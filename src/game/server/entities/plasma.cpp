@@ -3,8 +3,11 @@
 #include "character.h"
 
 #include <engine/server.h>
+#include <engine/shared/config.h>
 
 #include <game/generated/protocol.h>
+#include <game/mapitems.h>
+#include <game/server/player.h>
 #include <game/teamscore.h>
 
 #include <game/server/gamecontext.h>
@@ -78,6 +81,8 @@ bool CPlasma::HitCharacter(CCharacter *pTarget)
 		GameServer()->CreateExplosion(
 			m_Pos, m_ForClientId, WEAPON_GRENADE, true, pTarget->Team(), pTarget->TeamMask());
 	}
+	if(g_Config.m_SvPlasmaKills)
+		pTarget->Die(pTarget->GetPlayer()->GetCid(), WEAPON_WORLD);
 	Reset();
 	return true;
 }
