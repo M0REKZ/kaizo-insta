@@ -21,6 +21,18 @@ void IGameController::OnEndMatchInsta()
 	dbg_msg("ddnet-insta", "building stats ...");
 	GetRoundEndStatsStr(aStats, sizeof(aStats));
 	PublishRoundEndStatsStr(aStats);
+
+	for(CInstaPlayerStats &Stats : m_aInstaPlayerStats)
+		Stats.Reset();
+}
+
+static float CalcKillDeathRatio(int Kills, int Deaths)
+{
+	if(!Kills)
+		return 0;
+	if(!Deaths)
+		return (float)Kills;
+	return (float)Kills / (float)Deaths;
 }
 
 void IGameController::PsvRowPlayer(const CPlayer *pPlayer, char *pBuf, size_t Size)
@@ -36,7 +48,7 @@ void IGameController::PsvRowPlayer(const CPlayer *pPlayer, char *pBuf, size_t Si
 		pPlayer->m_Score.value_or(0),
 		pStats->m_Kills,
 		pStats->m_Deaths,
-		(float)pStats->m_Kills / ((float)pStats->m_Kills + (float)pStats->m_Deaths));
+		CalcKillDeathRatio(pStats->m_Kills, pStats->m_Deaths));
 	str_append(pBuf, aBuf, Size);
 }
 
