@@ -20,6 +20,8 @@ void CGameContext::ConCreditsGctf(IConsole::IResult *pResult, void *pUserData)
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+		"Custom DDNet-insta fork by +KZ");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"DDNet-insta written by ChillerDragon");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"https://github.com/ZillyInsta/ddnet-insta/");
@@ -78,6 +80,8 @@ void CGameContext::ConCredits(IConsole::IResult *pResult, void *pUserData)
 void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+		"Custom DDNet-insta fork by +KZ");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"DDNet-insta by ChillerDragon");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
