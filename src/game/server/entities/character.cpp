@@ -852,6 +852,10 @@ void CCharacter::Tick()
 	m_PrevInput = m_Input;
 
 	m_PrevPos = m_Core.m_Pos;
+    
+    //call anticamper
+    if(g_Config.m_SvAnticamper && !GameServer()->m_World.m_Paused)
+        Anticamper();
 }
 
 void CCharacter::TickDeferred()
@@ -2506,4 +2510,66 @@ void CCharacter::ResetInstaSettings()
 {
 	GiveWeapon(GameServer()->GetDDNetInstaWeapon(), false, g_Config.m_SvGrenadeAmmoRegen ? g_Config.m_SvGrenadeAmmoRegenNum : -1);
 	m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
+}
+
+
+int CCharacter::Anticamper()
+{
+    
+    //Dont do anticamper if player is already frozen
+    if(m_FreezeTime > 0 || m_Core.m_DeepFrozen)
+        return 0;
+    
+    int AnticamperTime = g_Config.m_SvAnticamperTime;
+    int AnticamperRange = g_Config.m_SvAnticamperRange;
+
+    if(m_CampTick == -1)
+    {
+        m_CampPos = m_Pos;
+        m_CampTick = Server()->Tick() + Server()->TickSpeed()*AnticamperTime;
+    }
+
+    // Check if the player is moving
+    if((m_CampPos.x - m_Pos.x >= (float)AnticamperRange || m_CampPos.x - m_Pos.x <= -(float)AnticamperRange)
+    || (m_CampPos.y - m_Pos.y >= (float)AnticamperRange || m_CampPos.y - m_Pos.y <= -(float)AnticamperRange))
+        {
+            m_CampTick = -1;
+            m_SentCampMsg = false;
+        }
+
+    // Send warning to the player
+    if(m_CampTick <= Server()->Tick() + Server()->TickSpeed() * AnticamperTime/2 && m_CampTick != -1 && !m_SentCampMsg)
+    {
+        GameServer()->SendBroadcast("ANTICAMPER: Move or die", m_pPlayer->GetCid());
+        m_SentCampMsg = true;
+    }
+
+    // Kill him
+    if((m_CampTick <= Server()->Tick()) && (m_CampTick > 0))
+    {
+        if(g_Config.m_SvAnticamperFreeze)
+        {
+            //Freeze player
+            Freeze(g_Config.m_SvAnticamperFreeze);
+            GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG);
+            
+            //Reset anticamper
+            m_CampTick = -1;
+            m_SentCampMsg = false;
+            
+            return 2;
+        }
+        else
+        {
+            //Kill Player
+            Die(GetPlayer()->GetCid(), WEAPON_WORLD);
+            
+            //Reset counter on death
+            m_CampTick = -1;
+            m_SentCampMsg = false;
+            
+            return 1;
+        }
+    }
+    return 0;
 }

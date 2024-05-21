@@ -98,6 +98,12 @@ public:
 	void SetRawVelocity(vec2 NewVelocity);
 	void AddVelocity(vec2 Addition);
 	void ApplyMoveRestrictions();
+    
+    //Anticamper
+    int Anticamper();
+    bool m_SentCampMsg;
+    int m_CampTick;
+    vec2 m_CampPos;
 
 private:
 	// player controlling this character
