@@ -82,7 +82,7 @@ bool CPlasma::HitCharacter(CCharacter *pTarget)
 			m_Pos, m_ForClientId, WEAPON_GRENADE, true, pTarget->Team(), pTarget->TeamMask());
 	}
 	if(g_Config.m_SvPlasmaKills)
-		pTarget->Die(pTarget->GetPlayer()->GetCid(), WEAPON_WORLD);
+		pHitPlayer->Die(pHitPlayer->GetPlayer()->GetCid(), WEAPON_WORLD);
 	Reset();
 	return true;
 }
