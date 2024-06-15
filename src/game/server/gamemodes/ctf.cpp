@@ -110,13 +110,19 @@ void CGameControllerCTF::OnFlagGrab(class CFlag *pFlag)
 
 void CGameControllerCTF::OnFlagCapture(class CFlag *pFlag, float Time)
 {
-	if(!g_Config.m_SvFastcap)
-		return;
+	//if(!g_Config.m_SvFastcap) //moved for confetti
+	//	return;
 	if(!pFlag)
 		return;
 	if(!pFlag->m_pCarrier)
 		return;
-
+    
+    CCharacter *pChar = pFlag->m_pCarrier;
+    GameServer()->CreateFinishConfetti(pChar->m_Pos, pChar->TeamMask());
+    
+    if(!g_Config.m_SvFastcap)
+        return;
+    
 	Teams().OnCharacterFinish(pFlag->m_pCarrier->GetPlayer()->GetCid());
 }
 
