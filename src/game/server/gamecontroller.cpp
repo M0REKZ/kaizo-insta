@@ -230,8 +230,11 @@ bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bo
 {
 	// ddnet-insta
 	// do not spawn pickups
-	if(Index == ENTITY_ARMOR_1 || Index == ENTITY_HEALTH_1 || Index == ENTITY_WEAPON_SHOTGUN || Index == ENTITY_WEAPON_GRENADE || Index == ENTITY_WEAPON_LASER || Index == ENTITY_POWERUP_NINJA)
-		return false;
+    if(!m_VanillaBehavior)
+    {
+        if(Index == ENTITY_ARMOR_1 || Index == ENTITY_HEALTH_1 || Index == ENTITY_WEAPON_SHOTGUN || Index == ENTITY_WEAPON_GRENADE || Index == ENTITY_WEAPON_LASER || Index == ENTITY_POWERUP_NINJA)
+            return false;
+    }
 
 	dbg_assert(Index >= 0, "Invalid entity index");
 
@@ -781,24 +784,52 @@ void IGameController::Snap(int SnappingClient)
 	if(!pGameInfoEx)
 		return;
 
-	pGameInfoEx->m_Flags =
-		/* GAMEINFOFLAG_TIMESCORE | */ // ddnet-insta
-		/* GAMEINFOFLAG_GAMETYPE_RACE | */ // ddnet-insta
-		/* GAMEINFOFLAG_GAMETYPE_DDRACE | */ // ddnet-insta
-		/* GAMEINFOFLAG_GAMETYPE_DDNET | */ // ddnet-insta
-		GAMEINFOFLAG_UNLIMITED_AMMO |
-		GAMEINFOFLAG_RACE_RECORD_MESSAGE |
-		GAMEINFOFLAG_ALLOW_EYE_WHEEL |
-		GAMEINFOFLAG_ALLOW_HOOK_COLL |
-		GAMEINFOFLAG_ALLOW_ZOOM |
-		GAMEINFOFLAG_BUG_DDRACE_GHOST |
-		GAMEINFOFLAG_BUG_DDRACE_INPUT |
-		GAMEINFOFLAG_PREDICT_DDRACE |
-		GAMEINFOFLAG_PREDICT_DDRACE_TILES |
-		GAMEINFOFLAG_ENTITIES_DDNET |
-		GAMEINFOFLAG_ENTITIES_DDRACE |
-		GAMEINFOFLAG_ENTITIES_RACE |
-		GAMEINFOFLAG_RACE;
+    if(!m_VanillaBehavior)
+    {
+        pGameInfoEx->m_Flags =
+        /* GAMEINFOFLAG_TIMESCORE | */ // ddnet-insta
+        /* GAMEINFOFLAG_GAMETYPE_RACE | */ // ddnet-insta
+        /* GAMEINFOFLAG_GAMETYPE_DDRACE | */ // ddnet-insta
+        /* GAMEINFOFLAG_GAMETYPE_DDNET | */ // ddnet-insta
+        GAMEINFOFLAG_UNLIMITED_AMMO |
+        GAMEINFOFLAG_RACE_RECORD_MESSAGE |
+        GAMEINFOFLAG_ALLOW_EYE_WHEEL |
+        GAMEINFOFLAG_ALLOW_HOOK_COLL |
+        GAMEINFOFLAG_ALLOW_ZOOM |
+        GAMEINFOFLAG_BUG_DDRACE_GHOST |
+        GAMEINFOFLAG_BUG_DDRACE_INPUT |
+        GAMEINFOFLAG_PREDICT_DDRACE |
+        GAMEINFOFLAG_PREDICT_DDRACE_TILES |
+        GAMEINFOFLAG_ENTITIES_DDNET |
+        GAMEINFOFLAG_ENTITIES_DDRACE |
+        GAMEINFOFLAG_ENTITIES_RACE |
+        GAMEINFOFLAG_RACE;
+    }
+    else //JSAURUS
+    {
+        pGameInfoEx->m_Flags =
+        GAMEINFOFLAG_PREDICT_VANILLA |
+        GAMEINFOFLAG_ENTITIES_VANILLA |
+        GAMEINFOFLAG_BUG_VANILLA_BOUNCE |
+        GAMEINFOFLAG_GAMETYPE_VANILLA |
+        /* GAMEINFOFLAG_TIMESCORE | */ // ddnet-insta
+        /* GAMEINFOFLAG_GAMETYPE_RACE | */ // ddnet-insta
+        /* GAMEINFOFLAG_GAMETYPE_DDRACE | */ // ddnet-insta
+        /* GAMEINFOFLAG_GAMETYPE_DDNET | */ // ddnet-insta
+        // GAMEINFOFLAG_UNLIMITED_AMMO |
+        GAMEINFOFLAG_RACE_RECORD_MESSAGE |
+        GAMEINFOFLAG_ALLOW_EYE_WHEEL |
+        GAMEINFOFLAG_ALLOW_HOOK_COLL |
+        GAMEINFOFLAG_ALLOW_ZOOM |
+        GAMEINFOFLAG_BUG_DDRACE_GHOST |
+        GAMEINFOFLAG_BUG_DDRACE_INPUT |
+        GAMEINFOFLAG_PREDICT_DDRACE |
+        GAMEINFOFLAG_PREDICT_DDRACE_TILES |
+        GAMEINFOFLAG_ENTITIES_DDNET |
+        GAMEINFOFLAG_ENTITIES_DDRACE |
+        GAMEINFOFLAG_ENTITIES_RACE |
+        GAMEINFOFLAG_RACE;
+    }
 	if(!g_Config.m_SvAllowZoom) //ddnet-insta
 		pGameInfoEx->m_Flags &= ~(GAMEINFOFLAG_ALLOW_ZOOM);
 	if(g_Config.m_SvFastcap) //ddnet-insta

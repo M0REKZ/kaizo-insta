@@ -30,6 +30,9 @@
 
 #include "entities/character.h"
 #include "gamemodes/DDRace.h"
+#include "gamemodes/ctf_vanilla.h"
+#include "gamemodes/dm_vanilla.h"
+#include "gamemodes/tdm_vanilla.h"
 #include "gamemodes/gctf.h"
 #include "gamemodes/gdm.h"
 #include "gamemodes/gtdm.h"
@@ -1500,7 +1503,8 @@ void CGameContext::OnClientEnter(int ClientId)
 		{
 			protocol7::CNetMsg_Sv_GameInfo Msg;
 			Msg.m_GameFlags = protocol7::GAMEFLAG_RACE;
-			Msg.m_GameFlags = protocol7::GAMEFLAG_TEAMS | protocol7::GAMEFLAG_FLAGS; // ddnet-insta
+			//Msg.m_GameFlags = protocol7::GAMEFLAG_TEAMS | protocol7::GAMEFLAG_FLAGS; // ddnet-insta
+            Msg.m_GameFlags = m_pController->m_GameFlags_v7; // ddnet-cfg JSAURUS
 			Msg.m_MatchCurrent = 1;
 			Msg.m_MatchNum = 0;
 			Msg.m_ScoreLimit = Config()->m_SvScorelimit; // ddnet-insta
@@ -3842,11 +3846,19 @@ void CGameContext::OnInit(const void *pPersistentData)
 	for(int i = 0; i < NUM_TUNEZONES; i++)
 	{
 		TuningList()[i] = TuningParams;
+        /* DDNET-INSTA
 		TuningList()[i].Set("gun_curvature", 0);
 		TuningList()[i].Set("gun_speed", 1400);
 		TuningList()[i].Set("shotgun_curvature", 0);
 		TuningList()[i].Set("shotgun_speed", 500);
 		TuningList()[i].Set("shotgun_speeddiff", 0);
+         */
+         //JSAURUS
+        TuningList()[i].Set("gun_speed", 2200);
+        TuningList()[i].Set("gun_curvature", 1.25f);
+        TuningList()[i].Set("shotgun_speed", 2750);
+        TuningList()[i].Set("shotgun_speeddiff", 0.8f);
+        TuningList()[i].Set("shotgun_curvature", 1.25f);
 	}
 
 	for(int i = 0; i < NUM_TUNEZONES; i++)
@@ -3862,11 +3874,19 @@ void CGameContext::OnInit(const void *pPersistentData)
 	}
 	else
 	{
+        /* DDNET-INSTA
 		Tuning()->Set("gun_speed", 1400);
 		Tuning()->Set("gun_curvature", 0);
 		Tuning()->Set("shotgun_speed", 500);
 		Tuning()->Set("shotgun_speeddiff", 0);
 		Tuning()->Set("shotgun_curvature", 0);
+         */
+        //JSAURUS
+        Tuning()->Set("gun_speed", 2200);
+        Tuning()->Set("gun_curvature", 1.25f);
+        Tuning()->Set("shotgun_speed", 2750);
+        Tuning()->Set("shotgun_speeddiff", 0.8f);
+        Tuning()->Set("shotgun_curvature", 1.25f);
 	}
 
 	if(g_Config.m_SvDDRaceTuneReset)
@@ -3907,6 +3927,12 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 	if(!str_comp(Config()->m_SvGametype, "mod"))
 		m_pController = new CGameControllerMod(this);
+    else if(!str_comp_nocase(Config()->m_SvGametype, "ctf"))
+        m_pController = new CGameControllerCTFVanilla(this);
+    else if(!str_comp_nocase(Config()->m_SvGametype, "dm"))
+        m_pController = new CGameControllerDMVanilla(this);
+    else if(!str_comp_nocase(Config()->m_SvGametype, "tdm"))
+        m_pController = new CGameControllerTDMVanilla(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "gctf"))
 		m_pController = new CGameControllerGCTF(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "ictf"))
@@ -4556,11 +4582,18 @@ void CGameContext::ResetTuning()
 {
 	CTuningParams TuningParams;
 	m_Tuning = TuningParams;
+    /*  DDNET-INSTA
 	Tuning()->Set("gun_speed", 1400);
 	Tuning()->Set("gun_curvature", 0);
 	Tuning()->Set("shotgun_speed", 500);
 	Tuning()->Set("shotgun_speeddiff", 0);
 	Tuning()->Set("shotgun_curvature", 0);
+     */ //JSAURUS +KZ TODO: this breaks freeze bullets
+    Tuning()->Set("gun_speed", 2200);
+    Tuning()->Set("gun_curvature", 1.25f);
+    Tuning()->Set("shotgun_speed", 2750);
+    Tuning()->Set("shotgun_speeddiff", 0.8f);
+    Tuning()->Set("shotgun_curvature", 1.25f);
 	SendTuningParams(-1);
 }
 

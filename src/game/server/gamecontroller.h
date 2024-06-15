@@ -73,7 +73,10 @@ protected:
 
 public:
 	const char *m_pGameType;
-
+    int m_GameFlags_v7;
+    
+    bool m_VanillaBehavior = false; //JSAURUS
+    
 	IGameController(class CGameContext *pGameServer);
 	virtual ~IGameController();
 
