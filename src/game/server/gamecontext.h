@@ -139,6 +139,11 @@ class CGameContext : public IGameServer
 	static void ConchainSpecialMotdupdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSettingUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConDumpLog(IConsole::IResult *pResult, void *pUserData);
+    
+    //custom +KZ
+    static void ConIfGameTypes(IConsole::IResult *pResult, void *pUserData);
+    static void ConRandomCmd(IConsole::IResult *pResult, void *pUserData);
+    static void ConQuestion(IConsole::IResult *pResult, void *pUserData);
 
 	void Construct(int Resetting);
 	void Destruct(int Resetting);

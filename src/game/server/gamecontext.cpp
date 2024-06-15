@@ -2277,9 +2277,16 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 				{
 					return;
 				}
-
-				str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s' (%s)", Server()->ClientName(ClientId),
-					pOption->m_aDescription, aReason);
+                if(str_comp_nocase("question", pOption->m_aCommand) == 0)
+                {
+                    
+                    str_format(aChatmsg, sizeof(aChatmsg), "'%s' asked (%s)", Server()->ClientName(ClientId),
+                        aReason);
+                }else
+                {
+                    str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s' (%s)", Server()->ClientName(ClientId),
+                        pOption->m_aDescription, aReason);
+                }
 				str_copy(aDesc, pOption->m_aDescription);
 
 				if((str_endswith(pOption->m_aCommand, "random_map") || str_endswith(pOption->m_aCommand, "random_unfinished_map")) && str_length(aReason) == 1 && aReason[0] >= '0' && aReason[0] <= '5')
@@ -2481,7 +2488,18 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 	}
 
 	if(aCmd[0] && str_comp_nocase(aCmd, "info") != 0)
-		CallVote(ClientId, aDesc, aCmd, aReason, aChatmsg, aSixupDesc[0] ? aSixupDesc : 0);
+    {
+        if(str_comp_nocase(aCmd, "question") == 0)
+        {
+            if(aReason[0])
+                CallVote(ClientId, aReason, aCmd, "", aChatmsg, aSixupDesc[0] ? aSixupDesc : 0);
+            else
+                SendChatTarget(ClientId, "Please put your question in 'Reason'");
+            
+            return;
+        }
+        CallVote(ClientId, aDesc, aCmd, aReason, aChatmsg, aSixupDesc[0] ? aSixupDesc : 0);
+    }
 }
 
 void CGameContext::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
@@ -3608,6 +3626,11 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("dump_antibot", "", CFGFLAG_SERVER, ConDumpAntibot, this, "Dumps the antibot status");
 	Console()->Register("antibot", "r[command]", CFGFLAG_SERVER, ConAntibot, this, "Sends a command to the antibot");
 
+    //custom +KZ
+    Console()->Register("if_gametypes", "s[gametypes] s[command]", CFGFLAG_SERVER, ConIfGameTypes, this, "Run command only if running certain gametype");
+    Console()->Register("random_cmd", "s[command1] s[command2] ?s[...]", CFGFLAG_SERVER, ConRandomCmd, this, "Run random command from the list given");
+    Console()->Register("question", "", CFGFLAG_SERVER, ConQuestion, this, "Make a question (only works on vote)");
+    
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 
 	Console()->Chain("sv_vote_kick", ConchainSettingUpdate, this);
@@ -4988,4 +5011,102 @@ void CGameContext::OnUpdatePlayerServerInfo(char *aBuf, int BufSize, int Id)
 		aJsonSkin,
 		JsonBool(m_apPlayers[Id]->IsAfk()),
 		Team);
+}
+
+//+KZ
+
+void CGameContext::ConIfGameTypes(IConsole::IResult *pResult, void *pUserData)
+{
+    
+    //KNOWN BUG: server crashes if put this command directly on cfg at first load for some reason
+    
+    CGameContext *pSelf = (CGameContext *)pUserData;
+    const char *pGameTypes = pResult->GetString(0);
+    const char *pCommand = pResult->GetString(1);
+    
+    if(!pSelf->Console()->LineIsValid(pCommand))
+    {
+        char aBuf[256];
+        str_format(aBuf, sizeof(aBuf), "skipped invalid command '%s'", pCommand);
+        pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+        return;
+    }
+    
+    bool exitwhile = false;
+    int i = 0;
+    int b;
+    char aBuf[256];
+    char name[256];
+    while(!exitwhile)
+    {
+        b = 0;
+
+        
+        for(;pGameTypes[i] != ',' && pGameTypes[i] && i < 256;i++)
+        {
+            name[b] = pGameTypes[i];
+            b++;
+            str_format(aBuf, sizeof(aBuf), "i value '%d'", i);
+            pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+        }
+        if(pGameTypes[i] == '\0' || i >= 256)
+            exitwhile = true; //last checking
+        b++;
+        i++;
+
+        name[b] = '\0';
+        
+        str_format(aBuf, sizeof(aBuf), "name value '%s'", name);
+        pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+        
+
+        
+        if(str_comp_nocase(pSelf->m_pController->m_pGameType, name) == 0)
+        {
+            //char aBuf[256];
+            str_format(aBuf, sizeof(aBuf), "executing '%s'", pCommand);
+            pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+            pSelf->Console()->ExecuteLine(pCommand);
+            return;
+        }
+    }
+}
+
+void CGameContext::ConRandomCmd(IConsole::IResult *pResult, void *pUserData)
+{
+    CGameContext *pSelf = (CGameContext *)pUserData;
+    unsigned numargs = pResult->NumArguments();
+    
+    if(numargs<2)
+    {
+        char aBuf[256];
+        str_format(aBuf, sizeof(aBuf), "not enough commands, found '%d', need at least 2", numargs);
+        pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+        return;
+    }
+    
+    const char *pCommand;
+    int Rnd = rand() % numargs;
+    
+    pCommand = pResult->GetString(Rnd);
+    
+    if(pSelf->Console()->LineIsValid(pCommand))
+    {
+        char aBuf[256];
+        str_format(aBuf, sizeof(aBuf), "running command '%s'", pCommand);
+        pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+        pSelf->Console()->ExecuteLine(pCommand);
+    }
+    else
+    {
+        char aBuf[256];
+        str_format(aBuf, sizeof(aBuf), "invalid command '%s'", pCommand);
+        pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+    }
+    return;
+}
+
+void CGameContext::ConQuestion(IConsole::IResult *pResult, void *pUserData)
+{
+    return;
 }
