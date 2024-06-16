@@ -104,13 +104,29 @@ vec2 CProjectile::GetPos(float Time)
 	case WEAPON_SHOTGUN:
 		if(!m_TuneZone)
 		{
-			Curvature = Tuning()->m_ShotgunCurvature;
-			Speed = Tuning()->m_ShotgunSpeed;
+            if(m_Owner < 0)
+            {
+                Curvature = Tuning()->m_FreezeBulletCurvature;
+                Speed = Tuning()->m_FreezeBulletSpeed;
+            }
+            else
+            {
+                Curvature = Tuning()->m_ShotgunCurvature;
+                Speed = Tuning()->m_ShotgunSpeed;
+            }
 		}
 		else
 		{
-			Curvature = TuningList()[m_TuneZone].m_ShotgunCurvature;
-			Speed = TuningList()[m_TuneZone].m_ShotgunSpeed;
+            if(m_Owner < 0)
+            {
+                Curvature = TuningList()[m_TuneZone].m_FreezeBulletCurvature;
+                Speed = TuningList()[m_TuneZone].m_FreezeBulletSpeed;
+            }
+            else
+            {
+                Curvature = TuningList()[m_TuneZone].m_ShotgunCurvature;
+                Speed = TuningList()[m_TuneZone].m_ShotgunSpeed;
+            }
 		}
 
 		break;
@@ -259,7 +275,7 @@ void CProjectile::Tick()
 				m_Direction.y = 0;
 			m_Pos += m_Direction;
 		}
-		else if(m_Type == WEAPON_GUN || (GameServer()->m_pController->m_VanillaBehavior ? (m_Type == WEAPON_SHOTGUN) : false)) //Vanillabehavior -> JSAURUS
+		else if(m_Type == WEAPON_GUN || (GameServer()->m_pController->m_VanillaBehavior ? (m_Type == WEAPON_SHOTGUN && m_Owner >= 0) : false)) //Vanillabehavior -> JSAURUS
 		{
             if(GameServer()->m_pController->m_VanillaBehavior) //JSAURUS
             {
@@ -341,14 +357,27 @@ void CProjectile::Snap(int SnappingClient)
 	if(NetworkClipped(SnappingClient, GetPos(Ct)))
 		return;
     
+    if(m_Owner < 0)
+    {
+        if(NetworkClipped(SnappingClient))
+            return;
+
+        int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
+        
+        vec2 CurPos = GetPos((Server()->Tick() - m_StartTick) / (float)Server()->TickSpeed());
+        GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetId(),
+            CurPos, CurPos, m_StartTick , -1, LASERTYPE_SHOTGUN, 2, 0);
+        return;
+    }
+    
     if(GameServer()->m_pController->m_VanillaBehavior)
     {
         if(m_Type == WEAPON_SHOTGUN)
         {
-            CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetId(), sizeof(CNetObj_Projectile)));
-            if(pProj)
-                FillInfo(pProj);
-            return;
+                CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetId(), sizeof(CNetObj_Projectile)));
+                if(pProj)
+                    FillInfo(pProj);
+                return;
         }
     }
 

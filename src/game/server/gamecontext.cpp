@@ -3855,10 +3855,13 @@ void CGameContext::OnInit(const void *pPersistentData)
          */
          //JSAURUS
         TuningList()[i].Set("gun_speed", 2200);
-        TuningList()[i].Set("gun_curvature", 1.25f);
+        TuningList()[i].Set("gun_curvature", 1.25f); //idk if really like this
         TuningList()[i].Set("shotgun_speed", 2750);
         TuningList()[i].Set("shotgun_speeddiff", 0.8f);
         TuningList()[i].Set("shotgun_curvature", 1.25f);
+        //+KZ for ddrace bullets fix
+        TuningList()[i].Set("freezebullet_speed", 500);
+        TuningList()[i].Set("freezebullet_curvature", 0.0f);
 	}
 
 	for(int i = 0; i < NUM_TUNEZONES; i++)
@@ -3887,6 +3890,9 @@ void CGameContext::OnInit(const void *pPersistentData)
         Tuning()->Set("shotgun_speed", 2750);
         Tuning()->Set("shotgun_speeddiff", 0.8f);
         Tuning()->Set("shotgun_curvature", 1.25f);
+        //+KZ for ddrace bullets fix
+        Tuning()->Set("freezebullet_speed", 500);
+        Tuning()->Set("freezebullet_curvature", 0.0f);
 	}
 
 	if(g_Config.m_SvDDRaceTuneReset)
@@ -4594,6 +4600,9 @@ void CGameContext::ResetTuning()
     Tuning()->Set("shotgun_speed", 2750);
     Tuning()->Set("shotgun_speeddiff", 0.8f);
     Tuning()->Set("shotgun_curvature", 1.25f);
+    //+KZ for ddrace bullets fix
+    Tuning()->Set("freezebullet_speed", 500);
+    Tuning()->Set("freezebullet_curvature", 0.0f);
 	SendTuningParams(-1);
 }
 
@@ -5077,17 +5086,17 @@ void CGameContext::ConIfGameTypes(IConsole::IResult *pResult, void *pUserData)
         
         for(;pGameTypes[i] != ',' && pGameTypes[i] && i < 256;i++)
         {
-            name[b] = pGameTypes[i];
-            b++;
+            name[b] = pGameTypes[i];//d0 d0;m1 m1;
+            b++; //1 0;2 1;
             str_format(aBuf, sizeof(aBuf), "i value '%d'", i);
             pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-        }
-        if(pGameTypes[i] == '\0' || i >= 256)
+        } //1 1; 2 2;
+        if(pGameTypes[i] == '\0' || i >= 256) //2 2
             exitwhile = true; //last checking
-        b++;
-        i++;
+        //b++; //3? 3?
+        i++; //2 3
 
-        name[b] = '\0';
+        name[b] = '\0'; //d0 m1 ?2 \03 -> d0 m1 \02
         
         str_format(aBuf, sizeof(aBuf), "name value '%s'", name);
         pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
