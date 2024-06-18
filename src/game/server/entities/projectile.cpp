@@ -275,9 +275,9 @@ void CProjectile::Tick()
 				m_Direction.y = 0;
 			m_Pos += m_Direction;
 		}
-		else if(m_Type == WEAPON_GUN || (GameServer()->m_pController->m_VanillaBehavior ? (m_Type == WEAPON_SHOTGUN && m_Owner >= 0) : false)) //Vanillabehavior -> JSAURUS
+		else if(m_Type == WEAPON_GUN || (!g_Config.m_SvDDraceShotgun ? (m_Type == WEAPON_SHOTGUN && m_Owner >= 0) : false)) //Vanillabehavior -> JSAURUS
 		{
-            if(GameServer()->m_pController->m_VanillaBehavior) //JSAURUS
+            if(!g_Config.m_SvDDraceShotgun) //JSAURUS
             {
                 // GameServer()->CreateDamageInd(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1) ? TeamMask : CClientMask().set());
                 if(pTargetChr)
@@ -370,7 +370,7 @@ void CProjectile::Snap(int SnappingClient)
         return;
     }
     
-    if(GameServer()->m_pController->m_VanillaBehavior)
+    if(!g_Config.m_SvDDraceShotgun) //for instagib use
     {
         if(m_Type == WEAPON_SHOTGUN)
         {

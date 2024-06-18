@@ -33,6 +33,7 @@
 #include "gamemodes/ctf_vanilla.h"
 #include "gamemodes/dm_vanilla.h"
 #include "gamemodes/tdm_vanilla.h"
+#include "gamemodes/lms_vanilla.h"
 #include "gamemodes/gctf.h"
 #include "gamemodes/gdm.h"
 #include "gamemodes/gtdm.h"
@@ -3939,6 +3940,8 @@ void CGameContext::OnInit(const void *pPersistentData)
         m_pController = new CGameControllerDMVanilla(this);
     else if(!str_comp_nocase(Config()->m_SvGametype, "tdm"))
         m_pController = new CGameControllerTDMVanilla(this);
+    else if(!str_comp_nocase(Config()->m_SvGametype, "lms"))
+        m_pController = new CGameControllerLMSVanilla(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "gctf"))
 		m_pController = new CGameControllerGCTF(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "ictf"))

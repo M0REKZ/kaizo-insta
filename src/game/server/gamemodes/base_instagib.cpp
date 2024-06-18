@@ -215,8 +215,9 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 	int Health = 10;
 
 	// no self damage
-	if(Dmg >= g_Config.m_SvDamageNeededForKill)
-		Health = From == Character.GetPlayer()->GetCid() ? Health : 0;
+    //+KZ: make shotgun instakill for now, otherwise its kinda useless unless i change settings (ugly hack)
+    if(Dmg >= g_Config.m_SvDamageNeededForKill || Weapon == WEAPON_SHOTGUN)
+        Health = From == Character.GetPlayer()->GetCid() ? Health : 0;
 
 	// check for death
 	if(Health <= 0)

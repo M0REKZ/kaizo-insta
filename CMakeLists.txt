@@ -2617,6 +2617,8 @@ if(SERVER)
     gamemodes/instagib/rcon_configs.cpp
     gamemodes/itdm.cpp
     gamemodes/itdm.h
+    gamemodes/lms_vanilla.cpp
+    gamemodes/lms_vanilla.h
     gamemodes/mod.cpp
     gamemodes/mod.h
     gamemodes/solofng.cpp

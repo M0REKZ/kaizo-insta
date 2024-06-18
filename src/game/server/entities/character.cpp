@@ -595,7 +595,7 @@ void CCharacter::FireWeapon()
 
 	case WEAPON_SHOTGUN:
 	{
-        if(!GameServer()->m_pController->m_VanillaBehavior)
+        if(g_Config.m_SvDDraceShotgun)
         {
             float LaserReach;
             if(!m_TuneZone)

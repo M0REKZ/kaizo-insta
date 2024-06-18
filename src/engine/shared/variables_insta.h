@@ -40,6 +40,7 @@ MACRO_CONFIG_INT(SvAnticamper, sv_anticamper, 1, 0, 1, CFGFLAG_SERVER, "Toggle t
 MACRO_CONFIG_INT(SvAnticamperFreeze, sv_anticamper_freeze, 7, 0, 15, CFGFLAG_SERVER, "If a player should freeze on camping (and how long) or die")
 MACRO_CONFIG_INT(SvAnticamperTime, sv_anticamper_time, 10, 5, 120, CFGFLAG_SERVER, "How long to wait till the player dies/freezes")
 MACRO_CONFIG_INT(SvAnticamperRange, sv_anticamper_range, 200, 0, 1000, CFGFLAG_SERVER, "Distance how far away the player must move to escape anticamper")
+MACRO_CONFIG_INT(SvDDraceShotgun, sv_ddrace_shotgun, 0, 0, 1, CFGFLAG_SERVER, "DDrace shotgun (0 = vanilla, 1 = ddrace)")
 
 //For Vanilla
 MACRO_CONFIG_INT(SvSpawnNinja, sv_spawn_ninja, 1, 0, 1, CFGFLAG_SERVER, "enable or disble ninja spawning")
