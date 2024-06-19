@@ -44,6 +44,8 @@ MACRO_CONFIG_INT(SvDDraceShotgun, sv_ddrace_shotgun, 0, 0, 1, CFGFLAG_SERVER, "D
 
 //For Vanilla
 MACRO_CONFIG_INT(SvSpawnNinja, sv_spawn_ninja, 1, 0, 1, CFGFLAG_SERVER, "enable or disble ninja spawning")
+MACRO_CONFIG_INT(SvSpawnPickupWeapons, sv_spawn_pickup_weapons, 1, 0, 1, CFGFLAG_SERVER, "enable or disble weapons spawning")
+MACRO_CONFIG_INT(SvSpawnPickups, sv_spawn_pickups, 1, 0, 1, CFGFLAG_SERVER, "enable or disble heart and armor spawning")
 /*
 
 sv_chat_ratelimit_long_messages

@@ -3633,7 +3633,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("antibot", "r[command]", CFGFLAG_SERVER, ConAntibot, this, "Sends a command to the antibot");
 
     //custom +KZ
-    Console()->Register("if_gametypes", "s[gametypes] s[command]", CFGFLAG_SERVER, ConIfGameTypes, this, "Run command only if running certain gametype");
+    Console()->Register("if_gametypes", "s[gametypes] ?s[true result command] ?s[alternate result command]", CFGFLAG_SERVER, ConIfGameTypes, this, "Run command if running certain gametypes");
     Console()->Register("random_cmd", "s[command1] s[command2] ?s[...]", CFGFLAG_SERVER, ConRandomCmd, this, "Run random command from the list given");
     Console()->Register("question", "", CFGFLAG_SERVER, ConQuestion, this, "Make a question (only works on vote)");
     
@@ -5072,11 +5072,32 @@ void CGameContext::ConIfGameTypes(IConsole::IResult *pResult, void *pUserData)
     CGameContext *pSelf = (CGameContext *)pUserData;
     const char *pGameTypes = pResult->GetString(0);
     const char *pCommand = pResult->GetString(1);
+    const char *pElseCommand = pResult->GetString(2);
+    
+    bool ignorefirst = false,ignoresecond = false;
+    
+
+        
     
     if(!pSelf->Console()->LineIsValid(pCommand))
     {
         char aBuf[256];
-        str_format(aBuf, sizeof(aBuf), "skipped invalid command '%s'", pCommand);
+        str_format(aBuf, sizeof(aBuf), "ignoring true case command '%s'", pCommand);
+        pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+        ignorefirst = true;
+    }
+    if(!pSelf->Console()->LineIsValid(pElseCommand))
+    {
+        char aBuf[256];
+        str_format(aBuf, sizeof(aBuf), "ignoring else case command '%s'", pElseCommand);
+        pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+        ignoresecond = true;
+    }
+    
+    if(ignorefirst && ignoresecond)
+    {
+        char aBuf[256];
+        str_format(aBuf, sizeof(aBuf), "both commands can not be empty or both are invalid", pCommand);
         pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
         return;
     }
@@ -5086,7 +5107,7 @@ void CGameContext::ConIfGameTypes(IConsole::IResult *pResult, void *pUserData)
     int b;
     char aBuf[256];
     char name[256];
-    while(!exitwhile)
+    while(!exitwhile && !ignorefirst)
     {
         b = 0;
 
@@ -5118,6 +5139,13 @@ void CGameContext::ConIfGameTypes(IConsole::IResult *pResult, void *pUserData)
             pSelf->Console()->ExecuteLine(pCommand);
             return;
         }
+    }
+    if(!ignoresecond)
+    {
+        str_format(aBuf, sizeof(aBuf), "executing '%s'", pElseCommand);
+        pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+        pSelf->Console()->ExecuteLine(pElseCommand);
+        return;
     }
 }
 
