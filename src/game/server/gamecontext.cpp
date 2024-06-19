@@ -34,6 +34,7 @@
 #include "gamemodes/dm_vanilla.h"
 #include "gamemodes/tdm_vanilla.h"
 #include "gamemodes/lms_vanilla.h"
+#include "gamemodes/lts_vanilla.h"
 #include "gamemodes/gctf.h"
 #include "gamemodes/gdm.h"
 #include "gamemodes/gtdm.h"
@@ -3932,6 +3933,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 		}
 	}
 
+    //+KZ: Ohno
 	if(!str_comp(Config()->m_SvGametype, "mod"))
 		m_pController = new CGameControllerMod(this);
     else if(!str_comp_nocase(Config()->m_SvGametype, "ctf"))
@@ -3942,6 +3944,8 @@ void CGameContext::OnInit(const void *pPersistentData)
         m_pController = new CGameControllerTDMVanilla(this);
     else if(!str_comp_nocase(Config()->m_SvGametype, "lms"))
         m_pController = new CGameControllerLMSVanilla(this);
+    else if(!str_comp_nocase(Config()->m_SvGametype, "lts"))
+        m_pController = new CGameControllerLTSVanilla(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "gctf"))
 		m_pController = new CGameControllerGCTF(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "ictf"))

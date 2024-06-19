@@ -2619,6 +2619,8 @@ if(SERVER)
     gamemodes/itdm.h
     gamemodes/lms_vanilla.cpp
     gamemodes/lms_vanilla.h
+    gamemodes/lts_vanilla.cpp
+    gamemodes/lts_vanilla.h
     gamemodes/mod.cpp
     gamemodes/mod.h
     gamemodes/solofng.cpp

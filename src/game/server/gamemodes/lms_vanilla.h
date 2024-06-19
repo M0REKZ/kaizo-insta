@@ -5,6 +5,7 @@
 
 class CGameControllerLMSVanilla : public CGameControllerDMVanilla
 {
+protected:
     virtual bool DoWincheckMatch() override;
     virtual void SetAllUndead();
     virtual void FakeEndRound();
