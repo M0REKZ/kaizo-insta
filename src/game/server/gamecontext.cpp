@@ -3936,15 +3936,15 @@ void CGameContext::OnInit(const void *pPersistentData)
     //+KZ: Ohno
 	if(!str_comp(Config()->m_SvGametype, "mod"))
 		m_pController = new CGameControllerMod(this);
-    else if(!str_comp_nocase(Config()->m_SvGametype, "ctf"))
+    else if(!str_comp_nocase(Config()->m_SvGametype, "ctf+"))
         m_pController = new CGameControllerCTFVanilla(this);
-    else if(!str_comp_nocase(Config()->m_SvGametype, "dm"))
+    else if(!str_comp_nocase(Config()->m_SvGametype, "dm+"))
         m_pController = new CGameControllerDMVanilla(this);
-    else if(!str_comp_nocase(Config()->m_SvGametype, "tdm"))
+    else if(!str_comp_nocase(Config()->m_SvGametype, "tdm+"))
         m_pController = new CGameControllerTDMVanilla(this);
-    else if(!str_comp_nocase(Config()->m_SvGametype, "lms"))
+    else if(!str_comp_nocase(Config()->m_SvGametype, "lms+"))
         m_pController = new CGameControllerLMSVanilla(this);
-    else if(!str_comp_nocase(Config()->m_SvGametype, "lts"))
+    else if(!str_comp_nocase(Config()->m_SvGametype, "lts+"))
         m_pController = new CGameControllerLTSVanilla(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "gctf"))
 		m_pController = new CGameControllerGCTF(this);
@@ -5069,12 +5069,19 @@ void CGameContext::ConIfGameTypes(IConsole::IResult *pResult, void *pUserData)
     
     //KNOWN BUG: server crashes if put this command directly on cfg at first load for some reason
     
+    
+    
     CGameContext *pSelf = (CGameContext *)pUserData;
+    
+    /*
+    if(!Config()->m_SvGametype) //avoid bug
+        return;*/
+    
     const char *pGameTypes = pResult->GetString(0);
     const char *pCommand = pResult->GetString(1);
     const char *pElseCommand = pResult->GetString(2);
     
-    bool ignorefirst = false,ignoresecond = false;
+    bool ignorefirst = false,ignoresecond = false, found = false;
     
 
         
@@ -5107,7 +5114,7 @@ void CGameContext::ConIfGameTypes(IConsole::IResult *pResult, void *pUserData)
     int b;
     char aBuf[256];
     char name[256];
-    while(!exitwhile && !ignorefirst)
+    while(!exitwhile)
     {
         b = 0;
 
@@ -5131,21 +5138,24 @@ void CGameContext::ConIfGameTypes(IConsole::IResult *pResult, void *pUserData)
         
 
         
-        if(str_comp_nocase(pSelf->m_pController->m_pGameType, name) == 0)
+        if(str_comp_nocase(g_Config.m_SvGametype, name) == 0)
         {
-            //char aBuf[256];
-            str_format(aBuf, sizeof(aBuf), "executing '%s'", pCommand);
-            pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-            pSelf->Console()->ExecuteLine(pCommand);
-            return;
+            found = true;
+            exitwhile = true;
         }
     }
-    if(!ignoresecond)
+    if((!ignorefirst) && found)
+    {
+        //char aBuf[256];
+        str_format(aBuf, sizeof(aBuf), "executing '%s'", pCommand);
+        pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+        pSelf->Console()->ExecuteLine(pCommand);
+    }
+    else if(!ignoresecond && !found)
     {
         str_format(aBuf, sizeof(aBuf), "executing '%s'", pElseCommand);
         pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
         pSelf->Console()->ExecuteLine(pElseCommand);
-        return;
     }
 }
 

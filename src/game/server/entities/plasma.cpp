@@ -126,8 +126,16 @@ void CPlasma::Snap(int SnappingClient)
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 
 	int Subtype = (m_Explosive ? 1 : 0) | (m_Freeze ? 2 : 0);
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetId(),
-		m_Pos, m_Pos, m_EvalTick, -1, LASERTYPE_PLASMA, Subtype, m_Number);
+    if(g_Config.m_SvPlasmaKills)
+    {
+        GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetId(),
+            m_Pos, m_Pos, m_EvalTick, -1, LASERTYPE_DOOR, Subtype, m_Number);
+    }
+    else
+    {
+        GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetId(),
+            m_Pos, m_Pos, m_EvalTick, -1, LASERTYPE_PLASMA, Subtype, m_Number);
+    }
 }
 
 void CPlasma::SwapClients(int Client1, int Client2)
