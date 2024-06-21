@@ -14,6 +14,7 @@ CGameControllerCTF::CGameControllerCTF(class CGameContext *pGameServer) :
 	CGameControllerInstagib(pGameServer)
 {
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
+    m_GameFlags_v7 = protocol7::GAMEFLAG_TEAMS | protocol7::GAMEFLAG_FLAGS;
 
 	m_apFlags[0] = 0;
 	m_apFlags[1] = 0;
@@ -109,13 +110,19 @@ void CGameControllerCTF::OnFlagGrab(class CFlag *pFlag)
 
 void CGameControllerCTF::OnFlagCapture(class CFlag *pFlag, float Time)
 {
-	if(!g_Config.m_SvFastcap)
-		return;
+	//if(!g_Config.m_SvFastcap) //moved for confetti
+	//	return;
 	if(!pFlag)
 		return;
 	if(!pFlag->m_pCarrier)
 		return;
-
+    
+    CCharacter *pChar = pFlag->m_pCarrier;
+    GameServer()->CreateFinishConfetti(pChar->m_Pos, pChar->TeamMask());
+    
+    if(!g_Config.m_SvFastcap)
+        return;
+    
 	Teams().OnCharacterFinish(pFlag->m_pCarrier->GetPlayer()->GetCid());
 }
 

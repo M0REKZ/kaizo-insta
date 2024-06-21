@@ -62,3 +62,8 @@ MACRO_TUNING_PARAM(HammerHitFireDelay, hammer_hit_fire_delay, 320, "Delay of ham
 
 MACRO_TUNING_PARAM(GroundElasticityX, ground_elasticity_x, 0, "Wall elasticity")
 MACRO_TUNING_PARAM(GroundElasticityY, ground_elasticity_y, 0, "Ground/ceiling elasticity")
+
+
+//+KZ
+MACRO_TUNING_PARAM(FreezeBulletCurvature, freezebullet_curvature, 0.0f, "DDrace Shotgun bullet curvature")
+MACRO_TUNING_PARAM(FreezeBulletSpeed, freezebullet_speed, 500.0f, "DDrace Shotgun bullet speed")

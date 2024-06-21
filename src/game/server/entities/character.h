@@ -106,6 +106,7 @@ public:
     vec2 m_CampPos;
 
 private:
+    friend class CGameControllerCTFVanilla; //JSaurus
 	// player controlling this character
 	class CPlayer *m_pPlayer;
 

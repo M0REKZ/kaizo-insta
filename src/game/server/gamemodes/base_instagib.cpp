@@ -10,6 +10,7 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
 	CGameControllerDDRace(pGameServer)
 {
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
+    m_GameFlags_v7 = protocol7::GAMEFLAG_TEAMS | protocol7::GAMEFLAG_FLAGS;
 
 	m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
 }
@@ -214,8 +215,9 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 	int Health = 10;
 
 	// no self damage
-	if(Dmg >= g_Config.m_SvDamageNeededForKill)
-		Health = From == Character.GetPlayer()->GetCid() ? Health : 0;
+    //+KZ: make shotgun instakill for now, otherwise its kinda useless unless i change settings (ugly hack)
+    if(Dmg >= g_Config.m_SvDamageNeededForKill || Weapon == WEAPON_SHOTGUN)
+        Health = From == Character.GetPlayer()->GetCid() ? Health : 0;
 
 	// check for death
 	if(Health <= 0)
@@ -355,7 +357,9 @@ void CGameControllerInstagib::OnPlayerConnect(CPlayer *pPlayer)
 	if(!Server()->ClientPrevIngame(ClientId))
 	{
 		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientId), GetTeamName(pPlayer->GetTeam()));
+        str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s using a %s client", Server()->ClientName(ClientId),
+                    GetTeamName(pPlayer->GetTeam()), !Server()->IsSixup(ClientId) ? "0.6" : "0.7");
+		//str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientId), GetTeamName(pPlayer->GetTeam()));
 		if(!g_Config.m_SvTournamentJoinMsgs || pPlayer->GetTeam() != TEAM_SPECTATORS)
 			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::CHAT_SIX);
 		else if(g_Config.m_SvTournamentJoinMsgs == 2)

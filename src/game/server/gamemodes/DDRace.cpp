@@ -131,8 +131,9 @@ void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientId), GetTeamName(pPlayer->GetTeam()));
 		GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::CHAT_SIX);
 
-		GameServer()->SendChatTarget(ClientId, "Custom DDNet-insta fork by +KZ");
-		GameServer()->SendChatTarget(ClientId, "Original DDNet-insta: https://github.com/ZillyInsta/ddnet-insta/");
+		GameServer()->SendChatTarget(ClientId, "Custom DDNet-insta fork by +KZ, including different mods combined");
+		GameServer()->SendChatTarget(ClientId, "Original DDNet-insta by ChillerDragon: https://github.com/ZillyInsta/ddnet-insta/");
+        GameServer()->SendChatTarget(ClientId, "Includes some changes from JSaurusRex");
 		GameServer()->SendChatTarget(ClientId, "DDraceNetwork Mod. Version: " GAME_VERSION);
 
 		GameServer()->AlertOnSpecialInstagibConfigs(ClientId);

@@ -104,13 +104,29 @@ vec2 CProjectile::GetPos(float Time)
 	case WEAPON_SHOTGUN:
 		if(!m_TuneZone)
 		{
-			Curvature = Tuning()->m_ShotgunCurvature;
-			Speed = Tuning()->m_ShotgunSpeed;
+            if(m_Owner < 0)
+            {
+                Curvature = Tuning()->m_FreezeBulletCurvature;
+                Speed = Tuning()->m_FreezeBulletSpeed;
+            }
+            else
+            {
+                Curvature = Tuning()->m_ShotgunCurvature;
+                Speed = Tuning()->m_ShotgunSpeed;
+            }
 		}
 		else
 		{
-			Curvature = TuningList()[m_TuneZone].m_ShotgunCurvature;
-			Speed = TuningList()[m_TuneZone].m_ShotgunSpeed;
+            if(m_Owner < 0)
+            {
+                Curvature = TuningList()[m_TuneZone].m_FreezeBulletCurvature;
+                Speed = TuningList()[m_TuneZone].m_FreezeBulletSpeed;
+            }
+            else
+            {
+                Curvature = TuningList()[m_TuneZone].m_ShotgunCurvature;
+                Speed = TuningList()[m_TuneZone].m_ShotgunSpeed;
+            }
 		}
 
 		break;
@@ -259,9 +275,18 @@ void CProjectile::Tick()
 				m_Direction.y = 0;
 			m_Pos += m_Direction;
 		}
-		else if(m_Type == WEAPON_GUN)
+		else if(m_Type == WEAPON_GUN || (!g_Config.m_SvDDraceShotgun ? (m_Type == WEAPON_SHOTGUN && m_Owner >= 0) : false)) //Vanillabehavior -> JSAURUS
 		{
-			GameServer()->CreateDamageInd(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1) ? TeamMask : CClientMask().set());
+            if(!g_Config.m_SvDDraceShotgun) //JSAURUS
+            {
+                // GameServer()->CreateDamageInd(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1) ? TeamMask : CClientMask().set());
+                if(pTargetChr)
+                    pTargetChr->TakeDamage(vec2(0,0), 1, m_Owner, m_Type);
+            }
+            else
+            {
+                GameServer()->CreateDamageInd(CurPos, -std::atan2(m_Direction.x, m_Direction.y), 10, (m_Owner != -1) ? TeamMask : CClientMask().set());
+            }
 			m_MarkedForDestroy = true;
 			return;
 		}
@@ -331,6 +356,30 @@ void CProjectile::Snap(int SnappingClient)
 
 	if(NetworkClipped(SnappingClient, GetPos(Ct)))
 		return;
+    
+    if(m_Owner < 0)
+    {
+        if(NetworkClipped(SnappingClient))
+            return;
+
+        int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
+        
+        vec2 CurPos = GetPos((Server()->Tick() - m_StartTick) / (float)Server()->TickSpeed());
+        GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetId(),
+            CurPos, CurPos, m_StartTick , -1, LASERTYPE_SHOTGUN, 2, 0);
+        return;
+    }
+    
+    if(!g_Config.m_SvDDraceShotgun) //for instagib use
+    {
+        if(m_Type == WEAPON_SHOTGUN)
+        {
+                CNetObj_Projectile *pProj = static_cast<CNetObj_Projectile *>(Server()->SnapNewItem(NETOBJTYPE_PROJECTILE, GetId(), sizeof(CNetObj_Projectile)));
+                if(pProj)
+                    FillInfo(pProj);
+                return;
+        }
+    }
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	if(SnappingClientVersion < VERSION_DDNET_ENTITY_NETOBJS)

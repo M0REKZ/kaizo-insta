@@ -30,6 +30,11 @@
 
 #include "entities/character.h"
 #include "gamemodes/DDRace.h"
+#include "gamemodes/ctf_vanilla.h"
+#include "gamemodes/dm_vanilla.h"
+#include "gamemodes/tdm_vanilla.h"
+#include "gamemodes/lms_vanilla.h"
+#include "gamemodes/lts_vanilla.h"
 #include "gamemodes/gctf.h"
 #include "gamemodes/gdm.h"
 #include "gamemodes/gtdm.h"
@@ -1500,7 +1505,8 @@ void CGameContext::OnClientEnter(int ClientId)
 		{
 			protocol7::CNetMsg_Sv_GameInfo Msg;
 			Msg.m_GameFlags = protocol7::GAMEFLAG_RACE;
-			Msg.m_GameFlags = protocol7::GAMEFLAG_TEAMS | protocol7::GAMEFLAG_FLAGS; // ddnet-insta
+			//Msg.m_GameFlags = protocol7::GAMEFLAG_TEAMS | protocol7::GAMEFLAG_FLAGS; // ddnet-insta
+            Msg.m_GameFlags = m_pController->m_GameFlags_v7; // ddnet-cfg JSAURUS
 			Msg.m_MatchCurrent = 1;
 			Msg.m_MatchNum = 0;
 			Msg.m_ScoreLimit = Config()->m_SvScorelimit; // ddnet-insta
@@ -3627,7 +3633,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("antibot", "r[command]", CFGFLAG_SERVER, ConAntibot, this, "Sends a command to the antibot");
 
     //custom +KZ
-    Console()->Register("if_gametypes", "s[gametypes] s[command]", CFGFLAG_SERVER, ConIfGameTypes, this, "Run command only if running certain gametype");
+    Console()->Register("if_gametypes", "s[gametypes] ?s[true result command] ?s[alternate result command]", CFGFLAG_SERVER, ConIfGameTypes, this, "Run command if running certain gametypes");
     Console()->Register("random_cmd", "s[command1] s[command2] ?s[...]", CFGFLAG_SERVER, ConRandomCmd, this, "Run random command from the list given");
     Console()->Register("question", "", CFGFLAG_SERVER, ConQuestion, this, "Make a question (only works on vote)");
     
@@ -3842,11 +3848,22 @@ void CGameContext::OnInit(const void *pPersistentData)
 	for(int i = 0; i < NUM_TUNEZONES; i++)
 	{
 		TuningList()[i] = TuningParams;
+        /* DDNET-INSTA
 		TuningList()[i].Set("gun_curvature", 0);
 		TuningList()[i].Set("gun_speed", 1400);
 		TuningList()[i].Set("shotgun_curvature", 0);
 		TuningList()[i].Set("shotgun_speed", 500);
 		TuningList()[i].Set("shotgun_speeddiff", 0);
+         */
+         //JSAURUS
+        TuningList()[i].Set("gun_speed", 2200);
+        TuningList()[i].Set("gun_curvature", 1.25f); //idk if really like this
+        TuningList()[i].Set("shotgun_speed", 2750);
+        TuningList()[i].Set("shotgun_speeddiff", 0.8f);
+        TuningList()[i].Set("shotgun_curvature", 1.25f);
+        //+KZ for ddrace bullets fix
+        TuningList()[i].Set("freezebullet_speed", 500);
+        TuningList()[i].Set("freezebullet_curvature", 0.0f);
 	}
 
 	for(int i = 0; i < NUM_TUNEZONES; i++)
@@ -3862,11 +3879,22 @@ void CGameContext::OnInit(const void *pPersistentData)
 	}
 	else
 	{
+        /* DDNET-INSTA
 		Tuning()->Set("gun_speed", 1400);
 		Tuning()->Set("gun_curvature", 0);
 		Tuning()->Set("shotgun_speed", 500);
 		Tuning()->Set("shotgun_speeddiff", 0);
 		Tuning()->Set("shotgun_curvature", 0);
+         */
+        //JSAURUS
+        Tuning()->Set("gun_speed", 2200);
+        Tuning()->Set("gun_curvature", 1.25f);
+        Tuning()->Set("shotgun_speed", 2750);
+        Tuning()->Set("shotgun_speeddiff", 0.8f);
+        Tuning()->Set("shotgun_curvature", 1.25f);
+        //+KZ for ddrace bullets fix
+        Tuning()->Set("freezebullet_speed", 500);
+        Tuning()->Set("freezebullet_curvature", 0.0f);
 	}
 
 	if(g_Config.m_SvDDRaceTuneReset)
@@ -3905,8 +3933,19 @@ void CGameContext::OnInit(const void *pPersistentData)
 		}
 	}
 
+    //+KZ: Ohno
 	if(!str_comp(Config()->m_SvGametype, "mod"))
 		m_pController = new CGameControllerMod(this);
+    else if(!str_comp_nocase(Config()->m_SvGametype, "ctf+"))
+        m_pController = new CGameControllerCTFVanilla(this);
+    else if(!str_comp_nocase(Config()->m_SvGametype, "dm+"))
+        m_pController = new CGameControllerDMVanilla(this);
+    else if(!str_comp_nocase(Config()->m_SvGametype, "tdm+"))
+        m_pController = new CGameControllerTDMVanilla(this);
+    else if(!str_comp_nocase(Config()->m_SvGametype, "lms+"))
+        m_pController = new CGameControllerLMSVanilla(this);
+    else if(!str_comp_nocase(Config()->m_SvGametype, "lts+"))
+        m_pController = new CGameControllerLTSVanilla(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "gctf"))
 		m_pController = new CGameControllerGCTF(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "ictf"))
@@ -4556,11 +4595,21 @@ void CGameContext::ResetTuning()
 {
 	CTuningParams TuningParams;
 	m_Tuning = TuningParams;
+    /*  DDNET-INSTA
 	Tuning()->Set("gun_speed", 1400);
 	Tuning()->Set("gun_curvature", 0);
 	Tuning()->Set("shotgun_speed", 500);
 	Tuning()->Set("shotgun_speeddiff", 0);
 	Tuning()->Set("shotgun_curvature", 0);
+     */ //JSAURUS +KZ TODO: this breaks freeze bullets
+    Tuning()->Set("gun_speed", 2200);
+    Tuning()->Set("gun_curvature", 1.25f);
+    Tuning()->Set("shotgun_speed", 2750);
+    Tuning()->Set("shotgun_speeddiff", 0.8f);
+    Tuning()->Set("shotgun_curvature", 1.25f);
+    //+KZ for ddrace bullets fix
+    Tuning()->Set("freezebullet_speed", 500);
+    Tuning()->Set("freezebullet_curvature", 0.0f);
 	SendTuningParams(-1);
 }
 
@@ -5020,14 +5069,42 @@ void CGameContext::ConIfGameTypes(IConsole::IResult *pResult, void *pUserData)
     
     //KNOWN BUG: server crashes if put this command directly on cfg at first load for some reason
     
+    
+    
     CGameContext *pSelf = (CGameContext *)pUserData;
+    
+    /*
+    if(!Config()->m_SvGametype) //avoid bug
+        return;*/
+    
     const char *pGameTypes = pResult->GetString(0);
     const char *pCommand = pResult->GetString(1);
+    const char *pElseCommand = pResult->GetString(2);
+    
+    bool ignorefirst = false,ignoresecond = false, found = false;
+    
+
+        
     
     if(!pSelf->Console()->LineIsValid(pCommand))
     {
         char aBuf[256];
-        str_format(aBuf, sizeof(aBuf), "skipped invalid command '%s'", pCommand);
+        str_format(aBuf, sizeof(aBuf), "ignoring true case command '%s'", pCommand);
+        pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+        ignorefirst = true;
+    }
+    if(!pSelf->Console()->LineIsValid(pElseCommand))
+    {
+        char aBuf[256];
+        str_format(aBuf, sizeof(aBuf), "ignoring else case command '%s'", pElseCommand);
+        pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+        ignoresecond = true;
+    }
+    
+    if(ignorefirst && ignoresecond)
+    {
+        char aBuf[256];
+        str_format(aBuf, sizeof(aBuf), "both commands can not be empty or both are invalid", pCommand);
         pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
         return;
     }
@@ -5044,31 +5121,41 @@ void CGameContext::ConIfGameTypes(IConsole::IResult *pResult, void *pUserData)
         
         for(;pGameTypes[i] != ',' && pGameTypes[i] && i < 256;i++)
         {
-            name[b] = pGameTypes[i];
-            b++;
+            name[b] = pGameTypes[i];//d0 d0;m1 m1;
+            b++; //1 0;2 1;
             str_format(aBuf, sizeof(aBuf), "i value '%d'", i);
             pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-        }
-        if(pGameTypes[i] == '\0' || i >= 256)
+        } //1 1; 2 2;
+        if(pGameTypes[i] == '\0' || i >= 256) //2 2
             exitwhile = true; //last checking
-        b++;
-        i++;
+        //b++; //3? 3?
+        i++; //2 3
 
-        name[b] = '\0';
+        name[b] = '\0'; //d0 m1 ?2 \03 -> d0 m1 \02
         
         str_format(aBuf, sizeof(aBuf), "name value '%s'", name);
         pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
         
 
         
-        if(str_comp_nocase(pSelf->m_pController->m_pGameType, name) == 0)
+        if(str_comp_nocase(g_Config.m_SvGametype, name) == 0)
         {
-            //char aBuf[256];
-            str_format(aBuf, sizeof(aBuf), "executing '%s'", pCommand);
-            pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
-            pSelf->Console()->ExecuteLine(pCommand);
-            return;
+            found = true;
+            exitwhile = true;
         }
+    }
+    if((!ignorefirst) && found)
+    {
+        //char aBuf[256];
+        str_format(aBuf, sizeof(aBuf), "executing '%s'", pCommand);
+        pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+        pSelf->Console()->ExecuteLine(pCommand);
+    }
+    else if(!ignoresecond && !found)
+    {
+        str_format(aBuf, sizeof(aBuf), "executing '%s'", pElseCommand);
+        pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+        pSelf->Console()->ExecuteLine(pElseCommand);
     }
 }
 

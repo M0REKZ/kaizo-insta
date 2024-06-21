@@ -2590,8 +2590,12 @@ if(SERVER)
     gamemodes/base_instagib.h
     gamemodes/ctf.cpp
     gamemodes/ctf.h
+    gamemodes/ctf_vanilla.cpp
+    gamemodes/ctf_vanilla.h
     gamemodes/dm.cpp
     gamemodes/dm.h
+    gamemodes/dm_vanilla.cpp
+    gamemodes/dm_vanilla.h
     gamemodes/gctf.cpp
     gamemodes/gctf.h
     gamemodes/gdm.cpp
@@ -2613,12 +2617,18 @@ if(SERVER)
     gamemodes/instagib/rcon_configs.cpp
     gamemodes/itdm.cpp
     gamemodes/itdm.h
+    gamemodes/lms_vanilla.cpp
+    gamemodes/lms_vanilla.h
+    gamemodes/lts_vanilla.cpp
+    gamemodes/lts_vanilla.h
     gamemodes/mod.cpp
     gamemodes/mod.h
     gamemodes/solofng.cpp
     gamemodes/solofng.h
     gamemodes/tdm.cpp
     gamemodes/tdm.h
+    gamemodes/tdm_vanilla.cpp
+    gamemodes/tdm_vanilla.h
     gamemodes/team_fng.cpp
     gamemodes/team_fng.h
     gamemodes/zcatch.cpp

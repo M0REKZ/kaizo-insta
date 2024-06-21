@@ -15,6 +15,7 @@ CGameControllerTeamFng::CGameControllerTeamFng(class CGameContext *pGameServer) 
 {
 	m_pGameType = "fng";
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
+    m_GameFlags_v7 = protocol7::GAMEFLAG_TEAMS | protocol7::GAMEFLAG_FLAGS;
 }
 
 CGameControllerTeamFng::~CGameControllerTeamFng() = default;

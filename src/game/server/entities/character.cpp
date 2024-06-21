@@ -233,12 +233,48 @@ void CCharacter::HandleNinja()
 	int NinjaTime = m_Core.m_Ninja.m_ActivationTick + (g_pData->m_Weapons.m_Ninja.m_Duration * Server()->TickSpeed() / 1000) - Server()->Tick();
 
 	if(NinjaTime % Server()->TickSpeed() == 0 && NinjaTime / Server()->TickSpeed() <= 5)
-	{
-		GameServer()->CreateDamageInd(m_Pos, 0, NinjaTime / Server()->TickSpeed(), TeamMask() & GameServer()->ClientsMaskExcludeClientVersionAndHigher(VERSION_DDNET_NEW_HUD));
+    {
+        if(!GameServer()->m_pController->m_VanillaBehavior) //ugly check for vanilla for JSaurus version
+        {
+            GameServer()->CreateDamageInd(m_Pos, 0, NinjaTime / Server()->TickSpeed(), TeamMask() & GameServer()->ClientsMaskExcludeClientVersionAndHigher(VERSION_DDNET_NEW_HUD));
+        }
+        else
+        {
+            GameServer()->CreateDamageInd(m_Pos, 0, NinjaTime / Server()->TickSpeed(), TeamMask());
+        }
 	}
 
-	m_Armor = clamp(10 - (NinjaTime / 15), 0, 10);
+    int AmmoRegenTime = g_pData->m_Weapons.m_aId[m_Core.m_ActiveWeapon].m_Ammoregentime; //JSaurus side
+    
+    if(!GameServer()->m_pController->m_VanillaBehavior)
+    {
+        m_Armor = clamp(10 - (NinjaTime / 15), 0, 10);
+    }
+    else
+    {
+        //JSaurus....
+        if(AmmoRegenTime && m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo >= 0)
+            {
+                // If equipped and not active, regen ammo?
+                if(m_ReloadTimer <= 0)
+                {
+                    if(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart < 0)
+                        m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = Server()->Tick();
 
+                    if((Server()->Tick() - m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart) >= AmmoRegenTime * Server()->TickSpeed() / 1000)
+                    {
+                        // Add some ammo
+                        m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo = minimum(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo + 1,
+                            g_pData->m_Weapons.m_aId[m_Core.m_ActiveWeapon].m_Maxammo);
+                        m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
+                    }
+                }
+                else
+                {
+                    m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
+                }
+            }
+    }
 	// force ninja Weapon
 	SetWeapon(WEAPON_NINJA);
 
@@ -428,8 +464,28 @@ void CCharacter::FireWeapon()
 	}
 
 	// check for ammo
-	if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
-		return;
+    
+    if(!GameServer()->m_pController->m_VanillaBehavior)
+    {
+        if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
+            return;
+    }
+    else
+    {
+        //JSAURUS >:(
+        
+        if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
+            {
+                // 125ms is a magical limit of how fast a human can click
+                m_ReloadTimer = 125 * Server()->TickSpeed() / 1000;
+                if(m_LastNoAmmoSound+Server()->TickSpeed() <= Server()->Tick())
+                {
+                    GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO);
+                    m_LastNoAmmoSound = Server()->Tick();
+                }
+                return;
+            }
+    }
 
 	// ddnet-insta
 	if(g_Config.m_SvGrenadeAmmoRegenResetOnFire)
@@ -539,14 +595,58 @@ void CCharacter::FireWeapon()
 
 	case WEAPON_SHOTGUN:
 	{
-		float LaserReach;
-		if(!m_TuneZone)
-			LaserReach = Tuning()->m_LaserReach;
-		else
-			LaserReach = TuningList()[m_TuneZone].m_LaserReach;
+        if(g_Config.m_SvDDraceShotgun)
+        {
+            float LaserReach;
+            if(!m_TuneZone)
+                LaserReach = Tuning()->m_LaserReach;
+            else
+                LaserReach = TuningList()[m_TuneZone].m_LaserReach;
+            
+            new CLaser(&GameServer()->m_World, m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_SHOTGUN);
+            GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+        }
+        else
+        {
+            //Jsaurus......
+            int ShotSpread = 2;
 
-		new CLaser(&GameServer()->m_World, m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_SHOTGUN);
-		GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+            for(int i = -ShotSpread; i <= ShotSpread; ++i)
+            {
+                float Spreading[] = {-0.185f, -0.070f, 0, 0.070f, 0.185f};
+                float a = 0;
+                if(Direction.x != 0 || Direction.y != 0)
+                {
+                    a = atanf(Direction.y/Direction.x);
+                    if(Direction.x < 0)
+                    a = a+pi;
+                }
+                a += Spreading[i+2];
+                float v = 1-(absolute(i)/(float)ShotSpread);
+                float Speed = mix((float)GameServer()->Tuning()->m_ShotgunSpeeddiff, 1.0f, v);
+                // CProjectile *pProj = new CProjectile(GameWorld(), WEAPON_SHOTGUN,
+                //     m_pPlayer->GetCID(),
+                //     ProjStartPos,
+                //     vec2(cosf(a), sinf(a))*Speed,
+                //     (int)(Server()->TickSpeed()*GameServer()->Tuning()->m_ShotgunLifetime),
+                //     1, 0, 0, -1, WEAPON_SHOTGUN);
+
+                new CProjectile(
+                    GameWorld(),
+                    WEAPON_SHOTGUN, //Type
+                    m_pPlayer->GetCid(), //Owner
+                    ProjStartPos, //Pos
+                    direction(a)*Speed, //Dir
+                    (int)(Server()->TickSpeed()*GameServer()->Tuning()->m_ShotgunLifetime), //Span
+                    false, //Freeze
+                    false, //Explosive
+                    -1, //SoundImpact
+                    vec2(cosf(a), sinf(a))*Speed // MouseTarget
+                );
+            }
+
+            GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE);
+        }
 	}
 	break;
 
@@ -1135,7 +1235,15 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 		if(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo > 0)
 			AmmoCount = (m_FreezeTime == 0) ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : 0;
 	}
-
+    
+    if(GameServer()->m_pController->m_VanillaBehavior) //JSAURUS
+    {
+        if(Weapon >= 0 && Weapon < NUM_WEAPONS)
+        {
+            AmmoCount = GetWeaponAmmo(Weapon);
+        }
+    }
+    
 	if(GetPlayer()->IsAfk() || GetPlayer()->IsPaused())
 	{
 		if(m_FreezeTime > 0 || m_Core.m_DeepFrozen || m_Core.m_LiveFrozen)
@@ -2126,7 +2234,10 @@ void CCharacter::ForceSetRescue(int RescueMode)
 void CCharacter::DDRaceTick()
 {
 	mem_copy(&m_Input, &m_SavedInput, sizeof(m_Input));
-	m_Armor = clamp(10 - (m_FreezeTime / 15), 0, 10);
+    
+    if(!GameServer()->m_pController->m_VanillaBehavior) //JSAURUS
+        m_Armor = clamp(10 - (m_FreezeTime / 15), 0, 10);
+    
 	if(m_Input.m_Direction != 0 || m_Input.m_Jump != 0)
 		m_LastMove = Server()->Tick();
 
