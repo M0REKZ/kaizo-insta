@@ -46,6 +46,11 @@ MACRO_CONFIG_INT(SvDDraceShotgun, sv_ddrace_shotgun, 0, 0, 1, CFGFLAG_SERVER, "D
 MACRO_CONFIG_INT(SvSpawnNinja, sv_spawn_ninja, 1, 0, 1, CFGFLAG_SERVER, "enable or disble ninja spawning")
 MACRO_CONFIG_INT(SvSpawnPickupWeapons, sv_spawn_pickup_weapons, 1, 0, 1, CFGFLAG_SERVER, "enable or disble weapons spawning")
 MACRO_CONFIG_INT(SvSpawnPickups, sv_spawn_pickups, 1, 0, 1, CFGFLAG_SERVER, "enable or disble heart and armor spawning")
+
+//For BOMB
+MACRO_CONFIG_INT(SvBombTime, sv_bomb_time, 15, 0, 1, CFGFLAG_SERVER, "Time in seconds for bomb to explode")
+MACRO_CONFIG_INT(SvBombAmount, sv_bomb_amount, 6, 0, 1, CFGFLAG_SERVER, "1 bomb for each specified amount of players (spawns at least 1 if there is less players)")
+
 /*
 
 sv_chat_ratelimit_long_messages
