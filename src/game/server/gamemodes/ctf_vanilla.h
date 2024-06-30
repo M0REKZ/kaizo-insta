@@ -5,7 +5,7 @@
 
 class CGameControllerCTFVanilla : public CGameControllerCTF
 {
-	class CFlag *m_apFlags[2];
+	//class CFlag *m_apFlags[2];
 	//virtual bool DoWincheckMatch() override;
 
 public:

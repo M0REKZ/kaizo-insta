@@ -173,37 +173,12 @@ bool CGameControllerCTFVanilla::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int
 
 int CGameControllerCTFVanilla::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
-    CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
-    int HadFlag = 0;
-
     if(WeaponId == WEAPON_SELF)
     {
         pVictim->GetPlayer()->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() * 3.0f;
     }
     else
         pVictim->GetPlayer()->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() * 0.5f;
-
-    // drop flags
-    for(auto &F : m_apFlags)
-    {
-        if(F && pKiller && pKiller->GetCharacter() && F->GetCarrier() == pKiller->GetCharacter())
-            HadFlag |= 2;
-        if(F && F->GetCarrier() == pVictim)
-        {
-            GameServer()->CreateSoundGlobal(SOUND_CTF_DROP);
-            GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_DROP, -1);
-            /*pVictim->GetPlayer()->m_Rainbow = false;
-            pVictim->GetPlayer()->m_TeeInfos.m_ColorBody = pVictim->GetPlayer()->m_ColorBodyOld;
-            pVictim->GetPlayer()->m_TeeInfos.m_ColorFeet = pVictim->GetPlayer()->m_ColorFeetOld;*/
-            F->m_DropTick = Server()->Tick();
-            F->SetCarrier(0);
-            F->m_Vel = vec2(0, 0);
-
-            HadFlag |= 1;
-        }
-        if(F && F->GetCarrier() == pVictim)
-            F->SetCarrier(0);
-    }
-
-    return HadFlag;
+    
+    return CGameControllerCTF::OnCharacterDeath(pVictim, pKiller, WeaponId);
 }
