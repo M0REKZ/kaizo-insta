@@ -4,7 +4,7 @@
 #include "BOMB.h"
 
 CGameControllerBOMB::CGameControllerBOMB(class CGameContext *pGameServer) :
-	CGameControllerLMSVanilla(pGameServer)
+	CGameControllerDMVanilla(pGameServer)
 {
     m_VanillaBehavior = true;
 
@@ -20,12 +20,42 @@ CGameControllerBOMB::~CGameControllerBOMB() = default;
 
 void CGameControllerBOMB::Tick()
 {
-
-    CGameControllerLMSVanilla::Tick();
+    CGameControllerDMVanilla::Tick();
     
     SetSkins(); //a lot of ugly loops...
     
-    if(m_RoundActive)
+    //TODO: m_World paused when endmatch
+    if(m_RoundPauseTime > 0)
+    {
+        m_RoundPauseTime--;
+        return;
+    }
+    else if(GameServer()->m_World.m_Paused && m_RoundPauseTime == 0)
+    {
+        GameServer()->m_World.m_Paused = false;
+        m_RoundPauseTime = -1;
+    }
+    CGameControllerDMVanilla::Tick();
+    //kinda ugly loop
+    int PlayerAmount=0;
+    for(int i = 0; i < MAX_CLIENTS; ++i)
+    {
+        if(GameServer()->m_apPlayers[i] && (GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS || (GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_IsDead)))
+                ++PlayerAmount;
+    }
+    if(PlayerAmount == 0)
+    {
+        m_RoundActive = false;
+    }
+    if(PlayerAmount == 1 && !m_RoundActive)
+    {
+        GameServer()->SendBroadcast("Waiting for players...", -1);
+    }
+    if(PlayerAmount == 1 && m_RoundActive)
+    {
+        m_RoundActive = false;
+    }
+    if(m_RoundActive && PlayerAmount > 1 && !m_Warmup)
     {
         if(!BombAmount())
         {
@@ -50,7 +80,12 @@ void CGameControllerBOMB::Tick()
             m_BombTime = g_Config.m_SvBombTime * Server()->TickSpeed();
         }
     }
-
+    if(!m_RoundActive && PlayerAmount > 1 && !m_Warmup)
+    {
+        KillEveryone();
+        GameServer()->SendBroadcast("Game started", -1);
+        m_RoundActive = true;
+    }
 }
 
 void CGameControllerBOMB::ExplodeBomb(CPlayer* BombPlayer)
@@ -84,6 +119,20 @@ void CGameControllerBOMB::Snap(int SnappingClient)
     }
 }
 
+void CGameControllerBOMB::OnPlayerConnect(class CPlayer *pPlayer)
+{
+    CGameControllerDMVanilla::OnPlayerConnect(pPlayer);
+    if(m_RoundActive)
+    {
+        pPlayer->SetTeamRaw(TEAM_SPECTATORS);
+        pPlayer->m_IsDead = true;
+    }
+    else
+    {
+        pPlayer->m_IsDead = false;
+    }
+}
+
 void CGameControllerBOMB::OnCharacterSpawn(class CCharacter *pChr)
 {
     OnCharacterConstruct(pChr);
@@ -106,7 +155,7 @@ bool CGameControllerBOMB::OnEntity(int Index, int x, int y, int Layer, int Flags
 bool CGameControllerBOMB::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
     Dmg = 0; //TODO: maybe i should add an option for bomb with damage
-    CGameControllerLMSVanilla::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
+    CGameControllerDMVanilla::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
     if(GameServer()->m_apPlayers[From] && GameServer()->m_apPlayers[From]->m_IsBomb)
         TransferBomb(GameServer()->m_apPlayers[From], Character.GetPlayer());
     return false;
@@ -114,11 +163,14 @@ bool CGameControllerBOMB::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From
 
 int CGameControllerBOMB::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
-    pVictim->GetPlayer()->m_IsBomb = false;
-    pVictim->GetPlayer()->SetTeamRaw(TEAM_SPECTATORS);
-    pVictim->GetPlayer()->m_IsDead = true;
-    //if(!BombAmount())
+    if(pVictim)
+    {
+        pVictim->GetPlayer()->m_IsBomb = false;
+        pVictim->GetPlayer()->SetTeamRaw(TEAM_SPECTATORS);
+        pVictim->GetPlayer()->m_IsDead = true;
+        //if(!BombAmount())
         //SetBombs();
+    }
 	return false;
 }
 
@@ -213,4 +265,137 @@ void CGameControllerBOMB::SetSkins()
             }
         }
     }
+}
+
+
+bool CGameControllerBOMB::DoWincheckMatch()
+{
+    if(!m_RoundActive)
+        return false;
+    
+    // check score win condition
+    for(int i = 0; i < MAX_CLIENTS; ++i)
+    {
+        if(GameServer()->m_apPlayers[i])
+        {
+            if(m_GameInfo.m_ScoreLimit > 0 && GameServer()->m_apPlayers[i]->m_Score.value_or(0) >= m_GameInfo.m_ScoreLimit)
+            {
+                GameServer()->SendBroadcast("Game End", -1);
+                m_BombTime = g_Config.m_SvBombTime * Server()->TickSpeed();
+                EndMatch();
+                SetAllUndead();
+                return true;
+            }
+        }
+    }
+    
+    // check for time based win
+    if(m_GameInfo.m_TimeLimit > 0 && (Server()->Tick()-m_GameStartTick) >= m_GameInfo.m_TimeLimit*Server()->TickSpeed()*60)
+    {
+        for(int i = 0; i < MAX_CLIENTS; ++i)
+        {
+            if(GameServer()->m_apPlayers[i])
+            {
+                if(GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && (!GameServer()->m_apPlayers[i]->m_IsDead || (GameServer()->m_apPlayers[i]->GetCharacter() && GameServer()->m_apPlayers[i]->GetCharacter()->IsAlive())))
+                    GameServer()->m_apPlayers[i]->IncrementScore();
+            }
+        }
+
+        GameServer()->SendBroadcast("Game End", -1);
+        m_BombTime = g_Config.m_SvBombTime * Server()->TickSpeed();
+        EndMatch();
+        SetAllUndead();
+        return true;
+    }
+    else
+    {
+        // check for survival win
+        CPlayer *pAlivePlayer = 0;
+        int AlivePlayerCount = 0;
+        for(int i = 0; i < MAX_CLIENTS; ++i)
+        {
+            if(GameServer()->m_apPlayers[i])
+            {
+                if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && (!GameServer()->m_apPlayers[i]->m_IsDead || (GameServer()->m_apPlayers[i]->GetCharacter() && GameServer()->m_apPlayers[i]->GetCharacter()->IsAlive())))
+                {
+                    ++AlivePlayerCount;
+                    pAlivePlayer = GameServer()->m_apPlayers[i];
+                }
+                
+            }
+        }
+
+        if(AlivePlayerCount == 0)        // no winner
+        {
+            m_BombTime = g_Config.m_SvBombTime * Server()->TickSpeed();
+            FakeEndRound();
+            SetAllUndead();
+            return true;
+        }
+        else if(AlivePlayerCount == 1)    // 1 winner
+        {
+            pAlivePlayer->IncrementScore();
+            m_BombTime = g_Config.m_SvBombTime * Server()->TickSpeed();
+            FakeEndRound();
+            SetAllUndead();
+            return true;
+        }
+    }
+    return false;
+}
+
+void CGameControllerBOMB::SetAllUndead()
+{
+    for(int i = 0; i < MAX_CLIENTS; ++i)
+    {
+        if(GameServer()->m_apPlayers[i])
+        {
+            if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_IsDead)
+            {
+                GameServer()->m_apPlayers[i]->SetTeamRaw(TEAM_RED);
+                //GameServer()->m_apPlayers[i]->Respawn();
+            }
+            GameServer()->m_apPlayers[i]->m_IsDead = false;
+        }
+    }
+}
+
+void CGameControllerBOMB::FakeEndRound()
+{
+    //m_GameOverTick = Server()->Tick();
+    GameServer()->m_World.m_Paused = true;
+    m_RoundPauseTime = 150;
+    GameServer()->SendBroadcast("Round Finish", -1);
+    KillEveryone();
+    //SetGameState(IGS_END_MATCH, TIMER_END);
+}
+
+void CGameControllerBOMB::KillEveryone()
+{
+    for(int i = 0; i < MAX_CLIENTS; ++i)
+    {
+        if(GameServer()->m_apPlayers[i])
+        {
+            if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
+            {
+                GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF);
+                GameServer()->m_apPlayers[i]->Respawn();
+            }
+            
+        }
+    }
+}
+
+bool CGameControllerBOMB::CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize)
+{
+    CPlayer *pPlayer = GameServer()->m_apPlayers[NotThisId];
+    if(!pPlayer)
+        return false;
+
+    if(pPlayer->m_IsDead && Team != TEAM_SPECTATORS)
+    {
+        str_copy(pErrorReason, "Wait until round end", ErrorReasonSize);
+        return false;
+    }
+    return true;
 }
