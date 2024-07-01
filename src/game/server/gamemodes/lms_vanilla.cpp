@@ -59,7 +59,15 @@ void CGameControllerLMSVanilla::Tick()
 void CGameControllerLMSVanilla::OnPlayerConnect(class CPlayer *pPlayer)
 {
     CGameControllerDMVanilla::OnPlayerConnect(pPlayer);
-    pPlayer->m_IsDead = false;
+    if(m_RoundActive)
+    {
+        pPlayer->SetTeamRaw(TEAM_SPECTATORS);
+        pPlayer->m_IsDead = true;
+    }
+    else
+    {
+        pPlayer->m_IsDead = false;
+    }
 }
 
 void CGameControllerLMSVanilla::OnCharacterSpawn(class CCharacter *pChr)
