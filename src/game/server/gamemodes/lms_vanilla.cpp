@@ -59,7 +59,7 @@ void CGameControllerLMSVanilla::Tick()
 void CGameControllerLMSVanilla::OnPlayerConnect(class CPlayer *pPlayer)
 {
     CGameControllerDMVanilla::OnPlayerConnect(pPlayer);
-    if(m_RoundActive)
+    /*if(m_RoundActive)
     {
         pPlayer->SetTeamRaw(TEAM_SPECTATORS);
         pPlayer->m_IsDead = true;
@@ -67,7 +67,7 @@ void CGameControllerLMSVanilla::OnPlayerConnect(class CPlayer *pPlayer)
     else
     {
         pPlayer->m_IsDead = false;
-    }
+    }*/ //For now dont, this casues the 0.7 spec bug
 }
 
 void CGameControllerLMSVanilla::OnCharacterSpawn(class CCharacter *pChr)

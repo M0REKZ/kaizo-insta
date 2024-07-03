@@ -53,6 +53,7 @@ void CGameControllerLTSVanilla::Tick()
         KillEveryone();
         GameServer()->SendBroadcast("Game started", -1);
         m_RoundActive = true;
+        m_RoundPauseTime = 2;
     }
 }
 
@@ -66,7 +67,7 @@ void CGameControllerLTSVanilla::OnPlayerConnect(class CPlayer *pPlayer)
 
 bool CGameControllerLTSVanilla::DoWincheckMatch()
 {
-    if(!m_RoundActive)
+    if(!m_RoundActive && m_RoundPauseTime == -1)
         return false;
     
     // check score win condition
