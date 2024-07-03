@@ -177,6 +177,10 @@ bool CGameControllerBOMB::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From
 {
     Dmg = 0; //TODO: maybe i should add an option for bomb with damage
     CGameControllerDMVanilla::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
+    if(GameServer()->m_apPlayers[From] == Character.GetPlayer())
+        return false;
+    if(Character.GetPlayer()->m_IsBomb)
+        return false;
     if(GameServer()->m_apPlayers[From] && GameServer()->m_apPlayers[From]->m_IsBomb)
         TransferBomb(GameServer()->m_apPlayers[From], Character.GetPlayer());
     return false;
