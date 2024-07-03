@@ -11,6 +11,7 @@ class CGameControllerBOMB : public CGameControllerDMVanilla
     void SetSkins();
     void TransferBomb(class CPlayer* From, class CPlayer* To);
     void ExplodeBomb(class CPlayer* BombPlayer);
+    void BombTick();
     int m_BombTime;
 protected:
     virtual bool DoWincheckMatch() override;

@@ -313,6 +313,8 @@ void CGameContext::InstagibUnstackChatMessage(char *pUnstacked, const char *pMes
 
 int CGameContext::GetDDNetInstaWeapon() const
 {
+    if(m_pController->m_VanillaBehavior)
+        return WEAPON_HAMMER;
 	if(m_pController->m_pGameType[0] == 'g')
 		return WEAPON_GRENADE;
 	if(m_pController->m_pGameType[0] == 'i')

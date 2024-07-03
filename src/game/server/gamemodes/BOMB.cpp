@@ -24,7 +24,7 @@ void CGameControllerBOMB::Tick()
     
     SetSkins(); //a lot of ugly loops...
     
-    //TODO: m_World paused when endmatch
+    //todo: m_World paused when endmatch-- DONE.. i guess
     if(m_RoundPauseTime > 0)
     {
         m_RoundPauseTime--;
@@ -79,12 +79,33 @@ void CGameControllerBOMB::Tick()
             }
             m_BombTime = g_Config.m_SvBombTime * Server()->TickSpeed();
         }
+        
+        if(!(m_BombTime % Server()->TickSpeed()))
+        {
+            BombTick(); //for the counting thing
+        }
     }
     if(!m_RoundActive && PlayerAmount > 1 && !m_Warmup)
     {
         KillEveryone();
         GameServer()->SendBroadcast("Game started", -1);
         m_RoundActive = true;
+        m_RoundPauseTime = 2;
+    }
+}
+
+void CGameControllerBOMB::BombTick()
+{
+    for(int i = 0; i < MAX_CLIENTS; ++i)
+    {
+        if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && (!GameServer()->m_apPlayers[i]->m_IsDead || (GameServer()->m_apPlayers[i]->GetCharacter() && GameServer()->m_apPlayers[i]->GetCharacter()->IsAlive())))
+        {
+            if(GameServer()->m_apPlayers[i]->m_IsBomb)
+            {
+                GameServer()->CreateDamageInd(GameServer()->m_apPlayers[i]->GetCharacter()->m_Pos, 0, m_BombTime / Server()->TickSpeed(), GameServer()->m_apPlayers[i]->GetCharacter()->TeamMask());
+                GameServer()->CreateSound(GameServer()->m_apPlayers[i]->m_ViewPos, SOUND_HOOK_NOATTACH);
+            }
+        }
     }
 }
 
@@ -108,7 +129,7 @@ void CGameControllerBOMB::ExplodeBomb(CPlayer* BombPlayer)
 void CGameControllerBOMB::Snap(int SnappingClient)
 {
     CGameControllerInstagib::Snap(SnappingClient);
-    
+/*
     if(!(m_BombTime % Server()->TickSpeed()))
     {
         if(GameServer()->m_apPlayers[SnappingClient] && (GameServer()->m_apPlayers[SnappingClient]->GetTeam() != TEAM_SPECTATORS && (!GameServer()->m_apPlayers[SnappingClient]->m_IsDead || (GameServer()->m_apPlayers[SnappingClient]->GetCharacter() && GameServer()->m_apPlayers[SnappingClient]->GetCharacter()->IsAlive())) && GameServer()->m_apPlayers[SnappingClient]->m_IsBomb))
@@ -116,7 +137,7 @@ void CGameControllerBOMB::Snap(int SnappingClient)
             GameServer()->CreateDamageInd(GameServer()->m_apPlayers[SnappingClient]->GetCharacter()->m_Pos, 0, m_BombTime / Server()->TickSpeed(), GameServer()->m_apPlayers[SnappingClient]->GetCharacter()->TeamMask());
             GameServer()->CreateSound(GameServer()->m_apPlayers[SnappingClient]->m_ViewPos, SOUND_HOOK_NOATTACH);
         }
-    }
+    }*/
 }
 
 void CGameControllerBOMB::OnPlayerConnect(class CPlayer *pPlayer)
@@ -163,7 +184,7 @@ bool CGameControllerBOMB::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From
 
 int CGameControllerBOMB::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
-    if(pVictim)
+    if(m_RoundActive && pVictim)
     {
         pVictim->GetPlayer()->m_IsBomb = false;
         pVictim->GetPlayer()->SetTeamRaw(TEAM_SPECTATORS);
@@ -254,6 +275,8 @@ void CGameControllerBOMB::SetSkins()
                 {
                     str_copy(GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinName, "bomb", sizeof(GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinName));
                     GameServer()->m_apPlayers[i]->m_TeeInfos.m_UseCustomColor = 0;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_ColorBody = 11279360; //for 0.7
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_ColorFeet = 140;
                 }
                 else
                 {
@@ -270,7 +293,7 @@ void CGameControllerBOMB::SetSkins()
 
 bool CGameControllerBOMB::DoWincheckMatch()
 {
-    if(!m_RoundActive)
+    if(!m_RoundActive && m_RoundPauseTime == -1)
         return false;
     
     // check score win condition
@@ -283,6 +306,8 @@ bool CGameControllerBOMB::DoWincheckMatch()
                 GameServer()->SendBroadcast("Game End", -1);
                 m_BombTime = g_Config.m_SvBombTime * Server()->TickSpeed();
                 EndMatch();
+                m_RoundPauseTime = 10 * Server()->TickSpeed();
+                GameServer()->m_World.m_Paused = true;
                 SetAllUndead();
                 return true;
             }
@@ -304,6 +329,8 @@ bool CGameControllerBOMB::DoWincheckMatch()
         GameServer()->SendBroadcast("Game End", -1);
         m_BombTime = g_Config.m_SvBombTime * Server()->TickSpeed();
         EndMatch();
+        m_RoundPauseTime = 10 * Server()->TickSpeed();
+        GameServer()->m_World.m_Paused = true;
         SetAllUndead();
         return true;
     }
@@ -350,10 +377,10 @@ void CGameControllerBOMB::SetAllUndead()
     {
         if(GameServer()->m_apPlayers[i])
         {
-            if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_IsDead)
+            if((GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_IsDead ) || GameServer()->m_apPlayers[i]->m_IsDead)
             {
                 GameServer()->m_apPlayers[i]->SetTeamRaw(TEAM_RED);
-                //GameServer()->m_apPlayers[i]->Respawn();
+                GameServer()->m_apPlayers[i]->Respawn();
             }
             GameServer()->m_apPlayers[i]->m_IsDead = false;
         }
@@ -392,7 +419,7 @@ bool CGameControllerBOMB::CanJoinTeam(int Team, int NotThisId, char *pErrorReaso
     if(!pPlayer)
         return false;
 
-    if(pPlayer->m_IsDead && Team != TEAM_SPECTATORS)
+    if(pPlayer->m_IsDead)
     {
         str_copy(pErrorReason, "Wait until round end", ErrorReasonSize);
         return false;
