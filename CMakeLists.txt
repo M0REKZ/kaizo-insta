@@ -2581,10 +2581,10 @@ if(SERVER)
     gamecontext.h
     gamecontroller.cpp
     gamecontroller.h
-    gamemodes/DDRace.cpp
-    gamemodes/DDRace.h
     gamemodes/BOMB.cpp
     gamemodes/BOMB.h
+    gamemodes/DDRace.cpp
+    gamemodes/DDRace.h
     gamemodes/base_fng.cpp
     gamemodes/base_fng.h
     gamemodes/base_instagib.cpp
