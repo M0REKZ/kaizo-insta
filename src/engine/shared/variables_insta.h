@@ -35,7 +35,7 @@ MACRO_CONFIG_STR(SvSpawnWeapons, sv_spawn_weapons, 900, "grenade", CFGFLAG_SERVE
 
 //+KZ
 
-MACRO_CONFIG_INT(SvPlasmaKills, sv_plasma_kills, 0, 0, 1, CFGFLAG_SERVER | CFGFLAG_GAME, "Plasma turret kills player")
+MACRO_CONFIG_INT(SvPlasmaKills, sv_plasma_kills, 0, 0, 100, CFGFLAG_SERVER | CFGFLAG_GAME, "Plasma turret damage for player")
 MACRO_CONFIG_INT(SvAnticamper, sv_anticamper, 1, 0, 1, CFGFLAG_SERVER, "Toggle to enable/disable Anticamper")
 MACRO_CONFIG_INT(SvAnticamperFreeze, sv_anticamper_freeze, 7, 0, 15, CFGFLAG_SERVER, "If a player should freeze on camping (and how long) or die")
 MACRO_CONFIG_INT(SvAnticamperTime, sv_anticamper_time, 10, 5, 120, CFGFLAG_SERVER, "How long to wait till the player dies/freezes")

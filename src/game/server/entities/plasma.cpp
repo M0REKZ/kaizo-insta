@@ -11,6 +11,7 @@
 #include <game/teamscore.h>
 
 #include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
 
 const float PLASMA_ACCEL = 1.1f;
 
@@ -86,7 +87,10 @@ bool CPlasma::HitCharacter(CCharacter *pTarget)
 	}
 	if(g_Config.m_SvPlasmaKills)
     {
-        pHitPlayer->Die(pHitPlayer->GetPlayer()->GetCid(), WEAPON_WORLD);
+        if(GameServer()->m_pController->m_VanillaBehavior)
+            pHitPlayer->TakeDamage(vec2(0,0), g_Config.m_SvPlasmaKills, pHitPlayer->GetPlayer()->GetCid(), WEAPON_WORLD);
+        else
+            pHitPlayer->Die(pHitPlayer->GetPlayer()->GetCid(), WEAPON_WORLD);
         GameServer()->CreateSound(m_Pos, SOUND_HIT);
     }
 	Reset();
