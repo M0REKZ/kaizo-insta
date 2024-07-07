@@ -30,6 +30,9 @@ class IGameController
 	class IServer *m_pServer;
 
 	CGameTeams m_Teams;
+    
+    //+KZ
+    int MakeLosersCry();
 
 protected:
 	CGameContext *GameServer() const { return m_pGameServer; }
@@ -294,7 +297,10 @@ protected:
 		// for example from gamecontroller score check
 		// and ctf flag capture at the same time
 		if(m_GameState != IGS_END_MATCH)
-			OnEndMatchInsta();
+        {
+            OnEndMatchInsta();
+            MakeLosersCry();
+        }
 		SetGameState(IGS_END_MATCH, TIMER_END);
 	}
 	void EndRound() { SetGameState(IGS_END_ROUND, TIMER_END / 2); } // never called ddnet-insta has no round support yet
