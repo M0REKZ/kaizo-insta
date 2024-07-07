@@ -27,6 +27,9 @@ CPlasma::CPlasma(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir, bool Freeze,
 	m_LifeTime = Server()->TickSpeed() * 1.5f;
 
 	GameWorld()->InsertEntity(this);
+    
+    if(g_Config.m_SvPlasmaKills)
+        GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP);
 }
 
 void CPlasma::Tick()
@@ -82,7 +85,10 @@ bool CPlasma::HitCharacter(CCharacter *pTarget)
 			m_Pos, m_ForClientId, WEAPON_GRENADE, true, pTarget->Team(), pTarget->TeamMask());
 	}
 	if(g_Config.m_SvPlasmaKills)
-		pHitPlayer->Die(pHitPlayer->GetPlayer()->GetCid(), WEAPON_WORLD);
+    {
+        pHitPlayer->Die(pHitPlayer->GetPlayer()->GetCid(), WEAPON_WORLD);
+        GameServer()->CreateSound(m_Pos, SOUND_HIT);
+    }
 	Reset();
 	return true;
 }
@@ -98,6 +104,8 @@ bool CPlasma::HitObstacle(CCharacter *pTarget)
 			// Even in the case of an explosion due to a collision with obstacles, only one player is affected
 			GameServer()->CreateExplosion(
 				m_Pos, m_ForClientId, WEAPON_GRENADE, true, pTarget->Team(), pTarget->TeamMask());
+            if(g_Config.m_SvPlasmaKills)
+                GameServer()->CreateSound(m_Pos, SOUND_GRENADE_EXPLODE);
 		}
 		Reset();
 		return true;

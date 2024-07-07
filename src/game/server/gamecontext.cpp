@@ -44,6 +44,7 @@
 #include "gamemodes/mod.h"
 #include "gamemodes/solofng.h"
 #include "gamemodes/zcatch.h"
+#include "gamemodes/BOMB.h"
 #include "player.h"
 #include "score.h"
 
@@ -3954,6 +3955,8 @@ void CGameContext::OnInit(const void *pPersistentData)
 		m_pController = new CGameControllerSoloFng(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "zcatch"))
 		m_pController = new CGameControllerZcatch(this);
+    else if(!str_comp_nocase(Config()->m_SvGametype, "bomb"))
+        m_pController = new CGameControllerBOMB(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "gdm"))
 		m_pController = new CGameControllerGDM(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "idm"))
@@ -5123,8 +5126,8 @@ void CGameContext::ConIfGameTypes(IConsole::IResult *pResult, void *pUserData)
         {
             name[b] = pGameTypes[i];//d0 d0;m1 m1;
             b++; //1 0;2 1;
-            str_format(aBuf, sizeof(aBuf), "i value '%d'", i);
-            pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+            //str_format(aBuf, sizeof(aBuf), "i value '%d'", i);
+            //pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
         } //1 1; 2 2;
         if(pGameTypes[i] == '\0' || i >= 256) //2 2
             exitwhile = true; //last checking
@@ -5133,8 +5136,8 @@ void CGameContext::ConIfGameTypes(IConsole::IResult *pResult, void *pUserData)
 
         name[b] = '\0'; //d0 m1 ?2 \03 -> d0 m1 \02
         
-        str_format(aBuf, sizeof(aBuf), "name value '%s'", name);
-        pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
+        //str_format(aBuf, sizeof(aBuf), "name value '%s'", name);
+        //pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "server", aBuf);
         
 
         

@@ -22,7 +22,13 @@ public:
 	// Will be -1 when the player is alive
 	int m_KillerId = -1;
 	void SetTeamRaw(int Team) { m_Team = Team; }
-	bool m_IsDead;
+	bool m_IsDead; //also used for LMS LTS and BOMB <- +KZ
+    
+    /*******************************************************************
+     * BOMB                                                           *
+     *******************************************************************/
+
+    bool m_IsBomb;
 
 	/*******************************************************************
 	 * gCTF                                                            *
