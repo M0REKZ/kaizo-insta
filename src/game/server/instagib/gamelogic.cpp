@@ -1,14 +1,11 @@
+#include <base/system.h>
 #include <engine/shared/config.h>
 
 #include "../entities/character.h"
 #include "../gamecontext.h"
-#include "../gamemodes/DDRace.h"
-#include "../gamemodes/gctf.h"
-#include "../gamemodes/ictf.h"
-#include "../gamemodes/mod.h"
 #include "../player.h"
 
-#include "strhelpers.h"
+#include <game/server/gamecontroller.h>
 
 // TODO: this is not game logic
 //       do some cleanup of the file structuring

@@ -366,7 +366,7 @@ void CGameControllerInstagib::OnPlayerConnect(CPlayer *pPlayer)
 			SendChatSpectators(aBuf, CGameContext::CHAT_SIX);
 
 		GameServer()->SendChatTarget(ClientId, "Custom DDNet-insta fork by +KZ");
-		GameServer()->SendChatTarget(ClientId, "Original DDNet-insta: https://github.com/ZillyInsta/ddnet-insta/");
+		GameServer()->SendChatTarget(ClientId, "Original DDNet-insta: https://github.com/ddnet-insta/ddnet-insta/");
 		GameServer()->SendChatTarget(ClientId, "DDraceNetwork Mod. Version: " GAME_VERSION);
 
 		GameServer()->AlertOnSpecialInstagibConfigs(ClientId);
