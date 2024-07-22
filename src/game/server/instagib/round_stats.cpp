@@ -15,13 +15,16 @@ void IGameController::OnEndMatchInsta()
 {
 	dbg_msg("ddnet-insta", "match end");
 
-	char aStats[1024];
-	dbg_msg("ddnet-insta", "building stats ...");
-	GetRoundEndStatsStr(aStats, sizeof(aStats));
-	PublishRoundEndStatsStr(aStats);
+	dbg_msg("ddnet-insta", "publishing stats ...");
+	PublishRoundEndStats();
 
-	for(CInstaPlayerStats &Stats : m_aInstaPlayerStats)
-		Stats.Reset();
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		pPlayer->ResetStats();
+	}
 }
 
 static float CalcKillDeathRatio(int Kills, int Deaths)
@@ -36,7 +39,6 @@ static float CalcKillDeathRatio(int Kills, int Deaths)
 void IGameController::PsvRowPlayer(const CPlayer *pPlayer, char *pBuf, size_t Size)
 {
 	char aBuf[512];
-	const CInstaPlayerStats *pStats = &m_aInstaPlayerStats[pPlayer->GetCid()];
 	str_format(
 		aBuf,
 		sizeof(aBuf),
@@ -44,9 +46,9 @@ void IGameController::PsvRowPlayer(const CPlayer *pPlayer, char *pBuf, size_t Si
 		pPlayer->GetCid(),
 		Server()->ClientName(pPlayer->GetCid()),
 		pPlayer->m_Score.value_or(0),
-		pStats->m_Kills,
-		pStats->m_Deaths,
-		CalcKillDeathRatio(pStats->m_Kills, pStats->m_Deaths));
+		pPlayer->m_Kills,
+		pPlayer->m_Deaths,
+		CalcKillDeathRatio(pPlayer->m_Kills, pPlayer->m_Deaths));
 	str_append(pBuf, aBuf, Size);
 }
 
@@ -87,8 +89,6 @@ void IGameController::GetRoundEndStatsStrJson(char *pBuf, size_t Size)
 			if(!pPlayer)
 				continue;
 
-			const CInstaPlayerStats *pStats = &m_aInstaPlayerStats[pPlayer->GetCid()];
-
 			Writer.BeginObject();
 			Writer.WriteAttribute("id");
 			Writer.WriteIntValue(pPlayer->GetCid());
@@ -99,11 +99,15 @@ void IGameController::GetRoundEndStatsStrJson(char *pBuf, size_t Size)
 			Writer.WriteAttribute("score");
 			Writer.WriteIntValue(pPlayer->m_Score.value_or(0));
 			Writer.WriteAttribute("kills");
-			Writer.WriteIntValue(pStats->m_Kills);
+			Writer.WriteIntValue(pPlayer->m_Kills);
 			Writer.WriteAttribute("deaths");
-			Writer.WriteIntValue(pStats->m_Deaths);
+			Writer.WriteIntValue(pPlayer->m_Deaths);
 			Writer.WriteAttribute("ratio");
-			Writer.WriteIntValue(CalcKillDeathRatio(pStats->m_Kills, pStats->m_Deaths));
+			Writer.WriteIntValue(CalcKillDeathRatio(pPlayer->m_Kills, pPlayer->m_Deaths));
+			Writer.WriteAttribute("flag_grabs");
+			Writer.WriteIntValue(pPlayer->m_FlagGrabs);
+			Writer.WriteAttribute("flag_captures");
+			Writer.WriteIntValue(pPlayer->m_FlagCaptures);
 			Writer.EndObject();
 		}
 		Writer.EndArray();
@@ -125,6 +129,44 @@ void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
 	int ScoreLimit = m_GameInfo.m_ScoreLimit;
 	int TimeLimit = m_GameInfo.m_TimeLimit;
 
+	std::optional<std::string> RedClan = std::nullopt;
+	std::optional<std::string> BlueClan = std::nullopt;
+
+	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		if(pPlayer->GetTeam() == TEAM_RED)
+		{
+			if(!RedClan.has_value())
+			{
+				RedClan = Server()->ClientClan(pPlayer->GetCid());
+				continue;
+			}
+
+			if(RedClan.value().empty())
+				break;
+
+			if(RedClan.value() != std::string(Server()->ClientClan(pPlayer->GetCid())))
+				RedClan.value().clear();
+		}
+		else if(pPlayer->GetTeam() == TEAM_BLUE)
+		{
+			if(!BlueClan.has_value())
+			{
+				BlueClan = Server()->ClientClan(pPlayer->GetCid());
+				continue;
+			}
+
+			if(BlueClan.value().empty())
+				break;
+
+			if(BlueClan.value() != std::string(Server()->ClientClan(pPlayer->GetCid())))
+				BlueClan.value().clear();
+		}
+	}
+
 	// headers
 	str_format(aBuf, sizeof(aBuf), "---> Server: %s, Map: %s, Gametype: %s.\n", g_Config.m_SvName, g_Config.m_SvMap, g_Config.m_SvGametype);
 	str_append(pBuf, aBuf, Size);
@@ -132,6 +174,11 @@ void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
 	str_append(pBuf, aBuf, Size);
 
 	str_append(pBuf, "**Red Team:**\n", Size);
+	if(RedClan.has_value() && !RedClan.value().empty())
+	{
+		str_format(aBuf, sizeof(aBuf), "Clan: **%s**\n", RedClan.value().c_str());
+		str_append(pBuf, aBuf, Size);
+	}
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
 		if(!pPlayer || pPlayer->GetTeam() != TEAM_RED)
@@ -139,7 +186,13 @@ void IGameController::GetRoundEndStatsStrPsv(char *pBuf, size_t Size)
 
 		PsvRowPlayer(pPlayer, pBuf, Size);
 	}
+
 	str_append(pBuf, "**Blue Team:**\n", Size);
+	if(BlueClan.has_value() && !BlueClan.value().empty())
+	{
+		str_format(aBuf, sizeof(aBuf), "Clan: **%s**\n", BlueClan.value().c_str());
+		str_append(pBuf, aBuf, Size);
+	}
 	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
 		if(!pPlayer || pPlayer->GetTeam() != TEAM_BLUE)
@@ -157,7 +210,7 @@ void IGameController::GetRoundEndStatsStrAsciiTable(char *pBuf, size_t Size)
 {
 }
 
-void IGameController::GetRoundEndStatsStr(char *pBuf, size_t Size)
+void IGameController::GetRoundEndStatsStrHttp(char *pBuf, size_t Size)
 {
 	if(!IsTeamPlay())
 	{
@@ -165,14 +218,50 @@ void IGameController::GetRoundEndStatsStr(char *pBuf, size_t Size)
 		return;
 	}
 
-	if(g_Config.m_SvRoundStatsFormat == 0)
+	if(g_Config.m_SvRoundStatsFormatHttp == 0)
 		GetRoundEndStatsStrCsv(pBuf, Size);
-	if(g_Config.m_SvRoundStatsFormat == 1)
+	if(g_Config.m_SvRoundStatsFormatHttp == 1)
 		GetRoundEndStatsStrPsv(pBuf, Size);
-	else if(g_Config.m_SvRoundStatsFormat == 4)
+	else if(g_Config.m_SvRoundStatsFormatHttp == 4)
 		GetRoundEndStatsStrJson(pBuf, Size);
 	else
-		dbg_msg("ddnet-insta", "sv_round_stats_format %d not implemented", g_Config.m_SvRoundStatsFormat);
+		dbg_msg("ddnet-insta", "sv_round_stats_format_http %d not implemented", g_Config.m_SvRoundStatsFormatHttp);
+}
+
+void IGameController::GetRoundEndStatsStrDiscord(char *pBuf, size_t Size)
+{
+	if(!IsTeamPlay())
+	{
+		dbg_msg("ddnet-insta", "failed to build stats (no teams not implemented)");
+		return;
+	}
+
+	if(g_Config.m_SvRoundStatsFormatDiscord == 0)
+		GetRoundEndStatsStrCsv(pBuf, Size);
+	if(g_Config.m_SvRoundStatsFormatDiscord == 1)
+		GetRoundEndStatsStrPsv(pBuf, Size);
+	else if(g_Config.m_SvRoundStatsFormatDiscord == 4)
+		GetRoundEndStatsStrJson(pBuf, Size);
+	else
+		dbg_msg("ddnet-insta", "sv_round_stats_format_discord %d not implemented", g_Config.m_SvRoundStatsFormatDiscord);
+}
+
+void IGameController::GetRoundEndStatsStrFile(char *pBuf, size_t Size)
+{
+	if(!IsTeamPlay())
+	{
+		dbg_msg("ddnet-insta", "failed to build stats (no teams not implemented)");
+		return;
+	}
+
+	if(g_Config.m_SvRoundStatsFormatFile == 0)
+		GetRoundEndStatsStrCsv(pBuf, Size);
+	if(g_Config.m_SvRoundStatsFormatFile == 1)
+		GetRoundEndStatsStrPsv(pBuf, Size);
+	else if(g_Config.m_SvRoundStatsFormatFile == 4)
+		GetRoundEndStatsStrJson(pBuf, Size);
+	else
+		dbg_msg("ddnet-insta", "sv_round_stats_format_file %d not implemented", g_Config.m_SvRoundStatsFormatFile);
 }
 
 void IGameController::PublishRoundEndStatsStrFile(const char *pStr)
@@ -205,7 +294,7 @@ void IGameController::PublishRoundEndStatsStrHttp(const char *pStr)
 	pHttp->LogProgress(HTTPLOG::FAILURE);
 	pHttp->IpResolve(IPRESOLVE::V4);
 	pHttp->Timeout(CTimeout{4000, 15000, 500, 5});
-	if(g_Config.m_SvRoundStatsFormat == 4)
+	if(g_Config.m_SvRoundStatsFormatHttp == 4)
 		pHttp->HeaderString("Content-Type", "application/json");
 	else
 		pHttp->HeaderString("Content-Type", "text/plain");
@@ -213,13 +302,25 @@ void IGameController::PublishRoundEndStatsStrHttp(const char *pStr)
 	GameServer()->m_pHttp->Run(pHttp);
 }
 
-void IGameController::PublishRoundEndStatsStr(const char *pStr)
+void IGameController::PublishRoundEndStats()
 {
-	dbg_msg("ddnet-insta", "publishing round stats:\n%s", pStr);
+	char aStats[1024];
 	if(g_Config.m_SvRoundStatsDiscordWebhook[0] != '\0')
-		PublishRoundEndStatsStrDiscord(pStr);
+	{
+		GetRoundEndStatsStrDiscord(aStats, sizeof(aStats));
+		PublishRoundEndStatsStrDiscord(aStats);
+		dbg_msg("ddnet-insta", "publishing round stats to discord:\n%s", aStats);
+	}
 	if(g_Config.m_SvRoundStatsHttpEndpoint[0] != '\0')
-		PublishRoundEndStatsStrHttp(pStr);
+	{
+		GetRoundEndStatsStrHttp(aStats, sizeof(aStats));
+		PublishRoundEndStatsStrHttp(aStats);
+		dbg_msg("ddnet-insta", "publishing round stats to custom http endpoint:\n%s", aStats);
+	}
 	if(g_Config.m_SvRoundStatsOutputFile[0] != '\0')
-		PublishRoundEndStatsStrFile(pStr);
+	{
+		GetRoundEndStatsStrFile(aStats, sizeof(aStats));
+		PublishRoundEndStatsStrFile(aStats);
+		dbg_msg("ddnet-insta", "publishing round stats to file:\n%s", aStats);
+	}
 }

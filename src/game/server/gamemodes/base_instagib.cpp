@@ -99,9 +99,9 @@ int CGameControllerInstagib::OnCharacterDeath(class CCharacter *pVictim, class C
 
 	// selfkill is no kill
 	if(pKiller != pVictim->GetPlayer())
-		m_aInstaPlayerStats[pKiller->GetCid()].m_Kills++;
+		pKiller->m_Kills++;
 	// but selfkill is a death
-	m_aInstaPlayerStats[pVictim->GetPlayer()->GetCid()].m_Deaths++;
+	pVictim->GetPlayer()->m_Deaths++;
 
 	if(pKiller && pVictim)
 	{
@@ -345,7 +345,7 @@ void CGameControllerInstagib::OnPlayerConnect(CPlayer *pPlayer)
 	OnPlayerConstruct(pPlayer);
 	IGameController::OnPlayerConnect(pPlayer);
 	int ClientId = pPlayer->GetCid();
-	m_aInstaPlayerStats[ClientId].Reset();
+	pPlayer->ResetStats();
 
 	// init the player
 	Score()->PlayerData(ClientId)->Reset();

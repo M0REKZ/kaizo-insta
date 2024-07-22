@@ -96,8 +96,6 @@ void CGameControllerCTF::OnFlagReturn(CFlag *pFlag)
 
 void CGameControllerCTF::OnFlagGrab(class CFlag *pFlag)
 {
-	if(!g_Config.m_SvFastcap)
-		return;
 	if(!pFlag)
 		return;
 	if(!pFlag->IsAtStand())
@@ -105,25 +103,29 @@ void CGameControllerCTF::OnFlagGrab(class CFlag *pFlag)
 	if(!pFlag->m_pCarrier)
 		return;
 
-	Teams().OnCharacterStart(pFlag->m_pCarrier->GetPlayer()->GetCid());
+	CPlayer *pPlayer = pFlag->m_pCarrier->GetPlayer();
+	pPlayer->m_FlagGrabs++;
+
+	if(g_Config.m_SvFastcap)
+		Teams().OnCharacterStart(pPlayer->GetCid());
 }
 
 void CGameControllerCTF::OnFlagCapture(class CFlag *pFlag, float Time)
 {
-	//if(!g_Config.m_SvFastcap) //moved for confetti
-	//	return;
 	if(!pFlag)
 		return;
 	if(!pFlag->m_pCarrier)
 		return;
     
+    //confetti +KZ
     CCharacter *pChar = pFlag->m_pCarrier;
     GameServer()->CreateFinishConfetti(pChar->m_Pos, pChar->TeamMask());
-    
-    if(!g_Config.m_SvFastcap)
-        return;
-    
-	Teams().OnCharacterFinish(pFlag->m_pCarrier->GetPlayer()->GetCid());
+
+	CPlayer *pPlayer = pFlag->m_pCarrier->GetPlayer();
+	pPlayer->m_FlagCaptures++;
+
+	if(g_Config.m_SvFastcap)
+		Teams().OnCharacterFinish(pPlayer->GetCid());
 }
 
 void CGameControllerCTF::FlagTick()
