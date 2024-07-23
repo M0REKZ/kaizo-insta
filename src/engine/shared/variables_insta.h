@@ -32,14 +32,13 @@ MACRO_CONFIG_INT(SvKillingspreeKills, sv_killingspree_kills, 0, 0, 20, CFGFLAG_S
 MACRO_CONFIG_INT(SvDamageNeededForKill, sv_damage_needed_for_kill, 4, 0, 5, CFGFLAG_SERVER, "Damage needed to kill")
 MACRO_CONFIG_INT(SvAllowZoom, sv_allow_zoom, 0, 0, 1, CFGFLAG_SERVER, "allow ddnet clients to use the client side zoom feature")
 MACRO_CONFIG_STR(SvSpawnWeapons, sv_spawn_weapons, 900, "grenade", CFGFLAG_SERVER, "possible values: grenade, laser")
-
-//+KZ
-
-MACRO_CONFIG_INT(SvPlasmaKills, sv_plasma_kills, 0, 0, 100, CFGFLAG_SERVER | CFGFLAG_GAME, "Plasma turret damage for player")
 MACRO_CONFIG_INT(SvAnticamper, sv_anticamper, 1, 0, 1, CFGFLAG_SERVER, "Toggle to enable/disable Anticamper")
 MACRO_CONFIG_INT(SvAnticamperFreeze, sv_anticamper_freeze, 7, 0, 15, CFGFLAG_SERVER, "If a player should freeze on camping (and how long) or die")
 MACRO_CONFIG_INT(SvAnticamperTime, sv_anticamper_time, 10, 5, 120, CFGFLAG_SERVER, "How long to wait till the player dies/freezes")
 MACRO_CONFIG_INT(SvAnticamperRange, sv_anticamper_range, 200, 0, 1000, CFGFLAG_SERVER, "Distance how far away the player must move to escape anticamper")
+//+KZ
+
+MACRO_CONFIG_INT(SvPlasmaKills, sv_plasma_kills, 0, 0, 100, CFGFLAG_SERVER | CFGFLAG_GAME, "Plasma turret damage for player")
 MACRO_CONFIG_INT(SvDDraceShotgun, sv_ddrace_shotgun, 0, 0, 1, CFGFLAG_SERVER, "DDrace shotgun (0 = vanilla, 1 = ddrace)")
 MACRO_CONFIG_INT(SvForceLaserType, sv_force_laser_type, 0, 0, 2, CFGFLAG_SERVER, "Laser behavior, overriding sv_oldlaser and tunes but no tune zones (0 = default, 1 = ddrace 2 = vanilla)")
 
