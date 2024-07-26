@@ -279,8 +279,29 @@ void CGameControllerBOMB::SetSkins()
                 {
                     str_copy(GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinName, "bomb", sizeof(GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinName));
                     GameServer()->m_apPlayers[i]->m_TeeInfos.m_UseCustomColor = 0;
-                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_ColorBody = 11279360; //for 0.7
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_ColorBody = 11279360;
                     GameServer()->m_apPlayers[i]->m_TeeInfos.m_ColorFeet = 140;
+                    
+                    str_copy(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[0], "standard", sizeof(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[0]));
+                    str_copy(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[1], "cammostripes", sizeof(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[1]));
+                    str_copy(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[2], "", sizeof(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[2]));
+                    str_copy(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[3], "standard", sizeof(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[3]));
+                    str_copy(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[4], "standard", sizeof(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[4]));
+                    str_copy(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[5], "standard", sizeof(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[5]));
+                    
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[0] = true;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[1] = true;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[2] = true;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[3] = true;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[4] = true;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[5] = true;
+                    
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[0] = 0;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[1] = -14876672;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[2] = 0;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[3] = 0;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[4] = 0;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[5] = 0;
                 }
                 else
                 {
@@ -288,6 +309,28 @@ void CGameControllerBOMB::SetSkins()
                     GameServer()->m_apPlayers[i]->m_TeeInfos.m_UseCustomColor = 1;
                     GameServer()->m_apPlayers[i]->m_TeeInfos.m_ColorBody = 16777215;
                     GameServer()->m_apPlayers[i]->m_TeeInfos.m_ColorFeet = 16777215;
+                    
+                    //0.7
+                    str_copy(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[0], "standard", sizeof(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[0]));
+                    str_copy(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[1], "cammostripes", sizeof(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[1]));
+                    str_copy(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[2], "", sizeof(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[2]));
+                    str_copy(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[3], "standard", sizeof(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[3]));
+                    str_copy(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[4], "standard", sizeof(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[4]));
+                    str_copy(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[5], "standard", sizeof(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[5]));
+                    
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[0] = true;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[1] = true;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[2] = true;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[3] = true;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[4] = true;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[5] = true;
+                    
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[0] = 16777215;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[1] = -14876672;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[2] = 16777215;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[3] = 16777215;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[4] = 16777215;
+                    GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[5] = 16777215;
                 }
             }
         }
