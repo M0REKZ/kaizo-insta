@@ -849,6 +849,8 @@ void IGameController::Snap(int SnappingClient)
 	pGameInfoEx->m_Flags2 = GAMEINFOFLAG2_HUD_AMMO | GAMEINFOFLAG2_HUD_HEALTH_ARMOR; // ddnet-insta
 	if(g_Config.m_SvNoWeakHook)
 		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK;
+    if(g_Config.m_SvEnableDDraceHUD) //+KZ
+        pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_HUD_DDRACE;
 	pGameInfoEx->m_Version = GAMEINFO_CURVERSION;
 
 	if(Server()->IsSixup(SnappingClient))
