@@ -100,7 +100,7 @@ void CGameControllerBOMB::BombTick()
     {
         if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && (!GameServer()->m_apPlayers[i]->m_IsDead || (GameServer()->m_apPlayers[i]->GetCharacter() && GameServer()->m_apPlayers[i]->GetCharacter()->IsAlive())))
         {
-            if(GameServer()->m_apPlayers[i]->m_IsBomb)
+            if(GameServer()->m_apPlayers[i]->GetCharacter() && GameServer()->m_apPlayers[i]->m_IsBomb)
             {
                 GameServer()->CreateDamageInd(GameServer()->m_apPlayers[i]->GetCharacter()->m_Pos, 0, m_BombTime / Server()->TickSpeed(), GameServer()->m_apPlayers[i]->GetCharacter()->TeamMask());
                 GameServer()->CreateSound(GameServer()->m_apPlayers[i]->m_ViewPos, SOUND_HOOK_NOATTACH);
