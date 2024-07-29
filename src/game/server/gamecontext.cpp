@@ -41,6 +41,7 @@
 #include "gamemodes/ictf.h"
 #include "gamemodes/idm.h"
 #include "gamemodes/itdm.h"
+#include "gamemodes/iFreeze.h"
 #include "gamemodes/mod.h"
 #include "gamemodes/solofng.h"
 #include "gamemodes/zcatch.h"
@@ -3958,6 +3959,8 @@ void CGameContext::OnInit(const void *pPersistentData)
 		m_pController = new CGameControllerZcatch(this);
     else if(!str_comp_nocase(Config()->m_SvGametype, "bomb"))
         m_pController = new CGameControllerBOMB(this);
+    else if(!str_comp_nocase(Config()->m_SvGametype, "ifreeze+"))
+        m_pController = new CGameControllerIFreeze(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "gdm"))
 		m_pController = new CGameControllerGDM(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "idm"))
