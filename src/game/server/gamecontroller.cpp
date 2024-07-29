@@ -1477,10 +1477,17 @@ void IGameController::OnFlagCapture(CFlag *pFlag, float Time)
 int IGameController::MakeLosersCry()
 {
     int loserteam;
+    int winnerteam;
     if(m_aTeamscore[TEAM_RED] > m_aTeamscore[TEAM_BLUE])
+    {
         loserteam = TEAM_BLUE;
+        winnerteam = TEAM_RED;
+    }
     else if(m_aTeamscore[TEAM_RED] < m_aTeamscore[TEAM_BLUE])
+    {
         loserteam = TEAM_RED;
+        winnerteam = TEAM_BLUE;
+    }
     else
         return false;
     
@@ -1491,7 +1498,21 @@ int IGameController::MakeLosersCry()
             continue;
         
         if(pPlayer->GetTeam() == loserteam)
+        {
             GameServer()->CreateSoundGlobal(SOUND_TEE_CRY, c);
+            if(pPlayer->GetCharacter())
+            {
+                pPlayer->GetCharacter()->SetEmote(EMOTE_PAIN, Server()->Tick() + Server()->TickSpeed());
+            }
+        }
+        else if(pPlayer->GetTeam() == winnerteam)
+        {
+            //GameServer()->CreateSoundGlobal(SOUND_TEE_CRY, c);
+            if(pPlayer->GetCharacter())
+            {
+                pPlayer->GetCharacter()->SetEmote(EMOTE_HAPPY, Server()->Tick() + Server()->TickSpeed());
+            }
+        }
     }
     return loserteam;
 }
