@@ -2870,6 +2870,9 @@ void CGameContext::OnKillNetMessage(const CNetMsg_Cl_Kill *pMsg, int ClientId)
 		SendChatTarget(ClientId, "Kill Protection enabled. If you really want to kill, type /kill");
 		return;
 	}
+    
+    if(m_pController && m_pController->m_DontSelfKill) //+KZ iFreeze
+        return;
 
 	pPlayer->m_LastKill = Server()->Tick();
 	pPlayer->KillCharacter(WEAPON_SELF);
