@@ -79,6 +79,7 @@ public:
     int m_GameFlags_v7;
     
     bool m_VanillaBehavior = false; //JSAURUS
+    bool m_DontSelfKill = false; //+KZ iFreeze
     
 	IGameController(class CGameContext *pGameServer);
 	virtual ~IGameController();

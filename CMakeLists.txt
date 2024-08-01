@@ -2620,6 +2620,8 @@ if(SERVER)
     gamemodes/instagib/rcon_configs.cpp
     gamemodes/itdm.cpp
     gamemodes/itdm.h
+    gamemodes/iFreeze.cpp
+    gamemodes/iFreeze.h
     gamemodes/lms_vanilla.cpp
     gamemodes/lms_vanilla.h
     gamemodes/lts_vanilla.cpp
