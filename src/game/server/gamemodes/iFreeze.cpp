@@ -29,13 +29,19 @@ void CGameControllerIFreeze::Tick()
             {
                 Blue++;
                 if(GameServer()->GetPlayerChar(i) && GameServer()->GetPlayerChar(i)->GetCore().m_DeepFrozen)
+                {
                     BlueFr++;
+                    DoMelting(GameServer()->GetPlayerChar(i));
+                }
             }
             else if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_RED)
             {
                 Red++;
                 if(GameServer()->GetPlayerChar(i) && GameServer()->GetPlayerChar(i)->GetCore().m_DeepFrozen)
+                {
                     RedFr++;
+                    DoMelting(GameServer()->GetPlayerChar(i));
+                }
             }
         }
     }
@@ -103,6 +109,8 @@ bool CGameControllerIFreeze::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
     {
         Character.Freeze();
         Character.SetDeepFrozen(true);
+        Character.GetPlayer()->m_AutoMeltTicks = g_Config.m_SvIFreezeAutomeltTime * Server()->TickSpeed();
+        
     }
     return false;
 }
@@ -123,4 +131,72 @@ void CGameControllerIFreeze::OnCharacterSpawn(class CCharacter *pChr)
 
     // give default weapons
     pChr->GiveWeapon(WEAPON_LASER, false, -1);
+}
+
+void CGameControllerIFreeze::DoMelting(class CCharacter *pChr)
+{
+    
+    if(pChr->GetPlayer()->m_AutoMeltTicks > 0)
+    {
+        pChr->GetPlayer()->m_AutoMeltTicks--;
+    }
+    else
+    {
+        pChr->GetPlayer()->m_AutoMeltTicks = 0;
+        Melt(pChr->GetPlayer()->GetCid(),0);
+        return;
+    }
+    
+    bool FoundMelter = false;
+    CCharacter *apCloseChars[MAX_CLIENTS];
+    int Num = GameServer()->m_World.FindEntities(pChr->m_Pos, g_Config.m_SvIFreezeMeltRange, (CEntity **)apCloseChars, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+    for(int i = 0; i < Num; i++)
+    {
+        if (!apCloseChars[i])
+            continue;
+        
+        if (!apCloseChars[i]->IsAlive() || apCloseChars[i] == pChr || apCloseChars[i]->GetCore().m_DeepFrozen)
+            continue;
+        
+        if (apCloseChars[i]->GetPlayer()->GetTeam() == pChr->GetPlayer()->GetTeam())
+        {
+            pChr->GetPlayer()->m_MeltTicks++;
+            FoundMelter = true;
+            // Send "thawed" on half of melttime
+            if (pChr->GetPlayer()->m_MeltTicks == (int)(Server()->TickSpeed() * g_Config.m_SvIFreezeMeltTime * 0.0005f))
+                GameServer()->SendBroadcast("You are being thawed", pChr->GetPlayer()->GetCid());
+            else if (pChr->GetPlayer()->m_MeltTicks >= Server()->TickSpeed() * g_Config.m_SvIFreezeMeltTime * 0.001f)
+                Melt(pChr->GetPlayer()->GetCid(),apCloseChars[i]->GetPlayer()->GetCid());
+            break;
+        }
+    }
+    
+    // set counter to 0 if melter went away or no melter found
+    if (!FoundMelter)
+        pChr->GetPlayer()->m_MeltTicks = 0;
+    
+}
+
+void CGameControllerIFreeze::Melt(int Melted, int Helper)
+{
+    GameServer()->m_apPlayers[Melted]->GetCharacter()->SetDeepFrozen(false);
+    GameServer()->m_apPlayers[Melted]->GetCharacter()->UnFreeze();
+    GameServer()->CreateSound(GameServer()->m_apPlayers[Melted]->GetCharacter()->m_Pos, SOUND_GRENADE_EXPLODE);
+    
+    if(g_Config.m_SvIFreezeMeltRespawn)
+    {
+        GameServer()->m_apPlayers[Melted]->KillCharacter(WEAPON_SELF);
+        GameServer()->m_apPlayers[Melted]->Respawn();
+    }
+    
+    if(Helper > 0)
+    {
+        char aBuf[128];
+        str_format(aBuf, sizeof(aBuf), "You melted %s", Server()->ClientName(Melted));
+        GameServer()->SendBroadcast(aBuf, Helper);
+        str_format(aBuf, sizeof(aBuf), "%s melted you", Server()->ClientName(Helper));
+        GameServer()->SendBroadcast(aBuf, Melted);
+    }
+
+    
 }

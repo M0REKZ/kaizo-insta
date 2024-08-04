@@ -8,6 +8,8 @@ class CGameControllerIFreeze : public CGameControllerTDM
     
 private:
     void ResetFrozenPlayer();
+    void DoMelting(class CCharacter *pChr);
+    void Melt(int Melted, int Helper);
 public:
 	CGameControllerIFreeze(class CGameContext *pGameServer);
 	~CGameControllerIFreeze();
