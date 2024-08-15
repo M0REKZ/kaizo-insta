@@ -119,7 +119,7 @@ void CGameControllerCTF::OnFlagCapture(class CFlag *pFlag, float Time)
     
     //confetti +KZ
     CCharacter *pChar = pFlag->m_pCarrier;
-    GameServer()->CreateFinishConfetti(pChar->m_Pos, pChar->TeamMask());
+    GameServer()->CreateFinishEffect(pChar->m_Pos, pChar->TeamMask());
 
 	CPlayer *pPlayer = pFlag->m_pCarrier->GetPlayer();
 	pPlayer->m_FlagCaptures++;
