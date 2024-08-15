@@ -491,21 +491,7 @@ void CGameClient::OnConnected()
 	m_Layers.Init(Kernel());
 	m_Collision.Init(Layers());
 	m_GameWorld.m_Core.InitSwitchers(m_Collision.m_HighestSwitchNumber);
-
-	CRaceHelper::ms_aFlagIndex[0] = -1;
-	CRaceHelper::ms_aFlagIndex[1] = -1;
-
-	CTile *pGameTiles = static_cast<CTile *>(Layers()->Map()->GetData(Layers()->GameLayer()->m_Data));
-
-	// get flag positions
-	for(int i = 0; i < m_Collision.GetWidth() * m_Collision.GetHeight(); i++)
-	{
-		if(pGameTiles[i].m_Index - ENTITY_OFFSET == ENTITY_FLAGSTAND_RED)
-			CRaceHelper::ms_aFlagIndex[TEAM_RED] = i;
-		else if(pGameTiles[i].m_Index - ENTITY_OFFSET == ENTITY_FLAGSTAND_BLUE)
-			CRaceHelper::ms_aFlagIndex[TEAM_BLUE] = i;
-		i += pGameTiles[i].m_Skip;
-	}
+	m_RaceHelper.Init(this);
 
 	// render loading before going through all components
 	m_Menus.RenderLoading(pConnectCaption, pLoadMapContent, 0, false);
@@ -846,6 +832,32 @@ ColorRGBA CGameClient::GetDDTeamColor(int DDTeam, float Lightness) const
 	return color_cast<ColorRGBA>(ColorHSLA(Hue, 1.0f, Lightness));
 }
 
+void CGameClient::FormatClientId(int ClientId, char (&aClientId)[16], EClientIdFormat Format) const
+{
+	if(Format == EClientIdFormat::NO_INDENT)
+	{
+		str_format(aClientId, sizeof(aClientId), "%d", ClientId);
+	}
+	else
+	{
+		const int HighestClientId = Format == EClientIdFormat::INDENT_AUTO ? m_Snap.m_HighestClientId : 64;
+		const char *pFigureSpace = " ";
+		char aNumber[8];
+		str_format(aNumber, sizeof(aNumber), "%d", ClientId);
+		aClientId[0] = '\0';
+		if(ClientId < 100 && HighestClientId >= 100)
+		{
+			str_append(aClientId, pFigureSpace);
+		}
+		if(ClientId < 10 && HighestClientId >= 10)
+		{
+			str_append(aClientId, pFigureSpace);
+		}
+		str_append(aClientId, aNumber);
+	}
+	str_append(aClientId, ": ");
+}
+
 void CGameClient::OnRelease()
 {
 	// release all systems
@@ -1041,6 +1053,17 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		CNetMsg_Sv_ChangeInfoCooldown *pMsg = (CNetMsg_Sv_ChangeInfoCooldown *)pRawMsg;
 		m_NextChangeInfo = pMsg->m_WaitUntil;
 	}
+	else if(MsgId == NETMSGTYPE_SV_MAPSOUNDGLOBAL)
+	{
+		if(m_SuppressEvents)
+			return;
+
+		if(!g_Config.m_SndGame)
+			return;
+
+		CNetMsg_Sv_MapSoundGlobal *pMsg = (CNetMsg_Sv_MapSoundGlobal *)pRawMsg;
+		m_MapSounds.Play(pMsg->m_SoundId);
+	}
 }
 
 void CGameClient::OnStateChange(int NewState, int OldState)
@@ -1183,10 +1206,15 @@ void CGameClient::ProcessEvents()
 			const CNetEvent_HammerHit *pEvent = (const CNetEvent_HammerHit *)Item.m_pData;
 			m_Effects.HammerHit(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
 		}
+		else if(Item.m_Type == NETEVENTTYPE_BIRTHDAY)
+		{
+			const CNetEvent_Birthday *pEvent = (const CNetEvent_Birthday *)Item.m_pData;
+			m_Effects.Confetti(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
+		}
 		else if(Item.m_Type == NETEVENTTYPE_FINISH)
 		{
 			const CNetEvent_Finish *pEvent = (const CNetEvent_Finish *)Item.m_pData;
-			m_Effects.FinishConfetti(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
+			m_Effects.Confetti(vec2(pEvent->m_X, pEvent->m_Y), Alpha);
 		}
 		else if(Item.m_Type == NETEVENTTYPE_SPAWN)
 		{
@@ -1208,6 +1236,14 @@ void CGameClient::ProcessEvents()
 				continue;
 
 			m_Sounds.PlayAt(CSounds::CHN_WORLD, pEvent->m_SoundId, 1.0f, vec2(pEvent->m_X, pEvent->m_Y));
+		}
+		else if(Item.m_Type == NETEVENTTYPE_MAPSOUNDWORLD)
+		{
+			CNetEvent_MapSoundWorld *pEvent = (CNetEvent_MapSoundWorld *)Item.m_pData;
+			if(!Config()->m_SndGame)
+				continue;
+
+			m_MapSounds.PlayAt(pEvent->m_SoundId, vec2(pEvent->m_X, pEvent->m_Y));
 		}
 	}
 }
@@ -1514,6 +1550,8 @@ void CGameClient::OnNewSnapshot()
 							m_Snap.m_SpecInfo.m_Active = true;
 						}
 					}
+
+					m_Snap.m_HighestClientId = maximum(m_Snap.m_HighestClientId, pInfo->m_ClientId);
 
 					// calculate team-balance
 					if(pInfo->m_Team != TEAM_SPECTATORS)
