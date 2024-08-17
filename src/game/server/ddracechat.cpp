@@ -2284,3 +2284,13 @@ void CGameContext::ConTimeCP(IConsole::IResult *pResult, void *pUserData)
 	const char *pName = pResult->GetString(0);
 	pSelf->Score()->LoadPlayerTimeCp(pResult->m_ClientId, pName);
 }
+
+void CGameContext::ConAfkKZ(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(pPlayer)
+		pPlayer->SetInitialAfk(true);
+}

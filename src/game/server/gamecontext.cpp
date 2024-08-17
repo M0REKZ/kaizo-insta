@@ -3639,6 +3639,7 @@ void CGameContext::OnConsoleInit()
     Console()->Register("if_gametypes", "s[gametypes] ?s[true result command] ?s[alternate result command]", CFGFLAG_SERVER, ConIfGameTypes, this, "Run command if running certain gametypes");
     Console()->Register("random_cmd", "s[command1] s[command2] ?s[...]", CFGFLAG_SERVER, ConRandomCmd, this, "Run random command from the list given");
     Console()->Register("question", "", CFGFLAG_SERVER, ConQuestion, this, "Make a question (only works on vote)");
+	Console()->Register("afk", "", CFGFLAG_SERVER, ConAfkKZ, this, "Set afk");
     
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 
