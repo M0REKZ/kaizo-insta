@@ -1,14 +1,12 @@
 #ifndef GAME_SERVER_GAMEMODES_TDMVANILLA_H
 #define GAME_SERVER_GAMEMODES_TDMVANILLA_H
 
-#include "dm_vanilla.h"
+#include "tdm.h"
 
-class CGameControllerTDMVanilla : public CGameControllerDMVanilla
+class CGameControllerTDMVanilla : public CGameControllerTDM
 {
 public:
 	CGameControllerTDMVanilla(class CGameContext *pGameServer);
 	~CGameControllerTDMVanilla();
-
-	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 };
 #endif // GAME_SERVER_GAMEMODES_TDM_H
