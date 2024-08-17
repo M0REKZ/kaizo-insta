@@ -15,9 +15,10 @@ public:
 	CGameControllerLTSVanilla(class CGameContext *pGameServer);
 	~CGameControllerLTSVanilla();
 
+	void Tick() override;
+	virtual void Snap(int SnappingClient) override;
 	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
     virtual void OnPlayerConnect(class CPlayer *pPlayer) override;
-	void Tick() override;
     //bool m_RoundActive = false;
     int m_aPlayerTeam[MAX_CLIENTS];
 };

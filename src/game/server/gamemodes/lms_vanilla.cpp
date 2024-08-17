@@ -18,6 +18,12 @@ CGameControllerLMSVanilla::~CGameControllerLMSVanilla() = default;
 
 void CGameControllerLMSVanilla::Tick()
 {
+	CGameControllerDMVanilla::Tick();
+	
+	if(m_RoundActive && !(GameServer()->m_World.m_Paused))
+	{
+		DoWincheckMatch();
+	}
     if(m_RoundPauseTime > 0)
     {
         m_RoundPauseTime--;
@@ -53,6 +59,7 @@ void CGameControllerLMSVanilla::Tick()
         KillEveryone();
         GameServer()->SendBroadcast("Game started", -1);
         m_RoundActive = true;
+		//m_RoundPauseTime = 2;
     }
 }
 
@@ -81,20 +88,10 @@ void CGameControllerLMSVanilla::OnCharacterSpawn(class CCharacter *pChr)
     pChr->GiveWeapon(WEAPON_LASER, false, 5);
 }
 
-bool CGameControllerLMSVanilla::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
-{
-    return CGameControllerInstagib::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
-}
-
-bool CGameControllerLMSVanilla::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
-{
-    return CGameControllerDMVanilla::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
-}
-
 int CGameControllerLMSVanilla::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
 	//CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId); //fallback to instagib
-    if(pVictim->GetPlayer() && m_RoundActive && m_RoundPauseTime < 0 && WeaponId != -3)
+    if(pVictim->GetPlayer() && m_RoundActive && WeaponId != -3)
     {
         //LMS also gives score on killing
         if(pKiller)
@@ -145,6 +142,7 @@ bool CGameControllerLMSVanilla::DoWincheckMatch()
 
         GameServer()->SendBroadcast("Game End", -1);
         EndMatch();
+		m_RoundActive = false;
         SetAllUndead();
         return true;
     }
@@ -217,7 +215,7 @@ void CGameControllerLMSVanilla::KillEveryone()
         {
             if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
             {
-                GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF);
+                GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_GAME);
                 GameServer()->m_apPlayers[i]->Respawn();
             }
             

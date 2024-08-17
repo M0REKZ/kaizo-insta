@@ -23,7 +23,11 @@ void CGameControllerBOMB::Tick()
     CGameControllerDMVanilla::Tick();
     
     SetSkins(); //a lot of ugly loops...
-    
+	
+	if(m_RoundActive && !(GameServer()->m_World.m_Paused))
+	{
+		DoWincheckMatch();
+	}
     //todo: m_World paused when endmatch-- DONE.. i guess
     if(m_RoundPauseTime > 0)
     {
@@ -353,6 +357,7 @@ bool CGameControllerBOMB::DoWincheckMatch()
                 GameServer()->SendBroadcast("Game End", -1);
                 m_BombTime = g_Config.m_SvBombTime * Server()->TickSpeed();
                 EndMatch();
+				m_RoundActive = false;
                 m_RoundPauseTime = 10 * Server()->TickSpeed();
                 GameServer()->m_World.m_Paused = true;
                 SetAllUndead();
@@ -376,6 +381,7 @@ bool CGameControllerBOMB::DoWincheckMatch()
         GameServer()->SendBroadcast("Game End", -1);
         m_BombTime = g_Config.m_SvBombTime * Server()->TickSpeed();
         EndMatch();
+		m_RoundActive = false;
         m_RoundPauseTime = 10 * Server()->TickSpeed();
         GameServer()->m_World.m_Paused = true;
         SetAllUndead();

@@ -18,43 +18,47 @@ CGameControllerLTSVanilla::~CGameControllerLTSVanilla() = default;
 
 void CGameControllerLTSVanilla::Tick()
 {
-    if(m_RoundPauseTime > 0)
-    {
-        m_RoundPauseTime--;
-        return;
-    }
-    else if(GameServer()->m_World.m_Paused && m_RoundPauseTime == 0)
-    {
-        GameServer()->m_World.m_Paused = false;
-        m_RoundPauseTime = -1;
-    }
-	CGameControllerLMSVanilla::Tick();
-    //kinda ugly loop
-    int PlayerAmount=0;
-    for(int i = 0; i < MAX_CLIENTS; ++i)
-    {
-        if(GameServer()->m_apPlayers[i] && (GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS || (GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_IsDead)))
-                ++PlayerAmount;
-    }
-    if(PlayerAmount == 0)
-    {
-        m_RoundActive = false;
-    }
-    if(PlayerAmount == 1 && !m_RoundActive)
-    {
-        GameServer()->SendBroadcast("Waiting for players...", -1);
-    }
-    if(PlayerAmount == 1 && m_RoundActive)
-    {
-        m_RoundActive = false;
-    }
-    if(!m_RoundActive && PlayerAmount > 1 && !m_Warmup)
-    {
-        KillEveryone();
-        GameServer()->SendBroadcast("Game started", -1);
-        m_RoundActive = true;
-        m_RoundPauseTime = 2;
-    }
+	if(m_RoundActive && !(GameServer()->m_World.m_Paused))
+	{
+		DoWincheckMatch();
+	}
+	if(m_RoundPauseTime > 0)
+	{
+		m_RoundPauseTime--;
+		return;
+	}
+	else if(GameServer()->m_World.m_Paused && m_RoundPauseTime == 0)
+	{
+		GameServer()->m_World.m_Paused = false;
+		m_RoundPauseTime = -1;
+	}
+	CGameControllerDMVanilla::Tick();
+	//kinda ugly loop
+	int PlayerAmount=0;
+	for(int i = 0; i < MAX_CLIENTS; ++i)
+	{
+		if(GameServer()->m_apPlayers[i] && (GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS || (GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_IsDead)))
+				++PlayerAmount;
+	}
+	if(PlayerAmount == 0)
+	{
+		m_RoundActive = false;
+	}
+	if(PlayerAmount == 1 && !m_RoundActive)
+	{
+		GameServer()->SendBroadcast("Waiting for players...", -1);
+	}
+	if(PlayerAmount == 1 && m_RoundActive)
+	{
+		m_RoundActive = false;
+	}
+	if(!m_RoundActive && PlayerAmount > 1 && !m_Warmup)
+	{
+		KillEveryone();
+		GameServer()->SendBroadcast("Game started", -1);
+		m_RoundActive = true;
+		//m_RoundPauseTime = 2;
+	}
 }
 
 void CGameControllerLTSVanilla::OnPlayerConnect(class CPlayer *pPlayer)
@@ -71,19 +75,15 @@ bool CGameControllerLTSVanilla::DoWincheckMatch()
         return false;
     
     // check score win condition
-    for(int i = 0; i < MAX_CLIENTS; ++i)
-    {
-        if(GameServer()->m_apPlayers[i])
-        {
-            if(m_GameInfo.m_ScoreLimit > 0 && GameServer()->m_apPlayers[i]->m_Score.value_or(0) >= m_GameInfo.m_ScoreLimit)
-            {
-                GameServer()->SendBroadcast("Game End", -1);
-                EndMatch();
-                SetAllUndead();
-                return true;
-            }
-        }
-    }
+
+	if(m_GameInfo.m_ScoreLimit > 0 && (m_aTeamscore[TEAM_BLUE] >= m_GameInfo.m_ScoreLimit || m_aTeamscore[TEAM_RED] >= m_GameInfo.m_ScoreLimit))
+	{
+		
+		GameServer()->SendBroadcast("Game End", -1);
+		EndMatch();
+		SetAllUndead();
+		
+	}
     
     int Count[2] = {0};
     for(int i = 0; i < MAX_CLIENTS; ++i)
@@ -152,4 +152,22 @@ int CGameControllerLTSVanilla::OnCharacterDeath(class CCharacter *pVictim, class
         pVictim->GetPlayer()->m_IsDead = true;
     }
     return false;
+}
+
+void CGameControllerLTSVanilla::Snap(int SnappingClient)
+{
+	CGameControllerInstagib::Snap(SnappingClient);
+
+	if(Server()->IsSixup(SnappingClient))
+		return;
+
+	CNetObj_GameData *pGameDataObj = (CNetObj_GameData *)Server()->SnapNewItem(NETOBJTYPE_GAMEDATA, 0, sizeof(CNetObj_GameData));
+	if(!pGameDataObj)
+		return;
+
+	pGameDataObj->m_TeamscoreRed = m_aTeamscore[TEAM_RED];
+	pGameDataObj->m_TeamscoreBlue = m_aTeamscore[TEAM_BLUE];
+
+	pGameDataObj->m_FlagCarrierRed = 0;
+	pGameDataObj->m_FlagCarrierBlue = 0;
 }

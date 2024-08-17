@@ -17,11 +17,6 @@ CGameControllerTDMVanilla::CGameControllerTDMVanilla(class CGameContext *pGameSe
 
 CGameControllerTDMVanilla::~CGameControllerTDMVanilla() = default;
 
-void CGameControllerTDMVanilla::Tick()
-{
-	CGameControllerDMVanilla::Tick();
-}
-
 int CGameControllerTDMVanilla::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
 	CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);

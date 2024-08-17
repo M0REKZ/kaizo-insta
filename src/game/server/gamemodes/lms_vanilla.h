@@ -18,8 +18,6 @@ public:
     virtual bool CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize) override;
 	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	void OnCharacterSpawn(class CCharacter *pChr) override;
-    bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
-    bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
     virtual void OnPlayerConnect(class CPlayer *pPlayer) override;
 	void Tick() override;
     bool m_RoundActive = false;
