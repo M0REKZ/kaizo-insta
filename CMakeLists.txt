@@ -2735,10 +2735,14 @@ if(SERVER)
     gamemodes/dm.h
     gamemodes/dm_vanilla.cpp
     gamemodes/dm_vanilla.h
+    gamemodes/Freeze.cpp
+    gamemodes/Freeze.h
     gamemodes/gctf.cpp
     gamemodes/gctf.h
     gamemodes/gdm.cpp
     gamemodes/gdm.h
+    gamemodes/gFreeze.cpp
+    gamemodes/gFreeze.h
     gamemodes/gtdm.cpp
     gamemodes/gtdm.h
     gamemodes/ictf.cpp

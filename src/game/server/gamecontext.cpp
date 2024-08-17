@@ -33,11 +33,13 @@
 #include "gamemodes/DDRace.h"
 #include "gamemodes/ctf_vanilla.h"
 #include "gamemodes/dm_vanilla.h"
+#include "gamemodes/Freeze.h"
 #include "gamemodes/tdm_vanilla.h"
 #include "gamemodes/lms_vanilla.h"
 #include "gamemodes/lts_vanilla.h"
 #include "gamemodes/gctf.h"
 #include "gamemodes/gdm.h"
+#include "gamemodes/gFreeze.h"
 #include "gamemodes/gtdm.h"
 #include "gamemodes/ictf.h"
 #include "gamemodes/idm.h"
@@ -3961,6 +3963,8 @@ void CGameContext::OnInit(const void *pPersistentData)
         m_pController = new CGameControllerBOMB(this);
     else if(!str_comp_nocase(Config()->m_SvGametype, "ifreeze+"))
         m_pController = new CGameControllerIFreeze(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "gfreeze+"))
+		m_pController = new CGameControllerGFreeze(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "gdm"))
 		m_pController = new CGameControllerGDM(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "idm"))
