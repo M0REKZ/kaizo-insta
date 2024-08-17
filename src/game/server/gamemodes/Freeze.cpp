@@ -101,17 +101,24 @@ bool CGameControllerFreeze::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &Fr
 {
     Dmg = 0;
     CGameControllerTDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
-    if(GameServer()->m_apPlayers[From] == Character.GetPlayer())
-        return false;
-    if(GameServer()->m_apPlayers[From]->GetTeam() == Character.GetPlayer()->GetTeam())
-        return false;
-    if(GameServer()->m_apPlayers[From])
-    {
-        Character.Freeze();
-        Character.SetDeepFrozen(true);
-        Character.GetPlayer()->m_AutoMeltTicks = g_Config.m_SvFreezeAutomeltTime * Server()->TickSpeed();
-        
-    }
+	
+	if(GameServer()->m_apPlayers[From])
+	{
+		if(GameServer()->m_apPlayers[From] == Character.GetPlayer())
+			return false;
+		if(GameServer()->m_apPlayers[From]->GetTeam() == Character.GetPlayer()->GetTeam())
+			return false;
+		Character.Freeze();
+		Character.SetDeepFrozen(true);
+		Character.GetPlayer()->m_AutoMeltTicks = g_Config.m_SvFreezeAutomeltTime * Server()->TickSpeed();
+		
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "You froze %s", Server()->ClientName(Character.GetPlayer()->GetCid()));
+		GameServer()->SendBroadcast(aBuf, From);
+		str_format(aBuf, sizeof(aBuf), "%s froze you", Server()->ClientName(From));
+		GameServer()->SendBroadcast(aBuf, Character.GetPlayer()->GetCid());
+		
+	}
     return false;
 }
 
