@@ -99,6 +99,8 @@ int CGameControllerFreeze::OnCharacterDeath(class CCharacter *pVictim, class CPl
 
 bool CGameControllerFreeze::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
+	if(!(Dmg >= g_Config.m_SvDamageNeededForKill))
+		return false;
     Dmg = 0;
     CGameControllerTDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
 	
