@@ -41,9 +41,13 @@
 #include "gamemodes/gdm.h"
 #include "gamemodes/gFreeze.h"
 #include "gamemodes/gtdm.h"
+#include "gamemodes/glms.h"
+#include "gamemodes/glts.h"
 #include "gamemodes/ictf.h"
 #include "gamemodes/idm.h"
 #include "gamemodes/itdm.h"
+#include "gamemodes/ilms.h"
+#include "gamemodes/ilts.h"
 #include "gamemodes/iFreeze.h"
 #include "gamemodes/mod.h"
 #include "gamemodes/solofng.h"
@@ -3952,6 +3956,14 @@ void CGameContext::OnInit(const void *pPersistentData)
         m_pController = new CGameControllerLMSVanilla(this);
     else if(!str_comp_nocase(Config()->m_SvGametype, "lts+"))
         m_pController = new CGameControllerLTSVanilla(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "ilms"))
+		m_pController = new CGameControllerILMS(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "ilts"))
+		m_pController = new CGameControllerILTS(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "glms"))
+		m_pController = new CGameControllerGLMS(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "glts"))
+		m_pController = new CGameControllerGLTS(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "gctf"))
 		m_pController = new CGameControllerGCTF(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "ictf"))
