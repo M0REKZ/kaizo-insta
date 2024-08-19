@@ -124,6 +124,14 @@ void CLaser::DoBounce()
 
 	Res = GameServer()->Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To, &z);
 
+	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner); //+KZ
+	
+	//+KZ from dikumod
+	if (g_Config.m_SvLaserJump && m_Bounces == 0)
+	{
+		GameServer()->CreateExplosion(To, m_Owner, WEAPON_LASER, true, (!pOwnerChar ? -1 : pOwnerChar->Team()));
+	}
+	
 	if(Res)
 	{
 		if(!HitCharacter(m_Pos, To))
@@ -197,7 +205,7 @@ void CLaser::DoBounce()
 		}
 	}
 
-	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	//CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner); +KZ commented this
 	if(m_Owner >= 0 && m_Energy <= 0 && !m_TeleportCancelled && pOwnerChar &&
 		pOwnerChar->IsAlive() && pOwnerChar->HasTelegunLaser() && m_Type == WEAPON_LASER)
 	{
