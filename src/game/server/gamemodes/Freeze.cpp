@@ -31,7 +31,7 @@ void CGameControllerFreeze::Tick()
                 if(GameServer()->GetPlayerChar(i) && GameServer()->GetPlayerChar(i)->GetCore().m_DeepFrozen)
                 {
                     BlueFr++;
-                    DoMelting(GameServer()->GetPlayerChar(i));
+                    //DoMelting(GameServer()->GetPlayerChar(i));
                 }
             }
             else if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_RED)
@@ -40,9 +40,14 @@ void CGameControllerFreeze::Tick()
                 if(GameServer()->GetPlayerChar(i) && GameServer()->GetPlayerChar(i)->GetCore().m_DeepFrozen)
                 {
                     RedFr++;
-                    DoMelting(GameServer()->GetPlayerChar(i));
+                    //DoMelting(GameServer()->GetPlayerChar(i));
                 }
             }
+			
+			if(GameServer()->GetPlayerChar(i) && (GameServer()->GetPlayerChar(i)->m_FreezeTime || GameServer()->GetPlayerChar(i)->GetCore().m_DeepFrozen))
+			{
+				DoMelting(GameServer()->GetPlayerChar(i));
+			}
         }
     }
 
@@ -201,3 +206,11 @@ void CGameControllerFreeze::Melt(int Melted, int Helper)
 
     
 }
+
+void CGameControllerFreeze::OnCharacterSpawn(class CCharacter *pChr)
+{
+	CGameControllerTDM::OnCharacterSpawn(pChr);
+
+	pChr->GetPlayer()->m_AutoMeltTicks = g_Config.m_SvFreezeAutomeltTime * Server()->TickSpeed();
+}
+

@@ -14,6 +14,7 @@ public:
 	CGameControllerFreeze(class CGameContext *pGameServer);
 	~CGameControllerFreeze();
 
+	void OnCharacterSpawn(class CCharacter *pChr) override;
     bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
 	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	void Tick() override;
