@@ -3946,15 +3946,15 @@ void CGameContext::OnInit(const void *pPersistentData)
     //+KZ: Ohno
 	if(!str_comp(Config()->m_SvGametype, "mod"))
 		m_pController = new CGameControllerMod(this);
-    else if(!str_comp_nocase(Config()->m_SvGametype, "ctf+"))
+    else if(!str_comp_nocase(Config()->m_SvGametype, "ctf"))
         m_pController = new CGameControllerCTFVanilla(this);
-    else if(!str_comp_nocase(Config()->m_SvGametype, "dm+"))
+    else if(!str_comp_nocase(Config()->m_SvGametype, "dm"))
         m_pController = new CGameControllerDMVanilla(this);
-    else if(!str_comp_nocase(Config()->m_SvGametype, "tdm+"))
+    else if(!str_comp_nocase(Config()->m_SvGametype, "tdm"))
         m_pController = new CGameControllerTDMVanilla(this);
-    else if(!str_comp_nocase(Config()->m_SvGametype, "lms+"))
+    else if(!str_comp_nocase(Config()->m_SvGametype, "lms"))
         m_pController = new CGameControllerLMSVanilla(this);
-    else if(!str_comp_nocase(Config()->m_SvGametype, "lts+"))
+    else if(!str_comp_nocase(Config()->m_SvGametype, "lts"))
         m_pController = new CGameControllerLTSVanilla(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "ilms"))
 		m_pController = new CGameControllerILMS(this);
@@ -3974,9 +3974,9 @@ void CGameContext::OnInit(const void *pPersistentData)
 		m_pController = new CGameControllerZcatch(this);
     else if(!str_comp_nocase(Config()->m_SvGametype, "bomb"))
         m_pController = new CGameControllerBOMB(this);
-    else if(!str_comp_nocase(Config()->m_SvGametype, "ifreeze+"))
+    else if(!str_comp_nocase(Config()->m_SvGametype, "ifreeze"))
         m_pController = new CGameControllerIFreeze(this);
-	else if(!str_comp_nocase(Config()->m_SvGametype, "gfreeze+"))
+	else if(!str_comp_nocase(Config()->m_SvGametype, "gfreeze"))
 		m_pController = new CGameControllerGFreeze(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "gdm"))
 		m_pController = new CGameControllerGDM(this);
