@@ -126,16 +126,18 @@ void CLaser::DoBounce()
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner); //+KZ
 	
-	//+KZ from dikumod
-	if (g_Config.m_SvLaserJump && m_Bounces == 0)
-	{
-		GameServer()->CreateExplosion(To, m_Owner, WEAPON_LASER, true, (!pOwnerChar ? -1 : pOwnerChar->Team()));
-	}
 	
 	if(Res)
 	{
 		if(!HitCharacter(m_Pos, To))
 		{
+			//+KZ from dikumod
+			if (g_Config.m_SvLaserJump && m_Bounces == 0)
+			{
+				GameServer()->CreateExplosion(To, m_Owner, WEAPON_LASER, true, (!pOwnerChar ? -1 : pOwnerChar->Team()));
+				GameServer()->CreateSound(m_Pos, SOUND_GRENADE_EXPLODE);
+			}
+			
 			// intersected
 			m_From = m_Pos;
 			m_Pos = To;
