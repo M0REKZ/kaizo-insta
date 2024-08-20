@@ -3,18 +3,22 @@
 #include "character.h"
 
 #include <engine/server.h>
+#include <engine/shared/config.h>
 
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
 #include <game/teamscore.h>
 
 #include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
 #include <game/server/player.h>
 
 CLight::CLight(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 	int Layer, int Number) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
+	m_DamageTick = 1 * Server()->TickSpeed();
+	
 	m_To = vec2(0.0f, 0.0f);
 	m_Core = vec2(0.0f, 0.0f);
 	m_Layer = Layer;
@@ -37,7 +41,21 @@ bool CLight::HitCharacter()
 	{
 		if(m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_aStatus[pChar->Team()])
 			continue;
-		pChar->Freeze();
+		if(!g_Config.m_SvLightKills)
+			pChar->Freeze();
+		else if(!m_DamageTick)
+		{
+			if(GameServer()->m_pController->m_VanillaBehavior)
+			{
+				pChar->TakeDamage(vec2(0,0), g_Config.m_SvLightKills, pChar->GetPlayer()->GetCid(), WEAPON_WORLD);
+			}
+			else
+			{
+				pChar->Die(pChar->GetPlayer()->GetCid(), WEAPON_WORLD);
+			}
+			GameServer()->CreateSound(m_Pos, SOUND_HIT);
+			m_DamageTick = 4 * Server()->TickSpeed();
+		}
 	}
 	return true;
 }
@@ -98,6 +116,15 @@ void CLight::Tick()
 		Step();
 	}
 
+	if(m_DamageTick > 0)
+		m_DamageTick--;
+	
+	//+KZ
+	if(m_DamageTick % Server()->TickSpeed())
+	{
+		GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO);
+	}
+	
 	HitCharacter();
 }
 
@@ -141,7 +168,22 @@ void CLight::Snap(int SnappingClient)
 		else if(StartTick > Server()->Tick())
 			StartTick = Server()->Tick();
 	}
-
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetId(),
-		m_Pos, From, StartTick, -1, LASERTYPE_FREEZE, 0, m_Number);
+	if(!g_Config.m_SvLightKills)
+	{
+		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetId(),
+			m_Pos, From, StartTick, -1, LASERTYPE_FREEZE, 0, m_Number);
+	}
+	else
+	{
+		if(m_DamageTick)
+		{
+			GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetId(),
+										  m_Pos, From, StartTick, -1, LASERTYPE_SHOTGUN, 0, m_Number);
+		}
+		else
+		{
+			GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetId(),
+										  m_Pos, From, StartTick, -1, LASERTYPE_DOOR, 0, m_Number);
+		}
+	}
 }

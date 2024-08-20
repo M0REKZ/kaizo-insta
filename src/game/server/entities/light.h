@@ -24,6 +24,8 @@ public:
 	float m_AngularSpeed;
 	int m_Speed;
 	int m_Length;
+	
+	int m_DamageTick; //+KZ
 
 	CLight(CGameWorld *pGameWorld, vec2 Pos, float Rotation, int Length,
 		int Layer = 0, int Number = 0);
