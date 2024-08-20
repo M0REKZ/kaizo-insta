@@ -144,6 +144,7 @@ class CGameContext : public IGameServer
     static void ConIfGameTypes(IConsole::IResult *pResult, void *pUserData);
     static void ConRandomCmd(IConsole::IResult *pResult, void *pUserData);
     static void ConQuestion(IConsole::IResult *pResult, void *pUserData);
+	static void ConAfkKZ(IConsole::IResult *pResult, void *pUserData);
 
 	void Construct(int Resetting);
 	void Destruct(int Resetting);
@@ -245,7 +246,8 @@ public:
 	void CreateHammerHit(vec2 Pos, CClientMask Mask = CClientMask().set());
 	void CreatePlayerSpawn(vec2 Pos, CClientMask Mask = CClientMask().set());
 	void CreateDeath(vec2 Pos, int ClientId, CClientMask Mask = CClientMask().set());
-	void CreateFinishConfetti(vec2 Pos, CClientMask Mask = CClientMask().set());
+	void CreateBirthdayEffect(vec2 Pos, CClientMask Mask = CClientMask().set());
+	void CreateFinishEffect(vec2 Pos, CClientMask Mask = CClientMask().set());
 	void CreateSound(vec2 Pos, int Sound, CClientMask Mask = CClientMask().set());
 	void CreateSoundGlobal(int Sound, int Target = -1) const;
 
@@ -477,6 +479,7 @@ private:
 	static void ConTimeCP(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConDND(IConsole::IResult *pResult, void *pUserData);
+	static void ConWhispers(IConsole::IResult *pResult, void *pUserData);
 	static void ConMapInfo(IConsole::IResult *pResult, void *pUserData);
 	static void ConTimeout(IConsole::IResult *pResult, void *pUserData);
 	static void ConPractice(IConsole::IResult *pResult, void *pUserData);

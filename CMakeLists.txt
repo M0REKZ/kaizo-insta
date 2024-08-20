@@ -2735,16 +2735,28 @@ if(SERVER)
     gamemodes/dm.h
     gamemodes/dm_vanilla.cpp
     gamemodes/dm_vanilla.h
+    gamemodes/Freeze.cpp
+    gamemodes/Freeze.h
     gamemodes/gctf.cpp
     gamemodes/gctf.h
     gamemodes/gdm.cpp
     gamemodes/gdm.h
+    gamemodes/gFreeze.cpp
+    gamemodes/gFreeze.h
+    gamemodes/glms.cpp
+    gamemodes/glms.h
+    gamemodes/glts.cpp
+    gamemodes/glts.h
     gamemodes/gtdm.cpp
     gamemodes/gtdm.h
     gamemodes/ictf.cpp
     gamemodes/ictf.h
     gamemodes/idm.cpp
     gamemodes/idm.h
+    gamemodes/ilms.cpp
+    gamemodes/ilms.h
+    gamemodes/ilts.cpp
+    gamemodes/ilts.h
     gamemodes/instagib/bangcommands.cpp
     gamemodes/instagib/character.cpp
     gamemodes/instagib/character.h
@@ -2758,6 +2770,10 @@ if(SERVER)
     gamemodes/itdm.h
     gamemodes/iFreeze.cpp
     gamemodes/iFreeze.h
+    gamemodes/lms.cpp
+    gamemodes/lms.h
+    gamemodes/lts.cpp
+    gamemodes/lts.h
     gamemodes/lms_vanilla.cpp
     gamemodes/lms_vanilla.h
     gamemodes/lts_vanilla.cpp

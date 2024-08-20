@@ -198,14 +198,20 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 	// if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From) && !g_Config.m_SvTeamdamage)
 	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
 		return false;
-	if(From == Character.GetPlayer()->GetCid())
+	
+	if(!m_VanillaBehavior)
 	{
-		Dmg = 0;
-		//Give back ammo on grenade self push//Only if not infinite ammo and activated
-		if(Weapon == WEAPON_GRENADE && g_Config.m_SvGrenadeAmmoRegen && g_Config.m_SvGrenadeAmmoRegenSpeedNade)
+		
+		if(From == Character.GetPlayer()->GetCid())
 		{
-			Character.SetWeaponAmmo(WEAPON_GRENADE, minimum(Character.GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + 1, g_Config.m_SvGrenadeAmmoRegenNum));
+			Dmg = 0;
+			//Give back ammo on grenade self push//Only if not infinite ammo and activated
+			if(Weapon == WEAPON_GRENADE && g_Config.m_SvGrenadeAmmoRegen && g_Config.m_SvGrenadeAmmoRegenSpeedNade)
+			{
+				Character.SetWeaponAmmo(WEAPON_GRENADE, minimum(Character.GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + 1, g_Config.m_SvGrenadeAmmoRegenNum));
+			}
 		}
+		
 	}
 
 	if(g_Config.m_SvOnlyHookKills && From >= 0 && From <= MAX_CLIENTS)
@@ -216,14 +222,84 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 	}
 
 	int Health = 10;
+	
+	if(!m_VanillaBehavior)
+	{
+		// no self damage
+		//+KZ: make shotgun instakill for now, otherwise its kinda useless unless i change settings (ugly hack)
+		if(Dmg >= g_Config.m_SvDamageNeededForKill || Weapon == WEAPON_SHOTGUN)
+			Health = From == Character.GetPlayer()->GetCid() ? Health : 0;
+	}
+	else
+	{
+		if(WEAPON_LASER == Weapon)
+		{
+			Dmg = 5;
+		}
 
-	// no self damage
-    //+KZ: make shotgun instakill for now, otherwise its kinda useless unless i change settings (ugly hack)
-    if(Dmg >= g_Config.m_SvDamageNeededForKill || Weapon == WEAPON_SHOTGUN)
-        Health = From == Character.GetPlayer()->GetCid() ? Health : 0;
+		//int damage = Dmg;
+		
+		if(From == Character.GetPlayer()->GetCid())
+			Dmg = std::max(1, Dmg/2);
+		
+		Character.m_DamageTaken++;
+
+		// create healthmod indicator
+		if(Server()->Tick() < Character.m_DamageTakenTick+25)
+		{
+			// make sure that the damage indicators doesn't group together
+			GameServer()->CreateDamageInd(Character.m_Pos, Character.m_DamageTaken*0.25f, Dmg);
+		}
+		else
+		{
+			Character.m_DamageTaken = 0;
+			GameServer()->CreateDamageInd(Character.m_Pos, 0, Dmg);
+		}
+		
+		if(Dmg)
+		{
+			if(Character.m_Armor)
+			{
+				if(Dmg > 1)
+				{
+					Character.m_Health--;
+					Dmg--;
+				}
+
+				if(Dmg > Character.m_Armor)
+				{
+					Dmg -= Character.m_Armor;
+					Character.m_Armor = 0;
+				}
+				else
+				{
+					Character.m_Armor -= Dmg;
+					Dmg = 0;
+				}
+			}
+
+			Character.m_Health -= Dmg;
+		}
+		
+		Character.m_DamageTakenTick = Server()->Tick();
+
+		if(From >= 0 && From != Character.GetPlayer()->GetCid() && GameServer()->m_apPlayers[From])
+		{
+			// do damage Hit sound
+			CClientMask Mask = CClientMask().set(From);
+			for(int i = 0; i < MAX_CLIENTS; i++)
+			{
+				if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorId == From)
+					Mask.set(i);
+				
+				// if(gaem)
+			}
+			GameServer()->CreateSound(GameServer()->m_apPlayers[From]->m_ViewPos, SOUND_HIT, Mask);
+		}
+	}
 
 	// check for death
-	if(Health <= 0)
+	if(m_VanillaBehavior ? Character.m_Health <= 0 : Health <= 0)
 	{
 		Character.Die(From, Weapon);
 
@@ -259,12 +335,14 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 		return false;
 	}
 
-	/*
-	if (Dmg > 2)
-		GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_LONG);
-	else
-		GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_SHORT);*/
-
+	if(m_VanillaBehavior)
+	{
+		if (Dmg > 2)
+			GameServer()->CreateSound(Character.GetPos(), SOUND_PLAYER_PAIN_LONG);
+		else
+			GameServer()->CreateSound(Character.GetPos(), SOUND_PLAYER_PAIN_SHORT);
+	}
+	
 	if(Dmg)
 	{
 		Character.SetEmote(EMOTE_PAIN, Server()->Tick() + 500 * Server()->TickSpeed() / 1000);
@@ -298,6 +376,14 @@ void CGameControllerInstagib::OnCharacterSpawn(class CCharacter *pChr)
 
 	// default health
 	pChr->IncreaseHealth(10);
+	
+	if(m_VanillaBehavior)
+	{
+		pChr->ResetPickups();
+		pChr->GiveWeapon(WEAPON_GUN, false, 10);
+		pChr->GiveWeapon(WEAPON_HAMMER);
+		pChr->SetActiveWeapon(WEAPON_GUN);
+	}
 }
 
 void CGameControllerInstagib::AddSpree(class CPlayer *pPlayer)

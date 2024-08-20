@@ -1,0 +1,16 @@
+#ifndef GAME_SERVER_GAMEMODES_GLTS_H
+#define GAME_SERVER_GAMEMODES_GLTS_H
+
+#include "lts.h"
+
+class CGameControllerGLTS : public CGameControllerLTS
+{
+
+public:
+	CGameControllerGLTS(class CGameContext *pGameServer);
+	~CGameControllerGLTS();
+
+	void OnCharacterSpawn(class CCharacter *pChr) override;
+
+};
+#endif // GAME_SERVER_GAMEMODES_LMS_H
