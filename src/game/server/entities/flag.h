@@ -12,7 +12,9 @@ public:
 	CCharacter *m_pCarrier;
 	CCharacter *m_pLastCarrier;
 	vec2 m_Vel;
-	vec2 m_StandPos;
+	//vec2 m_StandPos;
+	vec2 m_StandPositions[10]; //+KZ from pointer tw_plus
+	int m_no_stands; //same
 
 	int m_Team;
 	int m_AtStand;

@@ -14,7 +14,8 @@ CFlag::CFlag(CGameWorld *pGameWorld, int Team) :
 	m_Team = Team;
 	m_pCarrier = NULL;
 	m_GrabTick = 0;
-
+	m_no_stands = 1; //+KZ twplus pointer
+	
 	Reset();
 }
 
@@ -22,7 +23,8 @@ void CFlag::Reset()
 {
 	m_pCarrier = NULL;
 	m_AtStand = 1;
-	m_Pos = m_StandPos;
+	int n = rand() % m_no_stands; //+KZ from twplus
+	m_Pos = m_StandPositions[n]; //same
 	m_Vel = vec2(0, 0);
 	m_GrabTick = 0;
 }
