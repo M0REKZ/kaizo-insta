@@ -2292,5 +2292,16 @@ void CGameContext::ConAfkKZ(IConsole::IResult *pResult, void *pUserData)
 		return;
 	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
 	if(pPlayer)
-		pPlayer->SetInitialAfk(true);
+	{
+		if(!pPlayer->m_ForceAFK)
+		{
+			pPlayer->m_ForceAFK = true;
+			pPlayer->SetInitialAfk(true);
+		}
+		else
+		{
+			pPlayer->m_ForceAFK = false;
+			pPlayer->SetInitialAfk(false);
+		}
+	}
 }

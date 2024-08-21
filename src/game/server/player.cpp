@@ -753,7 +753,10 @@ void CPlayer::UpdatePlaytime()
 
 void CPlayer::AfkTimer()
 {
-	SetAfk(g_Config.m_SvMaxAfkTime != 0 && m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime);
+	if(!m_ForceAFK)
+		SetAfk(g_Config.m_SvMaxAfkTime != 0 && m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime);
+	else
+		SetAfk(true);
 }
 
 void CPlayer::SetAfk(bool Afk)
@@ -772,7 +775,7 @@ void CPlayer::SetAfk(bool Afk)
 
 void CPlayer::SetInitialAfk(bool Afk)
 {
-	if(g_Config.m_SvMaxAfkTime == 0)
+	if(!m_ForceAFK && g_Config.m_SvMaxAfkTime == 0)
 	{
 		SetAfk(false);
 		return;
