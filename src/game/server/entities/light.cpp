@@ -117,12 +117,14 @@ void CLight::Tick()
 	}
 
 	if(m_DamageTick > 0)
-		m_DamageTick--;
-	
-	//+KZ
-	if(m_DamageTick % Server()->TickSpeed())
 	{
-		GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO);
+		m_DamageTick--;
+		
+		//+KZ
+		if((m_DamageTick % Server()->TickSpeed()) == 0)
+		{
+			GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO);
+		}
 	}
 	
 	HitCharacter();
