@@ -119,6 +119,9 @@ bool CGameControllerFreeze::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &Fr
 		Character.SetDeepFrozen(true);
 		Character.GetPlayer()->m_AutoMeltTicks = g_Config.m_SvFreezeAutomeltTime * Server()->TickSpeed();
 		
+		GameServer()->CreatePlayerSpawn(Character.m_Pos, Character.TeamMask());
+		GameServer()->CreateSound(Character.m_Pos, SOUND_NINJA_HIT);
+		
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "You froze %s", Server()->ClientName(Character.GetPlayer()->GetCid()));
 		GameServer()->SendBroadcast(aBuf, From);
