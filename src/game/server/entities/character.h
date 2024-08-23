@@ -274,7 +274,11 @@ public:
 	void ResetInstaSettings();
 	bool m_IsGodmode;
 	
+private:
+	//+KZ
 	void HandleKZTiles();
+	int m_AirTicks;
+	int m_AirDamageTick;
 };
 
 enum

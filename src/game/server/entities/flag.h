@@ -42,6 +42,10 @@ public:
 	/* Functions */
 	void Grab(class CCharacter *pChar);
 	void Drop();
+	
+private:
+	//+KZ
+	void HandleKZTiles();
 };
 
 #endif

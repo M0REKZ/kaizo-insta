@@ -19,6 +19,7 @@
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/server/teams.h>
+#include <game/server/kztiles.h>
 
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
@@ -2641,6 +2642,36 @@ void CCharacter::HandleKZTiles()
 	
 	int TileIndex = Collision()->GetKZTileIndex(Collision()->GetKZIndex(m_Pos));
 	
-	if(TileIndex == 1)
-		Die(m_pPlayer->GetCid(), WEAPON_WORLD);
+	if(TileIndex == TILE_ADMIN)
+	{
+		if(!(Server()->ClientAuthed(m_pPlayer->GetCid())))
+		{
+			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
+			GameServer()->SendChatTarget(m_pPlayer->GetCid(), "Only Admins allowed");
+		}
+	}
+	if(TileIndex == TILE_NOAIR)
+	{
+		if(m_AirTicks > 0)
+		{
+			m_AirTicks--;
+		}
+		else
+		{
+			if(m_AirDamageTick > 0)
+			{
+				m_AirDamageTick--;
+			}
+			else
+			{
+				TakeDamage(vec2(0,0), 3, m_pPlayer->GetCid(), WEAPON_WORLD);
+				m_AirDamageTick = Server()->TickSpeed();
+			}
+		}
+		
+	}
+	else
+	{
+		m_AirTicks = 5 * Server()->TickSpeed();
+	}
 }

@@ -4,6 +4,7 @@
 #include <game/mapitems.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
+#include <game/server/kztiles.h>
 
 #include <game/server/player.h>
 
@@ -93,6 +94,8 @@ void CFlag::TickDeferred()
 			}
 		}
 	}
+	
+	HandleKZTiles(); //+KZ
 }
 
 void CFlag::TickPaused()
@@ -134,5 +137,19 @@ void CFlag::Snap(int SnappingClient)
 		pFlag->m_X = round_to_int(m_Pos.x);
 		pFlag->m_Y = round_to_int(m_Pos.y);
 		pFlag->m_Team = m_Team;
+	}
+}
+
+void CFlag::HandleKZTiles()
+{
+	if(!(Collision()->KZFound()))
+		return;
+	
+	int TileIndex = Collision()->GetKZTileIndex(Collision()->GetKZIndex(m_Pos));
+	
+	if(TileIndex == TILE_NOFLAG)
+	{
+		Reset();
+		GameServer()->m_pController->OnFlagReturn(this);
 	}
 }
