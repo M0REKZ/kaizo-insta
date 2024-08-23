@@ -273,6 +273,8 @@ public:
 	*/
 	void ResetInstaSettings();
 	bool m_IsGodmode;
+	
+	void HandleKZTiles();
 };
 
 enum

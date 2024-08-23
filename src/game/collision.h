@@ -36,6 +36,13 @@ public:
 	CCollision();
 	~CCollision();
 
+	//+KZ
+	
+	bool KZFound() { return m_pKZTiles != 0; }
+	int GetKZIndex(float x, float y) const;
+	int GetKZIndex(vec2 Pos) const { return GetKZIndex(Pos.x, Pos.y); }
+	int GetKZTileIndex(int Index) const;
+	
 	void Init(CLayers *pLayers);
 	void Unload();
 	void FillAntibot(CAntibotMapData *pMapData) const;
@@ -154,6 +161,13 @@ private:
 	int m_Width;
 	int m_Height;
 
+	int m_KZWidth; //+KZ
+	int m_KZHeight;
+	
+	void FindKZLayer();
+	
+	CTile *m_pKZTiles;
+	
 	CTile *m_pTiles;
 	CTeleTile *m_pTele;
 	CSpeedupTile *m_pSpeedup;

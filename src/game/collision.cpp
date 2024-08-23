@@ -12,6 +12,7 @@
 #include <game/collision.h>
 #include <game/layers.h>
 #include <game/mapitems.h>
+#include <game/gamecore.h>
 
 #include <engine/shared/config.h>
 
@@ -56,6 +57,8 @@ void CCollision::Init(class CLayers *pLayers)
 	m_Height = m_pLayers->GameLayer()->m_Height;
 	m_pTiles = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->GameLayer()->m_Data));
 
+	FindKZLayer();
+	
 	if(m_pLayers->TeleLayer())
 	{
 		unsigned int Size = m_pLayers->Map()->GetDataSize(m_pLayers->TeleLayer()->m_Tele);
@@ -150,6 +153,10 @@ void CCollision::Init(class CLayers *pLayers)
 
 void CCollision::Unload()
 {
+	m_pKZTiles = nullptr; //+KZ
+	m_KZWidth = 0;
+	m_KZHeight = 0;
+	
 	m_pTiles = nullptr;
 	m_Width = 0;
 	m_Height = 0;
@@ -1309,4 +1316,58 @@ size_t CCollision::TeleAllSize(int Number)
 	if(m_TeleOthers.count(Number) > 0)
 		Total += m_TeleOthers[Number].size();
 	return Total;
+}
+
+//-----------------
+//+KZ
+
+int CCollision::GetKZIndex(float x, float y) const
+{
+	int Nx = clamp(round_to_int(x) / 32, 0, m_KZWidth - 1);
+	int Ny = clamp(round_to_int(y) / 32, 0, m_KZHeight - 1);
+	return Ny * m_KZWidth + Nx;
+}
+
+int CCollision::GetKZTileIndex(int Index) const
+{
+	//printf("%d\n",Index);
+	
+	if(Index < 0)
+		return 0;
+	return m_pKZTiles[Index].m_Index;
+}
+
+void CCollision::FindKZLayer()
+{
+	//+KZ
+	
+	CMapItemLayer *pKZLayer;
+	CMapItemLayerTilemap *pKZTileLayer;
+	
+	char aBufKZ[12];
+	
+	for(int i = 0; i < m_pLayers->NumLayers(); i++)
+	{
+		pKZLayer = m_pLayers->GetLayer(i);
+		
+		if(!pKZLayer)
+			continue;
+		
+		if(!(pKZLayer->m_Type == LAYERTYPE_TILES)) //!(pKZLayer->m_Version >= 3)
+			continue;
+		
+		pKZTileLayer = reinterpret_cast<CMapItemLayerTilemap *>(pKZLayer);
+		
+		IntsToStr(pKZTileLayer->m_aName, std::size(pKZTileLayer->m_aName), aBufKZ, std::size(aBufKZ));
+		
+		//printf("loop\n");
+		if(!str_comp_nocase("KZCustom", aBufKZ))
+		{
+			//printf("KZCUSTOM FOUND\n");
+			m_pKZTiles = static_cast<CTile *>(m_pLayers->Map()->GetData(pKZTileLayer->m_Data));
+			m_KZWidth = pKZTileLayer->m_Width;
+			m_KZHeight = pKZTileLayer->m_Height;
+			break;
+		}
+	}
 }

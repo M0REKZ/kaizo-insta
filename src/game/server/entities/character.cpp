@@ -2351,6 +2351,8 @@ void CCharacter::DDRacePostCoreTick()
 		if(!m_Alive)
 			return;
 	}
+	
+	HandleKZTiles();
 
 	// teleport gun
 	if(m_TeleGunTeleport)
@@ -2630,4 +2632,15 @@ void CCharacter::ResetInstaSettings()
 		m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
 	}
 	GiveWeapon(GameServer()->GetDDNetInstaWeapon(), false, Ammo);
+}
+
+void CCharacter::HandleKZTiles()
+{
+	if(!(Collision()->KZFound()))
+		return;
+	
+	int TileIndex = Collision()->GetKZTileIndex(Collision()->GetKZIndex(m_Pos));
+	
+	if(TileIndex == 1)
+		Die(m_pPlayer->GetCid(), WEAPON_WORLD);
 }
