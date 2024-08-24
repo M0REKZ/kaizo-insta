@@ -763,11 +763,6 @@ void CPlayer::SetAfk(bool Afk)
 {
 	if(m_Afk != Afk)
 	{
-        if(GameServer()->m_pController->m_VanillaBehavior) //JSAURUS
-        {
-            if(m_TicksAlive > Server()->TickSpeed() * 10)
-                SetTeam(TEAM_SPECTATORS);
-        }
 		Server()->ExpireServerInfo();
 		m_Afk = Afk;
 	}
