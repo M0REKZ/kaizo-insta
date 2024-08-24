@@ -4194,6 +4194,17 @@ void CGameContext::CreateAllEntities(bool Initial)
 			}
 		}
 	}
+	
+	for(int y = 0; y < Collision()->GetKZHeight(); y++)
+	{
+		for(int x = 0; x < Collision()->GetKZWidth(); x++)
+		{
+			const int Index = y * Collision()->GetKZWidth() + x;
+			
+			m_pController->OnKZEntity(Index, x, y, LAYER_GAME, pTiles[Index].m_Flags, Initial);
+		}
+	}
+	
 }
 
 void CGameContext::DeleteTempfile()
