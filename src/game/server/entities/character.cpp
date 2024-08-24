@@ -19,7 +19,7 @@
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/server/teams.h>
-#include <game/server/kztiles.h>
+#include <game/kztiles.h>
 
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
@@ -2640,7 +2640,9 @@ void CCharacter::HandleKZTiles()
 	if(!(Collision()->KZFound()))
 		return;
 	
-	int TileIndex = Collision()->GetKZTileIndex(Collision()->GetKZIndex(m_Pos));
+	int TileIndex = Collision()->GetKZTileIndex(m_Pos);
+	bool ApplyRest = false;
+	
 	
 	if(TileIndex == TILE_ADMIN)
 	{
@@ -2674,4 +2676,61 @@ void CCharacter::HandleKZTiles()
 	{
 		m_AirTicks = 5 * Server()->TickSpeed();
 	}
+	
+	if(m_pPlayer->GetTeam() == TEAM_BLUE)
+	{
+		if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == TILE_TEAMRED)
+		{
+			m_MoveRestrictions |= CANTMOVE_LEFT;
+			ApplyRest = true;
+		}
+		if(Collision()->GetKZTileIndex(m_Pos.x + 15 , m_Pos.y) == TILE_TEAMRED)
+		{
+			m_MoveRestrictions |= CANTMOVE_RIGHT;
+			ApplyRest = true;
+		}
+		if(Collision()->GetKZTileIndex(m_Pos.x , m_Pos.y - 15) == TILE_TEAMRED)
+		{
+			m_MoveRestrictions |= CANTMOVE_UP;
+			ApplyRest = true;
+		}
+		if(Collision()->GetKZTileIndex(m_Pos.x, m_Pos.y + 15 ) == TILE_TEAMRED)
+		{
+			m_MoveRestrictions |= CANTMOVE_DOWN;
+			m_Core.m_Jumped = 0;
+			m_Core.m_JumpedTotal = 0;
+			ApplyRest = true;
+		}
+	}
+	else if(m_pPlayer->GetTeam() == TEAM_RED)
+	{
+		if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == TILE_TEAMBLUE)
+		{
+			m_MoveRestrictions |= CANTMOVE_LEFT;
+			ApplyRest = true;
+		}
+		if(Collision()->GetKZTileIndex(m_Pos.x + 15 , m_Pos.y) == TILE_TEAMBLUE)
+		{
+			m_MoveRestrictions |= CANTMOVE_RIGHT;
+			ApplyRest = true;
+		}
+		if(Collision()->GetKZTileIndex(m_Pos.x , m_Pos.y - 15) == TILE_TEAMBLUE)
+		{
+			m_MoveRestrictions |= CANTMOVE_UP;
+			ApplyRest = true;
+		}
+		if(Collision()->GetKZTileIndex(m_Pos.x, m_Pos.y + 15 ) == TILE_TEAMBLUE)
+		{
+			m_MoveRestrictions |= CANTMOVE_DOWN;
+			m_Core.m_Jumped = 0;
+			m_Core.m_JumpedTotal = 0;
+			ApplyRest = true;
+		}
+	}
+	
+	if(ApplyRest)
+	{
+		ApplyMoveRestrictions();
+	}
+	
 }

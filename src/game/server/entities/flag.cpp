@@ -4,7 +4,7 @@
 #include <game/mapitems.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
-#include <game/server/kztiles.h>
+#include <game/kztiles.h>
 
 #include <game/server/player.h>
 
