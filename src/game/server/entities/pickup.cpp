@@ -299,7 +299,7 @@ void CPickup::Snap(int SnappingClient)
 		pos2.y = (int)m_Pos.y + -16*cos((float)Server()->Tick() / 25.0);
 		
 		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), pos1, m_Type, 0, m_Number);
-		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), pos2, m_Type, 0, m_Number);
+		//GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), pos2, m_Type, 0, m_Number);
 	}
 	else
 	{
