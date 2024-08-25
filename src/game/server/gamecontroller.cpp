@@ -1521,6 +1521,19 @@ int IGameController::MakeLosersCry()
 bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {
 
+	if(m_VanillaBehavior)
+	{
+		//+KZ: some non-insta game modes dont spawn certain things so im better leaving this as config variables, even if it looks "ugly"
+		if(g_Config.m_SvSpawnPickups ? false : (Index == TILE_BIGARMOR || Index == TILE_BIGHEART))
+			return false;
+	}
+	else
+	{
+		// do not spawn pickups
+		if(Index == TILE_BIGARMOR || Index == TILE_BIGHEART)
+			return false;
+	}
+	
 	int Type = -1;
 	int SubType = 0;
 
