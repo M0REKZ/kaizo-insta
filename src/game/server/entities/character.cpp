@@ -2677,54 +2677,57 @@ void CCharacter::HandleKZTiles()
 		m_AirTicks = 5 * Server()->TickSpeed();
 	}
 	
-	if(m_pPlayer->GetTeam() == TEAM_BLUE)
+	if(GameServer()->m_pController->IsTeamplay())
 	{
-		if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == TILE_TEAMRED)
+		if(m_pPlayer->GetTeam() == TEAM_BLUE)
 		{
-			m_MoveRestrictions |= CANTMOVE_LEFT;
-			ApplyRest = true;
+			if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == TILE_TEAMRED)
+			{
+				m_MoveRestrictions |= CANTMOVE_LEFT;
+				ApplyRest = true;
+			}
+			if(Collision()->GetKZTileIndex(m_Pos.x + 15 , m_Pos.y) == TILE_TEAMRED)
+			{
+				m_MoveRestrictions |= CANTMOVE_RIGHT;
+				ApplyRest = true;
+			}
+			if(Collision()->GetKZTileIndex(m_Pos.x , m_Pos.y - 15) == TILE_TEAMRED)
+			{
+				m_MoveRestrictions |= CANTMOVE_UP;
+				ApplyRest = true;
+			}
+			if(Collision()->GetKZTileIndex(m_Pos.x, m_Pos.y + 15 ) == TILE_TEAMRED)
+			{
+				m_MoveRestrictions |= CANTMOVE_DOWN;
+				m_Core.m_Jumped = 0;
+				m_Core.m_JumpedTotal = 0;
+				ApplyRest = true;
+			}
 		}
-		if(Collision()->GetKZTileIndex(m_Pos.x + 15 , m_Pos.y) == TILE_TEAMRED)
+		else if(m_pPlayer->GetTeam() == TEAM_RED)
 		{
-			m_MoveRestrictions |= CANTMOVE_RIGHT;
-			ApplyRest = true;
-		}
-		if(Collision()->GetKZTileIndex(m_Pos.x , m_Pos.y - 15) == TILE_TEAMRED)
-		{
-			m_MoveRestrictions |= CANTMOVE_UP;
-			ApplyRest = true;
-		}
-		if(Collision()->GetKZTileIndex(m_Pos.x, m_Pos.y + 15 ) == TILE_TEAMRED)
-		{
-			m_MoveRestrictions |= CANTMOVE_DOWN;
-			m_Core.m_Jumped = 0;
-			m_Core.m_JumpedTotal = 0;
-			ApplyRest = true;
-		}
-	}
-	else if(m_pPlayer->GetTeam() == TEAM_RED)
-	{
-		if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == TILE_TEAMBLUE)
-		{
-			m_MoveRestrictions |= CANTMOVE_LEFT;
-			ApplyRest = true;
-		}
-		if(Collision()->GetKZTileIndex(m_Pos.x + 15 , m_Pos.y) == TILE_TEAMBLUE)
-		{
-			m_MoveRestrictions |= CANTMOVE_RIGHT;
-			ApplyRest = true;
-		}
-		if(Collision()->GetKZTileIndex(m_Pos.x , m_Pos.y - 15) == TILE_TEAMBLUE)
-		{
-			m_MoveRestrictions |= CANTMOVE_UP;
-			ApplyRest = true;
-		}
-		if(Collision()->GetKZTileIndex(m_Pos.x, m_Pos.y + 15 ) == TILE_TEAMBLUE)
-		{
-			m_MoveRestrictions |= CANTMOVE_DOWN;
-			m_Core.m_Jumped = 0;
-			m_Core.m_JumpedTotal = 0;
-			ApplyRest = true;
+			if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == TILE_TEAMBLUE)
+			{
+				m_MoveRestrictions |= CANTMOVE_LEFT;
+				ApplyRest = true;
+			}
+			if(Collision()->GetKZTileIndex(m_Pos.x + 15 , m_Pos.y) == TILE_TEAMBLUE)
+			{
+				m_MoveRestrictions |= CANTMOVE_RIGHT;
+				ApplyRest = true;
+			}
+			if(Collision()->GetKZTileIndex(m_Pos.x , m_Pos.y - 15) == TILE_TEAMBLUE)
+			{
+				m_MoveRestrictions |= CANTMOVE_UP;
+				ApplyRest = true;
+			}
+			if(Collision()->GetKZTileIndex(m_Pos.x, m_Pos.y + 15 ) == TILE_TEAMBLUE)
+			{
+				m_MoveRestrictions |= CANTMOVE_DOWN;
+				m_Core.m_Jumped = 0;
+				m_Core.m_JumpedTotal = 0;
+				ApplyRest = true;
+			}
 		}
 	}
 	
