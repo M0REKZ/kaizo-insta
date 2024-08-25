@@ -4194,6 +4194,19 @@ void CGameContext::CreateAllEntities(bool Initial)
 			}
 		}
 	}
+	
+	int KZIndex;
+	
+	for(int y = 0; y < Collision()->GetKZHeight(); y++)
+	{
+		for(int x = 0; x < Collision()->GetKZWidth(); x++)
+		{
+			KZIndex = Collision()->GetKZTileIndex(y * Collision()->GetKZWidth() + x);
+			
+			m_pController->OnKZEntity(KZIndex, x, y, LAYER_GAME, pTiles[KZIndex].m_Flags, Initial);
+		}
+	}
+	
 }
 
 void CGameContext::DeleteTempfile()

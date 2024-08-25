@@ -6,6 +6,7 @@
 #include <game/mapitems.h>
 #include <game/server/score.h>
 #include <game/teamscore.h>
+#include <game/kztiles.h>
 
 #include "gamecontext.h"
 #include "gamecontroller.h"
@@ -1515,4 +1516,33 @@ int IGameController::MakeLosersCry()
         }
     }
     return loserteam;
+}
+
+bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
+{
+
+	int Type = -1;
+	int SubType = 0;
+
+	if(Index == TILE_BIGARMOR)
+	{
+		Type = POWERUP_ARMOR;
+		SubType = 1;
+	}
+	else if(Index == TILE_BIGHEART)
+	{
+		Type = POWERUP_HEALTH;
+		SubType = 1;
+	}
+
+	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
+	
+	if(Type != -1) // NOLINT(clang-analyzer-unix.Malloc)
+	{
+		CPickup *pPickup = new CPickup(&GameServer()->m_World, Type, SubType, Layer, Number);
+		pPickup->m_Pos = Pos;
+		return true; // NOLINT(clang-analyzer-unix.Malloc)
+	}
+
+	return false;
 }

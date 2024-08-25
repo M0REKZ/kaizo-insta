@@ -169,6 +169,9 @@ public:
 	CGameTeams &Teams() { return m_Teams; }
 	std::shared_ptr<CScoreLoadBestTimeResult> m_pLoadBestTimeResult;
 
+	//+KZ
+	virtual bool OnKZEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number = 0);
+	
 	//      _     _            _        _           _
 	//   __| | __| |_ __   ___| |_     (_)_ __  ___| |_ __ _
 	//  / _` |/ _` | '_ \ / _ \ __|____| | '_ \/ __| __/ _` |
