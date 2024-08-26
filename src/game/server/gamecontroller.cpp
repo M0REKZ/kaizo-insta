@@ -1525,13 +1525,15 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 	if(m_VanillaBehavior)
 	{
 		//+KZ: some non-insta game modes dont spawn certain things so im better leaving this as config variables, even if it looks "ugly"
+		if(g_Config.m_SvSpawnPickupWeapons ? false : (Index == TILE_RANDOMPICKUP))
+			return false;
 		if(g_Config.m_SvSpawnPickups ? false : (Index == TILE_BIGARMOR || Index == TILE_BIGHEART))
 			return false;
 	}
 	else
 	{
 		// do not spawn pickups
-		if(Index == TILE_BIGARMOR || Index == TILE_BIGHEART)
+		if(Index == TILE_BIGARMOR || Index == TILE_BIGHEART || Index == TILE_RANDOMPICKUP)
 			return false;
 	}
 	
