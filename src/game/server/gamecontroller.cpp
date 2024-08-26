@@ -18,6 +18,7 @@
 #include "entities/gun.h"
 #include "entities/light.h"
 #include "entities/pickup.h"
+#include "entities/random_pickup.h"
 #include "entities/projectile.h"
 
 IGameController::IGameController(class CGameContext *pGameServer) :
@@ -1547,14 +1548,32 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 		Type = POWERUP_HEALTH;
 		SubType = 1;
 	}
+	else if(Index == TILE_RANDOMPICKUP)
+	{
+		Type = POWERUP_WEAPON;
+		
+		SubType = 0;
+		while(SubType == WEAPON_HAMMER || SubType == WEAPON_GUN)
+		{
+			SubType = rand() % NUM_WEAPONS;
+		}
+	}
 
 	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 	
 	if(Type != -1) // NOLINT(clang-analyzer-unix.Malloc)
 	{
-		CPickup *pPickup = new CPickup(&GameServer()->m_World, Type, SubType, Layer, Number);
-		pPickup->m_Pos = Pos;
-		return true; // NOLINT(clang-analyzer-unix.Malloc)
+		if(Index == TILE_RANDOMPICKUP)
+		{
+			CPickup *pPickup = new CRandomPickup(&GameServer()->m_World, Type, SubType, Layer, Number);
+			pPickup->m_Pos = Pos;
+		}
+		else
+		{
+			CPickup *pPickup = new CPickup(&GameServer()->m_World, Type, SubType, Layer, Number);
+			pPickup->m_Pos = Pos;
+			return true; // NOLINT(clang-analyzer-unix.Malloc)
+		}
 	}
 
 	return false;
