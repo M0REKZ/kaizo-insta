@@ -2651,7 +2651,7 @@ void CCharacter::HandleKZTiles()
 			GameServer()->SendChatTarget(m_pPlayer->GetCid(), "Only Admins allowed");
 		}
 	}
-	if(TileIndex == TILE_NOAIR)
+	if(TileIndex == TILE_NOAIR || TileIndex == TILE_WATER)
 	{
 		if(m_AirTicks > 0)
 		{
@@ -2674,6 +2674,12 @@ void CCharacter::HandleKZTiles()
 	else
 	{
 		m_AirTicks = 5 * Server()->TickSpeed();
+	}
+	
+	if(TileIndex == TILE_WATER)
+	{
+		m_Core.m_JumpedTotal = 0;
+		m_Core.m_Jumped = 0;
 	}
 	
 	if(GameServer()->m_pController->IsTeamplay())
