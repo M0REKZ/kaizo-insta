@@ -127,7 +127,7 @@ void CGameControllerBOMB::ExplodeBomb(CPlayer* BombPlayer)
     
     char aBuf[128];
     str_format(aBuf, sizeof(aBuf), "'%s' eliminated!", Server()->ClientName(BombPlayer->GetCid()));
-    GameServer()->SendChat(-1, protocol7::CHAT_ALL, aBuf, -1, CGameContext::CHAT_SIX);
+    GameServer()->SendChat(-1, protocol7::CHAT_ALL, aBuf, -1, CGameContext::FLAG_SIX);
 }
 
 void CGameControllerBOMB::Snap(int SnappingClient)
