@@ -129,7 +129,7 @@ void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 	{
 		char aBuf[512];
 		str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientId), GetTeamName(pPlayer->GetTeam()));
-		GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::CHAT_SIX);
+		GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::FLAG_SIX);
 
 		GameServer()->SendChatTarget(ClientId, "Custom DDNet-insta fork by +KZ, including different mods combined");
 		GameServer()->SendChatTarget(ClientId, "Original DDNet-insta by ChillerDragon: https://github.com/ddnet-insta/ddnet-insta/");

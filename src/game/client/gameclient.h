@@ -7,6 +7,7 @@
 #include <base/color.h>
 #include <base/vmath.h>
 #include <engine/client.h>
+#include <engine/client/enums.h>
 #include <engine/console.h>
 #include <engine/shared/config.h>
 
@@ -437,19 +438,21 @@ public:
 		bool m_SpecCharPresent;
 		vec2 m_SpecChar;
 
-		void UpdateRenderInfo(bool IsTeamPlay);
+		void UpdateRenderInfo(bool IsTeamPlay, int Conn);
 		void Reset();
 
 		class CSixup
 		{
 		public:
+			void Reset();
+
 			char m_aaSkinPartNames[protocol7::NUM_SKINPARTS][protocol7::MAX_SKIN_LENGTH];
 			int m_aUseCustomColors[protocol7::NUM_SKINPARTS];
 			int m_aSkinPartColors[protocol7::NUM_SKINPARTS];
 		};
 
 		// 0.7 Skin
-		CSixup m_Sixup;
+		CSixup m_aSixup[NUM_DUMMIES];
 	};
 
 	CClientData m_aClients[MAX_CLIENTS];
@@ -509,7 +512,7 @@ public:
 	void OnConsoleInit() override;
 	void OnStateChange(int NewState, int OldState) override;
 	template<typename T>
-	void ApplySkin7InfoFromGameMsg(const T *pMsg, int ClientId);
+	void ApplySkin7InfoFromGameMsg(const T *pMsg, int ClientId, int Conn);
 	void ApplySkin7InfoFromSnapObj(const protocol7::CNetObj_De_ClientInfo *pObj, int ClientId) override;
 	int OnDemoRecSnap7(class CSnapshot *pFrom, class CSnapshot *pTo, int Conn) override;
 	void *TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn);
