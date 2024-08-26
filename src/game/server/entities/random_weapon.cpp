@@ -1,6 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
-#include "random_pickup.h"
+#include "random_weapon.h"
 #include "character.h"
 
 #include <game/generated/protocol.h>
@@ -14,13 +14,13 @@
 //dirty:
 #include <game/server/gamecontroller.h>
 
-CRandomPickup::CRandomPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number) :
+CRandomWeapon::CRandomWeapon(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number) :
 	CPickup(pGameWorld, Type, SubType, Layer, Number)
 {
 	m_ChangedType = false;
 }
 
-void CRandomPickup::Tick()
+void CRandomWeapon::Tick()
 {
 
 	if(!m_ChangedType && m_SpawnTick >= 0)

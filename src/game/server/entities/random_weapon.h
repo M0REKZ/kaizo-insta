@@ -5,10 +5,10 @@
 
 #include "pickup.h"
 
-class CRandomPickup : public CPickup
+class CRandomWeapon : public CPickup
 {
 public:
-	CRandomPickup(CGameWorld *pGameWorld, int Type, int SubType = 0, int Layer = 0, int Number = 0);
+	CRandomWeapon(CGameWorld *pGameWorld, int Type, int SubType = 0, int Layer = 0, int Number = 0);
 	void Tick() override;
 
 private:
