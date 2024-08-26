@@ -1372,6 +1372,9 @@ void CCharacter::Snap(int SnappingClient)
 {
 	int Id = m_pPlayer->GetCid();
 
+	if(m_Invisible && Id != SnappingClient)
+		return;
+	
 	if(!Server()->Translate(Id, SnappingClient))
 		return;
 
@@ -2676,10 +2679,19 @@ void CCharacter::HandleKZTiles()
 		m_AirTicks = 5 * Server()->TickSpeed();
 	}
 	
-	if(TileIndex == TILE_WATER)
+	if(TileIndex == TILE_WATER || TileIndex == TILE_FLY)
 	{
 		m_Core.m_JumpedTotal = 0;
 		m_Core.m_Jumped = 0;
+	}
+	
+	if(TileIndex == TILE_INVISIBLE && !m_Invisible)
+	{
+		m_Invisible = true;
+	}
+	else if(TileIndex != TILE_INVISIBLE && m_Invisible)
+	{
+		m_Invisible = false;
 	}
 	
 	if(GameServer()->m_pController->IsTeamplay())

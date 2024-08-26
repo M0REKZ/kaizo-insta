@@ -279,6 +279,7 @@ private:
 	void HandleKZTiles();
 	int m_AirTicks;
 	int m_AirDamageTick;
+	bool m_Invisible;
 };
 
 enum
