@@ -2141,6 +2141,19 @@ void CCharacter::HandleTuneLayer()
 		m_Core.m_Tuning = TuningList()[m_TuneZone]; // throw tunings from specific zone into gamecore
 	else
 		m_Core.m_Tuning = *Tuning();
+	
+	//+KZ
+	if(m_Water && !m_TuneZone)
+	{
+		m_Core.m_Tuning.m_Gravity = 0.3f;
+		m_Core.m_Tuning.m_GroundFriction = 0.9f;
+		m_Core.m_Tuning.m_GroundControlSpeed = 6.0f;
+		m_Core.m_Tuning.m_GroundJumpImpulse = 6.0f;
+		m_Core.m_Tuning.m_AirFriction = 0.9f;
+		m_Core.m_Tuning.m_AirControlSpeed = 6.0f;
+		m_Core.m_Tuning.m_AirJumpImpulse = 6.0f;
+		m_Core.m_Tuning.m_HookDragSpeed = 7.0f;
+	}
 
 	if(m_TuneZone != m_TuneZoneOld) // don't send tunigs all the time
 	{
@@ -2683,6 +2696,15 @@ void CCharacter::HandleKZTiles()
 	{
 		m_Core.m_JumpedTotal = 0;
 		m_Core.m_Jumped = 0;
+	}
+	
+	if(TileIndex == TILE_WATER && !m_Water)
+	{
+		m_Water = true;
+	}
+	else if(TileIndex != TILE_WATER && m_Water)
+	{
+		m_Water = false;
 	}
 	
 	if(TileIndex == TILE_INVISIBLE && !m_Invisible)

@@ -280,6 +280,7 @@ private:
 	int m_AirTicks;
 	int m_AirDamageTick;
 	bool m_Invisible;
+	bool m_Water;
 };
 
 enum
