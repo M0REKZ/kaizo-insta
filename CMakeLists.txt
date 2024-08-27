@@ -2753,6 +2753,8 @@ if(SERVER)
     gamemodes/glts.h
     gamemodes/gtdm.cpp
     gamemodes/gtdm.h
+    gamemodes/hFreeze.cpp
+    gamemodes/hFreeze.h
     gamemodes/ictf.cpp
     gamemodes/ictf.h
     gamemodes/idm.cpp
