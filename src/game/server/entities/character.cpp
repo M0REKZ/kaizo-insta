@@ -32,6 +32,9 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	m_TriggeredEvents7 = 0;
 	m_StrongWeakId = 0;
 
+	//+KZ kinda ugly
+	m_InvisibleShieldId = Server()->SnapNewId();
+		
 	m_Input = LastInput;
 	// never initialize both to zero
 	m_Input.m_TargetX = 0;
@@ -1372,8 +1375,15 @@ void CCharacter::Snap(int SnappingClient)
 {
 	int Id = m_pPlayer->GetCid();
 
-	if(m_Invisible && Id != SnappingClient)
-		return;
+	if(m_Invisible)
+	{
+		if(Id != SnappingClient)
+			return;
+		
+		//+KZ: indicator idea taken from catch16
+		GameServer()->SnapPickup(CSnapContext(GameServer()->GetClientVersion(SnappingClient), Server()->IsSixup(SnappingClient)), m_InvisibleShieldId, vec2(m_Pos.x+15,m_Pos.y-10), POWERUP_ARMOR, 0, 0);
+		
+	}
 	
 	if(!Server()->Translate(Id, SnappingClient))
 		return;

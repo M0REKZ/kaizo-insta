@@ -281,6 +281,7 @@ private:
 	int m_AirDamageTick;
 	bool m_Invisible;
 	bool m_Water;
+	int m_InvisibleShieldId;
 };
 
 enum
