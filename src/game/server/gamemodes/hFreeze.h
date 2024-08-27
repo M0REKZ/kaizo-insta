@@ -10,5 +10,6 @@ public:
 	~CGameControllerHFreeze();
 
     void OnCharacterSpawn(class CCharacter *pChr) override;
+	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
 };
 #endif // GAME_SERVER_GAMEMODES_GFREEZE_H

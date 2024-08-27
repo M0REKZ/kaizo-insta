@@ -10,6 +10,8 @@ private:
     void ResetFrozenPlayer();
     void DoMelting(class CCharacter *pChr);
     void Melt(int Melted, int Helper);
+protected:
+	void DoFreezing(int &From, class CCharacter &Character);
 public:
 	CGameControllerFreeze(class CGameContext *pGameServer);
 	~CGameControllerFreeze();

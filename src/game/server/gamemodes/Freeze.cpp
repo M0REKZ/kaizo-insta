@@ -109,12 +109,19 @@ bool CGameControllerFreeze::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &Fr
     Dmg = 0;
     CGameControllerTDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
 	
+	DoFreezing(From, Character);
+	
+    return false;
+}
+
+void CGameControllerFreeze::DoFreezing(int &From, CCharacter &Character)
+{
 	if(GameServer()->m_apPlayers[From])
 	{
 		if(GameServer()->m_apPlayers[From] == Character.GetPlayer())
-			return false;
+			return;
 		if(GameServer()->m_apPlayers[From]->GetTeam() == Character.GetPlayer()->GetTeam())
-			return false;
+			return;
 		Character.Freeze();
 		Character.SetDeepFrozen(true);
 		Character.GetPlayer()->m_AutoMeltTicks = g_Config.m_SvFreezeAutomeltTime * Server()->TickSpeed();
@@ -129,8 +136,8 @@ bool CGameControllerFreeze::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &Fr
 		GameServer()->SendBroadcast(aBuf, Character.GetPlayer()->GetCid());
 		
 	}
-    return false;
 }
+	
 
 void CGameControllerFreeze::ResetFrozenPlayer()
 {
