@@ -1380,8 +1380,13 @@ void CCharacter::Snap(int SnappingClient)
 		if(Id != SnappingClient)
 			return;
 		
+		vec2 postemp;
+				
+		postemp.x = m_Pos.x + 32*sin((float)Server()->Tick() / 25.0);
+		postemp.y = m_Pos.y + 32*cos((float)Server()->Tick() / 25.0);
+		
 		//+KZ: indicator idea taken from catch16
-		GameServer()->SnapPickup(CSnapContext(GameServer()->GetClientVersion(SnappingClient), Server()->IsSixup(SnappingClient)), m_InvisibleShieldId, vec2(m_Pos.x+15,m_Pos.y-10), POWERUP_ARMOR, 0, 0);
+		GameServer()->SnapPickup(CSnapContext(GameServer()->GetClientVersion(SnappingClient), Server()->IsSixup(SnappingClient)), m_InvisibleShieldId, postemp, POWERUP_ARMOR, 0, 0);
 		
 	}
 	
