@@ -1574,8 +1574,8 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 		{
 			CPickup *pPickup = new CPickup(&GameServer()->m_World, Type, SubType, Layer, Number);
 			pPickup->m_Pos = Pos;
-			return true; // NOLINT(clang-analyzer-unix.Malloc)
 		}
+		return true;
 	}
 
 	return false;
