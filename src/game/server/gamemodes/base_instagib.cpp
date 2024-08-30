@@ -13,6 +13,7 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
     m_GameFlags_v7 = protocol7::GAMEFLAG_TEAMS | protocol7::GAMEFLAG_FLAGS;
 
 	m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
+	m_AllowSkinChange = true;
 }
 
 CGameControllerInstagib::~CGameControllerInstagib() = default;

@@ -2,6 +2,7 @@
 #include <engine/server.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
+#include <game/generated/protocol7.h>
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
 #include <game/server/entities/flag.h>
@@ -15,9 +16,14 @@
 CGameControllerZcatch::CGameControllerZcatch(class CGameContext *pGameServer) :
 	CGameControllerInstagib(pGameServer)
 {
-	m_GameFlags = GAMEFLAG_FLAGS;
-    m_GameFlags_v7 = protocol7::GAMEFLAG_FLAGS;
+	m_GameFlags = 0;
+	m_GameFlags_v7 = 0;
+	m_AllowSkinChange = false;
+	
 	m_pGameType = "zCatch";
+
+	for(auto &Color : m_aBodyColors)
+		Color = 0;
 }
 
 CGameControllerZcatch::~CGameControllerZcatch() = default;
@@ -25,7 +31,6 @@ CGameControllerZcatch::~CGameControllerZcatch() = default;
 void CGameControllerZcatch::Tick()
 {
 	CGameControllerInstagib::Tick();
-	static int s_aBodyColors[MAX_CLIENTS] = {0};
 
 	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
 	{
@@ -38,11 +43,10 @@ void CGameControllerZcatch::Tick()
 		pPlayer->m_TeeInfos.m_ColorBody = GetBodyColor(pPlayer->m_Spree);
 		pPlayer->m_TeeInfos.m_UseCustomColor = 1;
 
-		if(s_aBodyColors[pPlayer->GetCid()] != pPlayer->m_TeeInfos.m_ColorBody)
+		if(m_aBodyColors[pPlayer->GetCid()] != pPlayer->m_TeeInfos.m_ColorBody)
 		{
-			s_aBodyColors[pPlayer->GetCid()] = pPlayer->m_TeeInfos.m_ColorBody;
+			m_aBodyColors[pPlayer->GetCid()] = pPlayer->m_TeeInfos.m_ColorBody;
 			SendSkinBodyColor7(pPlayer->GetCid(), pPlayer->m_TeeInfos.m_ColorBody);
-			dbg_msg("zcatch", "send skin change");
 		}
 	}
 }
@@ -56,8 +60,16 @@ void CGameControllerZcatch::SendSkinBodyColor7(int ClientId, int Color)
 	if(!pPlayer)
 		return;
 
+	// also update 0.6 just to be sure
 	pPlayer->m_TeeInfos.m_ColorBody = Color;
 	pPlayer->m_TeeInfos.m_UseCustomColor = 1;
+
+	// 0.7
+	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+	{
+		pPlayer->m_TeeInfos.m_aSkinPartColors[p] = Color;
+		pPlayer->m_TeeInfos.m_aUseCustomColors[p] = true;
+	}
 
 	protocol7::CNetMsg_Sv_SkinChange Msg;
 	Msg.m_ClientId = ClientId;
@@ -175,6 +187,17 @@ bool CGameControllerZcatch::CanJoinTeam(int Team, int NotThisId, char *pErrorRea
 		return false;
 	}
 	return true;
+}
+
+void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
+{
+	CGameControllerInstagib::OnPlayerConnect(pPlayer);
+
+	pPlayer->m_TeeInfos.m_ColorBody = GetBodyColor(pPlayer->m_Spree);
+	pPlayer->m_TeeInfos.m_UseCustomColor = 1;
+
+	m_aBodyColors[pPlayer->GetCid()] = pPlayer->m_TeeInfos.m_ColorBody;
+	SendSkinBodyColor7(pPlayer->GetCid(), pPlayer->m_TeeInfos.m_ColorBody);
 }
 
 bool CGameControllerZcatch::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
