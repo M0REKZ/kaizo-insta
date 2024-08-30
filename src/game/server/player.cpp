@@ -26,7 +26,7 @@ CPlayer::CPlayer(CGameContext *pGameServer, uint32_t UniqueClientId, int ClientI
 	m_RespawnTick = Server()->Tick(); // ddnet-insta
 	m_HasGhostCharInGame = false; // ddnet-insta
 	m_ClientId = ClientId;
-	m_Team = GameServer()->m_pController->GetStartTeam();
+	m_Team = Team;
 	m_NumInputs = 0;
 	m_Spawning = false;
 	Reset();
@@ -385,7 +385,6 @@ void CPlayer::Snap(int SnappingClient)
 		// ddnet-insta
 		if(!GameServer()->m_pController->IsGameRunning() &&
 			GameServer()->m_World.m_Paused &&
-			GameServer()->m_pController->GameState() != IGameController::IGS_END_MATCH &&
 			GameServer()->m_pController->GameState() != IGameController::IGS_END_ROUND &&
 			GetTeam() != TEAM_SPECTATORS &&
 			(!GameServer()->m_pController->IsPlayerReadyMode() || m_IsReadyToPlay))

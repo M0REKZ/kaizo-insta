@@ -6,6 +6,7 @@
 
 #include <base/vmath.h>
 #include <optional>
+#include <vector>
 
 // player object
 class CPlayer
@@ -22,8 +23,11 @@ public:
 	// Will be -1 when the player is alive
 	int m_KillerId = -1;
 	void SetTeamRaw(int Team) { m_Team = Team; }
-	bool m_IsDead; //also used for LMS LTS and BOMB <- +KZ
-    
+	// dead players can not respawn
+	bool m_IsDead;
+	bool m_GotRespawnInfo = false;
+	std::vector<int> m_vVictimIds;
+	
     /*******************************************************************
      * BOMB                                                           *
      *******************************************************************/

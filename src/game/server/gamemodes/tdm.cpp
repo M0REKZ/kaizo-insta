@@ -39,7 +39,7 @@ int CGameControllerTDM::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 		{
 			if(m_aTeamscore[TEAM_RED] / 100 != m_aTeamscore[TEAM_BLUE] / 100)
 			{
-				EndMatch();
+				EndRound();
 				return true;
 			}
 		}
@@ -47,7 +47,7 @@ int CGameControllerTDM::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 		{
 			if(m_aTeamscore[TEAM_RED] != m_aTeamscore[TEAM_BLUE])
 			{
-				EndMatch();
+				EndRound();
 				return true;
 			}
 			else

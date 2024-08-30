@@ -27,6 +27,7 @@ public:
 	void OnCharacterSpawn(class CCharacter *pChr) override;
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	void Tick() override;
+	int GetAutoTeam(int NotThisId) override;
 
 	void ModifyWeapons(IConsole::IResult *pResult, void *pUserData, int Weapon, bool Remove);
 
@@ -61,7 +62,32 @@ public:
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
 	bool OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer) override;
 
-	//Anticamper
+	// Anticamper
 	void Anticamper();
+
+	// generic helpers
+
+	// returns the amount of tee's that are not spectators
+	int NumActivePlayers();
+
+	// returns the amount of players that currently have a tee in the world
+	int NumAlivePlayers();
+
+	// different than NumAlivePlayers()
+	// it does check m_IsDead which is set in OnCharacterDeath
+	// instead of checking the character which only gets destroyed
+	// after OnCharacterDeath
+	//
+	// needed for the wincheck in zcatch to get triggered on kill
+	int NumNonDeadActivePlayers();
+
+	// returns the client id of the player with the highest
+	// killing spree (active spree not high score)
+	// returns -1 if nobody made a kill since spawning
+	int GetHighestSpreeClientId();
+
+	// get the lowest client id that has a tee in the world
+	// returns -1 if no player is alive
+	int GetFirstAlivePlayerId();
 };
 #endif // GAME_SERVER_GAMEMODES_BASE_INSTAGIB_H

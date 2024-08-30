@@ -36,6 +36,10 @@ MACRO_CONFIG_INT(SvAnticamper, sv_anticamper, 0, 0, 1, CFGFLAG_SERVER, "Toggle t
 MACRO_CONFIG_INT(SvAnticamperFreeze, sv_anticamper_freeze, 7, 0, 15, CFGFLAG_SERVER, "If a player should freeze on camping (and how long) or die")
 MACRO_CONFIG_INT(SvAnticamperTime, sv_anticamper_time, 10, 5, 120, CFGFLAG_SERVER, "How long to wait till the player dies/freezes")
 MACRO_CONFIG_INT(SvAnticamperRange, sv_anticamper_range, 200, 0, 1000, CFGFLAG_SERVER, "Distance how far away the player must move to escape anticamper")
+MACRO_CONFIG_INT(SvZcatchMinPlayers, sv_zcatch_min_players, 3, 0, MAX_CLIENTS, CFGFLAG_SERVER, "How many active players (not spectators) are required to start a round")
+MACRO_CONFIG_INT(SvReleaseGame, sv_release_game, 0, 0, 1, CFGFLAG_SERVER, "auto release on kill (only affects sv_gametype zCatch)")
+MACRO_CONFIG_STR(SvZcatchColors, sv_zcatch_colors, 512, "teetime", CFGFLAG_SERVER, "Color scheme for zCatch options: teetime, savander")
+
 //+KZ
 
 MACRO_CONFIG_INT(SvPlasmaKills, sv_plasma_kills, 0, 0, 100, CFGFLAG_SERVER | CFGFLAG_GAME, "Plasma turret damage for player")

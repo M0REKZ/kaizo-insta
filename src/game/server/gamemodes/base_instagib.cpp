@@ -1,4 +1,5 @@
 #include <base/system.h>
+#include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
@@ -17,6 +18,34 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
 }
 
 CGameControllerInstagib::~CGameControllerInstagib() = default;
+
+int CGameControllerInstagib::GetAutoTeam(int NotThisId)
+{
+	if(Config()->m_SvTournamentMode)
+		return TEAM_SPECTATORS;
+
+	// determine new team
+	int Team = TEAM_RED;
+	if(IsTeamplay())
+	{
+#ifdef CONF_DEBUG
+		if(!Config()->m_DbgStress) // this will force the auto balancer to work overtime aswell
+#endif
+			Team = m_aTeamSize[TEAM_RED] > m_aTeamSize[TEAM_BLUE] ? TEAM_BLUE : TEAM_RED;
+	}
+
+	// check if there're enough player slots left
+	// TODO: add SvPlayerSlots in upstream
+	if(m_aTeamSize[TEAM_RED] + m_aTeamSize[TEAM_BLUE] < Server()->MaxClients() - g_Config.m_SvSpectatorSlots)
+	{
+		++m_aTeamSize[Team];
+		// m_UnbalancedTick = TBALANCE_CHECK;
+		// if(m_GameState == IGS_WARMUP_GAME && HasEnoughPlayers())
+		// 	SetGameState(IGS_WARMUP_GAME, 0);
+		return Team;
+	}
+	return TEAM_SPECTATORS;
+}
 
 void CGameControllerInstagib::SendChatTarget(int To, const char *pText, int Flags) const
 {
@@ -635,4 +664,56 @@ void CGameControllerInstagib::Anticamper()
 			}
 		}
 	}
+}
+
+int CGameControllerInstagib::NumActivePlayers()
+{
+	int Active = 0;
+	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+		if(pPlayer && (pPlayer->GetTeam() != TEAM_SPECTATORS || pPlayer->m_IsDead))
+			Active++;
+	return Active;
+}
+
+int CGameControllerInstagib::NumAlivePlayers()
+{
+	int Alive = 0;
+	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+		if(pPlayer && pPlayer->GetCharacter())
+			Alive++;
+	return Alive;
+}
+
+int CGameControllerInstagib::NumNonDeadActivePlayers()
+{
+	int Alive = 0;
+	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+		if(pPlayer && !pPlayer->m_IsDead && pPlayer->GetTeam() != TEAM_SPECTATORS)
+			Alive++;
+	return Alive;
+}
+
+int CGameControllerInstagib::GetHighestSpreeClientId()
+{
+	int ClientId = -1;
+	int Spree = 0;
+	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		if(pPlayer->m_Spree <= Spree)
+			continue;
+
+		ClientId = pPlayer->GetCid();
+		Spree = pPlayer->m_Spree;
+	}
+	return ClientId;
+}
+
+int CGameControllerInstagib::GetFirstAlivePlayerId()
+{
+	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+		if(pPlayer && pPlayer->GetCharacter())
+			return pPlayer->GetCid();
+	return -1;
 }

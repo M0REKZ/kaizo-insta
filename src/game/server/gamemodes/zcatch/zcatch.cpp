@@ -1,0 +1,323 @@
+#include <base/system.h>
+#include <engine/server.h>
+#include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
+#include <game/generated/protocol7.h>
+#include <game/mapitems.h>
+#include <game/server/entities/character.h>
+#include <game/server/entities/flag.h>
+#include <game/server/gamecontext.h>
+#include <game/server/player.h>
+#include <game/server/score.h>
+#include <game/version.h>
+
+#include "zcatch.h"
+
+CGameControllerZcatch::CGameControllerZcatch(class CGameContext *pGameServer) :
+	CGameControllerInstagib(pGameServer)
+{
+	m_GameFlags = 0;
+	m_AllowSkinChange = false;
+
+	m_pGameType = "zCatch";
+
+	for(auto &Color : m_aBodyColors)
+		Color = 0;
+}
+
+CGameControllerZcatch::ECatchGameState CGameControllerZcatch::CatchGameState() const
+{
+	if(g_Config.m_SvReleaseGame)
+		return ECatchGameState::RELEASE_GAME;
+	return m_CatchGameState;
+}
+
+void CGameControllerZcatch::SetCatchGameState(ECatchGameState State)
+{
+	if(g_Config.m_SvReleaseGame)
+	{
+		m_CatchGameState = ECatchGameState::RELEASE_GAME;
+		return;
+	}
+	m_CatchGameState = State;
+}
+
+void CGameControllerZcatch::OnRoundStart()
+{
+	CGameControllerInstagib::OnRoundStart();
+
+	int ActivePlayers = NumActivePlayers();
+	if(ActivePlayers < g_Config.m_SvZcatchMinPlayers && CatchGameState() != ECatchGameState::RELEASE_GAME)
+	{
+		SendChatTarget(-1, "Not enough players to start a round");
+		SetCatchGameState(ECatchGameState::WAITING_FOR_PLAYERS);
+	}
+
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		pPlayer->m_GotRespawnInfo = false;
+		pPlayer->m_vVictimIds.clear();
+		pPlayer->m_KillerId = -1;
+	}
+}
+
+int CGameControllerZcatch::GetAutoTeam(int NotThisId)
+{
+	if(CatchGameState() == ECatchGameState::RUNNING)
+		return TEAM_SPECTATORS;
+
+	return CGameControllerInstagib::GetAutoTeam(NotThisId);
+}
+
+CGameControllerZcatch::~CGameControllerZcatch() = default;
+
+void CGameControllerZcatch::Tick()
+{
+	CGameControllerInstagib::Tick();
+
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		int Color = GetBodyColor(pPlayer->m_Spree);
+		if(GameState() == IGS_END_ROUND)
+			Color = m_aBodyColors[pPlayer->GetCid()];
+
+		// this is wasting a bit of clock cycles setting it every tick
+		// it should be set on kill and then not be overwritten by info changes
+		// but there is no git conflict free way of doing that
+		pPlayer->m_TeeInfos.m_ColorBody = Color;
+		pPlayer->m_TeeInfos.m_UseCustomColor = 1;
+
+		if(m_aBodyColors[pPlayer->GetCid()] != pPlayer->m_TeeInfos.m_ColorBody)
+		{
+			m_aBodyColors[pPlayer->GetCid()] = pPlayer->m_TeeInfos.m_ColorBody;
+			SendSkinBodyColor7(pPlayer->GetCid(), pPlayer->m_TeeInfos.m_ColorBody);
+		}
+	}
+}
+
+void CGameControllerZcatch::OnCharacterSpawn(class CCharacter *pChr)
+{
+	CGameControllerInstagib::OnCharacterSpawn(pChr);
+
+	SetSpawnWeapons(pChr);
+}
+
+void CGameControllerZcatch::ReleasePlayer(class CPlayer *pPlayer, const char *pMsg)
+{
+	GameServer()->SendChatTarget(pPlayer->GetCid(), pMsg);
+	pPlayer->m_KillerId = -1;
+	pPlayer->m_IsDead = false;
+	pPlayer->SetTeamRaw(TEAM_RED);
+}
+
+bool CGameControllerZcatch::OnSelfkill(int ClientId)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return false;
+	if(pPlayer->m_vVictimIds.empty())
+		return false;
+
+	CPlayer *pVictim = nullptr;
+	while(!pVictim)
+	{
+		if(pPlayer->m_vVictimIds.empty())
+			return false;
+
+		int ReleaseId = pPlayer->m_vVictimIds.back();
+		pPlayer->m_vVictimIds.pop_back();
+
+		pVictim = GameServer()->m_apPlayers[ReleaseId];
+	}
+	if(!pVictim)
+		return false;
+
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "You were released by '%s'", Server()->ClientName(pPlayer->GetCid()));
+	ReleasePlayer(pVictim, aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "You released '%s' (%d players left)", Server()->ClientName(pVictim->GetCid()), pPlayer->m_vVictimIds.size());
+	SendChatTarget(ClientId, aBuf);
+
+	return true;
+}
+
+void CGameControllerZcatch::KillPlayer(class CPlayer *pVictim, class CPlayer *pKiller)
+{
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "You are spectator until '%s' dies", Server()->ClientName(pKiller->GetCid()));
+	GameServer()->SendChatTarget(pVictim->GetCid(), aBuf);
+
+	pVictim->SetTeamRaw(TEAM_SPECTATORS);
+	pVictim->m_SpectatorId = pKiller->GetCid();
+	pVictim->m_IsDead = true;
+	pVictim->m_KillerId = pKiller->GetCid();
+	pKiller->m_vVictimIds.emplace_back(pVictim->GetCid());
+}
+
+void CGameControllerZcatch::OnCaught(class CPlayer *pVictim, class CPlayer *pKiller)
+{
+	if(pVictim->GetCid() == pKiller->GetCid())
+		return;
+
+	if(CatchGameState() == ECatchGameState::WAITING_FOR_PLAYERS)
+	{
+		if(!pKiller->m_GotRespawnInfo)
+			GameServer()->SendChatTarget(pKiller->GetCid(), "Kill respawned because there are not enough players.");
+		pKiller->m_GotRespawnInfo = true;
+		return;
+	}
+	if(CatchGameState() == ECatchGameState::RELEASE_GAME)
+	{
+		if(!pKiller->m_GotRespawnInfo)
+			GameServer()->SendChatTarget(pKiller->GetCid(), "Kill respawned because this is a release game.");
+		pKiller->m_GotRespawnInfo = true;
+		return;
+	}
+
+	KillPlayer(pVictim, pKiller);
+}
+
+int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
+{
+	CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
+
+	// TODO: revisit this edge case when zcatch is done
+	//       a killer leaving while the bullet is flying
+	if(!pKiller)
+		return 0;
+
+	OnCaught(pVictim->GetPlayer(), pKiller);
+
+	char aBuf[512];
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		if(pPlayer->m_KillerId == -1)
+			continue;
+		if(pPlayer->GetCid() == pVictim->GetPlayer()->GetCid())
+			continue;
+		if(pPlayer->m_KillerId != pVictim->GetPlayer()->GetCid())
+			continue;
+
+		// victim's victims
+		str_format(aBuf, sizeof(aBuf), "You respawned because '%s' died", Server()->ClientName(pVictim->GetPlayer()->GetCid()));
+		ReleasePlayer(pPlayer, aBuf);
+	}
+
+	DoWincheckRound();
+
+	return 0;
+}
+
+bool CGameControllerZcatch::CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[NotThisId];
+	if(!pPlayer)
+		return false;
+
+	if(pPlayer->m_IsDead && Team != TEAM_SPECTATORS)
+	{
+		str_copy(pErrorReason, "Wait until someone dies", ErrorReasonSize);
+		return false;
+	}
+	return true;
+}
+
+void CGameControllerZcatch::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
+{
+	CGameControllerInstagib::DoTeamChange(pPlayer, Team, DoChatMsg);
+
+	CheckGameState();
+}
+
+void CGameControllerZcatch::CheckGameState()
+{
+	int ActivePlayers = NumActivePlayers();
+
+	if(ActivePlayers >= g_Config.m_SvZcatchMinPlayers && CatchGameState() == ECatchGameState::WAITING_FOR_PLAYERS)
+	{
+		SendChatTarget(-1, "Enough players connected. Starting game!");
+		SetCatchGameState(ECatchGameState::RUNNING);
+	}
+}
+
+void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
+{
+	CGameControllerInstagib::OnPlayerConnect(pPlayer);
+
+	if(CatchGameState() == ECatchGameState::RUNNING)
+	{
+		int KillerId = GetHighestSpreeClientId();
+		if(KillerId == -1)
+			KillerId = GetFirstAlivePlayerId();
+		if(KillerId != -1)
+			KillPlayer(pPlayer, GameServer()->m_apPlayers[KillerId]);
+	}
+	CheckGameState();
+
+	pPlayer->m_TeeInfos.m_ColorBody = GetBodyColor(pPlayer->m_Spree);
+	pPlayer->m_TeeInfos.m_UseCustomColor = 1;
+
+	m_aBodyColors[pPlayer->GetCid()] = pPlayer->m_TeeInfos.m_ColorBody;
+	SendSkinBodyColor7(pPlayer->GetCid(), pPlayer->m_TeeInfos.m_ColorBody);
+
+	if(CatchGameState() == ECatchGameState::WAITING_FOR_PLAYERS)
+		SendChatTarget(pPlayer->GetCid(), "Waiting for more players to start the round.");
+	else if(CatchGameState() == ECatchGameState::RELEASE_GAME)
+		SendChatTarget(pPlayer->GetCid(), "This is a release game.");
+}
+
+void CGameControllerZcatch::OnPlayerDisconnect(class CPlayer *pDisconnectingPlayer, const char *pReason)
+{
+	CGameControllerInstagib::OnPlayerDisconnect(pDisconnectingPlayer, pReason);
+
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		pPlayer->m_vVictimIds.erase(std::remove(pPlayer->m_vVictimIds.begin(), pPlayer->m_vVictimIds.end(), pDisconnectingPlayer->GetCid()), pPlayer->m_vVictimIds.end());
+	}
+}
+
+bool CGameControllerZcatch::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
+{
+	CGameControllerInstagib::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
+	return false;
+}
+
+bool CGameControllerZcatch::DoWincheckRound()
+{
+	if(CatchGameState() == ECatchGameState::RUNNING && NumNonDeadActivePlayers() <= 1)
+	{
+		EndRound();
+
+		for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+		{
+			if(!pPlayer)
+				continue;
+
+			// only release players that actually died
+			// not all spectators
+			if(pPlayer->m_IsDead)
+				pPlayer->SetTeamRaw(TEAM_RED);
+			pPlayer->m_IsDead = false;
+		}
+
+		return true;
+	}
+	return false;
+}
+
+void CGameControllerZcatch::Snap(int SnappingClient)
+{
+	CGameControllerInstagib::Snap(SnappingClient);
+}

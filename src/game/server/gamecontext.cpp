@@ -52,7 +52,7 @@
 #include "gamemodes/iFreeze.h"
 #include "gamemodes/mod.h"
 #include "gamemodes/solofng.h"
-#include "gamemodes/zcatch.h"
+#include "gamemodes/zcatch/zcatch.h"
 #include "gamemodes/BOMB.h"
 #include "player.h"
 #include "score.h"
@@ -2877,6 +2877,9 @@ void CGameContext::OnEmoticonNetMessage(const CNetMsg_Cl_Emoticon *pMsg, int Cli
 void CGameContext::OnKillNetMessage(const CNetMsg_Cl_Kill *pMsg, int ClientId)
 {
 	if(m_World.m_Paused)
+		return;
+
+	if(m_pController->OnSelfkill(ClientId)) // ddnet-insta
 		return;
 
 	if(m_VoteCloseTime && m_VoteCreator == ClientId && GetDDRaceTeam(ClientId) && (IsKickVote() || IsSpecVote()))
