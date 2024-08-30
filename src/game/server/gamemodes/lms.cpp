@@ -20,7 +20,7 @@ void CGameControllerLMS::Tick()
 	
 	if(m_RoundActive && !(GameServer()->m_World.m_Paused))
 	{
-		DoWincheckMatch();
+		DoWincheckRound();
 	}
     if(m_RoundPauseTime > 0)
     {
@@ -95,7 +95,7 @@ int CGameControllerLMS::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 	return false;
 }
 
-bool CGameControllerLMS::DoWincheckMatch()
+bool CGameControllerLMS::DoWincheckRound()
 {
     if(!m_RoundActive)
         return false;
@@ -108,7 +108,7 @@ bool CGameControllerLMS::DoWincheckMatch()
             if(m_GameInfo.m_ScoreLimit > 0 && GameServer()->m_apPlayers[i]->m_Score.value_or(0) >= m_GameInfo.m_ScoreLimit)
             {
                 GameServer()->SendBroadcast("Game End", -1);
-                EndMatch();
+                EndRound();
                 SetAllUndead();
                 return true;
             }
@@ -128,7 +128,7 @@ bool CGameControllerLMS::DoWincheckMatch()
         }
 
         GameServer()->SendBroadcast("Game End", -1);
-        EndMatch();
+        EndRound();
 		m_RoundActive = false;
         SetAllUndead();
         return true;

@@ -14,7 +14,7 @@ class CGameControllerBOMB : public CGameControllerDMVanilla
     void BombTick();
     int m_BombTime;
 protected:
-    virtual bool DoWincheckMatch() override;
+    virtual bool DoWincheckRound() override;
     virtual void SetAllUndead();
     virtual void FakeEndRound();
     virtual void KillEveryone();

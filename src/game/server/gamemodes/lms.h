@@ -6,7 +6,7 @@
 class CGameControllerLMS : public CGameControllerDM
 {
 protected:
-    virtual bool DoWincheckMatch() override;
+    virtual bool DoWincheckRound() override;
     virtual void SetAllUndead();
     virtual void FakeEndRound();
     virtual void KillEveryone();

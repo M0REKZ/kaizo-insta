@@ -84,7 +84,7 @@ int CGameControllerFreeze::OnCharacterDeath(class CCharacter *pVictim, class CPl
 		{
 			if(m_aTeamscore[TEAM_RED] / 100 != m_aTeamscore[TEAM_BLUE] / 100)
 			{
-				EndMatch();
+				EndRound();
 				return true;
 			}
 		}
@@ -92,7 +92,7 @@ int CGameControllerFreeze::OnCharacterDeath(class CCharacter *pVictim, class CPl
 		{
 			if(m_aTeamscore[TEAM_RED] != m_aTeamscore[TEAM_BLUE])
 			{
-				EndMatch();
+				EndRound();
 				return true;
 			}
 			else

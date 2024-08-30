@@ -20,7 +20,7 @@ void CGameControllerLTS::Tick()
 {
 	if(m_RoundActive && !(GameServer()->m_World.m_Paused))
 	{
-		DoWincheckMatch();
+		DoWincheckRound();
 	}
 	if(m_RoundPauseTime > 0)
 	{
@@ -69,7 +69,7 @@ void CGameControllerLTS::OnPlayerConnect(class CPlayer *pPlayer)
     pPlayer->m_IsDead = false;
 }
 
-bool CGameControllerLTS::DoWincheckMatch()
+bool CGameControllerLTS::DoWincheckRound()
 {
     if(!m_RoundActive && m_RoundPauseTime == -1)
         return false;
@@ -80,7 +80,7 @@ bool CGameControllerLTS::DoWincheckMatch()
 	{
 		
 		GameServer()->SendBroadcast("Game End", -1);
-		EndMatch();
+		EndRound();
 		SetAllUndead();
 		
 	}

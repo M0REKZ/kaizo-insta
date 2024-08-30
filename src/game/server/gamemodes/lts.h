@@ -7,7 +7,7 @@ class CGameControllerLTS : public CGameControllerLMS
 {
 
 protected:
-    virtual bool DoWincheckMatch() override;
+    virtual bool DoWincheckRound() override;
     virtual void SetAllUndead() override;
     //int m_RoundPauseTime = -1;
 
