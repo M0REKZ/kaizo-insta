@@ -4,7 +4,7 @@
 #include "glms.h"
 
 CGameControllerGLMS::CGameControllerGLMS(class CGameContext *pGameServer) :
-	CGameControllerLMS(pGameServer)
+	CGameControllerInstaLMS(pGameServer)
 {
     //m_VanillaBehavior = true;
 
@@ -15,7 +15,7 @@ CGameControllerGLMS::~CGameControllerGLMS() = default;
 
 void CGameControllerGLMS::OnCharacterSpawn(class CCharacter *pChr)
 {
-	CGameControllerLMS::OnCharacterSpawn(pChr);
+	CGameControllerInstaLMS::OnCharacterSpawn(pChr);
 
 	// give default weapons
 	pChr->GiveWeapon(WEAPON_GRENADE, false, -1);

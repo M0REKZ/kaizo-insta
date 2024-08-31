@@ -4,7 +4,7 @@
 #include "ilms.h"
 
 CGameControllerILMS::CGameControllerILMS(class CGameContext *pGameServer) :
-	CGameControllerLMS(pGameServer)
+	CGameControllerInstaLMS(pGameServer)
 {
     //m_VanillaBehavior = true;
 
@@ -15,7 +15,7 @@ CGameControllerILMS::~CGameControllerILMS() = default;
 
 void CGameControllerILMS::OnCharacterSpawn(class CCharacter *pChr)
 {
-	CGameControllerLMS::OnCharacterSpawn(pChr);
+	CGameControllerInstaLMS::OnCharacterSpawn(pChr);
 
 	// give default weapons
 	pChr->GiveWeapon(WEAPON_LASER, false, -1);

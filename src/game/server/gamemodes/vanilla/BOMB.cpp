@@ -4,7 +4,7 @@
 #include "BOMB.h"
 
 CGameControllerBOMB::CGameControllerBOMB(class CGameContext *pGameServer) :
-	CGameControllerDMVanilla(pGameServer)
+	CGameControllerDM(pGameServer)
 {
     m_VanillaBehavior = true;
 
@@ -20,7 +20,7 @@ CGameControllerBOMB::~CGameControllerBOMB() = default;
 
 void CGameControllerBOMB::Tick()
 {
-    CGameControllerDMVanilla::Tick();
+    CGameControllerDM::Tick();
     
     SetSkins(); //a lot of ugly loops...
 	
@@ -39,7 +39,7 @@ void CGameControllerBOMB::Tick()
         GameServer()->m_World.m_Paused = false;
         m_RoundPauseTime = -1;
     }
-    CGameControllerDMVanilla::Tick();
+    CGameControllerDM::Tick();
     //kinda ugly loop
     int PlayerAmount=0;
     for(int i = 0; i < MAX_CLIENTS; ++i)
@@ -132,7 +132,7 @@ void CGameControllerBOMB::ExplodeBomb(CPlayer* BombPlayer)
 
 void CGameControllerBOMB::Snap(int SnappingClient)
 {
-    CGameControllerInstagib::Snap(SnappingClient);
+    CGameControllerVanilla::Snap(SnappingClient);
 /*
     if(!(m_BombTime % Server()->TickSpeed()))
     {
@@ -146,7 +146,7 @@ void CGameControllerBOMB::Snap(int SnappingClient)
 
 void CGameControllerBOMB::OnPlayerConnect(class CPlayer *pPlayer)
 {
-    CGameControllerDMVanilla::OnPlayerConnect(pPlayer);
+    CGameControllerDM::OnPlayerConnect(pPlayer);
     /*if(m_RoundActive)
     {
         pPlayer->SetTeamRaw(TEAM_SPECTATORS);
@@ -173,14 +173,14 @@ void CGameControllerBOMB::OnCharacterSpawn(class CCharacter *pChr)
 
 bool CGameControllerBOMB::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {
-    return CGameControllerInstagib::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
+    return CGameControllerVanilla::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
      
 }
 
 bool CGameControllerBOMB::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
     Dmg = 0; //TODO: maybe i should add an option for bomb with damage
-    CGameControllerDMVanilla::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
+    CGameControllerDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
     if(GameServer()->m_apPlayers[From] == Character.GetPlayer())
         return false;
     if(Character.GetPlayer()->m_IsBomb)

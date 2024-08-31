@@ -4,7 +4,7 @@
 #include "ilts.h"
 
 CGameControllerILTS::CGameControllerILTS(class CGameContext *pGameServer) :
-	CGameControllerLTS(pGameServer)
+	CGameControllerInstaLTS(pGameServer)
 {
     //m_VanillaBehavior = true;
     
@@ -18,7 +18,7 @@ CGameControllerILTS::~CGameControllerILTS() = default;
 
 void CGameControllerILTS::OnCharacterSpawn(class CCharacter *pChr)
 {
-	CGameControllerLTS::OnCharacterSpawn(pChr);
+	CGameControllerInstaLTS::OnCharacterSpawn(pChr);
 
 	// give default weapons
 	pChr->GiveWeapon(WEAPON_LASER, false, -1);

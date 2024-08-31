@@ -3,7 +3,7 @@
 
 #include "lts.h"
 
-class CGameControllerILTS : public CGameControllerLTS
+class CGameControllerILTS : public CGameControllerInstaLTS
 {
 
 public:

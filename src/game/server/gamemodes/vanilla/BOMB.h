@@ -1,9 +1,9 @@
 #ifndef GAME_SERVER_GAMEMODES_BOMB_H
 #define GAME_SERVER_GAMEMODES_BOMB_H
 
-#include "dm_vanilla.h"
+#include "dm.h"
 
-class CGameControllerBOMB : public CGameControllerDMVanilla
+class CGameControllerBOMB : public CGameControllerDM
 {
     int BombAmount();
     int CharAmount();

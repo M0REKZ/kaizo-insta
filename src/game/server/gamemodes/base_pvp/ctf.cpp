@@ -73,6 +73,37 @@ bool CGameControllerBaseCTF::OnEntity(int Index, int x, int y, int Layer, int Fl
 		Team = TEAM_RED;
 	if(Index == ENTITY_FLAGSTAND_BLUE)
 		Team = TEAM_BLUE;
+	
+	//twplus begin +KZ
+	if(!(Team == -1 || m_apFlags[Team]))
+	{
+		CFlag *F = new CFlag(&GameServer()->m_World, Team);
+		//F->m_StandPos = Pos;
+		F->m_Pos = Pos;
+		m_apFlags[Team] = F;
+		GameServer()->m_World.InsertEntity(F);
+	}
+	
+	if (Team == TEAM_RED && m_flagstand_temp_i_0 < 10) {
+		//m_flagstands_0[m_flagstand_temp_i_0] = Pos;
+		m_apFlags[Team]->m_StandPositions[m_flagstand_temp_i_0] = Pos;
+		m_flagstand_temp_i_0++;
+		m_apFlags[Team]->m_no_stands = m_flagstand_temp_i_0;
+	}
+	if (Team == TEAM_BLUE && m_flagstand_temp_i_1 < 10) {
+		//m_flagstands_1[m_flagstand_temp_i_1] = Pos;
+		m_apFlags[Team]->m_StandPositions[m_flagstand_temp_i_1] = Pos;
+		m_flagstand_temp_i_1++;
+		m_apFlags[Team]->m_no_stands = m_flagstand_temp_i_1;
+	}
+	if (Team == -1)
+	{
+		return false;
+	}
+	
+	//twplus end +KZ
+	
+	/*
 	if(Team == -1 || m_apFlags[Team])
 		return false;
 
@@ -81,6 +112,7 @@ bool CGameControllerBaseCTF::OnEntity(int Index, int x, int y, int Layer, int Fl
 	F->m_Pos = Pos;
 	m_apFlags[Team] = F;
 	GameServer()->m_World.InsertEntity(F);
+	 */
 	return true;
 }
 

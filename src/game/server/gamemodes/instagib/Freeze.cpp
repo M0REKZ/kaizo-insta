@@ -4,7 +4,7 @@
 #include "Freeze.h"
 
 CGameControllerFreeze::CGameControllerFreeze(class CGameContext *pGameServer) :
-	CGameControllerTDM(pGameServer)
+	CGameControllerInstaTDM(pGameServer)
 {
     m_GameFlags = GAMEFLAG_TEAMS;
     m_GameFlags_v7 = protocol7::GAMEFLAG_TEAMS;
@@ -17,7 +17,7 @@ CGameControllerFreeze::~CGameControllerFreeze() = default;
 
 void CGameControllerFreeze::Tick()
 {
-	CGameControllerTDM::Tick();
+	CGameControllerInstaTDM::Tick();
     
     int Red = 0, Blue = 0, RedFr = 0, BlueFr = 0;
 
@@ -107,7 +107,7 @@ bool CGameControllerFreeze::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &Fr
 	if(!(Dmg >= g_Config.m_SvDamageNeededForKill))
 		return false;
     Dmg = 0;
-    CGameControllerTDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
+    CGameControllerInstaTDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
 	
 	DoFreezing(From, Character);
 	
@@ -219,7 +219,7 @@ void CGameControllerFreeze::Melt(int Melted, int Helper)
 
 void CGameControllerFreeze::OnCharacterSpawn(class CCharacter *pChr)
 {
-	CGameControllerTDM::OnCharacterSpawn(pChr);
+	CGameControllerInstaTDM::OnCharacterSpawn(pChr);
 
 	pChr->GetPlayer()->m_AutoMeltTicks = g_Config.m_SvFreezeAutomeltTime * Server()->TickSpeed();
 }

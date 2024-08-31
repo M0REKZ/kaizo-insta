@@ -3,8 +3,8 @@
 
 #include "lts.h"
 
-CGameControllerLTS::CGameControllerLTS(class CGameContext *pGameServer) :
-	CGameControllerLMS(pGameServer)
+CGameControllerInstaLTS::CGameControllerInstaLTS(class CGameContext *pGameServer) :
+	CGameControllerInstaLMS(pGameServer)
 {
     //m_VanillaBehavior = true;
     
@@ -14,9 +14,9 @@ CGameControllerLTS::CGameControllerLTS(class CGameContext *pGameServer) :
     //m_pGameType = "LTS+";
 }
 
-CGameControllerLTS::~CGameControllerLTS() = default;
+CGameControllerInstaLTS::~CGameControllerInstaLTS() = default;
 
-void CGameControllerLTS::Tick()
+void CGameControllerInstaLTS::Tick()
 {
 	if(m_RoundActive && !(GameServer()->m_World.m_Paused))
 	{
@@ -32,7 +32,7 @@ void CGameControllerLTS::Tick()
 		GameServer()->m_World.m_Paused = false;
 		m_RoundPauseTime = -1;
 	}
-	CGameControllerDM::Tick();
+	CGameControllerInstaBaseDM::Tick();
 	//kinda ugly loop
 	int PlayerAmount=0;
 	for(int i = 0; i < MAX_CLIENTS; ++i)
@@ -61,15 +61,15 @@ void CGameControllerLTS::Tick()
 	}
 }
 
-void CGameControllerLTS::OnPlayerConnect(class CPlayer *pPlayer)
+void CGameControllerInstaLTS::OnPlayerConnect(class CPlayer *pPlayer)
 {
-    CGameControllerLMS::OnPlayerConnect(pPlayer);
+    CGameControllerInstaLMS::OnPlayerConnect(pPlayer);
     m_aPlayerTeam[pPlayer->GetCid()] = TEAM_SPECTATORS; //TODO: improve this
     pPlayer->SetTeamRaw(TEAM_SPECTATORS);
     pPlayer->m_IsDead = false;
 }
 
-bool CGameControllerLTS::DoWincheckRound()
+bool CGameControllerInstaLTS::DoWincheckRound()
 {
     if(!m_RoundActive && m_RoundPauseTime == -1)
         return false;
@@ -118,7 +118,7 @@ bool CGameControllerLTS::DoWincheckRound()
     return false;
 }
 
-void CGameControllerLTS::SetAllUndead()
+void CGameControllerInstaLTS::SetAllUndead()
 {
     for(int i = 0; i < MAX_CLIENTS; ++i)
     {
@@ -134,7 +134,7 @@ void CGameControllerLTS::SetAllUndead()
     }
 }
 
-int CGameControllerLTS::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
+int CGameControllerInstaLTS::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
     //CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId); //fallback to instagib
     if(pVictim->GetPlayer() && m_RoundActive && m_RoundPauseTime < 0 && WeaponId != -3)
@@ -154,7 +154,7 @@ int CGameControllerLTS::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
     return false;
 }
 
-void CGameControllerLTS::Snap(int SnappingClient)
+void CGameControllerInstaLTS::Snap(int SnappingClient)
 {
 	CGameControllerInstagib::Snap(SnappingClient);
 

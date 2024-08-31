@@ -3,7 +3,7 @@
 
 #include "tdm.h"
 
-class CGameControllerFreeze : public CGameControllerTDM
+class CGameControllerFreeze : public CGameControllerInstaTDM
 {
     
 private:

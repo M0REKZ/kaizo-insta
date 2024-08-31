@@ -12,6 +12,9 @@ public:
 	CGameControllerBaseCTF(class CGameContext *pGameServer);
 	~CGameControllerBaseCTF() override;
 
+	int m_flagstand_temp_i_0; //+KZ from tw_plus
+	int m_flagstand_temp_i_1; //same
+	
 	void Tick() override;
 	void Snap(int SnappingClient) override;
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;

@@ -26,7 +26,7 @@ bool CGameControllerHFreeze::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 	if((Weapon == WEAPON_HAMMER ? false : (!(Dmg >= g_Config.m_SvDamageNeededForKill))))
 		return false;
 	Dmg = 0;
-	CGameControllerTDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
+	CGameControllerInstaTDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
 	
 	DoFreezing(From, Character);
 	

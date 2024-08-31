@@ -4,7 +4,7 @@
 #include "glts.h"
 
 CGameControllerGLTS::CGameControllerGLTS(class CGameContext *pGameServer) :
-	CGameControllerLTS(pGameServer)
+	CGameControllerInstaLTS(pGameServer)
 {
     //m_VanillaBehavior = true;
     
@@ -18,7 +18,7 @@ CGameControllerGLTS::~CGameControllerGLTS() = default;
 
 void CGameControllerGLTS::OnCharacterSpawn(class CCharacter *pChr)
 {
-	CGameControllerLTS::OnCharacterSpawn(pChr);
+	CGameControllerInstaLTS::OnCharacterSpawn(pChr);
 
 	// give default weapons
 	pChr->GiveWeapon(WEAPON_GRENADE, false, -1);

@@ -3,7 +3,7 @@
 
 #include "lms.h"
 
-class CGameControllerILMS : public CGameControllerLMS
+class CGameControllerILMS : public CGameControllerInstaLMS
 {
 public:
 	CGameControllerILMS(class CGameContext *pGameServer);

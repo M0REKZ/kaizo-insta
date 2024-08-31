@@ -31,17 +31,17 @@
 
 #include "entities/character.h"
 #include "gamemodes/DDRace.h"
-#include "gamemodes/BOMB.h"
-#include "gamemodes/Freeze.h"
-#include "gamemodes/gFreeze.h"
-#include "gamemodes/hFreeze.h"
-#include "gamemodes/iFreeze.h"
-#include "gamemodes/lms_vanilla.h"
-#include "gamemodes/lts_vanilla.h"
-#include "gamemodes/glms.h"
-#include "gamemodes/glts.h"
-#include "gamemodes/ilms.h"
-#include "gamemodes/ilts.h"
+#include "gamemodes/vanilla/BOMB.h"
+#include "gamemodes/instagib/Freeze.h"
+#include "gamemodes/instagib/gFreeze.h"
+#include "gamemodes/instagib/hFreeze.h"
+#include "gamemodes/instagib/iFreeze.h"
+#include "gamemodes/instagib/glms.h"
+#include "gamemodes/instagib/glts.h"
+#include "gamemodes/instagib/ilms.h"
+#include "gamemodes/instagib/ilts.h"
+#include "gamemodes/vanilla/lms.h"
+#include "gamemodes/vanilla/lts.h"
 #include "gamemodes/instagib/gctf.h"
 #include "gamemodes/instagib/gdm.h"
 #include "gamemodes/instagib/gtdm.h"
@@ -4026,16 +4026,10 @@ void CGameContext::OnInit(const void *pPersistentData)
     //+KZ: Ohno
 	if(!str_comp(Config()->m_SvGametype, "mod"))
 		m_pController = new CGameControllerMod(this);
-    else if(!str_comp_nocase(Config()->m_SvGametype, "ctf"))
-        m_pController = new CGameControllerCTFVanilla(this);
-    else if(!str_comp_nocase(Config()->m_SvGametype, "dm"))
-        m_pController = new CGameControllerDMVanilla(this);
-    else if(!str_comp_nocase(Config()->m_SvGametype, "tdm"))
-        m_pController = new CGameControllerTDMVanilla(this);
     else if(!str_comp_nocase(Config()->m_SvGametype, "lms"))
-        m_pController = new CGameControllerLMSVanilla(this);
+        m_pController = new CGameControllerLMS(this);
     else if(!str_comp_nocase(Config()->m_SvGametype, "lts"))
-        m_pController = new CGameControllerLTSVanilla(this);
+        m_pController = new CGameControllerLTS(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "ilms"))
 		m_pController = new CGameControllerILMS(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "ilts"))

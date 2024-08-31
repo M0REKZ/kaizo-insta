@@ -2729,8 +2729,6 @@ if(SERVER)
     gamecontext.h
     gamecontroller.cpp
     gamecontroller.h
-    gamemodes/BOMB.cpp
-    gamemodes/BOMB.h
     gamemodes/DDRace.cpp
     gamemodes/DDRace.h
     gamemodes/base_pvp/bangcommands.cpp
@@ -2782,26 +2780,32 @@ if(SERVER)
     gamemodes/vanilla/ctf.h
     gamemodes/vanilla/dm.cpp
     gamemodes/vanilla/dm.h
-	gamemodes/Freeze.cpp
-    gamemodes/Freeze.h
-	gamemodes/gFreeze.cpp
-    gamemodes/gFreeze.h
-	gamemodes/hFreeze.cpp
-    gamemodes/hFreeze.h
-	gamemodes/iFreeze.cpp
-    gamemodes/iFreeze.h
-    gamemodes/lms.cpp
-    gamemodes/lms.h
-	gamemodes/lts.cpp
-    gamemodes/lts.h
-	gamemodes/ilms.cpp
-    gamemodes/ilms.h
-    gamemodes/ilts.cpp
-    gamemodes/ilts.h
-    gamemodes/lms_vanilla.cpp
-    gamemodes/lms_vanilla.h
-    gamemodes/lts_vanilla.cpp
-    gamemodes/lts_vanilla.h
+    gamemodes/vanilla/BOMB.cpp
+    gamemodes/vanilla/BOMB.h
+    gamemodes/instagib/Freeze.cpp
+    gamemodes/instagib/Freeze.h
+    gamemodes/instagib/gFreeze.cpp
+    gamemodes/instagib/gFreeze.h
+    gamemodes/instagib/hFreeze.cpp
+    gamemodes/instagib/hFreeze.h
+    gamemodes/instagib/iFreeze.cpp
+    gamemodes/instagib/iFreeze.h
+    gamemodes/instagib/lms.cpp
+    gamemodes/instagib/lms.h
+    gamemodes/instagib/lts.cpp
+    gamemodes/instagib/lts.h
+    gamemodes/instagib/ilms.cpp
+    gamemodes/instagib/ilms.h
+    gamemodes/instagib/ilts.cpp
+    gamemodes/instagib/ilts.h
+    gamemodes/instagib/glms.cpp
+    gamemodes/instagib/glms.h
+    gamemodes/instagib/glts.cpp
+    gamemodes/instagib/glts.h
+    gamemodes/vanilla/lms.cpp
+    gamemodes/vanilla/lms.h
+    gamemodes/vanilla/lts.cpp
+    gamemodes/vanilla/lts.h
     gameworld.cpp
     gameworld.h
     instagib/gamelogic.cpp
