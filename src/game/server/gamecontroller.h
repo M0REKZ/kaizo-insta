@@ -193,6 +193,18 @@ public:
 			it also sets the happy eyes if the Dmg is not zero
 	*/
 	virtual bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) { return false; };
+
+	/*
+		Function: OnFireWeapon
+			this function was added in ddnet-insta and is a non standard controller method.
+			neither ddnet nor teeworlds have this
+
+		Returns:
+			return true to skip ddnet CCharacter::FireWeapon() behavior
+			which is doing standard ddnet fire weapon things
+	*/
+	virtual bool OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos) { return false; };
+
 	/*
 		Function: OnChatMessage
 			hooks into CGameContext::OnSayNetMessage()
@@ -204,6 +216,8 @@ public:
 	*/
 	virtual bool OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer) { return false; };
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
+	virtual int GameInfoExFlags(int SnappingClient) { return 0; }; // TODO: this breaks the ddrace gametype
+	virtual int GameInfoExFlags2(int SnappingClient) { return 0; };
 	void CheckReadyStates(int WithoutId = -1);
 	bool GetPlayersReadyState(int WithoutId = -1, int *pNumUnready = nullptr);
 	void SetPlayersReadyState(bool ReadyState);

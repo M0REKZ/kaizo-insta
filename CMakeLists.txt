@@ -2695,6 +2695,10 @@ if(SERVER)
     ddracecommands.cpp
     entities/character.cpp
     entities/character.h
+    entities/ddnet_pvp/vanilla_pickup.cpp
+    entities/ddnet_pvp/vanilla_pickup.h
+    entities/ddnet_pvp/vanilla_projectile.cpp
+    entities/ddnet_pvp/vanilla_projectile.h
     entities/door.cpp
     entities/door.h
     entities/dragger.cpp
@@ -2729,79 +2733,81 @@ if(SERVER)
     gamemodes/BOMB.h
     gamemodes/DDRace.cpp
     gamemodes/DDRace.h
-    gamemodes/base_fng.cpp
-    gamemodes/base_fng.h
-    gamemodes/base_instagib.cpp
-    gamemodes/base_instagib.h
-    gamemodes/ctf.cpp
-    gamemodes/ctf.h
-    gamemodes/ctf_vanilla.cpp
-    gamemodes/ctf_vanilla.h
-    gamemodes/dm.cpp
-    gamemodes/dm.h
-    gamemodes/dm_vanilla.cpp
-    gamemodes/dm_vanilla.h
-    gamemodes/Freeze.cpp
+    gamemodes/base_pvp/bangcommands.cpp
+    gamemodes/base_pvp/base_pvp.cpp
+    gamemodes/base_pvp/base_pvp.h
+    gamemodes/base_pvp/character.cpp
+    gamemodes/base_pvp/character.h
+    gamemodes/base_pvp/chat.cpp
+    gamemodes/base_pvp/ctf.cpp
+    gamemodes/base_pvp/ctf.h
+    gamemodes/base_pvp/dm.cpp
+    gamemodes/base_pvp/dm.h
+    gamemodes/base_pvp/player.cpp
+    gamemodes/base_pvp/player.h
+    gamemodes/instagib/base_fng.cpp
+    gamemodes/instagib/base_fng.h
+    gamemodes/instagib/base_instagib.cpp
+    gamemodes/instagib/base_instagib.h
+    gamemodes/instagib/ctf.cpp
+    gamemodes/instagib/ctf.h
+    gamemodes/instagib/dm.cpp
+    gamemodes/instagib/dm.h
+    gamemodes/instagib/gctf.cpp
+    gamemodes/instagib/gctf.h
+    gamemodes/instagib/gdm.cpp
+    gamemodes/instagib/gdm.h
+    gamemodes/instagib/gtdm.cpp
+    gamemodes/instagib/gtdm.h
+    gamemodes/instagib/ictf.cpp
+    gamemodes/instagib/ictf.h
+    gamemodes/instagib/idm.cpp
+    gamemodes/instagib/idm.h
+    gamemodes/instagib/itdm.cpp
+    gamemodes/instagib/itdm.h
+    gamemodes/instagib/solofng.cpp
+    gamemodes/instagib/solofng.h
+    gamemodes/instagib/tdm.cpp
+    gamemodes/instagib/tdm.h
+    gamemodes/instagib/team_fng.cpp
+    gamemodes/instagib/team_fng.h
+    gamemodes/instagib/zcatch/colors.cpp
+    gamemodes/instagib/zcatch/zcatch.cpp
+    gamemodes/instagib/zcatch/zcatch.h
+    gamemodes/mod.cpp
+    gamemodes/mod.h
+    gamemodes/vanilla/base_vanilla.cpp
+    gamemodes/vanilla/base_vanilla.h
+    gamemodes/vanilla/ctf.cpp
+    gamemodes/vanilla/ctf.h
+    gamemodes/vanilla/dm.cpp
+    gamemodes/vanilla/dm.h
+	gamemodes/Freeze.cpp
     gamemodes/Freeze.h
-    gamemodes/gctf.cpp
-    gamemodes/gctf.h
-    gamemodes/gdm.cpp
-    gamemodes/gdm.h
-    gamemodes/gFreeze.cpp
+	gamemodes/gFreeze.cpp
     gamemodes/gFreeze.h
-    gamemodes/glms.cpp
-    gamemodes/glms.h
-    gamemodes/glts.cpp
-    gamemodes/glts.h
-    gamemodes/gtdm.cpp
-    gamemodes/gtdm.h
-    gamemodes/hFreeze.cpp
+	gamemodes/hFreeze.cpp
     gamemodes/hFreeze.h
-    gamemodes/ictf.cpp
-    gamemodes/ictf.h
-    gamemodes/idm.cpp
-    gamemodes/idm.h
-    gamemodes/ilms.cpp
-    gamemodes/ilms.h
-    gamemodes/ilts.cpp
-    gamemodes/ilts.h
-    gamemodes/instagib/bangcommands.cpp
-    gamemodes/instagib/character.cpp
-    gamemodes/instagib/character.h
-    gamemodes/instagib/chat.cpp
-    gamemodes/instagib/player.cpp
-    gamemodes/instagib/player.h
-    gamemodes/instagib/rcon_commands.cpp
-    gamemodes/instagib/rcon_commands.h
-    gamemodes/instagib/rcon_configs.cpp
-    gamemodes/itdm.cpp
-    gamemodes/itdm.h
-    gamemodes/iFreeze.cpp
+	gamemodes/iFreeze.cpp
     gamemodes/iFreeze.h
     gamemodes/lms.cpp
     gamemodes/lms.h
-    gamemodes/lts.cpp
+	gamemodes/lts.cpp
     gamemodes/lts.h
+	gamemodes/ilms.cpp
+    gamemodes/ilms.h
+    gamemodes/ilts.cpp
+    gamemodes/ilts.h
     gamemodes/lms_vanilla.cpp
     gamemodes/lms_vanilla.h
     gamemodes/lts_vanilla.cpp
     gamemodes/lts_vanilla.h
-    gamemodes/mod.cpp
-    gamemodes/mod.h
-    gamemodes/solofng.cpp
-    gamemodes/solofng.h
-    gamemodes/tdm.cpp
-    gamemodes/tdm.h
-    gamemodes/tdm_vanilla.cpp
-    gamemodes/tdm_vanilla.h
-    gamemodes/team_fng.cpp
-    gamemodes/team_fng.h
-    gamemodes/zcatch/colors.cpp
-    gamemodes/zcatch/zcatch.cpp
-    gamemodes/zcatch/zcatch.h
     gameworld.cpp
     gameworld.h
     instagib/gamelogic.cpp
+    instagib/rcon_commands.cpp
+    instagib/rcon_commands.h
+    instagib/rcon_configs.cpp
     instagib/round_stats.cpp
     instagib/round_stats_csv.cpp
     instagib/round_stats_player.h

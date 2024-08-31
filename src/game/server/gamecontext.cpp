@@ -31,29 +31,28 @@
 
 #include "entities/character.h"
 #include "gamemodes/DDRace.h"
-#include "gamemodes/ctf_vanilla.h"
-#include "gamemodes/dm_vanilla.h"
+#include "gamemodes/BOMB.h"
 #include "gamemodes/Freeze.h"
-#include "gamemodes/tdm_vanilla.h"
+#include "gamemodes/gFreeze.h"
+#include "gamemodes/hFreeze.h"
+#include "gamemodes/iFreeze.h"
 #include "gamemodes/lms_vanilla.h"
 #include "gamemodes/lts_vanilla.h"
-#include "gamemodes/gctf.h"
-#include "gamemodes/gdm.h"
-#include "gamemodes/gFreeze.h"
-#include "gamemodes/gtdm.h"
 #include "gamemodes/glms.h"
 #include "gamemodes/glts.h"
-#include "gamemodes/hFreeze.h"
-#include "gamemodes/ictf.h"
-#include "gamemodes/idm.h"
-#include "gamemodes/itdm.h"
 #include "gamemodes/ilms.h"
 #include "gamemodes/ilts.h"
-#include "gamemodes/iFreeze.h"
+#include "gamemodes/instagib/gctf.h"
+#include "gamemodes/instagib/gdm.h"
+#include "gamemodes/instagib/gtdm.h"
+#include "gamemodes/instagib/ictf.h"
+#include "gamemodes/instagib/idm.h"
+#include "gamemodes/instagib/itdm.h"
+#include "gamemodes/instagib/solofng.h"
+#include "gamemodes/instagib/zcatch/zcatch.h"
 #include "gamemodes/mod.h"
-#include "gamemodes/solofng.h"
-#include "gamemodes/zcatch/zcatch.h"
-#include "gamemodes/BOMB.h"
+#include "gamemodes/vanilla/ctf.h"
+#include "gamemodes/vanilla/dm.h"
 #include "player.h"
 #include "score.h"
 
@@ -1513,28 +1512,6 @@ void CGameContext::OnClientEnter(int ClientId)
 		m_TeeHistorian.RecordPlayerReady(ClientId);
 	}
 	m_pController->OnPlayerConnect(m_apPlayers[ClientId]);
-
-	if(Server()->IsSixup(ClientId))
-	{
-		{
-			protocol7::CNetMsg_Sv_GameInfo Msg;
-			Msg.m_GameFlags = protocol7::GAMEFLAG_RACE;
-			//Msg.m_GameFlags = protocol7::GAMEFLAG_TEAMS | protocol7::GAMEFLAG_FLAGS; // ddnet-insta
-            Msg.m_GameFlags = m_pController->m_GameFlags_v7; // ddnet-cfg JSAURUS
-			Msg.m_MatchCurrent = 1;
-			Msg.m_MatchNum = 0;
-			Msg.m_ScoreLimit = Config()->m_SvScorelimit; // ddnet-insta
-			Msg.m_TimeLimit = Config()->m_SvTimelimit; // ddnet-insta
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
-		}
-
-		// /team is essential
-		{
-			protocol7::CNetMsg_Sv_CommandInfoRemove Msg;
-			Msg.m_pName = "team";
-			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
-		}
-	}
 
 	{
 		CNetMsg_Sv_CommandInfoGroupStart Msg;
@@ -4091,6 +4068,10 @@ void CGameContext::OnInit(const void *pPersistentData)
 		m_pController = new CGameControllerGTDM(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "itdm"))
 		m_pController = new CGameControllerITDM(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "dm"))
+		m_pController = new CGameControllerDM(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "ctf"))
+		m_pController = new CGameControllerCTF(this);
 	else
 	{
 		if(str_comp_nocase(Config()->m_SvGametype, "ddnet"))

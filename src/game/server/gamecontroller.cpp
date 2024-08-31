@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include <engine/shared/config.h>
 
+#include <engine/shared/protocolglue.h>
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
 #include <game/server/score.h>
@@ -230,22 +231,12 @@ bool IGameController::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
 
 bool IGameController::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {
-    //JSAURUS
-    if(m_VanillaBehavior)
-    {
-        //+KZ: some non-insta game modes dont spawn certain things so im better leaving this as config variables, even if it looks "ugly"
-        if(g_Config.m_SvSpawnPickupWeapons ? false : (Index == ENTITY_WEAPON_SHOTGUN || Index == ENTITY_WEAPON_GRENADE || Index == ENTITY_WEAPON_LASER))
-            return false;
-        if(g_Config.m_SvSpawnPickups ? false : (Index == ENTITY_ARMOR_1 || Index == ENTITY_HEALTH_1))
-            return false;
-    }
-    else
-    {
-        // ddnet-insta
-        // do not spawn pickups
-        if(Index == ENTITY_ARMOR_1 || Index == ENTITY_HEALTH_1 || Index == ENTITY_WEAPON_SHOTGUN || Index == ENTITY_WEAPON_GRENADE || Index == ENTITY_WEAPON_LASER || Index == ENTITY_POWERUP_NINJA)
-            return false;
-    }
+
+	//+KZ: some non-insta game modes dont spawn certain things so im better leaving this as config variables, even if it looks "ugly"
+	if(g_Config.m_SvSpawnPickupWeapons ? false : (Index == ENTITY_WEAPON_SHOTGUN || Index == ENTITY_WEAPON_GRENADE || Index == ENTITY_WEAPON_LASER))
+		return false;
+	if(g_Config.m_SvSpawnPickups ? false : (Index == ENTITY_ARMOR_1 || Index == ENTITY_HEALTH_1))
+		return false;
 
 	dbg_assert(Index >= 0, "Invalid entity index");
 
@@ -473,6 +464,26 @@ void IGameController::OnPlayerConnect(CPlayer *pPlayer)
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "team_join player='%d:%s' team=%d", ClientId, Server()->ClientName(ClientId), pPlayer->GetTeam());
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+	}
+
+	if(Server()->IsSixup(ClientId))
+	{
+		{
+			protocol7::CNetMsg_Sv_GameInfo Msg;
+			Msg.m_GameFlags = m_GameFlags;
+			Msg.m_MatchCurrent = 1;
+			Msg.m_MatchNum = 0;
+			Msg.m_ScoreLimit = 0;
+			Msg.m_TimeLimit = 0;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
+		}
+
+		// /team is essential
+		{
+			protocol7::CNetMsg_Sv_CommandInfoRemove Msg;
+			Msg.m_pName = "team";
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
+		}
 	}
 }
 
@@ -754,7 +765,7 @@ void IGameController::Snap(int SnappingClient)
 	if(!pGameInfoObj)
 		return;
 
-	pGameInfoObj->m_GameFlags = m_GameFlags;
+	pGameInfoObj->m_GameFlags = GameFlags_ClampToSix(m_GameFlags);
 	pGameInfoObj->m_GameStateFlags = 0;
 	if(m_GameOverTick != -1)
 		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_GAMEOVER;
@@ -796,60 +807,26 @@ void IGameController::Snap(int SnappingClient)
 	if(!pGameInfoEx)
 		return;
 
-    if(!m_VanillaBehavior)
-    {
-        pGameInfoEx->m_Flags =
-        /* GAMEINFOFLAG_TIMESCORE | */ // ddnet-insta
-        /* GAMEINFOFLAG_GAMETYPE_RACE | */ // ddnet-insta
-        /* GAMEINFOFLAG_GAMETYPE_DDRACE | */ // ddnet-insta
-        /* GAMEINFOFLAG_GAMETYPE_DDNET | */ // ddnet-insta
-        GAMEINFOFLAG_UNLIMITED_AMMO |
-        GAMEINFOFLAG_RACE_RECORD_MESSAGE |
-        GAMEINFOFLAG_ALLOW_EYE_WHEEL |
-        GAMEINFOFLAG_ALLOW_HOOK_COLL |
-        GAMEINFOFLAG_ALLOW_ZOOM |
-        GAMEINFOFLAG_BUG_DDRACE_GHOST |
-        GAMEINFOFLAG_BUG_DDRACE_INPUT |
-        //GAMEINFOFLAG_PREDICT_DDRACE |
-        GAMEINFOFLAG_PREDICT_DDRACE_TILES |
-        GAMEINFOFLAG_ENTITIES_DDNET |
-        GAMEINFOFLAG_ENTITIES_DDRACE |
-        GAMEINFOFLAG_ENTITIES_RACE |
-        GAMEINFOFLAG_RACE;
-    }
-    else //JSAURUS
-    {
-        pGameInfoEx->m_Flags =
-        GAMEINFOFLAG_PREDICT_VANILLA |
-        GAMEINFOFLAG_ENTITIES_VANILLA |
-        GAMEINFOFLAG_BUG_VANILLA_BOUNCE |
-        GAMEINFOFLAG_GAMETYPE_VANILLA |
-        /* GAMEINFOFLAG_TIMESCORE | */ // ddnet-insta
-        /* GAMEINFOFLAG_GAMETYPE_RACE | */ // ddnet-insta
-        /* GAMEINFOFLAG_GAMETYPE_DDRACE | */ // ddnet-insta
-        /* GAMEINFOFLAG_GAMETYPE_DDNET | */ // ddnet-insta
-        // GAMEINFOFLAG_UNLIMITED_AMMO |
-        GAMEINFOFLAG_RACE_RECORD_MESSAGE |
-        GAMEINFOFLAG_ALLOW_EYE_WHEEL |
-        GAMEINFOFLAG_ALLOW_HOOK_COLL |
-        GAMEINFOFLAG_ALLOW_ZOOM |
-        GAMEINFOFLAG_BUG_DDRACE_GHOST |
-        GAMEINFOFLAG_BUG_DDRACE_INPUT |
-        //GAMEINFOFLAG_PREDICT_DDRACE |
-        GAMEINFOFLAG_PREDICT_DDRACE_TILES |
-        GAMEINFOFLAG_ENTITIES_DDNET |
-        GAMEINFOFLAG_ENTITIES_DDRACE |
-        GAMEINFOFLAG_ENTITIES_RACE |
-        GAMEINFOFLAG_RACE;
-    }
-	if(!g_Config.m_SvAllowZoom) //ddnet-insta
-		pGameInfoEx->m_Flags &= ~(GAMEINFOFLAG_ALLOW_ZOOM);
-	if(g_Config.m_SvFastcap) //ddnet-insta
-	{
-		pGameInfoEx->m_Flags |= GAMEINFOFLAG_GAMETYPE_FASTCAP;
-		pGameInfoEx->m_Flags |= GAMEINFOFLAG_FLAG_STARTS_RACE;
-	}
-	pGameInfoEx->m_Flags2 = GAMEINFOFLAG2_HUD_AMMO | GAMEINFOFLAG2_HUD_HEALTH_ARMOR; // ddnet-insta
+	pGameInfoEx->m_Flags =
+		GAMEINFOFLAG_TIMESCORE |
+		GAMEINFOFLAG_GAMETYPE_RACE |
+		GAMEINFOFLAG_GAMETYPE_DDRACE |
+		GAMEINFOFLAG_GAMETYPE_DDNET |
+		GAMEINFOFLAG_UNLIMITED_AMMO |
+		GAMEINFOFLAG_RACE_RECORD_MESSAGE |
+		GAMEINFOFLAG_ALLOW_EYE_WHEEL |
+		GAMEINFOFLAG_ALLOW_HOOK_COLL |
+		GAMEINFOFLAG_ALLOW_ZOOM |
+		GAMEINFOFLAG_BUG_DDRACE_GHOST |
+		GAMEINFOFLAG_BUG_DDRACE_INPUT |
+		GAMEINFOFLAG_PREDICT_DDRACE |
+		GAMEINFOFLAG_PREDICT_DDRACE_TILES |
+		GAMEINFOFLAG_ENTITIES_DDNET |
+		GAMEINFOFLAG_ENTITIES_DDRACE |
+		GAMEINFOFLAG_ENTITIES_RACE |
+		GAMEINFOFLAG_RACE;
+	pGameInfoEx->m_Flags = GameInfoExFlags(SnappingClient); // ddnet-insta
+	pGameInfoEx->m_Flags2 = GameInfoExFlags2(SnappingClient); // ddnet-insta
 	if(g_Config.m_SvNoWeakHook)
 		pGameInfoEx->m_Flags2 |= GAMEINFOFLAG2_NO_WEAK_HOOK;
     if(g_Config.m_SvEnableDDraceHUD) //+KZ
@@ -1207,8 +1184,7 @@ void IGameController::UpdateGameInfo(int ClientId)
 		if(Server()->IsSixup(i))
 		{
 			protocol7::CNetMsg_Sv_GameInfo Msg;
-			Msg.m_GameFlags = protocol7::GAMEFLAG_RACE;
-			Msg.m_GameFlags = protocol7::GAMEFLAG_TEAMS | protocol7::GAMEFLAG_FLAGS;
+			Msg.m_GameFlags = m_GameFlags;
 			Msg.m_MatchCurrent = 1;
 			Msg.m_MatchNum = 0;
 			Msg.m_ScoreLimit = Config()->m_SvScorelimit;
