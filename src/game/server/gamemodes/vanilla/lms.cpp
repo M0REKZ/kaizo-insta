@@ -10,7 +10,7 @@ CGameControllerLMS::CGameControllerLMS(class CGameContext *pGameServer) :
     m_GameFlags = 0;
     m_GameFlags_v7 = protocol7::GAMEFLAG_SURVIVAL;
 
-    //m_pGameType = "LMS+";
+    m_pGameType = "LMS*";
 }
 
 CGameControllerLMS::~CGameControllerLMS() = default;
@@ -222,4 +222,15 @@ bool CGameControllerLMS::CanJoinTeam(int Team, int NotThisId, char *pErrorReason
         return false;
     }
     return true;
+}
+
+void CGameControllerLMS::OnCharacterSpawn(class CCharacter *pChr)
+{
+	CGameControllerDM::OnCharacterSpawn(pChr);
+
+	//LMS
+	pChr->IncreaseArmor(5);
+	pChr->GiveWeapon(WEAPON_SHOTGUN, false, 10);
+	pChr->GiveWeapon(WEAPON_GRENADE, false, 10);
+	pChr->GiveWeapon(WEAPON_LASER, false, 5);
 }

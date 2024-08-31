@@ -16,6 +16,7 @@ public:
 	~CGameControllerLMS();
 
     virtual bool CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize) override;
+	void OnCharacterSpawn(class CCharacter *pChr) override;
 	virtual int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
     virtual void OnPlayerConnect(class CPlayer *pPlayer) override;
 	void Tick() override;
