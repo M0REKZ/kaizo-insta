@@ -9,7 +9,6 @@ CGameControllerBOMB::CGameControllerBOMB(class CGameContext *pGameServer) :
     m_VanillaBehavior = true;
 
     m_GameFlags = 0;
-    m_GameFlags_v7 = protocol7::GAMEFLAG_SURVIVAL;
 
     m_pGameType = "BOMB";
     

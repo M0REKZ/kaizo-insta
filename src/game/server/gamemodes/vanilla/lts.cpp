@@ -6,10 +6,8 @@
 CGameControllerLTS::CGameControllerLTS(class CGameContext *pGameServer) :
 	CGameControllerLMS(pGameServer)
 {
-    //m_VanillaBehavior = true;
-    
+
     m_GameFlags = GAMEFLAG_TEAMS;
-    m_GameFlags_v7 = protocol7::GAMEFLAG_TEAMS | protocol7::GAMEFLAG_SURVIVAL;
 
     m_pGameType = "LTS*";
 }

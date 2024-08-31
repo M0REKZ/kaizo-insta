@@ -14,7 +14,6 @@ CGameControllerInstaBaseCTF::CGameControllerInstaBaseCTF(class CGameContext *pGa
 	CGameControllerInstagib(pGameServer)
 {
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
-    m_GameFlags_v7 = protocol7::GAMEFLAG_TEAMS | protocol7::GAMEFLAG_FLAGS;
 
 	m_apFlags[0] = 0;
 	m_apFlags[1] = 0;

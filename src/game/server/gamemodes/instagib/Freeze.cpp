@@ -7,8 +7,6 @@ CGameControllerFreeze::CGameControllerFreeze(class CGameContext *pGameServer) :
 	CGameControllerInstaTDM(pGameServer)
 {
     m_GameFlags = GAMEFLAG_TEAMS;
-    m_GameFlags_v7 = protocol7::GAMEFLAG_TEAMS;
-   // m_pGameType = "Freeze+";
     
     m_DontSelfKill = true;
 }

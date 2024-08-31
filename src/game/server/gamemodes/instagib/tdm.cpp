@@ -7,8 +7,6 @@ CGameControllerInstaTDM::CGameControllerInstaTDM(class CGameContext *pGameServer
 	CGameControllerInstaBaseDM(pGameServer)
 {
 	m_GameFlags = GAMEFLAG_TEAMS;
-	
-	m_GameFlags_v7 = protocol7::GAMEFLAG_TEAMS;
 }
 
 CGameControllerInstaTDM::~CGameControllerInstaTDM() = default;

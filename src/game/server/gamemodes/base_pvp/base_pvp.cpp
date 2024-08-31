@@ -12,7 +12,6 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	CGameControllerDDRace(pGameServer)
 {
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
-    m_GameFlags_v7 = protocol7::GAMEFLAG_TEAMS | protocol7::GAMEFLAG_FLAGS;
 
 	m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
 	m_AllowSkinChange = true;
@@ -347,14 +346,6 @@ void CGameControllerPvp::OnCharacterSpawn(class CCharacter *pChr)
 
 	// default health
 	pChr->IncreaseHealth(10);
-	
-	if(m_VanillaBehavior)
-	{
-		pChr->ResetPickups();
-		pChr->GiveWeapon(WEAPON_GUN, false, 10);
-		pChr->GiveWeapon(WEAPON_HAMMER);
-		pChr->SetActiveWeapon(WEAPON_GUN);
-	}
 }
 
 void CGameControllerPvp::AddSpree(class CPlayer *pPlayer)
