@@ -104,6 +104,7 @@ public:
 	virtual void OnCharacterSpawn(class CCharacter *pChr);
 
 	virtual void HandleCharacterTiles(class CCharacter *pChr, int MapIndex);
+	virtual void SetArmorProgress(CCharacter *pCharacer, int Progress){};
 
 	/*
 		Function: OnEntity
@@ -213,6 +214,16 @@ public:
 			which would print it to the chat or run it as a ddrace chat command
 	*/
 	virtual bool OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer) { return false; };
+
+	/*
+		Function: OnChangeInfoNetMessage
+			hooks into CGameContext::OnChangeInfoNetMessage()
+			after spam protection check
+
+		Returns:
+			return true to not run the rest of CGameContext::OnChangeInfoNetMessage()
+	*/
+	virtual bool OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId) { return false; }
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
 	virtual int GameInfoExFlags(int SnappingClient) { return 0; }; // TODO: this breaks the ddrace gametype
 	virtual int GameInfoExFlags2(int SnappingClient) { return 0; };

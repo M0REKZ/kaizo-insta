@@ -28,6 +28,7 @@ public:
 	void OnRoundStart() override;
 	bool OnSelfkill(int ClientId) override;
 	int GetAutoTeam(int NotThisId) override;
+	bool OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId) override;
 
 	enum class ECatchGameState
 	{
@@ -56,6 +57,8 @@ public:
 
 	int GetBodyColorTeetime(int Kills);
 	int GetBodyColorSavander(int Kills);
+
+	void SetCatchColors(class CPlayer *pPlayer);
 
 	void SendSkinBodyColor7(int ClientId, int Color);
 

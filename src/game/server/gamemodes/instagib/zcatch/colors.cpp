@@ -1,6 +1,12 @@
 #include <game/server/player.h>
+#include <game/server/teeinfo.h>
 
 #include "zcatch.h"
+
+static int ColorToSixup(int Color6)
+{
+	return ColorHSLA(Color6).UnclampLighting().Pack(CTeeInfo::ms_DarkestLGT7);
+}
 
 int CGameControllerZcatch::GetBodyColorTeetime(int Kills)
 {
@@ -78,6 +84,42 @@ void CGameControllerZcatch::OnUpdateZcatchColorConfig()
 	}
 }
 
+void CGameControllerZcatch::SetCatchColors(CPlayer *pPlayer)
+{
+	int Color = GetBodyColor(pPlayer->m_Spree);
+
+	// it would be cleaner if this only applied to the winner
+	// we could make sure m_Spree is not reset until the next round starts
+	// but for now it should work because players that connect during round end
+	// will reset m_aBodyColors
+	if(GameState() == IGS_END_ROUND)
+		Color = m_aBodyColors[pPlayer->GetCid()];
+
+	// 0.6
+	pPlayer->m_TeeInfos.m_ColorBody = Color;
+	pPlayer->m_TeeInfos.m_UseCustomColor = 1;
+
+	// 0.7
+	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+	{
+		pPlayer->m_TeeInfos.m_aSkinPartColors[p] = ColorToSixup(Color);
+		pPlayer->m_TeeInfos.m_aUseCustomColors[p] = true;
+	}
+}
+
+bool CGameControllerZcatch::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId)
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return false;
+
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return false;
+
+	SetCatchColors(pPlayer);
+	return false;
+}
+
 void CGameControllerZcatch::SendSkinBodyColor7(int ClientId, int Color)
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
@@ -94,7 +136,7 @@ void CGameControllerZcatch::SendSkinBodyColor7(int ClientId, int Color)
 	// 0.7
 	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 	{
-		pPlayer->m_TeeInfos.m_aSkinPartColors[p] = Color;
+		pPlayer->m_TeeInfos.m_aSkinPartColors[p] = ColorToSixup(Color);
 		pPlayer->m_TeeInfos.m_aUseCustomColors[p] = true;
 	}
 

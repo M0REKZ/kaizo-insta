@@ -2,6 +2,7 @@
 #include <engine/server.h>
 #include <engine/shared/config.h>
 #include <engine/shared/protocol.h>
+#include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
@@ -64,14 +65,6 @@ void CGameControllerZcatch::OnRoundStart()
 	}
 }
 
-int CGameControllerZcatch::GetAutoTeam(int NotThisId)
-{
-	if(CatchGameState() == ECatchGameState::RUNNING)
-		return TEAM_SPECTATORS;
-
-	return CGameControllerInstagib::GetAutoTeam(NotThisId);
-}
-
 CGameControllerZcatch::~CGameControllerZcatch() = default;
 
 void CGameControllerZcatch::Tick()
@@ -83,15 +76,10 @@ void CGameControllerZcatch::Tick()
 		if(!pPlayer)
 			continue;
 
-		int Color = GetBodyColor(pPlayer->m_Spree);
-		if(GameState() == IGS_END_ROUND)
-			Color = m_aBodyColors[pPlayer->GetCid()];
-
 		// this is wasting a bit of clock cycles setting it every tick
 		// it should be set on kill and then not be overwritten by info changes
 		// but there is no git conflict free way of doing that
-		pPlayer->m_TeeInfos.m_ColorBody = Color;
-		pPlayer->m_TeeInfos.m_UseCustomColor = 1;
+		SetCatchColors(pPlayer);
 
 		if(m_aBodyColors[pPlayer->GetCid()] != pPlayer->m_TeeInfos.m_ColorBody)
 		{
@@ -99,6 +87,9 @@ void CGameControllerZcatch::Tick()
 			SendSkinBodyColor7(pPlayer->GetCid(), pPlayer->m_TeeInfos.m_ColorBody);
 		}
 	}
+
+	if(Server()->Tick() % 100 == 0)
+		DoWincheckRound();
 }
 
 void CGameControllerZcatch::OnCharacterSpawn(class CCharacter *pChr)
@@ -113,7 +104,7 @@ void CGameControllerZcatch::ReleasePlayer(class CPlayer *pPlayer, const char *pM
 	GameServer()->SendChatTarget(pPlayer->GetCid(), pMsg);
 	pPlayer->m_KillerId = -1;
 	pPlayer->m_IsDead = false;
-	pPlayer->SetTeamRaw(TEAM_RED);
+	pPlayer->SetTeamNoKill(TEAM_RED);
 }
 
 bool CGameControllerZcatch::OnSelfkill(int ClientId)
@@ -154,11 +145,15 @@ void CGameControllerZcatch::KillPlayer(class CPlayer *pVictim, class CPlayer *pK
 	str_format(aBuf, sizeof(aBuf), "You are spectator until '%s' dies", Server()->ClientName(pKiller->GetCid()));
 	GameServer()->SendChatTarget(pVictim->GetCid(), aBuf);
 
-	pVictim->SetTeamRaw(TEAM_SPECTATORS);
+	if(pVictim->GetTeam() != TEAM_SPECTATORS)
+		pVictim->SetTeamNoKill(TEAM_SPECTATORS);
 	pVictim->m_SpectatorId = pKiller->GetCid();
 	pVictim->m_IsDead = true;
 	pVictim->m_KillerId = pKiller->GetCid();
-	pKiller->m_vVictimIds.emplace_back(pVictim->GetCid());
+
+	int Found = count(pKiller->m_vVictimIds.begin(), pKiller->m_vVictimIds.end(), pVictim->GetCid());
+	if(!Found)
+		pKiller->m_vVictimIds.emplace_back(pVictim->GetCid());
 }
 
 void CGameControllerZcatch::OnCaught(class CPlayer *pVictim, class CPlayer *pKiller)
@@ -225,7 +220,7 @@ bool CGameControllerZcatch::CanJoinTeam(int Team, int NotThisId, char *pErrorRea
 
 	if(pPlayer->m_IsDead && Team != TEAM_SPECTATORS)
 	{
-		str_copy(pErrorReason, "Wait until someone dies", ErrorReasonSize);
+		str_format(pErrorReason, ErrorReasonSize, "Wait until '%s' dies", Server()->ClientName(pPlayer->m_KillerId));
 		return false;
 	}
 	return true;
@@ -249,24 +244,40 @@ void CGameControllerZcatch::CheckGameState()
 	}
 }
 
+int CGameControllerZcatch::GetAutoTeam(int NotThisId)
+{
+	if(CatchGameState() == ECatchGameState::RUNNING)
+	{
+		return TEAM_SPECTATORS;
+	}
+
+	return CGameControllerInstagib::GetAutoTeam(NotThisId);
+}
+
 void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 {
 	CGameControllerInstagib::OnPlayerConnect(pPlayer);
-
-	if(CatchGameState() == ECatchGameState::RUNNING)
-	{
-		int KillerId = GetHighestSpreeClientId();
-		if(KillerId == -1)
-			KillerId = GetFirstAlivePlayerId();
-		if(KillerId != -1)
-			KillPlayer(pPlayer, GameServer()->m_apPlayers[KillerId]);
-	}
 	CheckGameState();
 
-	pPlayer->m_TeeInfos.m_ColorBody = GetBodyColor(pPlayer->m_Spree);
-	pPlayer->m_TeeInfos.m_UseCustomColor = 1;
+	int KillerId = GetHighestSpreeClientId();
+	if(KillerId != -1)
+	{
+		// avoid team change message by pre setting it
+		pPlayer->SetTeamRaw(TEAM_SPECTATORS);
+		KillPlayer(pPlayer, GameServer()->m_apPlayers[KillerId]);
+	}
+	// complicated way of saying not tournament mode
+	else if(CGameControllerInstagib::GetAutoTeam(pPlayer->GetCid()) != TEAM_SPECTATORS && pPlayer->GetTeam() == TEAM_SPECTATORS)
+	{
+		// auto join running games if nobody made a kill yet
+		// SetTeam will kill us and delay the spawning
+		// so you are stuck in the scoreboard for a second when joining a active round
+		// but lets call that a feature for now so you have to to get ready
+		pPlayer->SetTeam(TEAM_RED);
+	}
 
-	m_aBodyColors[pPlayer->GetCid()] = pPlayer->m_TeeInfos.m_ColorBody;
+	m_aBodyColors[pPlayer->GetCid()] = GetBodyColor(0);
+	SetCatchColors(pPlayer);
 	SendSkinBodyColor7(pPlayer->GetCid(), pPlayer->m_TeeInfos.m_ColorBody);
 
 	if(CatchGameState() == ECatchGameState::WAITING_FOR_PLAYERS)
@@ -308,7 +319,7 @@ bool CGameControllerZcatch::DoWincheckRound()
 			// only release players that actually died
 			// not all spectators
 			if(pPlayer->m_IsDead)
-				pPlayer->SetTeamRaw(TEAM_RED);
+				pPlayer->SetTeamNoKill(TEAM_RED);
 			pPlayer->m_IsDead = false;
 		}
 
