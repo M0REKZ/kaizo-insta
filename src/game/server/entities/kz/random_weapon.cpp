@@ -1,7 +1,6 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "random_weapon.h"
-#include "character.h"
 
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
@@ -15,7 +14,7 @@
 #include <game/server/gamecontroller.h>
 
 CRandomWeapon::CRandomWeapon(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number) :
-	CPickup(pGameWorld, Type, SubType, Layer, Number)
+CVanillaPickup(pGameWorld, Type, SubType, Layer, Number)
 {
 	m_ChangedType = false;
 }
@@ -39,5 +38,5 @@ void CRandomWeapon::Tick()
 		m_ChangedType = false;
 	}
 	
-	CPickup::Tick();
+	CVanillaPickup::Tick();
 }

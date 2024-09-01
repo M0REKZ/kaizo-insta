@@ -261,47 +261,12 @@ void CCharacter::HandleNinja()
 
 	if(NinjaTime % Server()->TickSpeed() == 0 && NinjaTime / Server()->TickSpeed() <= 5)
     {
-        if(!GameServer()->m_pController->m_VanillaBehavior) //ugly check for vanilla for JSaurus version
-        {
-            GameServer()->CreateDamageInd(m_Pos, 0, NinjaTime / Server()->TickSpeed(), TeamMask() & GameServer()->ClientsMaskExcludeClientVersionAndHigher(VERSION_DDNET_NEW_HUD));
-        }
-        else
-        {
-            GameServer()->CreateDamageInd(m_Pos, 0, NinjaTime / Server()->TickSpeed(), TeamMask());
-        }
+		GameServer()->CreateDamageInd(m_Pos, 0, NinjaTime / Server()->TickSpeed(), TeamMask() & GameServer()->ClientsMaskExcludeClientVersionAndHigher(VERSION_DDNET_NEW_HUD));
+
 	}
 
-    int AmmoRegenTime = g_pData->m_Weapons.m_aId[m_Core.m_ActiveWeapon].m_Ammoregentime; //JSaurus side
-    
-    if(!GameServer()->m_pController->m_VanillaBehavior)
-    {
-        m_Armor = clamp(10 - (NinjaTime / 15), 0, 10);
-    }
-    else
-    {
-        //JSaurus....
-        if(AmmoRegenTime && m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo >= 0)
-            {
-                // If equipped and not active, regen ammo?
-                if(m_ReloadTimer <= 0)
-                {
-                    if(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart < 0)
-                        m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = Server()->Tick();
+	m_Armor = clamp(10 - (NinjaTime / 15), 0, 10);
 
-                    if((Server()->Tick() - m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart) >= AmmoRegenTime * Server()->TickSpeed() / 1000)
-                    {
-                        // Add some ammo
-                        m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo = minimum(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo + 1,
-                            g_pData->m_Weapons.m_aId[m_Core.m_ActiveWeapon].m_Maxammo);
-                        m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
-                    }
-                }
-                else
-                {
-                    m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
-                }
-            }
-    }
 	// force ninja Weapon
 	SetWeapon(WEAPON_NINJA);
 
@@ -489,27 +454,8 @@ void CCharacter::FireWeapon()
 
 	// check for ammo
     
-    if(!GameServer()->m_pController->m_VanillaBehavior)
-    {
-        if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
-            return;
-    }
-    else
-    {
-        //JSAURUS >:(
-        
-        if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
-            {
-                // 125ms is a magical limit of how fast a human can click
-                m_ReloadTimer = 125 * Server()->TickSpeed() / 1000;
-                if(m_LastNoAmmoSound+Server()->TickSpeed() <= Server()->Tick())
-                {
-                    GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO);
-                    m_LastNoAmmoSound = Server()->Tick();
-                }
-                return;
-            }
-    }
+	if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
+		return;
 
 	vec2 ProjStartPos = m_Pos + Direction * GetProximityRadius() * 0.75f;
 
@@ -609,14 +555,10 @@ void CCharacter::FireWeapon()
 	{
         if(g_Config.m_SvDDraceShotgun)
         {
-            float LaserReach;
-            if(!m_TuneZone)
-                LaserReach = Tuning()->m_LaserReach;
-            else
-				LaserReach = GetTuning(m_TuneZone)->m_LaserReach;
-            
-            new CLaser(&GameServer()->m_World, m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_SHOTGUN);
-            GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+			float LaserReach = GetTuning(m_TuneZone)->m_LaserReach;
+
+			new CLaser(&GameServer()->m_World, m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_SHOTGUN);
+			GameServer()->CreateSound(m_Pos, SOUND_SHOTGUN_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
         }
         else
         {
@@ -1228,14 +1170,6 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 		if(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo > 0)
 			AmmoCount = (m_FreezeTime == 0) ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : 0;
 	}
-    
-    if(GameServer()->m_pController->m_VanillaBehavior) //JSAURUS
-    {
-        if(Weapon >= 0 && Weapon < NUM_WEAPONS)
-        {
-            AmmoCount = GetWeaponAmmo(Weapon);
-        }
-    }
     
 	if(GetPlayer()->IsAfk() || GetPlayer()->IsPaused())
 	{

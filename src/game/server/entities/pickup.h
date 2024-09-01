@@ -20,11 +20,9 @@ public:
 	int Type() const { return m_Type; }
 	int Subtype() const { return m_Subtype; }
 
-protected:
+private:
 	int m_Type;
 	int m_Subtype;
-	int m_SpawnTick; //JSAURUS
-	int m_Id2; //+KZ from Pointer tw+
 	
 	// DDRace
 

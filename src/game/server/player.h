@@ -75,9 +75,6 @@ public:
 	vec2 m_ViewPos;
 	int m_TuneZone;
 	int m_TuneZoneOld;
-    
-    /* ddnet-cfg */ //JSAURUS
-    int m_TicksAlive; //JSAURUS
 
 	// states if the client is chatting, accessing a menu etc.
 	int m_PlayerFlags;

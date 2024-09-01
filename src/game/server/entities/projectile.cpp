@@ -275,7 +275,7 @@ void CProjectile::Tick()
 				m_Direction.y = 0;
 			m_Pos += m_Direction;
 		}
-		else if(m_Type == WEAPON_GUN || (!g_Config.m_SvDDraceShotgun ? (m_Type == WEAPON_SHOTGUN && m_Owner >= 0) : false)) //Vanillabehavior -> JSAURUS
+		else if(m_Type == WEAPON_GUN || (!g_Config.m_SvDDraceShotgun ? (m_Type == WEAPON_SHOTGUN && m_Owner >= 0) : false))
 		{
             if(!g_Config.m_SvDDraceShotgun) //JSAURUS
             {

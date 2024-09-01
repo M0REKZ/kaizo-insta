@@ -45,14 +45,11 @@ bool CLight::HitCharacter()
 			pChar->Freeze();
 		else if(!m_DamageTick)
 		{
-			if(GameServer()->m_pController->m_VanillaBehavior)
-			{
-				pChar->TakeDamage(vec2(0,0), g_Config.m_SvLightKills, pChar->GetPlayer()->GetCid(), WEAPON_WORLD);
-			}
-			else
-			{
-				pChar->Die(pChar->GetPlayer()->GetCid(), WEAPON_WORLD);
-			}
+
+			pChar->TakeDamage(vec2(0,0), g_Config.m_SvLightKills, pChar->GetPlayer()->GetCid(), WEAPON_WORLD);
+
+			//pChar->Die(pChar->GetPlayer()->GetCid(), WEAPON_WORLD);
+
 			GameServer()->CreateSound(m_Pos, SOUND_HIT);
 			m_DamageTick = 4 * Server()->TickSpeed();
 		}

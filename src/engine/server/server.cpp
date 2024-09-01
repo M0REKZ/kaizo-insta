@@ -2182,8 +2182,7 @@ void CServer::CacheServerInfoSixup(CCache *pCache, bool SendClients)
 	Packer.AddString(GameServer()->GameType(), 16);
 
 	// flags
-	//int Flags = SERVER_FLAG_TIMESCORE; //ddnet-insta side
-    int Flags = 0; //JSaurusRex side
+	int Flags = SERVER_FLAG_TIMESCORE; //ddnet-insta side
 	if(Config()->m_Password[0]) // password set
 		Flags |= SERVER_FLAG_PASSWORD;
 	Packer.AddInt(Flags);

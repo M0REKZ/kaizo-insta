@@ -22,26 +22,9 @@ CPickup::CPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int N
 	m_Core = vec2(0.0f, 0.0f);
 	m_Type = Type;
 	m_Subtype = SubType;
-
-	if(m_Subtype && (m_Type == POWERUP_HEALTH || m_Type == POWERUP_ARMOR))
-	{
-		m_Id2 = Server()->SnapNewId();
-	}
-	else
-	{
-		m_Id2 = -1;
-	}
 	
 	m_Layer = Layer;
 	m_Number = Number;
-    
-    if(GameServer()->m_pController->m_VanillaBehavior) //JSAURUS
-    {
-        m_SpawnTick = -1;
-
-        if(m_Type == POWERUP_NINJA)
-            m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * 90;
-    }
     
 	GameWorld()->InsertEntity(this);
 }
@@ -53,25 +36,6 @@ void CPickup::Reset()
 
 void CPickup::Tick()
 {
-    if(GameServer()->m_pController->m_VanillaBehavior)
-    {
-        if(m_SpawnTick > 0)
-        {
-            if(Server()->Tick() > m_SpawnTick)
-            {
-                // respawn
-                m_SpawnTick = -1;
-
-                if(m_Type == POWERUP_WEAPON)
-                    GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SPAWN);
-            }
-            else
-                return;
-        }
-
-        if(!Config()->m_SvSpawnNinja && m_Type == POWERUP_NINJA)
-            m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * 90;
-    }
     
 	Move();
 
@@ -81,70 +45,45 @@ void CPickup::Tick()
 	for(int i = 0; i < Num; ++i)
 	{
 		auto *pChr = static_cast<CCharacter *>(apEnts[i]);
-
-        //if(GameServer()->m_pController->m_VanillaBehavior) //JSAURUS
-            int RespawnTime = -1;
         
 		if(pChr && pChr->IsAlive())
 		{
 			if(m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_aStatus[pChr->Team()])
 				continue;
-            
-            //if(!GameServer()->m_pController->m_VanillaBehavior) //JSAURUS
-                bool Sound = false;
+
+			bool Sound = false;
             
 			// player picked us up, is someone was hooking us, let them go
 			switch(m_Type)
 			{
 			case POWERUP_HEALTH:
-                if(!GameServer()->m_pController->m_VanillaBehavior)
-                {
-                    if(pChr->Freeze())
-                        GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->TeamMask());
-                }
-                else //JSAURUS..
-                {
-                    if(m_Subtype == 1 ? pChr->IncreaseHealth(5) : pChr->IncreaseHealth(1))
-                        {
-                            GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
-                            RespawnTime = 15; //todo, not hardcode >:(
-                        }
-                }
+				if(pChr->Freeze())
+					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->TeamMask());
 				break;
 
 			case POWERUP_ARMOR:
-                if(!GameServer()->m_pController->m_VanillaBehavior)
-                {
-                    if(pChr->Team() == TEAM_SUPER)
-                        continue;
-                    for(int j = WEAPON_SHOTGUN; j < NUM_WEAPONS; j++)
-                    {
-                        if(pChr->GetWeaponGot(j))
-                        {
-                            pChr->SetWeaponGot(j, false);
-                            pChr->SetWeaponAmmo(j, 0);
-                            Sound = true;
-                        }
-                    }
-                    pChr->SetNinjaActivationDir(vec2(0, 0));
-                    pChr->SetNinjaActivationTick(-500);
-                    pChr->SetNinjaCurrentMoveTime(0);
-                    if(Sound)
-                    {
-                        pChr->SetLastWeapon(WEAPON_GUN);
-                        GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
-                    }
-                    if(pChr->GetActiveWeapon() >= WEAPON_SHOTGUN)
-                        pChr->SetActiveWeapon(WEAPON_HAMMER);
-                }
-                else //JSAURUS
-                {
-                    if(m_Subtype == 1 ? pChr->IncreaseArmor(5) : pChr->IncreaseArmor(1))
-                        {
-                            GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR);
-                            RespawnTime = 15; //todo, not hardcode >:(
-                        }
-                }
+
+				if(pChr->Team() == TEAM_SUPER)
+					continue;
+				for(int j = WEAPON_SHOTGUN; j < NUM_WEAPONS; j++)
+				{
+					if(pChr->GetWeaponGot(j))
+					{
+						pChr->SetWeaponGot(j, false);
+						pChr->SetWeaponAmmo(j, 0);
+						Sound = true;
+					}
+				}
+				pChr->SetNinjaActivationDir(vec2(0, 0));
+				pChr->SetNinjaActivationTick(-500);
+				pChr->SetNinjaCurrentMoveTime(0);
+				if(Sound)
+				{
+					pChr->SetLastWeapon(WEAPON_GUN);
+					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
+				}
+				if(pChr->GetActiveWeapon() >= WEAPON_SHOTGUN)
+					pChr->SetActiveWeapon(WEAPON_HAMMER);
 				break;
 
 			case POWERUP_ARMOR_SHOTGUN:
@@ -199,17 +138,9 @@ void CPickup::Tick()
 
 			case POWERUP_WEAPON:
                     
-				if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || (GameServer()->m_pController->m_VanillaBehavior ? (pChr->GetWeaponAmmo(m_Subtype) != -1 && pChr->GetWeaponAmmo(m_Subtype) != 10) : pChr->GetWeaponAmmo(m_Subtype) != -1))) //VanillaBehavior added because JSaurus
+				if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
 				{
-                    if(GameServer()->m_pController->m_VanillaBehavior) //JSAURUS
-                    {
-                        RespawnTime = 15;
-                        pChr->GiveWeapon(m_Subtype, false, 10);
-                    }
-                    else
-                    {
-                        pChr->GiveWeapon(m_Subtype);
-                    }
+					pChr->GiveWeapon(m_Subtype);
                     
 					if(m_Subtype == WEAPON_GRENADE)
 						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
@@ -228,39 +159,11 @@ void CPickup::Tick()
 				// activate ninja on target player
 				pChr->GiveNinja();
                 
-                if(GameServer()->m_pController->m_VanillaBehavior) //JSAURUS
-                {
-                    CClientMask mask;
-                    GameServer()->CreateSound(m_Pos, SOUND_PICKUP_NINJA, pChr->TeamMask());
-
-                    RespawnTime = 90;
-
-                    CCharacter *pC = static_cast<CCharacter *>(GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER));
-                    for(; pC; pC = (CCharacter *)pC->TypeNext())
-                    {
-                        if (pC != pChr)
-                            pC->SetEmote(EMOTE_SURPRISE, Server()->Tick() + Server()->TickSpeed());
-                    }
-
-                    pChr->SetEmote(EMOTE_ANGRY, Server()->Tick() + 1200 * Server()->TickSpeed() / 1000);
-                }
-                
 				break;
 			}
 			default:
 				break;
 			};
-        if(GameServer()->m_pController->m_VanillaBehavior) //JSAURUS
-        {
-            if(RespawnTime >= 0)
-            {
-                char aBuf[256];
-                str_format(aBuf, sizeof(aBuf), "pickup player='%d:%s' item=%d/%d",
-                    pChr->GetPlayer()->GetCid(), Server()->ClientName(pChr->GetPlayer()->GetCid()), m_Type, m_Subtype);
-                GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-                m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
-            }
-        }
 		}
 	}
 }
@@ -271,16 +174,8 @@ void CPickup::TickPaused()
 
 void CPickup::Snap(int SnappingClient)
 {
-    if(GameServer()->m_pController->m_VanillaBehavior) //JSAURUS
-    {
-        if(m_SpawnTick != -1 || NetworkClipped(SnappingClient))
-            return;
-    }
-    else
-    {
-        if(NetworkClipped(SnappingClient))
-            return;
-    }
+	if(NetworkClipped(SnappingClient))
+		return;
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	bool Sixup = Server()->IsSixup(SnappingClient);
@@ -296,24 +191,7 @@ void CPickup::Snap(int SnappingClient)
 		if(pChar && pChar->IsAlive() && m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_aStatus[pChar->Team()] && !Tick)
 			return;
 	}
-
-	if ((m_Type == POWERUP_HEALTH || m_Type == POWERUP_ARMOR) && m_Subtype == 1 && m_Id2 != -1)
-	{
-		vec2 pos1, pos2;
-		
-		pos1.x = (int)m_Pos.x + 16*sin((float)Server()->Tick() / 25.0);
-		pos1.y = (int)m_Pos.y + 16*sin((float)Server()->Tick() / 25.0);
-		
-		pos2.x = (int)m_Pos.x + 16*cos((float)Server()->Tick() / 25.0);
-		pos2.y = (int)m_Pos.y + -16*cos((float)Server()->Tick() / 25.0);
-		
-		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), pos1, m_Type, 0, m_Number);
-		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), m_Id2, pos2, m_Type, 0, m_Number);
-	}
-	else
-	{
-		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, m_Subtype, m_Number);
-	}
+	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, m_Subtype, m_Number);
 	
 }
 

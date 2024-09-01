@@ -3,9 +3,9 @@
 #ifndef GAME_SERVER_ENTITIES_RANDOMPICKUP_H
 #define GAME_SERVER_ENTITIES_RANDOMPICKUP_H
 
-#include "pickup.h"
+#include <game/server/entities/ddnet_pvp/vanilla_pickup.h>
 
-class CRandomWeapon : public CPickup
+class CRandomWeapon : public CVanillaPickup
 {
 public:
 	CRandomWeapon(CGameWorld *pGameWorld, int Type, int SubType = 0, int Layer = 0, int Number = 0);

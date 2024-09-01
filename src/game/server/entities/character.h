@@ -103,7 +103,6 @@ public:
 	void ApplyMoveRestrictions();
 
 private:
-    friend class CGameControllerInstagib; //JSaurus
 	// player controlling this character
 	class CPlayer *m_pPlayer;
 

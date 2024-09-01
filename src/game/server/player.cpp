@@ -124,8 +124,6 @@ void CPlayer::Reset()
 	m_LastPause = 0;
 	m_Score.reset();
 	m_Score = 0; // ddnet-insta
-    if(GameServer()->m_pController->m_VanillaBehavior)
-        m_TicksAlive = 0;
 
 	// Variable initialized:
 	m_Last_Team = 0;
@@ -171,8 +169,6 @@ static int PlayerFlags_SixToSeven(int Flags)
 
 void CPlayer::Tick()
 {
-    if(GameServer()->m_pController->m_VanillaBehavior) //JSAURUS
-        m_TicksAlive++;
 	if(m_ScoreQueryResult != nullptr && m_ScoreQueryResult->m_Completed && m_SentSnaps >= 3)
 	{
 		ProcessScoreResult(*m_ScoreQueryResult);

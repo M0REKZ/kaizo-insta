@@ -19,6 +19,15 @@ CVanillaPickup::CVanillaPickup(CGameWorld *pGameWorld, int Type, int SubType, in
 	m_Type = Type;
 	m_Subtype = SubType;
 
+	if(m_Subtype && (m_Type == POWERUP_HEALTH || m_Type == POWERUP_ARMOR))
+	{
+		m_Id2 = Server()->SnapNewId();
+	}
+	else
+	{
+		m_Id2 = -1;
+	}
+	
 	m_Layer = Layer;
 	m_Number = Number;
 
@@ -68,7 +77,8 @@ void CVanillaPickup::Tick()
 			switch(m_Type)
 			{
 			case POWERUP_HEALTH:
-				if(pChr->IncreaseHealth(1))
+					
+				if(m_Subtype == 1 ? pChr->IncreaseHealth(5) : pChr->IncreaseHealth(1))
 				{
 					Picked = true;
 					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->TeamMask());
@@ -76,7 +86,7 @@ void CVanillaPickup::Tick()
 				break;
 
 			case POWERUP_ARMOR:
-				if(pChr->IncreaseArmor(1))
+				if(m_Subtype == 1 ? pChr->IncreaseArmor(5) : pChr->IncreaseArmor(1))
 				{
 					Picked = true;
 					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
@@ -153,5 +163,21 @@ void CVanillaPickup::Snap(int SnappingClient)
 			return;
 	}
 
-	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, m_Subtype, m_Number);
+	if ((m_Type == POWERUP_HEALTH || m_Type == POWERUP_ARMOR) && m_Subtype == 1 && m_Id2 != -1)
+	{
+		vec2 pos1, pos2;
+		
+		pos1.x = (int)m_Pos.x + 16*sin((float)Server()->Tick() / 25.0);
+		pos1.y = (int)m_Pos.y + 16*sin((float)Server()->Tick() / 25.0);
+		
+		pos2.x = (int)m_Pos.x + 16*cos((float)Server()->Tick() / 25.0);
+		pos2.y = (int)m_Pos.y + -16*cos((float)Server()->Tick() / 25.0);
+		
+		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), pos1, m_Type, 0, m_Number);
+		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), m_Id2, pos2, m_Type, 0, m_Number);
+	}
+	else
+	{
+		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, m_Subtype, m_Number);
+	}
 }

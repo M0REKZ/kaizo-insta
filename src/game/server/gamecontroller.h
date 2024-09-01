@@ -77,7 +77,6 @@ protected:
 public:
 	const char *m_pGameType;
     
-    bool m_VanillaBehavior = false; //JSAURUS
     bool m_DontSelfKill = false; //+KZ iFreeze
     
 	IGameController(class CGameContext *pGameServer);

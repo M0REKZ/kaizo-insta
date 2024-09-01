@@ -6,8 +6,6 @@
 CGameControllerBOMB::CGameControllerBOMB(class CGameContext *pGameServer) :
 	CGameControllerDM(pGameServer)
 {
-    m_VanillaBehavior = true;
-
     m_GameFlags = 0;
 
     m_pGameType = "BOMB";

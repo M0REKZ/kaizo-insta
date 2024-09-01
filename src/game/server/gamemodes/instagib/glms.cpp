@@ -6,8 +6,6 @@
 CGameControllerGLMS::CGameControllerGLMS(class CGameContext *pGameServer) :
 	CGameControllerInstaLMS(pGameServer)
 {
-    //m_VanillaBehavior = true;
-
     m_pGameType = "gLMS";
 }
 

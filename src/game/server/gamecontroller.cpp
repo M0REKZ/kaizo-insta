@@ -19,7 +19,7 @@
 #include "entities/gun.h"
 #include "entities/light.h"
 #include "entities/pickup.h"
-#include "entities/random_weapon.h"
+#include "entities/kz/random_weapon.h"
 #include "entities/projectile.h"
 
 IGameController::IGameController(class CGameContext *pGameServer) :
@@ -1440,20 +1440,13 @@ int IGameController::MakeLosersCry()
 bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {
 
-	if(m_VanillaBehavior)
-	{
-		//+KZ: some non-insta game modes dont spawn certain things so im better leaving this as config variables, even if it looks "ugly"
-		if(g_Config.m_SvSpawnPickupWeapons ? false : (Index == TILE_RANDOMWEAPON))
-			return false;
-		if(g_Config.m_SvSpawnPickups ? false : (Index == TILE_BIGARMOR || Index == TILE_BIGHEART))
-			return false;
-	}
-	else
-	{
-		// do not spawn pickups
-		if(Index == TILE_BIGARMOR || Index == TILE_BIGHEART || Index == TILE_RANDOMWEAPON)
-			return false;
-	}
+
+	//+KZ: some non-insta game modes dont spawn certain things so im better leaving this as config variables, even if it looks "ugly"
+	if(g_Config.m_SvSpawnPickupWeapons ? false : (Index == TILE_RANDOMWEAPON))
+		return false;
+	if(g_Config.m_SvSpawnPickups ? false : (Index == TILE_BIGARMOR || Index == TILE_BIGHEART))
+		return false;
+
 	
 	int Type = -1;
 	int SubType = 0;
@@ -1485,12 +1478,12 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 	{
 		if(Index == TILE_RANDOMWEAPON)
 		{
-			CPickup *pPickup = new CRandomWeapon(&GameServer()->m_World, Type, SubType, Layer, Number);
+			CVanillaPickup *pPickup = new CRandomWeapon(&GameServer()->m_World, Type, SubType, Layer, Number);
 			pPickup->m_Pos = Pos;
 		}
 		else
 		{
-			CPickup *pPickup = new CPickup(&GameServer()->m_World, Type, SubType, Layer, Number);
+			CVanillaPickup *pPickup = new CVanillaPickup(&GameServer()->m_World, Type, SubType, Layer, Number);
 			pPickup->m_Pos = Pos;
 		}
 		return true;

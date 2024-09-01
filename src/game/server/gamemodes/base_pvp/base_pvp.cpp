@@ -1,6 +1,7 @@
 #include <base/system.h>
 #include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
+#include <game/server/entities/laser.h>
 #include <game/server/entities/ddnet_pvp/vanilla_projectile.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
@@ -629,32 +630,46 @@ bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &
 	}
 	else if(Weapon == WEAPON_SHOTGUN)
 	{
-		int ShotSpread = 2;
-
-		for(int i = -ShotSpread; i <= ShotSpread; ++i)
+		if(g_Config.m_SvDDraceShotgun)
 		{
-			float Spreading[] = {-0.185f, -0.070f, 0, 0.070f, 0.185f};
-			float Angle = angle(Direction);
-			Angle += Spreading[i + 2];
-			float v = 1 - (absolute(i) / (float)ShotSpread);
-			float Speed = mix((float)GameServer()->Tuning()->m_ShotgunSpeeddiff, 1.0f, v);
-
-			// TODO: not sure about Dir and InitDir and prediction
-
-			new CVanillaProjectile(
-				Character.GameWorld(),
-				WEAPON_SHOTGUN, // Type
-				Character.GetPlayer()->GetCid(), // Owner
-				ProjStartPos, // Pos
-				direction(Angle) * Speed, // Dir
-				(int)(Server()->TickSpeed() * GameServer()->Tuning()->m_ShotgunLifetime), // Span
-				false, // Freeze
-				false, // Explosive
-				-1, // SoundImpact
-				vec2(cosf(Angle), sinf(Angle)) * Speed); // InitDir
+			float LaserReach;
+			if(!Character.m_TuneZone)
+				LaserReach = GameServer()->Tuning()->m_LaserReach;
+			else
+				LaserReach = GameServer()->TuningList()[Character.m_TuneZone].m_LaserReach;
+			
+			new CLaser(&GameServer()->m_World, Character.m_Pos, Direction, LaserReach, Character.GetPlayer()->GetCid(), WEAPON_SHOTGUN);
+			GameServer()->CreateSound(Character.m_Pos, SOUND_SHOTGUN_FIRE, Character.TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 		}
-
-		GameServer()->CreateSound(Character.m_Pos, SOUND_SHOTGUN_FIRE);
+		else
+		{
+			int ShotSpread = 2;
+			
+			for(int i = -ShotSpread; i <= ShotSpread; ++i)
+			{
+				float Spreading[] = {-0.185f, -0.070f, 0, 0.070f, 0.185f};
+				float Angle = angle(Direction);
+				Angle += Spreading[i + 2];
+				float v = 1 - (absolute(i) / (float)ShotSpread);
+				float Speed = mix((float)GameServer()->Tuning()->m_ShotgunSpeeddiff, 1.0f, v);
+				
+				// TODO: not sure about Dir and InitDir and prediction
+				
+				new CVanillaProjectile(
+									   Character.GameWorld(),
+									   WEAPON_SHOTGUN, // Type
+									   Character.GetPlayer()->GetCid(), // Owner
+									   ProjStartPos, // Pos
+									   direction(Angle) * Speed, // Dir
+									   (int)(Server()->TickSpeed() * GameServer()->Tuning()->m_ShotgunLifetime), // Span
+									   false, // Freeze
+									   false, // Explosive
+									   -1, // SoundImpact
+									   vec2(cosf(Angle), sinf(Angle)) * Speed); // InitDir
+			}
+			
+			GameServer()->CreateSound(Character.m_Pos, SOUND_SHOTGUN_FIRE);
+		}
 	}
 	else
 	{
