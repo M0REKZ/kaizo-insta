@@ -17,6 +17,9 @@ CGameControllerBaseCTF::CGameControllerBaseCTF(class CGameContext *pGameServer) 
 
 	m_apFlags[0] = 0;
 	m_apFlags[1] = 0;
+	
+	m_flagstand_temp_i_0 = 0;
+	m_flagstand_temp_i_1 = 0;
 }
 
 CGameControllerBaseCTF::~CGameControllerBaseCTF() = default;
