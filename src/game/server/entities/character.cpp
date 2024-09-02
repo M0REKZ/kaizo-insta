@@ -61,7 +61,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	m_EmoteStop = -1;
 	m_LastAction = -1;
 	m_LastNoAmmoSound = -1;
-	m_LastWeapon = GameServer()->GetDDNetInstaWeapon();
+	m_LastWeapon = GameServer()->m_pController->GetDefaultWeapon(pPlayer);
 	m_QueuedWeapon = -1;
 	m_LastRefillJumps = false;
 	m_LastPenalty = false;
@@ -82,7 +82,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	m_Core.Reset();
 	m_Core.Init(&GameServer()->m_World.m_Core, Collision());
-	m_Core.m_ActiveWeapon = GameServer()->GetDDNetInstaWeapon();
+	m_Core.m_ActiveWeapon = GameServer()->m_pController->GetDefaultWeapon(pPlayer);
 	m_Core.m_Pos = m_Pos;
 	m_Core.m_Id = m_pPlayer->GetCid();
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCid()] = &m_Core;
@@ -2572,18 +2572,7 @@ void CCharacter::SwapClients(int Client1, int Client2)
 	m_Core.SetHookedPlayer(HookedPlayer == Client1 ? Client2 : HookedPlayer == Client2 ? Client1 : HookedPlayer);
 }
 
-// ddnet-insta
-
-void CCharacter::ResetInstaSettings()
-{
-	int Ammo = -1;
-	if(GameServer()->GetDDNetInstaWeapon() == WEAPON_GRENADE)
-	{
-		Ammo = g_Config.m_SvGrenadeAmmoRegen ? g_Config.m_SvGrenadeAmmoRegenNum : -1;
-		m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
-	}
-	GiveWeapon(GameServer()->GetDDNetInstaWeapon(), false, Ammo);
-}
+//+KZ
 
 void CCharacter::HandleKZTiles()
 {

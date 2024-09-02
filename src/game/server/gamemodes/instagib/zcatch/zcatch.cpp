@@ -19,8 +19,8 @@ CGameControllerZcatch::CGameControllerZcatch(class CGameContext *pGameServer) :
 {
 	m_GameFlags = 0;
 	m_AllowSkinChange = false;
-
 	m_pGameType = "zCatch";
+	m_DefaultWeapon = GetDefaultWeaponBasedOnSpawnWeapons();
 
 	for(auto &Color : m_aBodyColors)
 		Color = 0;
@@ -99,12 +99,33 @@ void CGameControllerZcatch::OnCharacterSpawn(class CCharacter *pChr)
 	SetSpawnWeapons(pChr);
 }
 
+int CGameControllerZcatch::GetPlayerTeam(class CPlayer *pPlayer, bool Sixup)
+{
+	// spoof fake in game team
+	// to get dead spec tees for 0.7 connections
+	if(Sixup && pPlayer->m_IsDead)
+		return TEAM_RED;
+
+	return IGameController::GetPlayerTeam(pPlayer, Sixup);
+
+	// TODO: ddnet insta PLAYERFLAG_DEAD
+	// and then allow joining spectators in zcatch while dead
+	// it should reply with "you will join spectators once xxx dies"
+}
+
 void CGameControllerZcatch::ReleasePlayer(class CPlayer *pPlayer, const char *pMsg)
 {
 	GameServer()->SendChatTarget(pPlayer->GetCid(), pMsg);
 	pPlayer->m_KillerId = -1;
 	pPlayer->m_IsDead = false;
-	pPlayer->SetTeamNoKill(TEAM_RED);
+
+	if(pPlayer->m_WantsToJoinSpectators)
+	{
+		pPlayer->SetTeam(TEAM_SPECTATORS);
+		pPlayer->m_WantsToJoinSpectators = false;
+	}
+	else
+		pPlayer->SetTeamNoKill(TEAM_RED);
 }
 
 bool CGameControllerZcatch::OnSelfkill(int ClientId)
@@ -145,11 +166,11 @@ void CGameControllerZcatch::KillPlayer(class CPlayer *pVictim, class CPlayer *pK
 	str_format(aBuf, sizeof(aBuf), "You are spectator until '%s' dies", Server()->ClientName(pKiller->GetCid()));
 	GameServer()->SendChatTarget(pVictim->GetCid(), aBuf);
 
+	pVictim->m_IsDead = true;
+	pVictim->m_KillerId = pKiller->GetCid();
 	if(pVictim->GetTeam() != TEAM_SPECTATORS)
 		pVictim->SetTeamNoKill(TEAM_SPECTATORS);
 	pVictim->m_SpectatorId = pKiller->GetCid();
-	pVictim->m_IsDead = true;
-	pVictim->m_KillerId = pKiller->GetCid();
 
 	int Found = count(pKiller->m_vVictimIds.begin(), pKiller->m_vVictimIds.end(), pVictim->GetCid());
 	if(!Found)
@@ -212,6 +233,35 @@ int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPl
 	return 0;
 }
 
+// called before spam protection on client team join request
+bool CGameControllerZcatch::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId)
+{
+	if(GameServer()->m_World.m_Paused)
+		return false;
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return false;
+
+	int Team = pMsg->m_Team;
+	if(
+		(Server()->IsSixup(ClientId) && pPlayer->m_IsDead && Team == TEAM_SPECTATORS) ||
+		(!Server()->IsSixup(ClientId) && pPlayer->m_IsDead && Team == TEAM_RED))
+	{
+		pPlayer->m_WantsToJoinSpectators = !pPlayer->m_WantsToJoinSpectators;
+		char aBuf[512];
+		if(pPlayer->m_WantsToJoinSpectators)
+			str_format(aBuf, sizeof(aBuf), "You will join the spectators once '%s' dies", Server()->ClientName(pPlayer->m_KillerId));
+		else
+			str_format(aBuf, sizeof(aBuf), "You will join the game once '%s' dies", Server()->ClientName(pPlayer->m_KillerId));
+
+		GameServer()->SendBroadcast(aBuf, ClientId);
+		return true;
+	}
+
+	return false;
+}
+
+// called after spam protection on client team join request
 bool CGameControllerZcatch::CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize)
 {
 	CPlayer *pPlayer = GameServer()->m_apPlayers[NotThisId];
@@ -319,8 +369,10 @@ bool CGameControllerZcatch::DoWincheckRound()
 			// only release players that actually died
 			// not all spectators
 			if(pPlayer->m_IsDead)
+			{
+				pPlayer->m_IsDead = false;
 				pPlayer->SetTeamNoKill(TEAM_RED);
-			pPlayer->m_IsDead = false;
+			}
 		}
 
 		return true;

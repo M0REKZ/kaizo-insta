@@ -282,7 +282,6 @@ public:
 	void SendGameMsg(int GameMsgId, int ClientId) const;
 	void SendGameMsg(int GameMsgId, int ParaI1, int ClientId) const;
 	void SendGameMsg(int GameMsgId, int ParaI1, int ParaI2, int ParaI3, int ClientId) const; // ddnet-insta
-	int GetDDNetInstaWeapon() const;
 	void UpdateVoteCheckboxes() const;
 	void RefreshVotes();
 	void AlertOnSpecialInstagibConfigs(int ClientId = -1) const;
@@ -298,7 +297,6 @@ public:
 	int m_UnstackHackCharacterOffset;
 	void InstagibUnstackChatMessage(char *pUnstacked, const char *pMessage, int Size);
 	void RegisterInstagibCommands();
-	bool IsInstaControllerActive() const;
 	void SwapTeams();
 	IHttp *m_pHttp;
 	void OnInitInstagib();

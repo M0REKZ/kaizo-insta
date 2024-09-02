@@ -4,6 +4,16 @@ DDNet-insta based on DDRaceNetwork, a Teeworlds mod. See the [website](https://d
 
 For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 
+---
+
+A ddnet based pvp mod. With the focus on correct 0.6 and 0.7 support and staying close to and up to date with ddnet.
+While being highly configurable and feature rich.
+
+Implementing most of the relevant pvp gametypes: gctf, ictf, gdm, idm, gtdm, itdm, zCatch
+
+
+Planned gametypes are: fng, ctf, dm
+
 # Features
 
 ## checkbox votes
@@ -32,6 +42,16 @@ This feature is now also possible for 0.6 clients using the /pause chat command.
 
 ![pause game](https://raw.githubusercontent.com/ddnet-insta/images/1a2d10c893605d704aeea8320cf0e65f8e0c2aa3/ready_change.png)
 
+## 0.7 dead players in zCatch
+
+In 0.6 dead players join the spectators team in the zCatch gamemode.
+
+![zCatch 0.6](https://raw.githubusercontent.com/ddnet-insta/images/master/zCatch_teetime_06.png)
+
+In 0.7 they are marked as dead players and are separate from spectators.
+
+![zCatch 0.7](https://raw.githubusercontent.com/ddnet-insta/images/master/zCatch_teetime_07.png)
+
 ## gametype support
 
 ### iCTF
@@ -48,9 +68,41 @@ It kills with one shot and capturing the enemy flag scores your team 100 points.
 Grenade capture the flag. Is a team based mode where every player only has a rocket launcher.
 It kills with one shot and capturing the enemy flag scores your team 100 points.
 
+### iDM
+
+``sv_gametype iDM``
+
+Laser death match. One shot kills. First to reach the scorelimit wins.
+
+### gDM
+
+``sv_gametype gDM``
+
+Grenade death match. One shot kills. First to reach the scorelimit wins.
+
+### iTDM
+
+``sv_gametype iTDM``
+
+Laser team death match. One shot kills. First team to reach the scorelimit wins.
+
+### gTDM
+
+``sv_gametype gTDM``
+
+Grenade team death match. One shot kills. First team to reach the scorelimit wins.
+
+### zCatch
+
+``sv_gametype zCatch``
+
+If you get killed you stay dead until your killer dies. Last man standing wins.
+It is an instagib gametype so one shot kills. You can choose the weapon with
+`sv_spawn_weapons` the options are `grenade` or `laser`.
+
 # Configs
 
-+ `sv_gametype` Game type (gctf, ictf)
++ `sv_gametype` Game type (gctf, ictf, gdm, idm, gtdm, itdm, zcatch)
 + `sv_spectator_votes` Allow spectators to vote
 + `sv_countdown_unpause` Number of seconds to freeze the game in a countdown before match continues after pause
 + `sv_countdown_round_start` Number of seconds to freeze the game in a countdown before match starts (0 enables only for survival gamemodes, -1 disables)
@@ -58,6 +110,7 @@ It kills with one shot and capturing the enemy flag scores your team 100 points.
 + `sv_timelimit` Time limit in minutes (0 disables)
 + `sv_player_ready_mode` When enabled, players can pause/unpause the game and start the game on warmup via their ready state
 + `sv_force_ready_all` minutes after which a game will be force unpaused (0=off) related to sv_player_ready_mode
++ `sv_powerups` Allow powerups like ninja
 + `sv_grenade_ammo_regen` Activate or deactivate grenade ammo regeneration in general
 + `sv_grenade_ammo_regen_time` Grenade ammo regeneration time in miliseconds
 + `sv_grenade_ammo_regen_num` Maximum number of grenades if ammo regeneration on

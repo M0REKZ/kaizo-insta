@@ -2814,6 +2814,8 @@ if(SERVER)
     gamemodes/vanilla/lts.h
     gameworld.cpp
     gameworld.h
+    instagib/gamecontroller.cpp
+    instagib/gamecontroller.h
     instagib/gamelogic.cpp
     instagib/rcon_commands.cpp
     instagib/rcon_commands.h
@@ -3021,6 +3023,7 @@ if(GTEST_FOUND OR DOWNLOAD_GTEST)
     compression.cpp
     csv.cpp
     datafile.cpp
+    editor.cpp
     fs.cpp
     git_revision.cpp
     hash.cpp

@@ -1634,7 +1634,7 @@ void CGameContext::OnClientEnter(int ClientId)
 			protocol7::CNetMsg_Sv_ClientInfo ClientInfoMsg;
 			ClientInfoMsg.m_ClientId = i;
 			ClientInfoMsg.m_Local = 0;
-			ClientInfoMsg.m_Team = pPlayer->GetTeam();
+			ClientInfoMsg.m_Team = m_pController->GetPlayerTeam(pPlayer, true); // ddnet-insta
 			ClientInfoMsg.m_pName = Server()->ClientName(i);
 			ClientInfoMsg.m_pClan = Server()->ClientClan(i);
 			ClientInfoMsg.m_Country = Server()->ClientCountry(i);
@@ -2559,6 +2559,9 @@ void CGameContext::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
 
 void CGameContext::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId)
 {
+	// ddnet-insta
+	if(m_pController->OnSetTeamNetMessage(pMsg, ClientId))
+		return;
 	if(m_World.m_Paused)
 		return;
 
@@ -2744,7 +2747,7 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 		Info.m_pClan = pMsg->m_pClan;
 		Info.m_Local = 0;
 		Info.m_Silent = true;
-		Info.m_Team = pPlayer->GetTeam();
+		Info.m_Team = m_pController->GetPlayerTeam(pPlayer, true); // ddnet-insta
 
 		for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 		{

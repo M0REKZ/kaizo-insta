@@ -30,6 +30,7 @@ public:
 	int GetAutoTeam(int NotThisId) override;
 	int GameInfoExFlags(int SnappingClient) override;
 	int GameInfoExFlags2(int SnappingClient) override;
+	int GetDefaultWeapon(class CPlayer *pPlayer) override { return m_DefaultWeapon; }
 
 	void ModifyWeapons(IConsole::IResult *pResult, void *pUserData, int Weapon, bool Remove);
 
@@ -49,7 +50,7 @@ public:
 	 *
 	 * called when sv_spawn_weapons is updated
 	 */
-	void UpdateSpawnWeapons();
+	void UpdateSpawnWeapons(bool Silent) override;
 	enum ESpawnWeapons
 	{
 		SPAWN_WEAPON_LASER,
@@ -58,7 +59,8 @@ public:
 	};
 	ESpawnWeapons m_SpawnWeapons;
 	ESpawnWeapons GetSpawnWeapons(int ClientId) const { return m_SpawnWeapons; }
-	void SetSpawnWeapons(class CCharacter *pChr) const;
+	int GetDefaultWeaponBasedOnSpawnWeapons() const;
+	void SetSpawnWeapons(class CCharacter *pChr) override;
 
 	// ddnet-insta only
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;

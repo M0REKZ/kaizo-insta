@@ -1,5 +1,6 @@
 #include <base/math.h>
 #include <base/system.h>
+#include <engine/shared/config.h>
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
@@ -13,10 +14,9 @@
 CGameControllerVanilla::CGameControllerVanilla(class CGameContext *pGameServer) :
 	CGameControllerPvp(pGameServer)
 {
-	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
-
-	m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
+	m_GameFlags = 0;
 	m_AllowSkinChange = true;
+	m_DefaultWeapon = WEAPON_GUN;
 }
 
 CGameControllerVanilla::~CGameControllerVanilla() = default;
@@ -120,7 +120,7 @@ bool CGameControllerVanilla::OnEntity(int Index, int x, int y, int Layer, int Fl
 		Type = POWERUP_WEAPON;
 		SubType = WEAPON_LASER;
 	}
-	else if(Index == ENTITY_POWERUP_NINJA)
+	else if(Index == ENTITY_POWERUP_NINJA && g_Config.m_SvPowerups)
 	{
 		Type = POWERUP_NINJA;
 		SubType = WEAPON_NINJA;

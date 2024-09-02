@@ -29,6 +29,8 @@ public:
 	bool OnSelfkill(int ClientId) override;
 	int GetAutoTeam(int NotThisId) override;
 	bool OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId) override;
+	int GetPlayerTeam(class CPlayer *pPlayer, bool Sixup) override;
+	bool OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId) override;
 
 	enum class ECatchGameState
 	{
