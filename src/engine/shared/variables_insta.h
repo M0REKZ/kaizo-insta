@@ -51,7 +51,6 @@ MACRO_CONFIG_INT(SvEnableDDraceHUD, sv_ddrace_hud, 0, 0, 1, CFGFLAG_SERVER, "Tog
 MACRO_CONFIG_INT(SvLaserJump, sv_laser_jump, 0, 0, 1, CFGFLAG_SERVER, "Create an explosion on first rifle bounce, allowing laser jumps.")
 
 //For Vanilla
-MACRO_CONFIG_INT(SvSpawnNinja, sv_spawn_ninja, 1, 0, 1, CFGFLAG_SERVER, "enable or disble ninja spawning")
 MACRO_CONFIG_INT(SvSpawnPickupWeapons, sv_spawn_pickup_weapons, 1, 0, 1, CFGFLAG_SERVER, "enable or disble weapons spawning")
 MACRO_CONFIG_INT(SvSpawnPickups, sv_spawn_pickups, 1, 0, 1, CFGFLAG_SERVER, "enable or disble heart and armor spawning")
 

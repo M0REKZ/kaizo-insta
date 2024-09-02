@@ -228,7 +228,15 @@ public:
 	int m_GameStartTick;
 	int m_aTeamscore[protocol7::NUM_TEAMS];
 
-	void EndRound() { SetGameState(IGS_END_ROUND, TIMER_END); }
+	void EndRound()
+	{
+		if(m_GameState != IGS_END_ROUND)
+		{
+			//OnEndRoundInsta();
+			MakeLosersCry();
+		}
+		SetGameState(IGS_END_ROUND, TIMER_END);
+	}
 
 	void OnEndRoundInsta();
 	void GetRoundEndStatsStrCsv(char *pBuf, size_t Size);
