@@ -7,6 +7,7 @@ CGameControllerILMS::CGameControllerILMS(class CGameContext *pGameServer) :
 	CGameControllerInstaLMS(pGameServer)
 {
     m_pGameType = "iLMS";
+	m_DefaultWeapon = WEAPON_LASER;
 }
 
 CGameControllerILMS::~CGameControllerILMS() = default;
@@ -16,5 +17,5 @@ void CGameControllerILMS::OnCharacterSpawn(class CCharacter *pChr)
 	CGameControllerInstaLMS::OnCharacterSpawn(pChr);
 
 	// give default weapons
-	pChr->GiveWeapon(WEAPON_LASER, false, -1);
+	pChr->GiveWeapon(m_DefaultWeapon, false, -1);
 }

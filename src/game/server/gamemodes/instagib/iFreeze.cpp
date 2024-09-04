@@ -7,6 +7,7 @@ CGameControllerIFreeze::CGameControllerIFreeze(class CGameContext *pGameServer) 
 	CGameControllerFreeze(pGameServer)
 {
     m_pGameType = "iFreeze+";
+	m_DefaultWeapon = WEAPON_LASER;
 }
 
 CGameControllerIFreeze::~CGameControllerIFreeze() = default;
@@ -16,5 +17,5 @@ void CGameControllerIFreeze::OnCharacterSpawn(class CCharacter *pChr)
     CGameControllerFreeze::OnCharacterSpawn(pChr);
 
     // give default weapons
-    pChr->GiveWeapon(WEAPON_LASER, false, -1);
+    pChr->GiveWeapon(m_DefaultWeapon, false, -1);
 }

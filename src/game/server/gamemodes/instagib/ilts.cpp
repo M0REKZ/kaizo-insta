@@ -6,9 +6,8 @@
 CGameControllerILTS::CGameControllerILTS(class CGameContext *pGameServer) :
 	CGameControllerInstaLTS(pGameServer)
 {
-    //m_GameFlags = GAMEFLAG_TEAMS;
-
     m_pGameType = "iLTS";
+	m_DefaultWeapon = WEAPON_LASER;
 }
 
 CGameControllerILTS::~CGameControllerILTS() = default;
@@ -18,5 +17,5 @@ void CGameControllerILTS::OnCharacterSpawn(class CCharacter *pChr)
 	CGameControllerInstaLTS::OnCharacterSpawn(pChr);
 
 	// give default weapons
-	pChr->GiveWeapon(WEAPON_LASER, false, -1);
+	pChr->GiveWeapon(m_DefaultWeapon, false, -1);
 }

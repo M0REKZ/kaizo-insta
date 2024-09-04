@@ -6,10 +6,8 @@
 CGameControllerGLTS::CGameControllerGLTS(class CGameContext *pGameServer) :
 	CGameControllerInstaLTS(pGameServer)
 {
-
-    //m_GameFlags = GAMEFLAG_TEAMS;
-
     m_pGameType = "gLTS";
+	m_DefaultWeapon = WEAPON_GRENADE;
 }
 
 CGameControllerGLTS::~CGameControllerGLTS() = default;
@@ -19,5 +17,5 @@ void CGameControllerGLTS::OnCharacterSpawn(class CCharacter *pChr)
 	CGameControllerInstaLTS::OnCharacterSpawn(pChr);
 
 	// give default weapons
-	pChr->GiveWeapon(WEAPON_GRENADE, false, -1);
+	pChr->GiveWeapon(m_DefaultWeapon, false, -1);
 }

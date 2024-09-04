@@ -7,6 +7,7 @@ CGameControllerHFreeze::CGameControllerHFreeze(class CGameContext *pGameServer) 
 	CGameControllerFreeze(pGameServer)
 {
     m_pGameType = "hFreeze+";
+	m_DefaultWeapon = WEAPON_HAMMER;
 }
 
 CGameControllerHFreeze::~CGameControllerHFreeze() = default;
@@ -17,8 +18,8 @@ void CGameControllerHFreeze::OnCharacterSpawn(class CCharacter *pChr)
 
 	// give default weapons
 	pChr->ResetPickups();
-	pChr->GiveWeapon(WEAPON_HAMMER);
-	pChr->SetActiveWeapon(WEAPON_HAMMER);
+	pChr->GiveWeapon(m_DefaultWeapon);
+	//pChr->SetActiveWeapon(WEAPON_HAMMER);
 }
 
 bool CGameControllerHFreeze::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)

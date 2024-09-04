@@ -7,6 +7,7 @@ CGameControllerGLMS::CGameControllerGLMS(class CGameContext *pGameServer) :
 	CGameControllerInstaLMS(pGameServer)
 {
     m_pGameType = "gLMS";
+	m_DefaultWeapon = WEAPON_GRENADE;
 }
 
 CGameControllerGLMS::~CGameControllerGLMS() = default;
@@ -16,5 +17,5 @@ void CGameControllerGLMS::OnCharacterSpawn(class CCharacter *pChr)
 	CGameControllerInstaLMS::OnCharacterSpawn(pChr);
 
 	// give default weapons
-	pChr->GiveWeapon(WEAPON_GRENADE, false, -1);
+	pChr->GiveWeapon(m_DefaultWeapon, false, -1);
 }
