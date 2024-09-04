@@ -247,8 +247,10 @@ void CGameControllerPvp::Tick()
 
 	if(Config()->m_SvPlayerReadyMode && GameServer()->m_World.m_Paused)
 	{
-		if(Server()->Tick() % Server()->TickSpeed() * 5 == 0)
+		if(Server()->Tick() % (Server()->TickSpeed() * 9) == 0)
+		{
 			GameServer()->PlayerReadyStateBroadcast();
+		}
 
 		// checks that only need to happen every second
 		// and not every tick
@@ -457,6 +459,9 @@ void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 	}
 
 	CheckReadyStates(); // ddnet-insta
+
+	// update game info
+	SendGameInfo(ClientId);
 }
 
 void CGameControllerPvp::SendChatSpectators(const char *pMessage, int Flags)
