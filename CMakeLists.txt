@@ -2799,6 +2799,8 @@ if(SERVER)
     gamemodes/instagib/hFreeze.h
     gamemodes/instagib/iFreeze.cpp
     gamemodes/instagib/iFreeze.h
+    gamemodes/vanilla/tdm.cpp
+    gamemodes/vanilla/tdm.h
     gamemodes/instagib/lms.cpp
     gamemodes/instagib/lms.h
     gamemodes/instagib/lts.cpp

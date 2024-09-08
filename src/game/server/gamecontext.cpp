@@ -40,6 +40,7 @@
 #include "gamemodes/instagib/glts.h"
 #include "gamemodes/instagib/ilms.h"
 #include "gamemodes/instagib/ilts.h"
+#include "gamemodes/vanilla/tdm.h"
 #include "gamemodes/vanilla/lms.h"
 #include "gamemodes/vanilla/lts.h"
 #include "gamemodes/instagib/bolofng.h"
@@ -4035,6 +4036,8 @@ void CGameContext::OnInit(const void *pPersistentData)
     //+KZ: Ohno
 	if(!str_comp(Config()->m_SvGametype, "mod"))
 		m_pController = new CGameControllerMod(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "tdm"))
+		m_pController = new CGameControllerTDM(this);
     else if(!str_comp_nocase(Config()->m_SvGametype, "lms"))
         m_pController = new CGameControllerLMS(this);
     else if(!str_comp_nocase(Config()->m_SvGametype, "lts"))
