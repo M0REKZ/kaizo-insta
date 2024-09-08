@@ -1,3 +1,4 @@
+#include <engine/shared/config.h>
 #include <game/server/entities/character.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
@@ -37,4 +38,23 @@ void CGameControllerPvp::ComCallSwapTeamsVote(int ClientId)
 void CGameControllerPvp::ComCallSwapTeamsRandomVote(int ClientId)
 {
 	BangCommandVote(ClientId, "swap_teams_random", "swap teams (random)");
+}
+
+void CGameControllerPvp::ComDropFlag(int ClientId)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return;
+
+	if(!g_Config.m_SvDropFlagOnVote && !g_Config.m_SvDropFlagOnSelfkill)
+	{
+		SendChatTarget(ClientId, "dropping flags is deactivated");
+		return;
+	}
+
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return;
+
+	DropFlag(pChr);
 }

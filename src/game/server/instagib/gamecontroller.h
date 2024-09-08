@@ -87,6 +87,16 @@ public:
 	virtual bool OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId) { return false; };
 
 	/*
+		Function: OnVoteNetMessage
+			hooks into CGameContext::OnVoteNetMessage()
+			before any spam protection check
+
+		Returns:
+			return true to not run the rest of CGameContext::OnVoteNetMessage()
+	*/
+	virtual bool OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId) { return false; }
+
+	/*
 		Function: GetPlayerTeam
 			wraps CPlayer::GetTeam()
 			to spoof fake teams for different versions
@@ -269,6 +279,7 @@ public:
 	virtual bool OnSelfkill(int ClientId) { return false; };
 	virtual void OnUpdateZcatchColorConfig(){};
 	virtual void OnUpdateSpectatorVotesConfig(){};
+	virtual bool DropFlag(class CCharacter *pChr) { return false; };
 
 	/*
 		Variable: m_GamePauseStartTime
@@ -283,6 +294,7 @@ public:
 	int64_t m_GamePauseStartTime;
 
 	bool IsSkinChangeAllowed() const { return m_AllowSkinChange; }
+	int GameFlags() const { return m_GameFlags; }
 
 private:
 #ifndef IN_CLASS_IGAMECONTROLLER

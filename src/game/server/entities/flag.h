@@ -13,6 +13,8 @@ public:
 	CCharacter *m_pLastCarrier;
 	vec2 m_Vel;
 	//vec2 m_StandPos;
+	bool m_IsGrounded;
+	
 	vec2 m_StandPositions[10]; //+KZ from pointer tw_plus
 	int m_no_stands; //same
 
@@ -34,14 +36,14 @@ public:
 	void SetCarrier(CCharacter *pCarrier) { m_pCarrier = pCarrier; }
 
 	/* CEntity functions */
-	virtual void Reset() override;
-	virtual void TickPaused() override;
-	virtual void Snap(int SnappingClient) override;
-	virtual void TickDeferred() override;
+	void Reset() override;
+	void TickPaused() override;
+	void Snap(int SnappingClient) override;
+	void TickDeferred() override;
 
 	/* Functions */
 	void Grab(class CCharacter *pChar);
-	void Drop();
+	void Drop(vec2 Direction = vec2(0, 0));
 	
 private:
 	//+KZ

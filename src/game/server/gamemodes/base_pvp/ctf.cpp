@@ -31,6 +31,65 @@ void CGameControllerBaseCTF::Tick()
 	FlagTick(); // ddnet-insta
 }
 
+bool CGameControllerBaseCTF::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
+{
+	if(!g_Config.m_SvDropFlagOnVote)
+		return false;
+
+	if(pMsg->m_Vote != 1) // 1 is yes
+		return false;
+
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return false;
+
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return false;
+
+	DropFlag(pChr);
+
+	// returning false here lets the vote go through
+	// so pressing vote yes as flag carrier during a vote
+	// will send an actual vote AND drop the flag
+	return false;
+}
+
+bool CGameControllerBaseCTF::OnSelfkill(int ClientId)
+{
+	if(!g_Config.m_SvDropFlagOnSelfkill)
+		return false;
+
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return false;
+
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return false;
+
+	return DropFlag(pChr);
+}
+
+bool CGameControllerBaseCTF::DropFlag(class CCharacter *pChr)
+{
+	for(CFlag *pFlag : m_apFlags)
+	{
+		if(!pFlag)
+			continue;
+		if(pFlag->GetCarrier() != pChr)
+			continue;
+
+		GameServer()->CreateSoundGlobal(SOUND_CTF_DROP);
+		GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_DROP, -1);
+
+		vec2 Dir = vec2(5 * pChr->GetAimDir(), -5);
+		pFlag->Drop(Dir);
+		return true;
+	}
+	return false;
+}
+
 void CGameControllerBaseCTF::OnCharacterSpawn(class CCharacter *pChr)
 {
 	CGameControllerPvp::OnCharacterSpawn(pChr);
@@ -42,25 +101,23 @@ int CGameControllerBaseCTF::OnCharacterDeath(class CCharacter *pVictim, class CP
 	int HadFlag = 0;
 
 	// drop flags
-	for(auto &F : m_apFlags)
+	for(CFlag *pFlag : m_apFlags)
 	{
-		if(F && pKiller && pKiller->GetCharacter() && F->GetCarrier() == pKiller->GetCharacter())
+		if(pFlag && pKiller && pKiller->GetCharacter() && pFlag->GetCarrier() == pKiller->GetCharacter())
 			HadFlag |= 2;
-		if(F && F->GetCarrier() == pVictim)
+		if(pFlag && pFlag->GetCarrier() == pVictim)
 		{
 			GameServer()->CreateSoundGlobal(SOUND_CTF_DROP);
 			GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_DROP, -1);
 			/*pVictim->GetPlayer()->m_Rainbow = false;
 			pVictim->GetPlayer()->m_TeeInfos.m_ColorBody = pVictim->GetPlayer()->m_ColorBodyOld;
 			pVictim->GetPlayer()->m_TeeInfos.m_ColorFeet = pVictim->GetPlayer()->m_ColorFeetOld;*/
-			F->m_DropTick = Server()->Tick();
-			F->SetCarrier(0);
-			F->m_Vel = vec2(0, 0);
+			pFlag->Drop();
 
 			HadFlag |= 1;
 		}
-		if(F && F->GetCarrier() == pVictim)
-			F->SetCarrier(0);
+		if(pFlag && pFlag->GetCarrier() == pVictim)
+			pFlag->SetCarrier(0);
 	}
 
 	return HadFlag;
@@ -177,6 +234,15 @@ void CGameControllerBaseCTF::FlagTick()
 		//
 		if(pFlag->GetCarrier())
 		{
+			// forbid holding flags in ddrace teams
+			if(GameServer()->GetDDRaceTeam(pFlag->GetCarrier()->GetPlayer()->GetCid()))
+			{
+				GameServer()->CreateSoundGlobal(SOUND_CTF_DROP);
+				GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_DROP, -1);
+				pFlag->Drop();
+				continue;
+			}
+
 			if(m_apFlags[FlagColor ^ 1] && m_apFlags[FlagColor ^ 1]->IsAtStand())
 			{
 				if(distance(pFlag->GetPos(), m_apFlags[FlagColor ^ 1]->GetPos()) < CFlag::ms_PhysSize + CCharacterCore::PhysicalSize())
@@ -218,9 +284,8 @@ void CGameControllerBaseCTF::FlagTick()
 					GameServer()->m_pController->OnFlagCapture(pFlag, Diff);
 					GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_CAPTURE, FlagColor, pFlag->GetCarrier()->GetPlayer()->GetCid(), Diff, -1);
 					GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
-					for(int i = 0; i < 2; i++)
-						for(auto &pFlag : m_apFlags)
-							pFlag->Reset();
+					for(CFlag *pF : m_apFlags)
+						pF->Reset();
 					// do a win check(capture could trigger win condition)
 					if(DoWincheckRound())
 						return;
@@ -238,6 +303,10 @@ void CGameControllerBaseCTF::FlagTick()
 
 				// only allow flag grabs in team 0
 				if(GameServer()->GetDDRaceTeam(apCloseCCharacters[i]->GetPlayer()->GetCid()))
+					continue;
+
+				// cooldown for recollect after dropping the flag
+				if(pFlag->m_pLastCarrier == apCloseCCharacters[i] && (pFlag->m_DropTick + Server()->TickSpeed() * 2) > Server()->Tick())
 					continue;
 
 				if(apCloseCCharacters[i]->GetPlayer()->GetTeam() == pFlag->GetTeam())

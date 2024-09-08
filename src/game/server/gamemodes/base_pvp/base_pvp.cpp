@@ -126,6 +126,18 @@ void CGameControllerPvp::OnUpdateSpectatorVotesConfig()
 	}
 }
 
+bool CGameControllerPvp::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+
+	if(pPlayer->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
+	{
+		// SendChatTarget(ClientId, "Spectators aren't allowed to vote.");
+		return true;
+	}
+	return false;
+}
+
 // called before spam protection on client team join request
 bool CGameControllerPvp::OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId)
 {
@@ -234,7 +246,15 @@ void CGameControllerPvp::UpdateSpawnWeapons(bool Silent)
 		|| m_pGameType[0] == 'D') // DM*
 	{
 		if(!Silent)
-			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", "WARNING: sv_spawn_weapons only has an effect in zCatch (and maybe in fng lol)");
+		{
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", "WARNING: sv_spawn_weapons only has an effect in zCatch");
+		}
+	}
+	if(str_find_nocase(m_pGameType, "fng"))
+	{
+		if(!Silent)
+			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", "WARNING: use sv_gametype fng/solofng/bolofng/boomfng to change weapons in fng");
+		return;
 	}
 
 	const char *pWeapons = Config()->m_SvSpawnWeapons;
@@ -287,6 +307,16 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 	// do scoreing
 	if(!pKiller || Weapon == WEAPON_GAME)
 		return 0;
+
+	if(Weapon == WEAPON_SELF)
+		pVictim->GetPlayer()->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() * 3.0f;
+
+	// never count score or win rounds in ddrace teams
+	if(GameServer()->GetDDRaceTeam(pKiller->GetCid()))
+		return 0;
+	if(GameServer()->GetDDRaceTeam(pVictim->GetPlayer()->GetCid()))
+		return 0;
+
 	if(pKiller == pVictim->GetPlayer())
 		pVictim->GetPlayer()->DecrementScore(); // suicide or world
 	else
@@ -296,8 +326,6 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 		else
 			pKiller->IncrementScore(); // normal kill
 	}
-	if(Weapon == WEAPON_SELF)
-		pVictim->GetPlayer()->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() * 3.0f;
 
 	// update spectator modes for dead players in survival
 	// if(m_GameFlags&GAMEFLAG_SURVIVAL)
@@ -316,7 +344,13 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 	if(pKiller && pVictim)
 	{
 		if(pKiller->GetCharacter() && pKiller != pVictim->GetPlayer())
+		{
 			AddSpree(pKiller);
+			if(g_Config.m_SvOnFireMode && Weapon == WEAPON_LASER)
+			{
+				pKiller->GetCharacter()->m_ReloadTimer = 10;
+			}
+		}
 		EndSpree(pVictim->GetPlayer(), pKiller);
 	}
 	return 0;

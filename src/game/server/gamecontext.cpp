@@ -42,6 +42,7 @@
 #include "gamemodes/instagib/ilts.h"
 #include "gamemodes/vanilla/lms.h"
 #include "gamemodes/vanilla/lts.h"
+#include "gamemodes/instagib/bolofng.h"
 #include "gamemodes/instagib/gctf.h"
 #include "gamemodes/instagib/gdm.h"
 #include "gamemodes/instagib/gtdm.h"
@@ -2520,16 +2521,14 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 
 void CGameContext::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
 {
+	// ddnet-insta
+	if(m_pController->OnVoteNetMessage(pMsg, ClientId))
+		return;
+
 	if(!m_VoteCloseTime)
 		return;
 
 	CPlayer *pPlayer = m_apPlayers[ClientId];
-
-	if(pPlayer->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
-	{
-		// SendChatTarget(ClientId, "Spectators aren't allowed to vote.");
-		return;
-	}
 
 	if(g_Config.m_SvSpamprotection && pPlayer->m_LastVoteTry && pPlayer->m_LastVoteTry + Server()->TickSpeed() * 3 > Server()->Tick())
 		return;
@@ -4054,6 +4053,8 @@ void CGameContext::OnInit(const void *pPersistentData)
 		m_pController = new CGameControllerICTF(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "solofng"))
 		m_pController = new CGameControllerSoloFng(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "bolofng"))
+		m_pController = new CGameControllerBoloFng(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "zcatch"))
 		m_pController = new CGameControllerZcatch(this);
     else if(!str_comp_nocase(Config()->m_SvGametype, "bomb"))

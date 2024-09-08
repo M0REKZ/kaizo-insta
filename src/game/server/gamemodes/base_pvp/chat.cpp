@@ -1,3 +1,4 @@
+#include <base/system.h>
 #include <game/server/entities/character.h>
 #include <game/server/instagib/strhelpers.h>
 #include <game/server/player.h>
@@ -409,6 +410,16 @@ bool CGameControllerPvp::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, i
 		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "swap_random")) // ddnet-insta
 		{
 			ComCallSwapTeamsRandomVote(ClientId);
+			return true;
+		}
+		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "drop flag")) // ddnet-insta
+		{
+			ComDropFlag(ClientId);
+			return true;
+		}
+		else if(str_startswith(pMsg->m_pMessage + 1, "drop")) // ddnet-insta
+		{
+			SendChatTarget(ClientId, "Did you mean '/drop flag'?");
 			return true;
 		}
 	}

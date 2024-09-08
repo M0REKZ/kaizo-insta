@@ -12,6 +12,7 @@
 CFlag::CFlag(CGameWorld *pGameWorld, int Team) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_FLAG)
 {
+	m_IsGrounded = true;
 	m_Team = Team;
 	m_pCarrier = NULL;
 	m_GrabTick = 0;
@@ -22,7 +23,9 @@ CFlag::CFlag(CGameWorld *pGameWorld, int Team) :
 
 void CFlag::Reset()
 {
-	m_pCarrier = NULL;
+	m_IsGrounded = true;
+	m_pLastCarrier = nullptr;
+	m_pCarrier = nullptr;
 	m_AtStand = 1;
 	int n = rand() % m_no_stands; //+KZ from twplus
 	m_Pos = m_StandPositions[n]; //same
@@ -55,10 +58,11 @@ void CFlag::Grab(CCharacter *pChar)
 	}
 }
 
-void CFlag::Drop()
+void CFlag::Drop(vec2 Direction)
 {
+	m_pLastCarrier = m_pCarrier;
 	m_pCarrier = 0;
-	m_Vel = vec2(0, 0);
+	m_Vel = Direction;
 	m_DropTick = Server()->Tick();
 }
 
@@ -89,6 +93,23 @@ void CFlag::TickDeferred()
 			}
 			else
 			{
+				// Friction
+				m_IsGrounded = false;
+				if(GameServer()->Collision()->CheckPoint(m_Pos.x + CFlag::ms_PhysSize / 2, m_Pos.y + CFlag::ms_PhysSize / 2 + 5))
+					m_IsGrounded = true;
+				if(GameServer()->Collision()->CheckPoint(m_Pos.x - CFlag::ms_PhysSize / 2, m_Pos.y + CFlag::ms_PhysSize / 2 + 5))
+					m_IsGrounded = true;
+
+				if(m_IsGrounded)
+				{
+					m_Vel.x *= 0.75f;
+				}
+				else
+				{
+					m_Vel.x *= 0.98f;
+				}
+
+				// Gravity
 				m_Vel.y += GameWorld()->m_Core.m_aTuning[0].m_Gravity;
 				GameServer()->Collision()->MoveBox(&m_Pos, &m_Vel, vec2(ms_PhysSize, ms_PhysSize), vec2(0.5, 0.5));
 			}

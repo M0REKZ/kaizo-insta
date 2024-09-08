@@ -1,5 +1,6 @@
 #include <base/system.h>
 #include <engine/shared/config.h>
+#include <game/generated/protocol.h>
 
 #include "../entities/character.h"
 #include "../gamecontext.h"
@@ -57,14 +58,32 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientId, bool Force) cons
 	else
 		str_append(aMotd, "* ready mode: off\n");
 
-	str_format(aBuf, sizeof(aBuf), "* damage needed for kill: %d\n", g_Config.m_SvDamageNeededForKill);
-	str_append(aMotd, aBuf);
+	// TODO: check if the spawn weapons include laser and only then print this
+	if(g_Config.m_SvOnFireMode)
+	{
+		str_append(aMotd, "* laser kill refills ammo (on fire mode)\n");
+	}
+
+	if(m_pController && m_pController->GameFlags() & GAMEFLAG_FLAGS)
+	{
+		if(g_Config.m_SvDropFlagOnVote || g_Config.m_SvDropFlagOnSelfkill)
+		{
+			str_append(aMotd, "* dropping the flag is on '/drop flag'\n");
+			if(g_Config.m_SvDropFlagOnSelfkill)
+				str_append(aMotd, "  - selfkill drops the flag\n");
+			if(g_Config.m_SvDropFlagOnVote)
+				str_append(aMotd, "  - vote yes drops the flag\n");
+		}
+	}
 
 	str_format(aBuf, sizeof(aBuf), "* allow spec public chat: %s\n", g_Config.m_SvTournamentChat ? "no" : "yes");
 	str_append(aMotd, aBuf);
 
-	if(!str_comp_nocase(g_Config.m_SvGametype, "gctf"))
+	if(g_Config.m_SvGametype[0] == 'g')
 	{
+		str_format(aBuf, sizeof(aBuf), "* damage needed for kill: %d\n", g_Config.m_SvDamageNeededForKill);
+		str_append(aMotd, aBuf);
+
 		str_format(aBuf, sizeof(aBuf), "* spray protection: %s\n", g_Config.m_SvSprayprotection ? "on" : "off");
 		str_append(aMotd, aBuf);
 		str_format(aBuf, sizeof(aBuf), "* spam protection: %s\n", g_Config.m_SvGrenadeAmmoRegen ? "on" : "off");
