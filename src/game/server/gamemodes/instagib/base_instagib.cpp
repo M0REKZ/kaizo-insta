@@ -11,7 +11,7 @@
 CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer) :
 	CGameControllerPvp(pGameServer)
 {
-	bool m_IsInstagibKZ = true;
+	m_IsInstagibKZ = true;
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
 	m_AllowSkinChange = true;
 }

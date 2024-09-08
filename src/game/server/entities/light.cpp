@@ -46,9 +46,7 @@ bool CLight::HitCharacter()
 		else if(!m_DamageTick)
 		{
 
-			pChar->TakeDamage(vec2(0,0), g_Config.m_SvLightKills, pChar->GetPlayer()->GetCid(), WEAPON_WORLD);
-
-			//pChar->Die(pChar->GetPlayer()->GetCid(), WEAPON_WORLD);
+			pChar->DoKZDamage(vec2(0,0), g_Config.m_SvLightKills, pChar->GetPlayer()->GetCid(), WEAPON_WORLD);
 
 			GameServer()->CreateSound(m_Pos, SOUND_HIT);
 			m_DamageTick = 4 * Server()->TickSpeed();

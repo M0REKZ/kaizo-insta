@@ -87,8 +87,7 @@ bool CPlasma::HitCharacter(CCharacter *pTarget)
 	}
 	if(g_Config.m_SvPlasmaKills)
     {
-		pHitPlayer->TakeDamage(vec2(0,0), g_Config.m_SvPlasmaKills, pHitPlayer->GetPlayer()->GetCid(), WEAPON_WORLD);
-		//pHitPlayer->Die(pHitPlayer->GetPlayer()->GetCid(), WEAPON_WORLD);
+		pHitPlayer->DoKZDamage(vec2(0,0), g_Config.m_SvPlasmaKills, pHitPlayer->GetPlayer()->GetCid(), WEAPON_WORLD);
         GameServer()->CreateSound(m_Pos, SOUND_HIT);
     }
 	Reset();

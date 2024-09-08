@@ -2605,7 +2605,7 @@ void CCharacter::HandleKZTiles()
 			}
 			else
 			{
-				TakeDamage(vec2(0,0), 3, m_pPlayer->GetCid(), WEAPON_WORLD);
+				DoKZDamage(vec2(0,0), 1, m_pPlayer->GetCid(), WEAPON_WORLD);
 				m_AirDamageTick = Server()->TickSpeed();
 			}
 		}
@@ -2699,4 +2699,33 @@ void CCharacter::HandleKZTiles()
 		ApplyMoveRestrictions();
 	}
 	
+}
+
+void CCharacter::DoKZDamage(vec2 Force, int Dmg, int From, int Weapon)
+{
+	
+	if(m_Armor)
+	{
+		m_Armor -= Dmg;
+	}
+	else
+	{
+		m_Health-= Dmg;
+	}
+	
+	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_SHORT);
+	
+	if(Dmg)
+	{
+		SetEmote(EMOTE_PAIN, Server()->Tick() + 500 * Server()->TickSpeed() / 1000);
+	}
+
+	vec2 Temp = m_Core.m_Vel + Force;
+	m_Core.m_Vel = ClampVel(m_MoveRestrictions, Temp);
+	GameServer()->CreateDamageInd(m_Pos, 0, Dmg);
+	
+	if(m_Health <= 0)
+	{
+		Die(From, Weapon);
+	}
 }

@@ -1041,6 +1041,9 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 
 
 	//+KZ: some non-insta game modes dont spawn certain things so im better leaving this as config variables, even if it looks "ugly"
+	if(m_IsInstagibKZ && (Index == TILE_BIGARMOR || Index == TILE_BIGHEART || Index == TILE_RANDOMWEAPON))
+		return false;
+	
 	if(g_Config.m_SvSpawnPickupWeapons ? false : (Index == TILE_RANDOMWEAPON))
 		return false;
 	if(g_Config.m_SvSpawnPickups ? false : (Index == TILE_BIGARMOR || Index == TILE_BIGHEART))
