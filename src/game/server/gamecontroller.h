@@ -81,6 +81,7 @@ public:
 	const char *m_pGameType;
     
     bool m_DontSelfKill = false; //+KZ iFreeze
+	bool m_IsInstagibKZ = false;
     
 	IGameController(class CGameContext *pGameServer);
 	virtual ~IGameController();
