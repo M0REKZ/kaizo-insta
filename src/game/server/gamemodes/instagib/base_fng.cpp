@@ -8,6 +8,7 @@
 #include <game/server/entities/character.h>
 #include <game/server/entities/flag.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gamemodes/instagib/base_instagib.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/version.h>
@@ -66,6 +67,7 @@ void CGameControllerBaseFng::OnCharacterSpawn(class CCharacter *pChr)
 int CGameControllerBaseFng::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
 	CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
+	DoWincheckRound();
 	return 0;
 }
 
@@ -100,6 +102,8 @@ void CGameControllerBaseFng::HandleCharacterTiles(CCharacter *pChr, int MapIndex
 		OnSpike(pChr, TILE_SPIKE_BLUE);
 	else if(((TileIndex == TILE_SPIKE_NEUTRAL) || (TileFIndex == TILE_SPIKE_NEUTRAL)))
 		OnSpike(pChr, TILE_SPIKE_NEUTRAL);
+	else if(((TileIndex == TILE_SPIKE_GOLD) || (TileFIndex == TILE_SPIKE_GOLD)))
+		OnSpike(pChr, TILE_SPIKE_GOLD);
 
 	CGameControllerDDRace::HandleCharacterTiles(pChr, MapIndex);
 }
@@ -112,7 +116,39 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 		return;
 	}
 
-	pChr->Die(pChr->GetPlayer()->m_LastToucherId, WEAPON_NINJA);
+	CPlayer *pKiller = nullptr;
+	int LastToucherId = pChr->GetPlayer()->m_LastToucherId;
+	if(LastToucherId >= 0 && LastToucherId < MAX_CLIENTS)
+		pKiller = GameServer()->m_apPlayers[LastToucherId];
+
+	if(pKiller)
+	{
+		// all scores are +1
+		// from the kill it self
+
+		if(SpikeTile == TILE_SPIKE_NEUTRAL)
+			pKiller->AddScore(2);
+		if(SpikeTile == TILE_SPIKE_GOLD)
+			pKiller->AddScore(7);
+		if(SpikeTile == TILE_SPIKE_RED)
+		{
+			if(pKiller->GetTeam() == TEAM_RED || !IsTeamPlay())
+				pKiller->AddScore(4);
+			else
+				pKiller->AddScore(-6);
+		}
+		if(SpikeTile == TILE_SPIKE_BLUE)
+		{
+			if(pKiller->GetTeam() == TEAM_BLUE || !IsTeamPlay())
+				pKiller->AddScore(4);
+			else
+				pKiller->AddScore(-6);
+		}
+
+		DoWincheckRound();
+	}
+
+	pChr->Die(LastToucherId, WEAPON_NINJA);
 }
 
 bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
@@ -123,9 +159,12 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 		return true;
 	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
 		return false;
-	if(g_Config.m_SvOnlyHookKills && From >= 0 && From <= MAX_CLIENTS)
+	CPlayer *pKiller = nullptr;
+	if(From >= 0 && From <= MAX_CLIENTS)
+		pKiller = GameServer()->m_apPlayers[From];
+	if(g_Config.m_SvOnlyHookKills && pKiller)
 	{
-		CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
+		CCharacter *pChr = pKiller->GetCharacter();
 		if(!pChr || pChr->GetCore().HookedPlayer() != Character.GetPlayer()->GetCid())
 			return false;
 	}
@@ -140,8 +179,22 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 		return false;
 	}
 
+	if(pKiller)
+	{
+		pKiller->IncrementScore();
+		DoWincheckRound();
+	}
+
 	Character.Freeze(10);
 	return false;
+}
+
+bool CGameControllerBaseFng::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos)
+{
+	if(Weapon == WEAPON_HAMMER)
+		if(Character.OnFngFireWeapon(Character, Weapon, Direction, MouseTarget, ProjStartPos))
+			return true;
+	return CGameControllerInstagib::OnFireWeapon(Character, Weapon, Direction, MouseTarget, ProjStartPos);
 }
 
 void CGameControllerBaseFng::Snap(int SnappingClient)

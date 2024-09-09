@@ -24,6 +24,12 @@ protected:
 	int m_Type;
 	int m_Subtype;
 	int m_SpawnTick;
+
+	// DDRace
+
+	void Move();
+	vec2 m_Core;
+	
 	int m_Id2; //+KZ from Pointer tw+
 };
 
