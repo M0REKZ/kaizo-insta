@@ -102,12 +102,30 @@ int CGameControllerFreeze::OnCharacterDeath(class CCharacter *pVictim, class CPl
 
 bool CGameControllerFreeze::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
-	if(!(Dmg >= g_Config.m_SvDamageNeededForKill))
+	if(Character.m_IsGodmode)
+		return true;
+	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
 		return false;
-    Dmg = 0;
-    CGameControllerInstaTDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
 	
-	DoFreezing(From, Character);
+	if(g_Config.m_SvOnlyHookKills && From >= 0 && From <= MAX_CLIENTS)
+	{
+		CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
+		if(!pChr || pChr->GetCore().HookedPlayer() != Character.GetPlayer()->GetCid())
+			return false;
+	}
+	
+	bool frz = false;
+	if(Dmg >= g_Config.m_SvDamageNeededForKill || Weapon == WEAPON_LASER || Weapon == WEAPON_HAMMER)
+	{
+		frz = true;
+		Dmg = g_Config.m_SvDamageNeededForKill - 1; //dont kill;
+	}
+	Dmg = 0;
+		
+    //CGameControllerInstaTDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
+	
+	if(frz)
+		DoFreezing(From, Character);
 	
     return false;
 }

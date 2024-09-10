@@ -21,15 +21,3 @@ void CGameControllerHFreeze::OnCharacterSpawn(class CCharacter *pChr)
 	pChr->GiveWeapon(m_DefaultWeapon);
 	//pChr->SetActiveWeapon(WEAPON_HAMMER);
 }
-
-bool CGameControllerHFreeze::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
-{
-	if((Weapon == WEAPON_HAMMER ? false : (!(Dmg >= g_Config.m_SvDamageNeededForKill))))
-		return false;
-	Dmg = 0;
-	CGameControllerInstaTDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
-	
-	DoFreezing(From, Character);
-	
-	return false;
-}
