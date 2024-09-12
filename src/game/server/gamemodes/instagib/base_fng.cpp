@@ -72,18 +72,24 @@ void CGameControllerBaseFng::Tick()
 
 void CGameControllerBaseFng::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason)
 {
-	if(!g_Config.m_SvPunishFreezeDisconnect)
-		return;
+	while(true)
+	{
+		if(!g_Config.m_SvPunishFreezeDisconnect)
+			break;
 
-	CCharacter *pChr = pPlayer->GetCharacter();
-	if(!pChr)
-		return;
-	if(!pChr->m_FreezeTime)
-		return;
+		CCharacter *pChr = pPlayer->GetCharacter();
+		if(!pChr)
+			break;
+		if(!pChr->m_FreezeTime)
+			break;
 
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "ban %d %d \"disconnected while frozen\"", pPlayer->GetCid(), g_Config.m_SvPunishFreezeDisconnect);
-	Console()->ExecuteLine(aBuf);
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "ban %d %d \"disconnected while frozen\"", pPlayer->GetCid(), g_Config.m_SvPunishFreezeDisconnect);
+		Console()->ExecuteLine(aBuf);
+		break;
+	}
+
+	CGameControllerInstagib::OnPlayerDisconnect(pPlayer, pReason);
 }
 
 void CGameControllerBaseFng::OnCharacterSpawn(class CCharacter *pChr)
@@ -197,8 +203,44 @@ void CGameControllerBaseFng::OnSnapDDNetCharacter(CCharacter *pChr, CNetObj_DDNe
 {
 	CGameControllerInstagib::OnSnapDDNetCharacter(pChr, pDDNetCharacter, SnappingClient);
 
-	if(pChr->GetPlayer()->GetCid() != SnappingClient && pDDNetCharacter->m_FreezeEnd)
+	CPlayer *pSnapReceiver = GameServer()->m_apPlayers[SnappingClient];
+	bool IsTeamMate = pChr->GetPlayer()->GetCid() == SnappingClient;
+	if(IsTeamPlay() && pChr->GetPlayer()->GetTeam() == pSnapReceiver->GetTeam())
+		IsTeamMate = true;
+	if(!IsTeamMate && pDDNetCharacter->m_FreezeEnd)
 		pDDNetCharacter->m_FreezeEnd = -1;
+}
+
+CClientMask CGameControllerBaseFng::FreezeDamageIndicatorMask(class CCharacter *pChr)
+{
+	CClientMask Mask = pChr->TeamMask() & GameServer()->ClientsMaskExcludeClientVersionAndHigher(VERSION_DDNET_NEW_HUD);
+	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		if(pPlayer->GetTeam() == pChr->GetPlayer()->GetTeam() && GameServer()->m_pController->IsTeamPlay())
+			continue;
+		if(pPlayer->GetCid() == pChr->GetPlayer()->GetCid())
+			continue;
+
+		Mask.reset(pPlayer->GetCid());
+	}
+	return Mask;
+}
+
+bool CGameControllerBaseFng::OnSelfkill(int ClientId)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return false;
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return false;
+	if(!pChr->m_FreezeTime)
+		return false;
+
+	GameServer()->SendChatTarget(ClientId, "You can't kill while being frozen");
+	return true;
 }
 
 bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
