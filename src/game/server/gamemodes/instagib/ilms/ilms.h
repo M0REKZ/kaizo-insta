@@ -1,7 +1,7 @@
 #ifndef GAME_SERVER_GAMEMODES_ILMS_H
 #define GAME_SERVER_GAMEMODES_ILMS_H
 
-#include "lms.h"
+#include <game/server/gamemodes/instagib/lms.h>
 
 class CGameControllerILMS : public CGameControllerInstaLMS
 {

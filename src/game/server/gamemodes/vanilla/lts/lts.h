@@ -1,7 +1,7 @@
 #ifndef GAME_SERVER_GAMEMODES_LTS_H
 #define GAME_SERVER_GAMEMODES_LTS_H
 
-#include "lms.h"
+#include <game/server/gamemodes/vanilla/lms/lms.h>
 
 class CGameControllerLTS : public CGameControllerLMS
 {

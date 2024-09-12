@@ -1,7 +1,7 @@
 #ifndef GAME_SERVER_GAMEMODES_IFREEZE_H
 #define GAME_SERVER_GAMEMODES_IFREEZE_H
 
-#include "Freeze.h"
+#include <game/server/gamemodes/instagib/Freeze.h>
 
 class CGameControllerIFreeze : public CGameControllerFreeze
 {

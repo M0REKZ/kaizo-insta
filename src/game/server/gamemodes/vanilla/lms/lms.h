@@ -1,7 +1,7 @@
 #ifndef GAME_SERVER_GAMEMODES_LMS_H
 #define GAME_SERVER_GAMEMODES_LMS_H
 
-#include "dm.h"
+#include <game/server/gamemodes/vanilla/dm/dm.h>
 
 class CGameControllerLMS : public CGameControllerDM
 {

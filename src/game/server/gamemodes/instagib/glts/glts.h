@@ -1,7 +1,7 @@
 #ifndef GAME_SERVER_GAMEMODES_GLTS_H
 #define GAME_SERVER_GAMEMODES_GLTS_H
 
-#include "lts.h"
+#include <game/server/gamemodes/instagib/lts.h>
 
 class CGameControllerGLTS : public CGameControllerInstaLTS
 {
