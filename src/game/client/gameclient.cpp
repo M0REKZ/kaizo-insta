@@ -447,7 +447,9 @@ void CGameClient::OnUpdate()
 	Input()->ConsumeEvents([&](const IInput::CEvent &Event) {
 		for(auto &pComponent : m_vpInput)
 		{
-			if(pComponent->OnInput(Event))
+			// Events with flag `FLAG_RELEASE` must always be forwarded to all components so keys being
+			// released can be handled in all components also after some components have been disabled.
+			if(pComponent->OnInput(Event) && (Event.m_Flags & ~IInput::FLAG_RELEASE) != 0)
 				break;
 		}
 	});
@@ -1554,11 +1556,7 @@ void CGameClient::OnNewSnapshot()
 					pClient->m_SkinInfo.m_Size = 64;
 
 					// find new skin
-					const CSkin *pSkin = m_Skins.Find(pClient->m_aSkinName);
-					pClient->m_SkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-					pClient->m_SkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
-					pClient->m_SkinInfo.m_SkinMetrics = pSkin->m_Metrics;
-					pClient->m_SkinInfo.m_BloodColor = pSkin->m_BloodColor;
+					pClient->m_SkinInfo.Apply(m_Skins.Find(pClient->m_aSkinName));
 					pClient->m_SkinInfo.m_CustomColoredSkin = pClient->m_UseCustomColor;
 
 					if(!pClient->m_UseCustomColor)
@@ -2071,6 +2069,32 @@ void CGameClient::OnNewSnapshot()
 				m_Effects.AirJump(Pos, Alpha);
 			}
 
+	if(g_Config.m_ClFreezeStars && !m_SuppressEvents)
+	{
+		for(auto &Character : m_Snap.m_aCharacters)
+		{
+			if(Character.m_Active && Character.m_HasExtendedData && Character.m_PrevExtendedData)
+			{
+				int FreezeTimeNow = Character.m_ExtendedData.m_FreezeEnd - Client()->GameTick(g_Config.m_ClDummy);
+				int FreezeTimePrev = Character.m_PrevExtendedData->m_FreezeEnd - Client()->PrevGameTick(g_Config.m_ClDummy);
+				vec2 Pos = vec2(Character.m_Cur.m_X, Character.m_Cur.m_Y);
+				int StarsNow = (FreezeTimeNow + 1) / Client()->GameTickSpeed();
+				int StarsPrev = (FreezeTimePrev + 1) / Client()->GameTickSpeed();
+				if(StarsNow < StarsPrev || (StarsPrev == 0 && StarsNow > 0))
+				{
+					int Amount = StarsNow + 1;
+					float Mid = 3 * pi / 2;
+					float Min = Mid - pi / 3;
+					float Max = Mid + pi / 3;
+					for(int j = 0; j < Amount; j++)
+					{
+						float Angle = mix(Min, Max, (j + 1) / (float)(Amount + 2));
+						m_Effects.DamageIndicator(Pos, direction(Angle));
+					}
+				}
+			}
+		}
+	}
 	if(m_Snap.m_LocalClientId != m_PrevLocalId)
 		m_PredictedDummyId = m_PrevLocalId;
 	m_PrevLocalId = m_Snap.m_LocalClientId;
@@ -3724,13 +3748,9 @@ void CGameClient::RefreshSkins()
 
 	for(auto &Client : m_aClients)
 	{
-		Client.m_SkinInfo.m_OriginalRenderSkin.Reset();
-		Client.m_SkinInfo.m_ColorableRenderSkin.Reset();
 		if(Client.m_aSkinName[0] != '\0')
 		{
-			const CSkin *pSkin = m_Skins.Find(Client.m_aSkinName);
-			Client.m_SkinInfo.m_OriginalRenderSkin = pSkin->m_OriginalSkin;
-			Client.m_SkinInfo.m_ColorableRenderSkin = pSkin->m_ColorableSkin;
+			Client.m_SkinInfo.Apply(m_Skins.Find(Client.m_aSkinName));
 		}
 		else
 		{
