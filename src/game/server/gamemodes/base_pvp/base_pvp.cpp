@@ -1,9 +1,13 @@
 #include <base/system.h>
+#include <engine/server/server.h>
 #include <engine/shared/config.h>
+#include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
 #include <game/server/entities/laser.h>
 #include <game/server/entities/ddnet_pvp/vanilla_projectile.h>
+#include <game/server/gamecontroller.h>
+#include <game/server/instagib/sql_stats.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/version.h>
@@ -24,9 +28,35 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	GameServer()->Tuning()->Set("shotgun_curvature", 1.25f);
 	GameServer()->Tuning()->Set("shotgun_speed", 2750);
 	GameServer()->Tuning()->Set("shotgun_speeddiff", 0.8f);
+
+	dbg_msg("ddnet-insta", "connecting to database ...");
+	// set the stats table to the gametype name in all lowercase
+	// if you want to track stats in a sql database for that gametype
+	m_pStatsTable = "";
+	m_pSqlStats = new CSqlStats(GameServer(), ((CServer *)Server())->DbPool());
+	m_pExtraColumns = nullptr;
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
 }
 
-CGameControllerPvp::~CGameControllerPvp() = default;
+CGameControllerPvp::~CGameControllerPvp()
+{
+	// TODO: we have to make sure to block all operations and save everything if sv_gametype is switched
+	//       there should be no data loss no matter in which state and how often the controller is recreated
+	//
+	//       this also has to save player sprees that were not ended yet!
+	dbg_msg("ddnet-insta", "cleaning up database connection ...");
+	if(m_pSqlStats)
+	{
+		delete m_pSqlStats;
+		m_pSqlStats = nullptr;
+	}
+
+	if(m_pExtraColumns)
+	{
+		delete m_pExtraColumns;
+		m_pExtraColumns = nullptr;
+	}
+}
 
 int CGameControllerPvp::GameInfoExFlags(int SnappingClient)
 {
@@ -71,6 +101,28 @@ int CGameControllerPvp::GameInfoExFlags(int SnappingClient)
 int CGameControllerPvp::GameInfoExFlags2(int SnappingClient)
 {
 	return GAMEINFOFLAG2_HUD_AMMO | GAMEINFOFLAG2_HUD_HEALTH_ARMOR; // ddnet-insta
+}
+
+void CGameControllerPvp::OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName)
+{
+	char aBuf[1024];
+	str_format(
+		aBuf,
+		sizeof(aBuf),
+		"'%s' kills: %d, requested by '%s'",
+		pRequestedName, pStats->m_Kills, Server()->ClientName(pRequestingPlayer->GetCid()));
+	GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+}
+
+void CGameControllerPvp::OnShowRank(int Rank, int RankedScore, const char *pRankType, class CPlayer *pRequestingPlayer, const char *pRequestedName)
+{
+	char aBuf[1024];
+	str_format(
+		aBuf,
+		sizeof(aBuf),
+		"%d. '%s' %s: %d, requested by '%s'",
+		Rank, pRequestedName, pRankType, RankedScore, Server()->ClientName(pRequestingPlayer->GetCid()));
+	GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 }
 
 void CGameControllerPvp::OnUpdateSpectatorVotesConfig()
@@ -130,6 +182,60 @@ void CGameControllerPvp::OnUpdateSpectatorVotesConfig()
 			pPlayer->m_IsFakeDeadSpec = false;
 		}
 	}
+}
+
+bool CGameControllerPvp::IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage)
+{
+	if(pMessage && SizeOfMessage)
+		pMessage[0] = '\0';
+
+	// you can only win on round end
+	if(GameState() != IGS_END_ROUND)
+		return false;
+	if(pPlayer->GetTeam() == TEAM_SPECTATORS)
+		return false;
+
+	if(IsTeamplay())
+	{
+		return m_aTeamscore[pPlayer->GetTeam()] > m_aTeamscore[!pPlayer->GetTeam()];
+	}
+	else
+	{
+		int OwnScore = pPlayer->m_Score.value_or(0);
+		if(!OwnScore)
+			return false;
+
+		int Topscore = 0;
+		for(auto &pOtherPlayer : GameServer()->m_apPlayers)
+		{
+			if(!pOtherPlayer)
+				continue;
+			int Score = pOtherPlayer->m_Score.value_or(0);
+			if(Score > Topscore)
+				Topscore = Score;
+		}
+		return OwnScore >= Topscore;
+	}
+
+	return false;
+}
+
+bool CGameControllerPvp::IsLoser(const CPlayer *pPlayer)
+{
+	// TODO: we could relax this a bit
+	//       and not count every disconnect during a running round as loss
+	//       for example when you or your team is leading or its currently a draw
+	//       then it could be neither a win or a loss to quit mid round
+	//
+	//       the draw case also covers quitting a few seconds after round start
+	//       which is common for users who connected to the wrong server
+	//       or users that quit after the previous round ended
+	if(GameState() != IGS_END_ROUND)
+		return true;
+	if(pPlayer->GetTeam() == TEAM_SPECTATORS)
+		return false;
+
+	return !IsWinner(pPlayer, 0, 0);
 }
 
 bool CGameControllerPvp::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
@@ -449,16 +555,42 @@ void CGameControllerPvp::OnPlayerTick(class CPlayer *pPlayer)
 
 bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
+	CPlayer *pPlayer = Character.GetPlayer();
 	if(Character.m_IsGodmode)
 		return true;
 	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
+	{
+		// boosting mates counts neither as hit nor as miss
+		pPlayer->m_Stats.m_ShotsFired--;
+		Dmg = 0;
 		return false;
-
+	}
 	if(g_Config.m_SvOnlyHookKills && From >= 0 && From <= MAX_CLIENTS)
 	{
-		CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
+		return false;
+	}
+	CPlayer *pKiller = nullptr;
+	if(From >= 0 && From <= MAX_CLIENTS)
+		pKiller = GameServer()->m_apPlayers[From];
+	if(g_Config.m_SvOnlyHookKills && pKiller)
+	{
+		CCharacter *pChr = pKiller->GetCharacter();
 		if(!pChr || pChr->GetCore().HookedPlayer() != Character.GetPlayer()->GetCid())
 			return false;
+	}
+
+	if(From == pPlayer->GetCid())
+	{
+		// self damage counts as boosting
+		// so the hit/misses rate should not be affected
+		//
+		// yes this means that grenade boost kills
+		// can get you a accuracy over 100%
+		pPlayer->m_Stats.m_ShotsFired--;
+	}
+	else if(pKiller)
+	{
+		pKiller->m_Stats.m_ShotsHit++;
 	}
 
 	// instagib damage always kills no matter the armor
@@ -476,9 +608,9 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 	{
 		Character.Die(From, Weapon);
 
-		if(From >= 0 && From != Character.GetPlayer()->GetCid() && GameServer()->m_apPlayers[From])
+		if(From != Character.GetPlayer()->GetCid() && pKiller)
 		{
-			CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
+			CCharacter *pChr = pKiller->GetCharacter();
 			if(pChr)
 			{
 				// set attacker's face to happy (taunt!)
@@ -492,7 +624,7 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 				if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorId == From)
 					Mask.set(i);
 			}
-			GameServer()->CreateSound(GameServer()->m_apPlayers[From]->m_ViewPos, SOUND_HIT, Mask);
+			GameServer()->CreateSound(pKiller->m_ViewPos, SOUND_HIT, Mask);
 		}
 		return false;
 	}
@@ -551,7 +683,7 @@ void CGameControllerPvp::OnCharacterSpawn(class CCharacter *pChr)
 
 void CGameControllerPvp::AddSpree(class CPlayer *pPlayer)
 {
-	pPlayer->m_Stats.m_Spree++;
+	pPlayer->m_Spree++;
 	const int NumMsg = 5;
 	char aBuf[128];
 
@@ -589,7 +721,10 @@ void CGameControllerPvp::EndSpree(class CPlayer *pPlayer, class CPlayer *pKiller
 		}
 	}
 	// pPlayer->m_GotAward = false;
-	pPlayer->m_Stats.m_Spree = 0;
+
+	if(pPlayer->m_Stats.m_BestSpree < pPlayer->Spree())
+		pPlayer->m_Stats.m_BestSpree = pPlayer->Spree();
+	pPlayer->m_Spree = 0;
 }
 
 void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
@@ -804,6 +939,8 @@ void CGameControllerPvp::Anticamper()
 
 bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos)
 {
+	Character.GetPlayer()->m_Stats.m_ShotsFired++;
+
 	if(g_Config.m_SvGrenadeAmmoRegenResetOnFire)
 		Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
 	if(Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_Ammo > 0) // -1 == unlimited

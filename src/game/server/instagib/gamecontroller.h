@@ -13,6 +13,9 @@
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
 
+#include <game/server/instagib/sql_stats.h>
+#include <game/server/instagib/sql_stats_player.h>
+
 struct CScoreLoadBestTimeResult;
 
 class IGameController
@@ -144,6 +147,52 @@ public:
 			Silent - if false it might print warnings to the admin console
 	*/
 	virtual void UpdateSpawnWeapons(bool Silent = false){};
+
+	/*
+		Function: IsWinner
+			called on disconnect and round end
+			used to track stats
+
+		Arguments:
+			pPlayer - the player to check
+			pMessage - should be sent to pPlayer in chat contains messages such as "you gained one win", "this win did not count because xyz"
+			SizeOfMessage - size of the message buffer
+	*/
+	virtual bool IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage) { return false; }
+
+	/*
+		Function: IsLoser
+			called on disconnect and round end
+			used to track stats
+
+		Arguments:
+			pPlayer - the player to check
+	*/
+	virtual bool IsLoser(const CPlayer *pPlayer) { return false; }
+
+	/*
+		Function: OnShowStatsAll
+			called from the main thread when a SQL worker finished querying stats from the database
+
+		Arguments:
+			pStats - stats struct to display
+			pRequestingPlayer - player who initiated the stats request (might differ from the requested player)
+			pRequestedName - player name the stats belong to
+	*/
+	virtual void OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName){};
+
+	/*
+		Function: OnShowRank
+			called from the main thread when a SQL worker finished querying a rank from the database
+
+		Arguments:
+			Rank - is the rank the player got with its score compared to all other players (lower is better)
+			RankedScore - is the score that was used to obtain the rank if its ranking kills this will be the amount of kills
+			pRankType - is the displayable string that shows the type of ranks (for example "Kills")
+			pRequestingPlayer - player who initiated the stats request (might differ from the requested player)
+			pRequestedName - player name the stats belong to
+	*/
+	virtual void OnShowRank(int Rank, int RankedScore, const char *pRankType, class CPlayer *pRequestingPlayer, const char *pRequestedName){};
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
 	virtual int GameInfoExFlags(int SnappingClient) { return 0; }; // TODO: this breaks the ddrace gametype
 	virtual int GameInfoExFlags2(int SnappingClient) { return 0; };
@@ -193,7 +242,7 @@ public:
 		IGS_END_ROUND, // round is over (tick timer)
 	};
 	EGameState m_GameState;
-	EGameState GameState() { return m_GameState; }
+	EGameState GameState() const { return m_GameState; }
 	int m_GameStateTimer;
 
 	const char *GameStateToStr(EGameState GameState)
@@ -297,6 +346,10 @@ public:
 
 	bool IsSkinChangeAllowed() const { return m_AllowSkinChange; }
 	int GameFlags() const { return m_GameFlags; }
+
+	CSqlStats *m_pSqlStats = nullptr;
+	const char *m_pStatsTable = "";
+	const char *StatsTable() const { return m_pStatsTable; }
 
 private:
 #ifndef IN_CLASS_IGAMECONTROLLER

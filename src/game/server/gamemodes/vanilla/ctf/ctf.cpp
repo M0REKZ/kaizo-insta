@@ -40,6 +40,9 @@ int CGameControllerCTF::GameInfoExFlags(int SnappingClient)
 
 bool CGameControllerCTF::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
+	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
+		return CGameControllerPvp::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
+
 	if(Weapon == WEAPON_GUN || Weapon == WEAPON_SHOTGUN)
 		Dmg = 1;
 	if(Weapon == WEAPON_LASER)
@@ -86,6 +89,20 @@ bool CGameControllerCTF::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 				Dmg = 0;
 			}
 		}
+	}
+
+	Character.m_DamageTakenTick = Server()->Tick();
+
+	if(From >= 0 && From < MAX_CLIENTS && From != Character.GetPlayer()->GetCid() && GameServer()->m_apPlayers[From])
+	{
+		// do damage Hit sound
+		CClientMask Mask = CClientMask().set(From);
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorId == From)
+				Mask.set(i);
+		}
+		GameServer()->CreateSound(GameServer()->m_apPlayers[From]->m_ViewPos, SOUND_HIT, Mask);
 	}
 
 	if(Dmg > 2)

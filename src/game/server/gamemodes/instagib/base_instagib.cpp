@@ -1,4 +1,5 @@
 #include <base/system.h>
+#include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
@@ -34,6 +35,13 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 			Dmg = 0;
 
 		// no self damage
+		//
+		// self damage counts as boosting
+		// so the hit/misses rate should not be affected
+		//
+		// yes this means that grenade boost kills
+		// can get you a accuracy over 100%
+		Character.GetPlayer()->m_Stats.m_ShotsFired--;
 		return false;
 	}
 	if(Dmg < g_Config.m_SvDamageNeededForKill && Weapon == WEAPON_GRENADE)
@@ -45,9 +53,22 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 	if(CGameControllerPvp::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character))
 		return true;
 
-	if(!Character.IsAlive())
+	CPlayer *pFrom = nullptr;
+	if(From >= 0 && From < MAX_CLIENTS)
+		pFrom = GameServer()->m_apPlayers[From];
+
+	if(!Character.IsAlive() && From != Character.GetPlayer()->GetCid() && pFrom)
 	{
-		CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
+		// do damage Hit sound
+		CClientMask Mask = CClientMask().set(From);
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorId == From)
+				Mask.set(i);
+		}
+		GameServer()->CreateSound(pFrom->m_ViewPos, SOUND_HIT, Mask);
+
+		CCharacter *pChr = pFrom->GetCharacter();
 		if(!pChr)
 			return false;
 
