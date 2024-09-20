@@ -14,6 +14,7 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
 {
 	m_IsInstagibKZ = true;
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
+	m_IsVanillaGameType = false;
 	m_AllowSkinChange = true;
 }
 

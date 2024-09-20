@@ -199,6 +199,8 @@ public:
 	virtual void OnSnapDDNetCharacter(class CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter, int SnappingClient){};
 	virtual CClientMask FreezeDamageIndicatorMask(class CCharacter *pChr);
 
+	bool IsVanillaGameType() const { return m_IsVanillaGameType; }
+	bool m_IsVanillaGameType = false;
 	int m_DefaultWeapon = WEAPON_GUN;
 	void CheckReadyStates(int WithoutId = -1);
 	bool GetPlayersReadyState(int WithoutId = -1, int *pNumUnready = nullptr);

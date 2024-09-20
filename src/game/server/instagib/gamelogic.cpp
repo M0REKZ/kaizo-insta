@@ -106,6 +106,18 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientId, bool Force) cons
 		}
 	}
 
+	// the hammer hitting through walls was a bug in 0.5
+	// it got fixed in teeworlds 0.6
+	// and was reintroduced by ddnet because its part of the core ddrace gameplay
+	// ddnet-insta is based on ddnet and did not revert that back
+	// also I (ChillerDragon) personally think the wallhammer was cool and
+	// fits into the CTF/DM gameplay
+	// see https://github.com/teeworlds/teeworlds/issues/1699
+	//
+	// because we are not correctly implementing vanilla physics that should be noted
+	if(m_pController && m_pController->IsVanillaGameType())
+		str_append(aMotd, "* hammer through walls: on\n");
+
 	if(g_Config.m_SvAllowZoom)
 		str_append(aMotd, "! WARNING: using zoom is allowed\n");
 	if(g_Config.m_SvOnlyHookKills)

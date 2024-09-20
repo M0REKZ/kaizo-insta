@@ -31,18 +31,18 @@ CVanillaPickup::CVanillaPickup(CGameWorld *pGameWorld, int Type, int SubType, in
 	m_Layer = Layer;
 	m_Number = Number;
 
-	Reset();
+	int SpawnDelay = m_Type == POWERUP_NINJA ? 90 : 0;
+	if(SpawnDelay > 0)
+		m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * SpawnDelay;
+	else
+		m_SpawnTick = -1;
 
 	GameWorld()->InsertEntity(this);
 }
 
 void CVanillaPickup::Reset()
 {
-	int SpawnDelay = m_Type == POWERUP_NINJA ? 90 : 0;
-	if(SpawnDelay > 0)
-		m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * SpawnDelay;
-	else
-		m_SpawnTick = -1;
+	m_MarkedForDestroy = true;
 }
 
 void CVanillaPickup::Tick()
@@ -99,18 +99,21 @@ void CVanillaPickup::Tick()
 
 				if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
 				{
-					pChr->GiveWeapon(m_Subtype, false, 10);
+					if(pChr->GetWeaponAmmo(m_Subtype) < 10)
+					{
+						pChr->GiveWeapon(m_Subtype, false, 10);
 
-					if(m_Subtype == WEAPON_GRENADE)
-						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
-					else if(m_Subtype == WEAPON_SHOTGUN)
-						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
-					else if(m_Subtype == WEAPON_LASER)
-						GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
+						if(m_Subtype == WEAPON_GRENADE)
+							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
+						else if(m_Subtype == WEAPON_SHOTGUN)
+							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
+						else if(m_Subtype == WEAPON_LASER)
+							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
 
-					if(pChr->GetPlayer())
-						GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCid(), m_Subtype);
-					Picked = true;
+						if(pChr->GetPlayer())
+							GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCid(), m_Subtype);
+						Picked = true;
+					}
 				}
 				break;
 

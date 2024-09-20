@@ -5,7 +5,7 @@
 
 static int ColorToSixup(int Color6)
 {
-	return ColorHSLA(Color6).UnclampLighting().Pack(CTeeInfo::ms_DarkestLGT7);
+	return ColorHSLA(Color6).UnclampLighting(ColorHSLA::DARKEST_LGT).Pack(ColorHSLA::DARKEST_LGT7);
 }
 
 int CGameControllerZcatch::GetBodyColorTeetime(int Kills)
