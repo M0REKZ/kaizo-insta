@@ -39,12 +39,19 @@ void IGameController::OnEndRoundInsta()
 
 		dbg_msg("sql", "saving round stats of player '%s' win=%d loss=%d msg='%s'", Server()->ClientName(pPlayer->GetCid()), Won, Lost, aMsg);
 
+		// the spree can not be incremented if stat track is off
+		// but the best spree will be counted even if it is off
+		// this ensures that the spree of a player counts that
+		// dominated the entire server into rq and never died
 		if(pPlayer->Spree() > pPlayer->m_Stats.m_BestSpree)
 			pPlayer->m_Stats.m_BestSpree = pPlayer->Spree();
-		if(Won)
-			pPlayer->m_Stats.m_Wins++;
-		if(Lost)
-			pPlayer->m_Stats.m_Losses++;
+		if(IsStatTrack())
+		{
+			if(Won)
+				pPlayer->m_Stats.m_Wins++;
+			if(Lost)
+				pPlayer->m_Stats.m_Losses++;
+		}
 
 		m_pSqlStats->SaveRoundStats(Server()->ClientName(pPlayer->GetCid()), StatsTable(), &pPlayer->m_Stats);
 		pPlayer->m_Stats.Reset();

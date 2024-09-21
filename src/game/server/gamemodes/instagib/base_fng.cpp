@@ -72,6 +72,17 @@ void CGameControllerBaseFng::Tick()
 
 void CGameControllerBaseFng::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason)
 {
+	for(CPlayer *pOther : GameServer()->m_apPlayers)
+	{
+		if(!pOther)
+			continue;
+
+		// if someone leaves a frozen tee behing on disconnect
+		// and a teammates spikes him this is not considered a steal
+		if(pOther->m_OriginalFreezerId == pPlayer->GetCid())
+			pOther->m_OriginalFreezerId = -1;
+	}
+
 	while(true)
 	{
 		if(!g_Config.m_SvPunishFreezeDisconnect)
@@ -193,6 +204,29 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 		// yes you can multi wrong spikes
 		pKiller->m_LastKillTime = pKiller->HandleMulti();
 
+		// check for steal
+		if(pChr->GetPlayer()->m_OriginalFreezerId != -1)
+		{
+			CPlayer *pOriginalFreezer = GameServer()->m_apPlayers[pChr->GetPlayer()->m_OriginalFreezerId];
+			if(pOriginalFreezer && pOriginalFreezer != pKiller)
+			{
+				char aBuf[512];
+				str_format(
+					aBuf,
+					sizeof(aBuf),
+					"'%s' stole '%s's kill.",
+					Server()->ClientName(pKiller->GetCid()),
+					Server()->ClientName(pOriginalFreezer->GetCid()));
+				GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+
+				if(IsStatTrack())
+				{
+					pKiller->m_Stats.m_StealsFromOthers++;
+					pOriginalFreezer->m_Stats.m_StealsByOthers++;
+				}
+			}
+		}
+
 		DoWincheckRound();
 	}
 
@@ -249,13 +283,16 @@ bool CGameControllerBaseFng::OnSelfkill(int ClientId)
 bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
 	Character.GetPlayer()->UpdateLastToucher(From);
+	if(!Character.m_FreezeTime)
+		Character.GetPlayer()->m_OriginalFreezerId = From;
 
 	if(Character.m_IsGodmode)
 		return true;
 	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
 	{
 		// boosting mates counts neither as hit nor as miss
-		Character.GetPlayer()->m_Stats.m_ShotsFired--;
+		if(IsStatTrack())
+			Character.GetPlayer()->m_Stats.m_ShotsFired--;
 		return false;
 	}
 	CPlayer *pKiller = nullptr;
@@ -276,7 +313,8 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 		//
 		// yes this means that grenade boost kills
 		// can get you a accuracy over 100%
-		Character.GetPlayer()->m_Stats.m_ShotsFired--;
+		if(IsStatTrack())
+			Character.GetPlayer()->m_Stats.m_ShotsFired--;
 		return false;
 	}
 

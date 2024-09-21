@@ -79,9 +79,14 @@ public:
 	bool OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId) override;
 	void OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
 	void OnShowRank(int Rank, int RankedScore, const char *pRankType, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
+	void OnRoundStart() override;
 
 	bool IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage) override;
 	bool IsLoser(const CPlayer *pPlayer) override;
+	bool IsStatTrack() override;
+
+	bool m_InvalidateConnectedIpsCache = true;
+	int m_NumConnectedIpsCached = 0;
 
 	// Anticamper
 	void Anticamper();
@@ -93,6 +98,9 @@ public:
 
 	// returns the amount of players that currently have a tee in the world
 	int NumAlivePlayers();
+
+	// cached amount of unique ips
+	int NumConnectedIps();
 
 	// different than NumAlivePlayers()
 	// it does check m_IsDead which is set in OnCharacterDeath

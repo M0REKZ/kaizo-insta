@@ -38,6 +38,18 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
 }
 
+void CGameControllerPvp::OnRoundStart()
+{
+	dbg_msg("ddnet-insta", "starting new round ...");
+
+	// for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	// {
+	// 	if(!pPlayer)
+	// 		continue;
+	//
+	// }
+}
+
 CGameControllerPvp::~CGameControllerPvp()
 {
 	// TODO: we have to make sure to block all operations and save everything if sv_gametype is switched
@@ -236,6 +248,14 @@ bool CGameControllerPvp::IsLoser(const CPlayer *pPlayer)
 		return false;
 
 	return !IsWinner(pPlayer, 0, 0);
+}
+
+bool CGameControllerPvp::IsStatTrack()
+{
+	int MinPlayers = IsTeamPlay() ? 3 : 2;
+	int Count = NumConnectedIps();
+	// dbg_msg("stats", "connected unique ips=%d (%d+ needed to track)", Count, MinPlayers);
+	return Count >= MinPlayers;
 }
 
 bool CGameControllerPvp::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
@@ -447,11 +467,14 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 	// 			GameServer()->m_apPlayers[i]->UpdateDeadSpecMode();
 	// }
 
-	// selfkill is no kill
-	if(pKiller != pVictim->GetPlayer())
-		pKiller->m_Stats.m_Kills++;
-	// but selfkill is a death
-	pVictim->GetPlayer()->m_Stats.m_Deaths++;
+	if(IsStatTrack())
+	{
+		// selfkill is no kill
+		if(pKiller != pVictim->GetPlayer())
+			pKiller->m_Stats.m_Kills++;
+		// but selfkill is a death
+		pVictim->GetPlayer()->m_Stats.m_Deaths++;
+	}
 
 	if(pKiller && pVictim)
 	{
@@ -561,7 +584,8 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
 	{
 		// boosting mates counts neither as hit nor as miss
-		pPlayer->m_Stats.m_ShotsFired--;
+		if(IsStatTrack())
+			pPlayer->m_Stats.m_ShotsFired--;
 		Dmg = 0;
 		return false;
 	}
@@ -579,18 +603,21 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 			return false;
 	}
 
-	if(From == pPlayer->GetCid())
+	if(IsStatTrack())
 	{
-		// self damage counts as boosting
-		// so the hit/misses rate should not be affected
-		//
-		// yes this means that grenade boost kills
-		// can get you a accuracy over 100%
-		pPlayer->m_Stats.m_ShotsFired--;
-	}
-	else if(pKiller)
-	{
-		pKiller->m_Stats.m_ShotsHit++;
+		if(From == pPlayer->GetCid())
+		{
+			// self damage counts as boosting
+			// so the hit/misses rate should not be affected
+			//
+			// yes this means that grenade boost kills
+			// can get you a accuracy over 100%
+			pPlayer->m_Stats.m_ShotsFired--;
+		}
+		else if(pKiller)
+		{
+			pKiller->m_Stats.m_ShotsHit++;
+		}
 	}
 
 	// instagib damage always kills no matter the armor
@@ -683,6 +710,9 @@ void CGameControllerPvp::OnCharacterSpawn(class CCharacter *pChr)
 
 void CGameControllerPvp::AddSpree(class CPlayer *pPlayer)
 {
+	if(IsStatTrack())
+		return;
+
 	pPlayer->m_Spree++;
 	const int NumMsg = 5;
 	char aBuf[128];
@@ -729,6 +759,7 @@ void CGameControllerPvp::EndSpree(class CPlayer *pPlayer, class CPlayer *pKiller
 
 void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 {
+	m_InvalidateConnectedIpsCache = true;
 	OnPlayerConstruct(pPlayer);
 	IGameController::OnPlayerConnect(pPlayer);
 	int ClientId = pPlayer->GetCid();
@@ -785,6 +816,7 @@ void CGameControllerPvp::SendChatSpectators(const char *pMessage, int Flags)
 
 void CGameControllerPvp::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason)
 {
+	m_InvalidateConnectedIpsCache = true;
 	pPlayer->OnDisconnect();
 	int ClientId = pPlayer->GetCid();
 	if(Server()->ClientIngame(ClientId))
@@ -939,7 +971,8 @@ void CGameControllerPvp::Anticamper()
 
 bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos)
 {
-	Character.GetPlayer()->m_Stats.m_ShotsFired++;
+	if(IsStatTrack())
+		Character.GetPlayer()->m_Stats.m_ShotsFired++;
 
 	if(g_Config.m_SvGrenadeAmmoRegenResetOnFire)
 		Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
@@ -1026,6 +1059,16 @@ bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &
 	}
 
 	return true;
+}
+
+int CGameControllerPvp::NumConnectedIps()
+{
+	if(!m_InvalidateConnectedIpsCache)
+		return m_NumConnectedIpsCached;
+
+	m_InvalidateConnectedIpsCache = false;
+	m_NumConnectedIpsCached = Server()->NumConnectedIps();
+	return m_NumConnectedIpsCached;
 }
 
 int CGameControllerPvp::NumActivePlayers()

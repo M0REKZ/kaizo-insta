@@ -138,8 +138,11 @@ bool CGameControllerVanilla::OnEntity(int Index, int x, int y, int Layer, int Fl
 		Type = POWERUP_WEAPON;
 		SubType = WEAPON_LASER;
 	}
-	else if(Index == ENTITY_POWERUP_NINJA && g_Config.m_SvPowerups)
+	else if(Index == ENTITY_POWERUP_NINJA)
 	{
+		if(!g_Config.m_SvPowerups)
+			return true;
+
 		Type = POWERUP_NINJA;
 		SubType = WEAPON_NINJA;
 	}

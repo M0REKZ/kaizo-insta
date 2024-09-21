@@ -137,6 +137,7 @@ sv_tune_reset 0
 sv_destroy_bullets_on_death 0
 sv_destroy_lasers_on_death 0
 sv_no_weak_hook 1
+sv_vote_veto_time 0
 ```
 
 Below is a list of all the settings that were added in ddnet-insta.

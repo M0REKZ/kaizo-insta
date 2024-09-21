@@ -42,7 +42,8 @@ bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &
 		//
 		// yes this means that grenade boost kills
 		// can get you a accuracy over 100%
-		Character.GetPlayer()->m_Stats.m_ShotsFired--;
+		if(IsStatTrack())
+			Character.GetPlayer()->m_Stats.m_ShotsFired--;
 		return false;
 	}
 	if(Dmg < g_Config.m_SvDamageNeededForKill && Weapon == WEAPON_GRENADE)

@@ -193,6 +193,19 @@ public:
 			pRequestedName - player name the stats belong to
 	*/
 	virtual void OnShowRank(int Rank, int RankedScore, const char *pRankType, class CPlayer *pRequestingPlayer, const char *pRequestedName){};
+
+	/*
+		Function: IsStatTrack
+			Called before stats changed.
+			If this returns false the stats will not be updated.
+			This is used to protect against farming. Define for example a minium amount of in game players
+			required to count the stats.
+
+		Returns:
+			true - count stats
+			false - do not count stats
+	*/
+	virtual bool IsStatTrack() { return true; }
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
 	virtual int GameInfoExFlags(int SnappingClient) { return 0; }; // TODO: this breaks the ddrace gametype
 	virtual int GameInfoExFlags2(int SnappingClient) { return 0; };
