@@ -46,6 +46,25 @@ public:
 	virtual bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) { return false; };
 
 	/*
+		Function: OnLaserHit
+			Will be called before Character::TakeDamage() and CGameController::OnCharacterTakeDamage()
+
+			this function was added in ddnet-insta and is a non standard controller method.
+			neither ddnet nor teeworlds have this
+
+		Arguments:
+			Bounces - 1 and more is a wallshot
+			From - client id of the player who shot the laser
+			Weapon - probably either WEAPON_LASER or WEAPON_SHOTGUN
+			pVictim - character that was hit
+
+		Returns:
+			true - to call TakeDamage
+			false - to skip TakeDamage
+	*/
+	virtual bool OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim) { return true; };
+
+	/*
 		Function: OnFireWeapon
 			this function was added in ddnet-insta and is a non standard controller method.
 			neither ddnet nor teeworlds have this
@@ -171,6 +190,15 @@ public:
 	virtual bool IsLoser(const CPlayer *pPlayer) { return false; }
 
 	/*
+		Function: PointsForWin
+			Computes the amount of points for winning a round
+
+		Arguments:
+			pPlayer - the player that won
+	*/
+	virtual int PointsForWin(const CPlayer *pPlayer) { return 1; }
+
+	/*
 		Function: OnShowStatsAll
 			called from the main thread when a SQL worker finished querying stats from the database
 
@@ -192,7 +220,12 @@ public:
 			pRequestingPlayer - player who initiated the stats request (might differ from the requested player)
 			pRequestedName - player name the stats belong to
 	*/
-	virtual void OnShowRank(int Rank, int RankedScore, const char *pRankType, class CPlayer *pRequestingPlayer, const char *pRequestedName){};
+	virtual void OnShowRank(
+		int Rank,
+		int RankedScore,
+		const char *pRankType,
+		class CPlayer *pRequestingPlayer,
+		const char *pRequestedName){};
 
 	/*
 		Function: IsStatTrack
@@ -206,6 +239,30 @@ public:
 			false - do not count stats
 	*/
 	virtual bool IsStatTrack() { return true; }
+
+	/*
+		Function: SaveStatsOnRoundEnd
+			Called for every player on round end once
+			the base_pvp controller implements stats saving
+			you probably do not need to extend this.
+			If a player leaves before round end the method
+			SaveStatsOnDisconnect() will be called.
+
+		Arguments:
+			pPlayer - player to save stats for
+	*/
+	virtual void SaveStatsOnRoundEnd(CPlayer *pPlayer){};
+
+	/*
+		Function: SaveStatsOnDisconnect
+			Called for every player that leaves the game
+			unless the game state is in round end
+			then SaveStatsOnRoundEnd() was already called
+
+		Arguments:
+			pPlayer - player to save stats for
+	*/
+	virtual void SaveStatsOnDisconnect(CPlayer *pPlayer){};
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
 	virtual int GameInfoExFlags(int SnappingClient) { return 0; }; // TODO: this breaks the ddrace gametype
 	virtual int GameInfoExFlags2(int SnappingClient) { return 0; };
@@ -361,6 +418,9 @@ public:
 
 	bool IsSkinChangeAllowed() const { return m_AllowSkinChange; }
 	int GameFlags() const { return m_GameFlags; }
+
+	// get client id by in game name
+	int GetCidByName(const char *pName);
 
 	CSqlStats *m_pSqlStats = nullptr;
 	const char *m_pStatsTable = "";

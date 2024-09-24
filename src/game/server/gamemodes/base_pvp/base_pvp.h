@@ -72,6 +72,8 @@ public:
 	void SetSpawnWeapons(class CCharacter *pChr) override;
 
 	// ddnet-insta only
+	// return false to not cause any damage
+	bool OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim) override;
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
 	bool OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer) override;
 	bool OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos) override;
@@ -81,9 +83,12 @@ public:
 	void OnShowRank(int Rank, int RankedScore, const char *pRankType, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
 	void OnRoundStart() override;
 
+	bool HasWinningScore(const CPlayer *pPlayer) const;
 	bool IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage) override;
 	bool IsLoser(const CPlayer *pPlayer) override;
 	bool IsStatTrack() override;
+	void SaveStatsOnRoundEnd(CPlayer *pPlayer) override;
+	void SaveStatsOnDisconnect(CPlayer *pPlayer) override;
 
 	bool m_InvalidateConnectedIpsCache = true;
 	int m_NumConnectedIpsCached = 0;

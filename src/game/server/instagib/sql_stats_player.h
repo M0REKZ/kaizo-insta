@@ -12,6 +12,11 @@ enum
 class CSqlStatsPlayer
 {
 public:
+	// can be used as score in save servers
+	// mostly matches the in game score in the scoreboard
+	// also used by zCatch to give different amounts of points
+	// for wins based on the amount of connected players
+	int m_Points;
 	// kills, deaths and flag grabs/caps are tracked per round
 	int m_Kills;
 	int m_Deaths;
@@ -19,9 +24,12 @@ public:
 	int m_Wins;
 	int m_Losses;
 	// used to track accuracy in any gametype
-	// in grenade, hammer, ninja and shotgun based gametypes the
+	// in grenade, ninja and shotgun based gametypes the
 	// accuracy can go over 100%
 	// because one shot can have multiple hits
+	//
+	// hammer is excluded by default from ShotsFired and ShotsHit
+	// if you need to track hammer as well you have to do so in your gamemode
 	int m_ShotsFired;
 	int m_ShotsHit;
 
@@ -49,12 +57,6 @@ public:
 	 * zCatch                            *
 	 *************************************/
 
-	// zCatch only for now but will possibly be shared
-
-	// TODO: this should probably be in the base stats
-	//       any pvp mode could collect points for kills/caps/wins
-	int m_Points; // TODO: this is not tracked yet
-
 	int m_TicksCaught; // TODO: this is not tracked yet
 	int m_TicksInGame; // TODO: this is not tracked yet
 
@@ -67,7 +69,7 @@ public:
 
 	int m_aMultis[MAX_MULTIS];
 
-	int m_Freezes;
+	int m_GotFrozen;
 	int m_GoldSpikes;
 	int m_GreenSpikes;
 	int m_PurpleSpikes;
@@ -85,6 +87,7 @@ public:
 	void Reset()
 	{
 		// base for all gametypes
+		m_Points = 0;
 		m_Kills = 0;
 		m_Deaths = 0;
 		m_BestSpree = 0;
@@ -102,7 +105,7 @@ public:
 		m_TicksCaught = 0;
 		m_TicksInGame = 0;
 		m_BestMulti = 0;
-		m_Freezes = 0;
+		m_GotFrozen = 0;
 		m_GoldSpikes = 0;
 		m_GreenSpikes = 0;
 		m_PurpleSpikes = 0;
@@ -119,6 +122,7 @@ public:
 	void Merge(const CSqlStatsPlayer *pOther)
 	{
 		// base for all gametypes
+		m_Points += pOther->m_Points;
 		m_Kills += pOther->m_Kills;
 		m_Deaths += pOther->m_Deaths;
 		m_BestSpree = std::max(m_BestSpree, pOther->m_BestSpree);
@@ -132,6 +136,7 @@ public:
 
 	void Dump(CExtraColumns *pExtraColumns, const char *pSystem = "stats") const
 	{
+		dbg_msg(pSystem, "  points: %d", m_Points);
 		dbg_msg(pSystem, "  kills: %d", m_Kills);
 		dbg_msg(pSystem, "  deaths: %d", m_Deaths);
 		dbg_msg(pSystem, "  spree: %d", m_BestSpree);
@@ -147,7 +152,8 @@ public:
 	bool HasValues() const
 	{
 		// TODO: add a HasValues callback in the gametype instead of listing all here
-		return m_Kills ||
+		return m_Points ||
+		       m_Kills ||
 		       m_Deaths ||
 		       m_BestSpree ||
 		       m_Wins ||
@@ -162,7 +168,7 @@ public:
 		       m_TicksCaught ||
 		       m_TicksInGame ||
 		       m_BestMulti ||
-		       m_Freezes ||
+		       m_GotFrozen ||
 		       m_GoldSpikes ||
 		       m_GreenSpikes ||
 		       m_PurpleSpikes ||

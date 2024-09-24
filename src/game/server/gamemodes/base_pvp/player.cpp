@@ -16,6 +16,16 @@ void CGameControllerPvp::OnPlayerConstruct(class CPlayer *pPlayer)
 	pPlayer->m_Stats.Reset();
 }
 
+void CPlayer::AddScore(int Score)
+{
+	// never decrement the tracked score
+	// so fakers can not remove points from others
+	if(Score > 0 && GameServer()->m_pController->IsStatTrack())
+		m_Stats.m_Points += Score;
+
+	m_Score = m_Score.value_or(0) + Score;
+}
+
 void CPlayer::InstagibTick()
 {
 	if(m_StatsQueryResult != nullptr && m_StatsQueryResult->m_Completed)

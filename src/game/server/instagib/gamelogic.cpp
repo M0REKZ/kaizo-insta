@@ -35,6 +35,8 @@ void CGameContext::AlertOnSpecialInstagibConfigs(int ClientId) const
 		SendChatTarget(ClientId, "WARNING: only hooked enemies can be killed");
 	if(g_Config.m_SvKillHook)
 		SendChatTarget(ClientId, "WARNING: the hook kills");
+	if(g_Config.m_SvOnlyWallshotKills)
+		SendChatTarget(ClientId, "WARNING: only wallshots can kill");
 }
 
 void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientId, bool Force) const
@@ -122,6 +124,8 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientId, bool Force) cons
 		str_append(aMotd, "! WARNING: using zoom is allowed\n");
 	if(g_Config.m_SvOnlyHookKills)
 		str_append(aMotd, "! WARNING: only hooked enemies can be killed\n");
+	if(g_Config.m_SvOnlyWallshotKills)
+		str_append(aMotd, "! WARNING: only wallshots can kill\n");
 	if(g_Config.m_SvKillHook)
 		str_append(aMotd, "! WARNING: the hook kills\n");
 
@@ -341,7 +345,25 @@ void CGameContext::InstagibUnstackChatMessage(char *pUnstacked, const char *pMes
 		m_UnstackHackCharacterOffset++;
 		if(m_UnstackHackCharacterOffset >= (int)(sizeof(aaInvisibleUnicodes) / 8))
 			m_UnstackHackCharacterOffset = 0;
-		str_format(pUnstacked, Size, "%s%s", aaInvisibleUnicodes[m_UnstackHackCharacterOffset], pMessage);
+
+		const char *pPingPrefix = "";
+
+		if(aaInvisibleUnicodes[m_UnstackHackCharacterOffset][0] != '\0')
+		{
+			for(const CPlayer *pPlayer : m_apPlayers)
+			{
+				if(!pPlayer)
+					continue;
+
+				if(str_startswith(pMessage, Server()->ClientName(pPlayer->GetCid())))
+				{
+					pPingPrefix = " ";
+					break;
+				}
+			}
+		}
+
+		str_format(pUnstacked, Size, "%s%s%s", aaInvisibleUnicodes[m_UnstackHackCharacterOffset], pPingPrefix, pMessage);
 	}
 	for(int i = MAX_LINES - 1; i > 0; i--)
 	{

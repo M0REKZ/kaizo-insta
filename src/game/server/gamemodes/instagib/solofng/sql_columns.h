@@ -7,7 +7,11 @@
 
 MACRO_ADD_COLUMN(Wallshots, "wallshots", "INTEGER", Int, "0", Add)
 
-MACRO_ADD_COLUMN(Freezes, "freezes", "INTEGER", Int, "0", Add)
+// the amount of times we were frozen with a laser by an enemy
+// not spiked that would be counted in deaths
+//
+// the amount of enemies we froze is tracked in base stats' shots_hit
+MACRO_ADD_COLUMN(GotFrozen, "got_frozen", "INTEGER", Int, "0", Add)
 
 // normal spikes are kills
 MACRO_ADD_COLUMN(GoldSpikes, "gold_spikes", "INTEGER", Int, "0", Add)

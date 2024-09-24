@@ -1,4 +1,6 @@
 #include <base/system.h>
+#include <engine/shared/config.h>
+#include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
 #include <game/server/instagib/strhelpers.h>
 #include <game/server/player.h>
@@ -237,6 +239,22 @@ bool CGameControllerPvp::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, i
 			GameServer()->SendChat(-1, TEAM_ALL, aChatText);
 			GameServer()->SendChat(-1, TEAM_ALL, "turn off tournament chat or make sure there are enough in game slots");
 			break;
+		}
+	}
+
+	if(g_Config.m_SvStopAndGoChat && pPlayer->GetTeam() != TEAM_SPECTATORS)
+	{
+		if(!str_comp_nocase(pMsg->m_pMessage, "stop") || !str_comp_nocase(pMsg->m_pMessage, "pause"))
+		{
+			SetGameState(IGS_GAME_PAUSED, TIMER_INFINITE);
+			GameServer()->SendGameMsg(protocol7::GAMEMSG_GAME_PAUSED, pPlayer->GetCid(), -1);
+		}
+		else if(!str_comp_nocase(pMsg->m_pMessage, "start") || !str_comp_nocase(pMsg->m_pMessage, "go"))
+		{
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "'%s' started the game", Server()->ClientName(ClientId));
+			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+			SetGameState(IGS_GAME_PAUSED, 0);
 		}
 	}
 

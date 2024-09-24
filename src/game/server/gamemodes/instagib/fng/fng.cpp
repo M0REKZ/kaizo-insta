@@ -18,6 +18,11 @@ CGameControllerFng::CGameControllerFng(class CGameContext *pGameServer) :
 
 	m_SpawnWeapons = ESpawnWeapons::SPAWN_WEAPON_LASER;
 	m_DefaultWeapon = WEAPON_LASER;
+
+	m_pStatsTable = "fng";
+	m_pExtraColumns = new CFngColumns();
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerFng::~CGameControllerFng() = default;

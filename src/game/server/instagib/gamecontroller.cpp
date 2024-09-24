@@ -438,3 +438,20 @@ void IGameController::OnFlagGrab(CFlag *pFlag)
 void IGameController::OnFlagCapture(CFlag *pFlag, float Time)
 {
 }
+
+int IGameController::GetCidByName(const char *pName)
+{
+	int ClientId = -1;
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		if(!str_comp(pName, Server()->ClientName(pPlayer->GetCid())))
+		{
+			ClientId = pPlayer->GetCid();
+			break;
+		}
+	}
+	return ClientId;
+}

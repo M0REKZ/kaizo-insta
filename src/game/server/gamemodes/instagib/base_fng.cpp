@@ -125,6 +125,8 @@ bool CGameControllerBaseFng::OnEntity(int Index, int x, int y, int Layer, int Fl
 
 void CGameControllerBaseFng::OnWrongSpike(class CPlayer *pPlayer)
 {
+	if(IsStatTrack())
+		pPlayer->m_Stats.m_WrongSpikes++;
 	pPlayer->AddScore(-6);
 	CCharacter *pChr = pPlayer->GetCharacter();
 	// this means you can selfkill before the wrong spike hits
@@ -162,16 +164,22 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 		}
 		if(SpikeTile == TILE_FNG_SPIKE_GOLD)
 		{
+			if(IsStatTrack())
+				pKiller->m_Stats.m_GoldSpikes++;
 			pKiller->AddScore(7);
 			m_aTeamscore[pKiller->GetTeam()] += 12;
 		}
 		if(SpikeTile == TILE_FNG_SPIKE_GREEN)
 		{
+			if(IsStatTrack())
+				pKiller->m_Stats.m_GreenSpikes++;
 			pKiller->AddScore(5);
 			m_aTeamscore[pKiller->GetTeam()] += 15;
 		}
 		if(SpikeTile == TILE_FNG_SPIKE_PURPLE)
 		{
+			if(IsStatTrack())
+				pKiller->m_Stats.m_PurpleSpikes++;
 			pKiller->AddScore(9);
 			m_aTeamscore[pKiller->GetTeam()] += 18;
 		}
@@ -280,6 +288,16 @@ bool CGameControllerBaseFng::OnSelfkill(int ClientId)
 	return true;
 }
 
+bool CGameControllerBaseFng::OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim)
+{
+	// do not track wallshots on frozen tees
+	if(pVictim->m_FreezeTime)
+		return true;
+	return CGameControllerInstagib::OnLaserHit(Bounces, From, Weapon, pVictim);
+}
+
+// warning this does not call the base pvp take damage method
+// so it has to reimplement all the relevant functionality
 bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
 	Character.GetPlayer()->UpdateLastToucher(From);
@@ -288,16 +306,16 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 
 	if(Character.m_IsGodmode)
 		return true;
-	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
-	{
-		// boosting mates counts neither as hit nor as miss
-		if(IsStatTrack())
-			Character.GetPlayer()->m_Stats.m_ShotsFired--;
-		return false;
-	}
 	CPlayer *pKiller = nullptr;
 	if(From >= 0 && From <= MAX_CLIENTS)
 		pKiller = GameServer()->m_apPlayers[From];
+	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
+	{
+		// boosting mates counts neither as hit nor as miss
+		if(IsStatTrack() && Weapon != WEAPON_HAMMER && pKiller)
+			pKiller->m_Stats.m_ShotsFired--;
+		return false;
+	}
 	if(g_Config.m_SvOnlyHookKills && pKiller)
 	{
 		CCharacter *pChr = pKiller->GetCharacter();
@@ -313,7 +331,7 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 		//
 		// yes this means that grenade boost kills
 		// can get you a accuracy over 100%
-		if(IsStatTrack())
+		if(IsStatTrack() && Weapon != WEAPON_HAMMER)
 			Character.GetPlayer()->m_Stats.m_ShotsFired--;
 		return false;
 	}
@@ -326,9 +344,19 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 
 	if(pKiller)
 	{
+		if(IsStatTrack())
+		{
+			pKiller->m_Stats.m_ShotsHit++;
+		}
+
 		pKiller->IncrementScore();
 		m_aTeamscore[pKiller->GetTeam()]++;
 		DoWincheckRound();
+	}
+
+	if(IsStatTrack())
+	{
+		Character.GetPlayer()->m_Stats.m_GotFrozen++;
 	}
 
 	Character.Freeze(10);

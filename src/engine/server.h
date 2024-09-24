@@ -301,6 +301,10 @@ public:
 class IGameServer : public IInterface
 {
 	MACRO_INTERFACE("gameserver")
+	// ddnet-insta
+public:
+	virtual const char *ServerInfoPlayerScoreKind() = 0;
+
 protected:
 public:
 	// `pPersistentData` may be null if this is the first time `IGameServer`

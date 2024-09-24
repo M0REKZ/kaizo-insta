@@ -196,17 +196,8 @@ void CGameControllerPvp::OnUpdateSpectatorVotesConfig()
 	}
 }
 
-bool CGameControllerPvp::IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage)
+bool CGameControllerPvp::HasWinningScore(const CPlayer *pPlayer) const
 {
-	if(pMessage && SizeOfMessage)
-		pMessage[0] = '\0';
-
-	// you can only win on round end
-	if(GameState() != IGS_END_ROUND)
-		return false;
-	if(pPlayer->GetTeam() == TEAM_SPECTATORS)
-		return false;
-
 	if(IsTeamplay())
 	{
 		return m_aTeamscore[pPlayer->GetTeam()] > m_aTeamscore[!pPlayer->GetTeam()];
@@ -232,6 +223,20 @@ bool CGameControllerPvp::IsWinner(const CPlayer *pPlayer, char *pMessage, int Si
 	return false;
 }
 
+bool CGameControllerPvp::IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage)
+{
+	if(pMessage && SizeOfMessage)
+		pMessage[0] = '\0';
+
+	// you can only win on round end
+	if(GameState() != IGS_END_ROUND)
+		return false;
+	if(pPlayer->GetTeam() == TEAM_SPECTATORS)
+		return false;
+
+	return HasWinningScore(pPlayer);
+}
+
 bool CGameControllerPvp::IsLoser(const CPlayer *pPlayer)
 {
 	// TODO: we could relax this a bit
@@ -254,8 +259,127 @@ bool CGameControllerPvp::IsStatTrack()
 {
 	int MinPlayers = IsTeamPlay() ? 3 : 2;
 	int Count = NumConnectedIps();
-	// dbg_msg("stats", "connected unique ips=%d (%d+ needed to track)", Count, MinPlayers);
-	return Count >= MinPlayers;
+	bool Track = Count >= MinPlayers;
+	if(g_Config.m_SvDebugStats)
+		dbg_msg("stats", "connected unique ips=%d (%d+ needed to track) tracking=%d", Count, MinPlayers, Track);
+	return Track;
+}
+
+void CGameControllerPvp::SaveStatsOnRoundEnd(CPlayer *pPlayer)
+{
+	char aMsg[512] = {0};
+	bool Won = IsWinner(pPlayer, aMsg, sizeof(aMsg));
+	bool Lost = IsLoser(pPlayer);
+	// dbg_msg("stats", "winner=%d loser=%d msg=%s name: %s", Won, Lost, aMsg, Server()->ClientName(pPlayer->GetCid()));
+	if(aMsg[0])
+		GameServer()->SendChatTarget(pPlayer->GetCid(), aMsg);
+
+	dbg_msg("sql", "saving round stats of player '%s' win=%d loss=%d msg='%s'", Server()->ClientName(pPlayer->GetCid()), Won, Lost, aMsg);
+
+	// the spree can not be incremented if stat track is off
+	// but the best spree will be counted even if it is off
+	// this ensures that the spree of a player counts that
+	// dominated the entire server into rq and never died
+	if(pPlayer->Spree() > pPlayer->m_Stats.m_BestSpree)
+		pPlayer->m_Stats.m_BestSpree = pPlayer->Spree();
+	if(IsStatTrack())
+	{
+		if(Won)
+		{
+			pPlayer->m_Stats.m_Wins++;
+			pPlayer->m_Stats.m_Points += PointsForWin(pPlayer);
+		}
+		if(Lost)
+			pPlayer->m_Stats.m_Losses++;
+	}
+
+	m_pSqlStats->SaveRoundStats(Server()->ClientName(pPlayer->GetCid()), StatsTable(), &pPlayer->m_Stats);
+	pPlayer->m_Stats.Reset();
+}
+
+void CGameControllerPvp::SaveStatsOnDisconnect(CPlayer *pPlayer)
+{
+	if(!pPlayer)
+		return;
+	if(!pPlayer->m_Stats.HasValues())
+		return;
+
+	// the spree can not be incremented if stat track is off
+	// but the best spree will be counted even if it is off
+	// this ensures that the spree of a player counts that
+	// dominated the entire server into rq and never died
+	if(pPlayer->Spree() > pPlayer->m_Stats.m_BestSpree)
+		pPlayer->m_Stats.m_BestSpree = pPlayer->Spree();
+
+	// rage quit during a round counts as loss
+	bool CountAsLoss = true;
+	const char *pLossReason = "rage quit";
+
+	// unless there are not enough players to track stats
+	// fast capping alone on a server should never increment losses
+	if(!IsStatTrack())
+	{
+		CountAsLoss = false;
+		pLossReason = "stat track is off";
+	}
+
+	// unless you are just a spectator
+	if(pPlayer->GetTeam() == TEAM_SPECTATORS)
+	{
+		int SpectatorTicks = Server()->Tick() - pPlayer->m_LastSetTeam;
+		int SpectatorSeconds = SpectatorTicks / Server()->TickSpeed();
+		if(SpectatorSeconds > 60)
+		{
+			CountAsLoss = false;
+			pLossReason = "player is spectator";
+		}
+		// dbg_msg("stats", "spectator since %d seconds", SpectatorSeconds);
+	}
+
+	// if the quitting player was about to win
+	// it does not count as a loss either
+	if(HasWinningScore(pPlayer))
+	{
+		CountAsLoss = false;
+		pLossReason = "player has winning score";
+	}
+
+	// require at least one death to count aborting a game as loss
+	if(!pPlayer->m_Stats.m_Deaths)
+	{
+		CountAsLoss = false;
+		pLossReason = "player never died";
+	}
+
+	int RoundTicks = Server()->Tick() - m_GameStartTick;
+	int ConnectedTicks = Server()->Tick() - pPlayer->m_JoinTick;
+	int RoundSeconds = RoundTicks / Server()->TickSpeed();
+	int ConnectedSeconds = ConnectedTicks / Server()->TickSpeed();
+
+	// dbg_msg(
+	// 	"disconnect",
+	// 	"round_ticks=%d (%ds)   connected_ticks=%d (%ds)",
+	// 	RoundTicks,
+	// 	RoundSeconds,
+	// 	ConnectedTicks,
+	// 	ConnectedSeconds);
+
+	// the player has to be playing in that round for at least one minute
+	// for it to count as a loss
+	//
+	// this protects from reconnecting stat griefers
+	// and also makes sure that casual short connects don't count as loss
+	if(RoundSeconds < 60 || ConnectedSeconds < 60)
+	{
+		CountAsLoss = false;
+		pLossReason = "player did not play long enough";
+	}
+
+	if(CountAsLoss)
+		pPlayer->m_Stats.m_Losses++;
+
+	dbg_msg("sql", "saving stats of disconnecting player '%s' CountAsLoss=%d (%s)", Server()->ClientName(pPlayer->GetCid()), CountAsLoss, pLossReason);
+	m_pSqlStats->SaveRoundStats(Server()->ClientName(pPlayer->GetCid()), StatsTable(), &pPlayer->m_Stats);
 }
 
 bool CGameControllerPvp::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
@@ -576,6 +700,20 @@ void CGameControllerPvp::OnPlayerTick(class CPlayer *pPlayer)
 	}
 }
 
+bool CGameControllerPvp::OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[From];
+	if(!pPlayer)
+		return true;
+
+	if(IsStatTrack() && Bounces != 0)
+		pPlayer->m_Stats.m_Wallshots++;
+
+	if(g_Config.m_SvOnlyWallshotKills)
+		return Bounces != 0;
+	return true;
+}
+
 bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
 	CPlayer *pPlayer = Character.GetPlayer();
@@ -584,7 +722,7 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
 	{
 		// boosting mates counts neither as hit nor as miss
-		if(IsStatTrack())
+		if(IsStatTrack() && Weapon != WEAPON_HAMMER)
 			pPlayer->m_Stats.m_ShotsFired--;
 		Dmg = 0;
 		return false;
@@ -603,7 +741,7 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 			return false;
 	}
 
-	if(IsStatTrack())
+	if(IsStatTrack() && Weapon != WEAPON_HAMMER)
 	{
 		if(From == pPlayer->GetCid())
 		{
@@ -710,7 +848,7 @@ void CGameControllerPvp::OnCharacterSpawn(class CCharacter *pChr)
 
 void CGameControllerPvp::AddSpree(class CPlayer *pPlayer)
 {
-	if(IsStatTrack())
+	if(!IsStatTrack())
 		return;
 
 	pPlayer->m_Spree++;
@@ -816,6 +954,9 @@ void CGameControllerPvp::SendChatSpectators(const char *pMessage, int Flags)
 
 void CGameControllerPvp::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason)
 {
+	if(GameState() != IGS_END_ROUND)
+		SaveStatsOnDisconnect(pPlayer);
+
 	m_InvalidateConnectedIpsCache = true;
 	pPlayer->OnDisconnect();
 	int ClientId = pPlayer->GetCid();
@@ -971,7 +1112,7 @@ void CGameControllerPvp::Anticamper()
 
 bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos)
 {
-	if(IsStatTrack())
+	if(IsStatTrack() && Weapon != WEAPON_HAMMER)
 		Character.GetPlayer()->m_Stats.m_ShotsFired++;
 
 	if(g_Config.m_SvGrenadeAmmoRegenResetOnFire)
@@ -1018,7 +1159,7 @@ bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &
 		{
 			int ShotSpread = 2;
 			
-			for(int i = -ShotSpread; i <= ShotSpread; ++i)
+			for(int i = -ShotSpread; i <= ShotSpread; ++i) // NOLINT(clang-analyzer-unix.Malloc)
 			{
 				float Spreading[] = {-0.185f, -0.070f, 0, 0.070f, 0.185f};
 				float Angle = angle(Direction);
@@ -1041,7 +1182,7 @@ bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &
 									   vec2(cosf(Angle), sinf(Angle)) * Speed); // InitDir
 			}
 			
-			GameServer()->CreateSound(Character.m_Pos, SOUND_SHOTGUN_FIRE);
+			GameServer()->CreateSound(Character.m_Pos, SOUND_SHOTGUN_FIRE); // NOLINT(clang-analyzer-unix.Malloc)
 		}
 	}
 	else

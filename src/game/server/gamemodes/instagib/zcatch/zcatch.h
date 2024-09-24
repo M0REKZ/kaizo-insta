@@ -78,8 +78,7 @@ public:
 	void ReadAndMergeStats(int *pOffset, IDbConnection *pSqlServer, CSqlStatsPlayer *pOutputStats, const CSqlStatsPlayer *pNewStats) override
 	{
 #define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) \
-	pOutputStats->m_##name = Merge##bind_type##merge_method(pSqlServer->Get##bind_type((*pOffset)++), pNewStats->m_##name); \
-	dbg_msg("gctf", "db[%d]=%d round=%d => merge=%d", (*pOffset) - 1, pSqlServer->Get##bind_type((*pOffset) - 1), pNewStats->m_##name, pOutputStats->m_##name);
+	pOutputStats->m_##name = Merge##bind_type##merge_method(pSqlServer->Get##bind_type((*pOffset)++), pNewStats->m_##name);
 #include "sql_columns.h"
 #undef MACRO_ADD_COLUMN
 	}
@@ -115,6 +114,7 @@ public:
 	bool OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId) override;
 	bool IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage) override;
 	bool IsLoser(const CPlayer *pPlayer) override;
+	int PointsForWin(const CPlayer *pPlayer) override;
 
 	enum class ECatchGameState
 	{

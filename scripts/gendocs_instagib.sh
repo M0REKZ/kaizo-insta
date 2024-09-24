@@ -77,7 +77,7 @@ insert_at() {
 	fi
 }
 
-insert_at '^# Configs$' '^# ' "$(gen_configs)" README.md
+insert_at '^## ddnet-insta configs$' '^# ' "$(gen_configs)" README.md
 insert_at '^# Rcon commmands$' '^# ' "$(gen_rcon_cmds)" README.md
 
 [[ -f "$(tmp)" ]] && rm "$(tmp)"

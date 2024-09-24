@@ -122,7 +122,7 @@ public:
 	int64_t m_LastReadyChangeTick;
 	void IncrementScore() { AddScore(1); }
 	void DecrementScore() { AddScore(-1); }
-	void AddScore(int Score) { m_Score = m_Score.value_or(0) + Score; }
+	void AddScore(int Score);
 
 #ifndef IN_CLASS_PLAYER
 }

@@ -71,6 +71,8 @@ bool CGameControllerZcatch::IsWinner(const CPlayer *pPlayer, char *pMessage, int
 		return false;
 	if(pPlayer->GetTeam() == TEAM_SPECTATORS)
 		return false;
+	if(pPlayer->m_IsDead)
+		return false;
 	// there are no winners in release games even if the round ends
 	if(!IsCatchGameRunning())
 		return false;
@@ -95,6 +97,18 @@ bool CGameControllerZcatch::IsLoser(const CPlayer *pPlayer)
 	// rage quit as dead player is counted as a loss
 	// qutting mid game while being alive is not
 	return pPlayer->m_IsDead;
+}
+
+int CGameControllerZcatch::PointsForWin(const CPlayer *pPlayer)
+{
+	int Points = pPlayer->m_vVictimIds.size() * 2;
+	dbg_msg(
+		"zcatch",
+		"player '%s' earned %d points for winning with %d kills",
+		Server()->ClientName(pPlayer->GetCid()),
+		Points,
+		pPlayer->m_vVictimIds.size());
+	return Points;
 }
 
 void CGameControllerZcatch::OnRoundStart()
@@ -434,6 +448,23 @@ bool CGameControllerZcatch::DoWincheckRound()
 {
 	if(IsCatchGameRunning() && NumNonDeadActivePlayers() <= 1)
 	{
+		for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+		{
+			if(!pPlayer)
+				continue;
+
+			// this player ended the round
+			if(!pPlayer->m_IsDead && IsCatchGameRunning() && pPlayer->GetTeam() != TEAM_SPECTATORS)
+			{
+				if(!IsWinner(pPlayer, 0, 0))
+				{
+					// if the win did not count because there were less than 10
+					// players we still give the winner points
+					pPlayer->m_Stats.m_Points += PointsForWin(pPlayer);
+				}
+			}
+		}
+
 		EndRound();
 
 		for(CPlayer *pPlayer : GameServer()->m_apPlayers)

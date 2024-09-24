@@ -63,14 +63,16 @@ struct CSqlInstaData : ISqlData
 
 	~CSqlInstaData() override;
 
+	int m_DebugStats = 0;
 	CExtraColumns *m_pExtraColumns = nullptr;
 };
 
 struct CSqlPlayerStatsRequest : CSqlInstaData
 {
-	CSqlPlayerStatsRequest(std::shared_ptr<CInstaSqlResult> pResult) :
+	CSqlPlayerStatsRequest(std::shared_ptr<CInstaSqlResult> pResult, int DebugStats) :
 		CSqlInstaData(std::move(pResult))
 	{
+		m_DebugStats = DebugStats;
 	}
 
 	// object being requested, player (16 bytes)
@@ -87,13 +89,17 @@ struct CSqlPlayerStatsRequest : CSqlInstaData
 
 	// table name depends on gametype
 	char m_aTable[128];
+
+	// SQL ASC or DESC
+	char m_aOrderBy[128];
 };
 
 struct CSqlSaveRoundStatsRequest : CSqlInstaData
 {
-	CSqlSaveRoundStatsRequest() :
+	CSqlSaveRoundStatsRequest(int DebugStats) :
 		CSqlInstaData(nullptr)
 	{
+		m_DebugStats = DebugStats;
 	}
 
 	char m_aName[128];
@@ -129,6 +135,7 @@ class CSqlStats
 
 	static bool ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool ShowRankWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool ShowTopWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 
 	std::shared_ptr<CInstaSqlResult> NewInstaSqlResult(int ClientId);
 
@@ -148,6 +155,7 @@ class CSqlStats
 		const char *pRankColumnDisplay,
 		const char *pRankColumnSql,
 		const char *pTable,
+		const char *pOrderBy,
 		int Offset);
 
 	bool RateLimitPlayer(int ClientId);
@@ -162,7 +170,8 @@ public:
 	void SaveRoundStats(const char *pName, const char *pTable, CSqlStatsPlayer *pStats);
 
 	void ShowStats(int ClientId, const char *pName, const char *pTable);
-	void ShowRank(int ClientId, const char *pName, const char *pRankColumnDisplay, const char *pRankColumnSql, const char *pTable);
+	void ShowRank(int ClientId, const char *pName, const char *pRankColumnDisplay, const char *pRankColumnSql, const char *pTable, const char *pOrderBy);
+	void ShowTop(int ClientId, const char *pName, const char *pRankColumnDisplay, const char *pRankColumnSql, const char *pTable, const char *pOrderBy, int Offset);
 };
 
 #endif
