@@ -111,6 +111,8 @@ int CGameControllerInstaBaseCTF::OnCharacterDeath(class CCharacter *pVictim, cla
 			GameServer()->CreateSoundGlobal(SOUND_CTF_DROP);
 			GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_DROP, -1);
 			pFlag->Drop();
+			// https://github.com/ddnet-insta/ddnet-insta/issues/156
+			pFlag->m_pLastCarrier = nullptr;
 
 			if(pKiller && pKiller->GetTeam() != pVictim->GetPlayer()->GetTeam())
 				pKiller->IncrementScore();
