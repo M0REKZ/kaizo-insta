@@ -18,6 +18,11 @@ CGameControllerBoomFng::CGameControllerBoomFng(class CGameContext *pGameServer) 
 
 	m_SpawnWeapons = ESpawnWeapons::SPAWN_WEAPON_GRENADE;
 	m_DefaultWeapon = WEAPON_GRENADE;
+
+	m_pStatsTable = "boomfng";
+	m_pExtraColumns = new CBoomfngColumns();
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerBoomFng::~CGameControllerBoomFng() = default;

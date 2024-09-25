@@ -9,10 +9,10 @@ For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 A ddnet based pvp mod. With the focus on correct 0.6 and 0.7 support and staying close to and up to date with ddnet.
 While being highly configurable and feature rich.
 
-Implementing most of the relevant pvp gametypes: gctf, ictf, gdm, idm, gtdm, itdm, zCatch
+Implementing most of the relevant pvp gametypes: gctf, ictf, gdm, idm, gtdm, itdm, zCatch, bolofng, solofng, boomfng, fng
 
 
-Planned gametypes are: fng, ctf, dm
+Planned gametypes are: ctf, dm
 
 # Features
 
@@ -126,6 +126,32 @@ If you get killed you stay dead until your killer dies. Last man standing wins.
 It is an instagib gametype so one shot kills. You can choose the weapon with
 `sv_spawn_weapons` the options are `grenade` or `laser`.
 
+### bolofng
+
+``sv_gametype bolofng``
+
+Freeze next generation mode with grenade. One grenade hit freezes enemies.
+Frozen enemies can be sacrificed to the gods by killing them in special spikes.
+First player to reach the scorelimit wins.
+
+### solofng
+
+``sv_gametype solofng``
+
+Like bolofng but with laser.
+
+### boomfng
+
+``sv_gametype boomfng``
+
+Like bolofng but with teams.
+
+### fng
+
+``sv_gametype fng``
+
+Like boomfng but with laser.
+
 # Configs
 
 ddnet-insta inherited all configs from ddnet. So make sure to also check ddnet's documentation.
@@ -144,7 +170,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 
 ## ddnet-insta configs
 
-+ `sv_gametype` Game type (gctf, ictf, gdm, idm, gtdm, itdm, zcatch)
++ `sv_gametype` Game type (gctf, ictf, gdm, idm, gtdm, itdm, zcatch, bolofng, solofng, boomfng, fng)
 + `sv_spectator_votes` Allow spectators to vote
 + `sv_spectator_votes_sixup` Allow 0.7 players to vote as spec if sv_spectator_vote is 1 (hacky dead spec)
 + `sv_countdown_unpause` Number of seconds to freeze the game in a countdown before match continues after pause

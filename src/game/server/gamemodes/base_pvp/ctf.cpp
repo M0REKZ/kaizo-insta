@@ -310,7 +310,7 @@ void CGameControllerBaseCTF::FlagTick()
 					continue;
 
 				// cooldown for recollect after dropping the flag
-				if(pFlag->m_pLastCarrier == apCloseCCharacters[i] && (pFlag->m_DropTick + Server()->TickSpeed() * 2) > Server()->Tick())
+				if(pFlag->m_pLastCarrier == apCloseCCharacters[i] && (pFlag->m_DropTick + Server()->TickSpeed()) > Server()->Tick())
 					continue;
 
 				if(apCloseCCharacters[i]->GetPlayer()->GetTeam() == pFlag->GetTeam())

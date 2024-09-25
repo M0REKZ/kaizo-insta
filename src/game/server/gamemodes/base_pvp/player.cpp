@@ -88,7 +88,7 @@ int64_t CPlayer::HandleMulti()
 		return TimeNow;
 	}
 
-	if(GameServer()->m_pController->IsStatTrack())
+	if(!GameServer()->m_pController->IsStatTrack())
 		return TimeNow;
 
 	m_Multi++;

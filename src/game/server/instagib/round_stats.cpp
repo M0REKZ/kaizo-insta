@@ -324,6 +324,7 @@ void IGameController::PublishRoundEndStatsStrHttp(const char *pStr)
 void IGameController::PublishRoundEndStats()
 {
 	char aStats[1024];
+	aStats[0] = '\0';
 	if(g_Config.m_SvRoundStatsDiscordWebhook[0] != '\0')
 	{
 		GetRoundEndStatsStrDiscord(aStats, sizeof(aStats));

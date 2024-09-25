@@ -9,6 +9,11 @@ CGameControllerDM::CGameControllerDM(class CGameContext *pGameServer) :
 	m_GameFlags = 0;
 	m_pGameType = "DM*";
 	m_DefaultWeapon = WEAPON_GUN;
+
+	m_pStatsTable = "dm";
+	m_pExtraColumns = new CDmColumns();
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerDM::~CGameControllerDM() = default;

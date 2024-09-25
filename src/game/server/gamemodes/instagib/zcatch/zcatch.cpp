@@ -404,6 +404,10 @@ void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 		// avoid team change message by pre setting it
 		pPlayer->SetTeamRaw(TEAM_SPECTATORS);
 		KillPlayer(pPlayer, GameServer()->m_apPlayers[KillerId]);
+
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "'%s' is now spectating you (selfkill to release them)", Server()->ClientName(pPlayer->GetCid()));
+		SendChatTarget(KillerId, aBuf);
 	}
 	// complicated way of saying not tournament mode
 	else if(CGameControllerInstagib::GetAutoTeam(pPlayer->GetCid()) != TEAM_SPECTATORS && pPlayer->GetTeam() == TEAM_SPECTATORS)

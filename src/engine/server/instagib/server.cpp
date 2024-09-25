@@ -23,13 +23,13 @@ int CServer::NumConnectedIps() const
 			if(m_aClients[k].m_State == CClient::STATE_EMPTY)
 				continue;
 
-			if(!mem_comp(ConnectedIps[k], m_NetServer.ClientAddr(i), Size))
+			if(!mem_comp(ConnectedIps[k], m_NetServer.ClientAddr(i)->ip, Size))
 			{
 				Duplicate = true;
 				break;
 			}
 
-			mem_copy(ConnectedIps[i], m_NetServer.ClientAddr(i), Size);
+			mem_copy(ConnectedIps[i], m_NetServer.ClientAddr(i)->ip, Size);
 		}
 
 		if(!Duplicate)

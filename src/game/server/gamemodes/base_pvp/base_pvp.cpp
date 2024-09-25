@@ -19,7 +19,7 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 {
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
 
-	UpdateSpawnWeapons(true);
+	UpdateSpawnWeapons(true, true);
 
 	m_AllowSkinChange = true;
 
@@ -491,7 +491,7 @@ void CGameControllerPvp::SendChat(int ClientId, int Team, const char *pText, int
 	GameServer()->SendChat(ClientId, Team, pText, SpamProtectionClientId, Flags);
 }
 
-void CGameControllerPvp::UpdateSpawnWeapons(bool Silent)
+void CGameControllerPvp::UpdateSpawnWeapons(bool Silent, bool Apply)
 {
 	// these gametypes are weapon bound
 	// so the always overwrite sv_spawn_weapons
@@ -513,18 +513,25 @@ void CGameControllerPvp::UpdateSpawnWeapons(bool Silent)
 		return;
 	}
 
-	const char *pWeapons = Config()->m_SvSpawnWeapons;
-	if(!str_comp_nocase(pWeapons, "grenade"))
-		m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
-	else if(!str_comp_nocase(pWeapons, "laser") || !str_comp_nocase(pWeapons, "rifle"))
-		m_SpawnWeapons = SPAWN_WEAPON_LASER;
-	else
+	if(Apply)
 	{
-		dbg_msg("ddnet-insta", "WARNING: invalid spawn weapon falling back to grenade");
-		m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
-	}
+		const char *pWeapons = Config()->m_SvSpawnWeapons;
+		if(!str_comp_nocase(pWeapons, "grenade"))
+			m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
+		else if(!str_comp_nocase(pWeapons, "laser") || !str_comp_nocase(pWeapons, "rifle"))
+			m_SpawnWeapons = SPAWN_WEAPON_LASER;
+		else
+		{
+			dbg_msg("ddnet-insta", "WARNING: invalid spawn weapon falling back to grenade");
+			m_SpawnWeapons = SPAWN_WEAPON_GRENADE;
+		}
 
-	m_DefaultWeapon = GetDefaultWeaponBasedOnSpawnWeapons();
+		m_DefaultWeapon = GetDefaultWeaponBasedOnSpawnWeapons();
+	}
+	else if(!Silent)
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", "WARNING: reload required for spawn weapons to apply");
+	}
 }
 
 void CGameControllerPvp::ModifyWeapons(IConsole::IResult *pResult, void *pUserData,

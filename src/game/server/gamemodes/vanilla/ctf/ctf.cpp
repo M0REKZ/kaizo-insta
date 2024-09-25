@@ -13,6 +13,11 @@ CGameControllerCTF::CGameControllerCTF(class CGameContext *pGameServer) :
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
 	m_AllowSkinChange = true;
 	m_DefaultWeapon = WEAPON_GUN;
+
+	m_pStatsTable = "ctf";
+	m_pExtraColumns = new CCtfColumns();
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerCTF::~CGameControllerCTF() = default;

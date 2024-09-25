@@ -2761,8 +2761,10 @@ if(SERVER)
     gamemodes/instagib/base_instagib.h
     gamemodes/instagib/bolofng/bolofng.cpp
     gamemodes/instagib/bolofng/bolofng.h
+    gamemodes/instagib/bolofng/sql_columns.h
     gamemodes/instagib/boomfng/boomfng.cpp
     gamemodes/instagib/boomfng/boomfng.h
+    gamemodes/instagib/boomfng/sql_columns.h
     gamemodes/instagib/ctf.cpp
     gamemodes/instagib/ctf.h
     gamemodes/instagib/dm.cpp
@@ -2801,8 +2803,10 @@ if(SERVER)
     gamemodes/vanilla/base_vanilla.h
     gamemodes/vanilla/ctf/ctf.cpp
     gamemodes/vanilla/ctf/ctf.h
+    gamemodes/vanilla/ctf/sql_columns.h
     gamemodes/vanilla/dm/dm.cpp
     gamemodes/vanilla/dm/dm.h
+    gamemodes/vanilla/dm/sql_columns.h
     gamemodes/vanilla/BOMB/BOMB.cpp
     gamemodes/vanilla/BOMB/BOMB.h
     gamemodes/instagib/Freeze.cpp

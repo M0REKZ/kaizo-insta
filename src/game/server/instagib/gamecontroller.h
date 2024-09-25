@@ -164,8 +164,9 @@ public:
 
 		Arguments:
 			Silent - if false it might print warnings to the admin console
+			Apply - if false it has no effect. Used to make sure spawn weapons only get changed on reload.
 	*/
-	virtual void UpdateSpawnWeapons(bool Silent = false){};
+	virtual void UpdateSpawnWeapons(bool Silent = false, bool Apply = false){};
 
 	/*
 		Function: IsWinner

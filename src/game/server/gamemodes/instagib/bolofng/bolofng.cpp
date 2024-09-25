@@ -18,6 +18,11 @@ CGameControllerBoloFng::CGameControllerBoloFng(class CGameContext *pGameServer) 
 
 	m_SpawnWeapons = ESpawnWeapons::SPAWN_WEAPON_GRENADE;
 	m_DefaultWeapon = WEAPON_GRENADE;
+
+	m_pStatsTable = "bolofng";
+	m_pExtraColumns = new CBolofngColumns();
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerBoloFng::~CGameControllerBoloFng() = default;
