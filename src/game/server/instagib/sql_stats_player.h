@@ -84,6 +84,16 @@ public:
 	int m_StealsByOthers;
 	int m_StealsFromOthers;
 
+	// can be over 100%
+	// because of self/team boost + kill
+	// or multiple kills with one shoot
+	float HitAccuracy() const
+	{
+		if(!m_ShotsFired)
+			return 0.0f;
+		return ((float)m_ShotsHit / (float)m_ShotsFired) * 100;
+	}
+
 	void Reset()
 	{
 		// base for all gametypes

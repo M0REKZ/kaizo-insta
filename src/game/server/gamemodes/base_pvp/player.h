@@ -87,10 +87,26 @@ public:
 	// not to be confused with m_Stats.m_BestSpree which is the highscore
 	int m_Spree;
 
+	// all metrics in m_Stats are protected by anti farm
+	// and might not be incremented if not enough players are connected
+	// see stats directly in CPlayer such as CPlayer::m_Kills for stats
+	// that are always counted
 	CSqlStatsPlayer m_Stats;
 	int Spree() const { return m_Spree; }
 	int Kills() const { return m_Stats.m_Kills; }
 	int Deaths() const { return m_Stats.m_Deaths; }
+
+	void AddKill() { AddKills(1); }
+	void AddDeath() { AddDeaths(1); }
+	void AddKills(int Amount);
+	void AddDeaths(int Amount);
+
+	// tracked per round no matter what
+	int m_Kills = 0;
+	int m_Deaths = 0;
+
+	// resets round stats and sql stats
+	void ResetStats();
 
 	std::shared_ptr<CInstaSqlResult> m_StatsQueryResult;
 

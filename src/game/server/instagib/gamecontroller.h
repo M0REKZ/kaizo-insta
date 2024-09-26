@@ -211,6 +211,18 @@ public:
 	virtual void OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName){};
 
 	/*
+		Function: OnShowRoundStats
+			called when /stats command is executed
+			print your gamemode specific round stats here
+
+		Arguments:
+			pStats - stats struct to display
+			pRequestingPlayer - player who initiated the stats request (might differ from the requested player)
+			pRequestedName - player name the stats belong to
+	*/
+	virtual void OnShowRoundStats(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName){};
+
+	/*
 		Function: OnShowRank
 			called from the main thread when a SQL worker finished querying a rank from the database
 

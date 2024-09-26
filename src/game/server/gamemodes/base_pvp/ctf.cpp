@@ -31,6 +31,36 @@ void CGameControllerBaseCTF::Tick()
 	FlagTick(); // ddnet-insta
 }
 
+void CGameControllerBaseCTF::OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName)
+{
+	CGameControllerPvp::OnShowStatsAll(pStats, pRequestingPlayer, pRequestedName);
+
+	char aBuf[512];
+
+	str_format(aBuf, sizeof(aBuf), "~ Flag grabs: %d", pStats->m_FlagGrabs);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "~ Flag captures: %d", pStats->m_FlagCaptures);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "~ Flagger kills: %d", pStats->m_FlaggerKills);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+}
+
+void CGameControllerBaseCTF::OnShowRoundStats(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName)
+{
+	char aBuf[512];
+
+	str_format(aBuf, sizeof(aBuf), "~ Flag grabs: %d", pStats->m_FlagGrabs);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "~ Flag captures: %d", pStats->m_FlagCaptures);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "~ Flagger kills: %d", pStats->m_FlaggerKills);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+}
+
 bool CGameControllerBaseCTF::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
 {
 	if(!g_Config.m_SvDropFlagOnVote)

@@ -7,6 +7,11 @@ CGameControllerGDM::CGameControllerGDM(class CGameContext *pGameServer) :
 {
 	m_pGameType = "gDM";
 	m_DefaultWeapon = WEAPON_GRENADE;
+
+	m_pStatsTable = "gdm";
+	m_pExtraColumns = nullptr;
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerGDM::~CGameControllerGDM() = default;

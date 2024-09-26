@@ -7,6 +7,11 @@ CGameControllerIDM::CGameControllerIDM(class CGameContext *pGameServer) :
 {
 	m_pGameType = "iDM";
 	m_DefaultWeapon = WEAPON_LASER;
+
+	m_pStatsTable = "idm";
+	m_pExtraColumns = new CIdmColumns();
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerIDM::~CGameControllerIDM() = default;

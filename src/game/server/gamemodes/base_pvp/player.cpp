@@ -13,7 +13,14 @@ void CGameControllerPvp::OnPlayerConstruct(class CPlayer *pPlayer)
 	pPlayer->m_IsDead = false;
 	pPlayer->m_KillerId = -1;
 	pPlayer->m_Spree = 0;
-	pPlayer->m_Stats.Reset();
+	pPlayer->ResetStats();
+}
+
+void CPlayer::ResetStats()
+{
+	m_Kills = 0;
+	m_Deaths = 0;
+	m_Stats.Reset();
 }
 
 void CPlayer::AddScore(int Score)
@@ -24,6 +31,22 @@ void CPlayer::AddScore(int Score)
 		m_Stats.m_Points += Score;
 
 	m_Score = m_Score.value_or(0) + Score;
+}
+
+void CPlayer::AddKills(int Amount)
+{
+	if(GameServer()->m_pController->IsStatTrack())
+		m_Stats.m_Kills += Amount;
+
+	m_Kills += Amount;
+}
+
+void CPlayer::AddDeaths(int Amount)
+{
+	if(GameServer()->m_pController->IsStatTrack())
+		m_Stats.m_Deaths += Amount;
+
+	m_Deaths += Amount;
 }
 
 void CPlayer::InstagibTick()

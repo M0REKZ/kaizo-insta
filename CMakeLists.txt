@@ -2784,6 +2784,7 @@ if(SERVER)
     gamemodes/instagib/ictf/sql_columns.h
     gamemodes/instagib/idm/idm.cpp
     gamemodes/instagib/idm/idm.h
+    gamemodes/instagib/idm/sql_columns.h
     gamemodes/instagib/itdm/itdm.cpp
     gamemodes/instagib/itdm/itdm.h
     gamemodes/instagib/solofng/solofng.cpp

@@ -121,9 +121,26 @@ void CGameControllerPvp::OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPl
 	str_format(
 		aBuf,
 		sizeof(aBuf),
-		"'%s' kills: %d, requested by '%s'",
+		"~~~ all time stats for '%s'",
 		pRequestedName, pStats->m_Kills, Server()->ClientName(pRequestingPlayer->GetCid()));
-	GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	char aAccuracy[512];
+	aAccuracy[0] = '\0';
+	if(pStats->m_ShotsFired)
+		str_format(aAccuracy, sizeof(aAccuracy), " (%.2f%% hit accuracy)", pStats->HitAccuracy());
+
+	str_format(aBuf, sizeof(aBuf), "~ Kills: %d%s", pStats->m_Kills, aAccuracy);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "~ Deaths: %d", pStats->m_Deaths);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "~ Wins: %d", pStats->m_Wins);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "~ Highest killing spree: %d", pStats->m_BestSpree);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
 }
 
 void CGameControllerPvp::OnShowRank(int Rank, int RankedScore, const char *pRankType, class CPlayer *pRequestingPlayer, const char *pRequestedName)
@@ -294,7 +311,7 @@ void CGameControllerPvp::SaveStatsOnRoundEnd(CPlayer *pPlayer)
 	}
 
 	m_pSqlStats->SaveRoundStats(Server()->ClientName(pPlayer->GetCid()), StatsTable(), &pPlayer->m_Stats);
-	pPlayer->m_Stats.Reset();
+	pPlayer->ResetStats();
 }
 
 void CGameControllerPvp::SaveStatsOnDisconnect(CPlayer *pPlayer)
@@ -598,14 +615,11 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 	// 			GameServer()->m_apPlayers[i]->UpdateDeadSpecMode();
 	// }
 
-	if(IsStatTrack())
-	{
-		// selfkill is no kill
-		if(pKiller != pVictim->GetPlayer())
-			pKiller->m_Stats.m_Kills++;
-		// but selfkill is a death
-		pVictim->GetPlayer()->m_Stats.m_Deaths++;
-	}
+	// selfkill is no kill
+	if(pKiller != pVictim->GetPlayer())
+		pKiller->AddKill();
+	// but selfkill is a death
+	pVictim->GetPlayer()->AddDeath();
 
 	if(pKiller && pVictim)
 	{
@@ -908,7 +922,7 @@ void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 	OnPlayerConstruct(pPlayer);
 	IGameController::OnPlayerConnect(pPlayer);
 	int ClientId = pPlayer->GetCid();
-	pPlayer->m_Stats.Reset();
+	pPlayer->ResetStats();
 
 	// init the player
 	Score()->PlayerData(ClientId)->Reset();

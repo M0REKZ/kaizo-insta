@@ -53,9 +53,9 @@ void IGameController::PsvRowPlayer(const CPlayer *pPlayer, char *pBuf, size_t Si
 		pPlayer->GetCid(),
 		Server()->ClientName(pPlayer->GetCid()),
 		pPlayer->m_Score.value_or(0),
-		pPlayer->Kills(),
-		pPlayer->Deaths(),
-		CalcKillDeathRatio(pPlayer->Kills(), pPlayer->Deaths()));
+		pPlayer->m_Kills,
+		pPlayer->m_Deaths,
+		CalcKillDeathRatio(pPlayer->m_Kills, pPlayer->m_Deaths));
 	str_append(pBuf, aBuf, Size);
 }
 
@@ -106,11 +106,11 @@ void IGameController::GetRoundEndStatsStrJson(char *pBuf, size_t Size)
 			Writer.WriteAttribute("score");
 			Writer.WriteIntValue(pPlayer->m_Score.value_or(0));
 			Writer.WriteAttribute("kills");
-			Writer.WriteIntValue(pPlayer->Kills());
+			Writer.WriteIntValue(pPlayer->m_Kills);
 			Writer.WriteAttribute("deaths");
-			Writer.WriteIntValue(pPlayer->Deaths());
+			Writer.WriteIntValue(pPlayer->m_Deaths);
 			Writer.WriteAttribute("ratio");
-			Writer.WriteIntValue(CalcKillDeathRatio(pPlayer->Kills(), pPlayer->Deaths()));
+			Writer.WriteIntValue(CalcKillDeathRatio(pPlayer->m_Kills, pPlayer->m_Deaths));
 			Writer.WriteAttribute("flag_grabs");
 			Writer.WriteIntValue(pPlayer->m_Stats.m_FlagGrabs);
 			Writer.WriteAttribute("flag_captures");

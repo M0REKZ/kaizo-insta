@@ -1,3 +1,4 @@
+#include <base/system.h>
 #include <engine/shared/protocol.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontroller.h>
@@ -29,18 +30,37 @@ void CGameContext::ConStatsRound(IConsole::IResult *pResult, void *pUserData)
 	if(TargetId < 0 || TargetId >= MAX_CLIENTS)
 		return;
 	const CPlayer *pPlayer = pSelf->m_apPlayers[TargetId];
+	CPlayer *pRequestingPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(!pRequestingPlayer)
+		return;
 
 	char aBuf[512];
+	char aUntrackedOrAccuracy[512];
 	str_format(aBuf, sizeof(aBuf), "~~~ round stats for '%s'", pName);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
-	str_format(aBuf, sizeof(aBuf), "~ Kills: %d", pPlayer->m_Stats.m_Kills);
+
+	aUntrackedOrAccuracy[0] = '\0';
+	if(pPlayer->m_Stats.m_ShotsFired)
+		str_format(aUntrackedOrAccuracy, sizeof(aUntrackedOrAccuracy), " (%.2f%% hit accuracy)", pPlayer->m_Stats.HitAccuracy());
+	if(!pSelf->m_pController->IsStatTrack())
+		str_format(aUntrackedOrAccuracy, sizeof(aUntrackedOrAccuracy), " (%d untracked)", pPlayer->m_Kills);
+	str_format(aBuf, sizeof(aBuf), "~ Kills: %d%s", pPlayer->m_Stats.m_Kills, aUntrackedOrAccuracy);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
-	str_format(aBuf, sizeof(aBuf), "~ Deaths: %d", pPlayer->m_Stats.m_Deaths);
+
+	char aUntracked[512];
+	aUntracked[0] = '\0';
+	if(!pSelf->m_pController->IsStatTrack())
+		str_format(aUntracked, sizeof(aUntracked), " (%d untracked)", pPlayer->m_Deaths);
+	str_format(aBuf, sizeof(aBuf), "~ Deaths: %d%s", pPlayer->m_Stats.m_Deaths, aUntracked);
+
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 	str_format(aBuf, sizeof(aBuf), "~ Current killing spree: %d", pPlayer->Spree());
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 	str_format(aBuf, sizeof(aBuf), "~ Highest killing spree: %d", pPlayer->m_Stats.m_BestSpree);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+
+	pSelf->m_pController->OnShowRoundStats(&pPlayer->m_Stats, pRequestingPlayer, pName);
+
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"~ see also /statsall");
 }

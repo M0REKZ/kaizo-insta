@@ -31,5 +31,8 @@ public:
 	bool OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId) override;
 
 	void FlagTick();
+
+	void OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
+	void OnShowRoundStats(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
 };
 #endif
