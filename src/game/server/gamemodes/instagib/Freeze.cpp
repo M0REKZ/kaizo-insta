@@ -160,7 +160,7 @@ void CGameControllerFreeze::ResetFrozenPlayer()
     for(int i = 0; i < MAX_CLIENTS; i++)
         if(GameServer()->m_apPlayers[i] && GameServer()->GetPlayerChar(i))
         {
-            GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF);
+            GameServer()->m_apPlayers[i]->GetCharacter()->Destroy();
             GameServer()->m_apPlayers[i]->Respawn();
         }
 }
@@ -217,7 +217,7 @@ void CGameControllerFreeze::Melt(int Melted, int Helper)
     
     if(g_Config.m_SvFreezeMeltRespawn)
     {
-        GameServer()->m_apPlayers[Melted]->KillCharacter(WEAPON_SELF);
+        GameServer()->m_apPlayers[Melted]->GetCharacter()->Destroy();
         GameServer()->m_apPlayers[Melted]->Respawn();
     }
     
