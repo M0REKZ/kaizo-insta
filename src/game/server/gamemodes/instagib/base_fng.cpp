@@ -359,6 +359,14 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 		Character.GetPlayer()->m_Stats.m_GotFrozen++;
 	}
 
+	// kill message
+	CNetMsg_Sv_KillMsg Msg;
+	Msg.m_Killer = From;
+	Msg.m_Victim = Character.GetPlayer()->GetCid();
+	Msg.m_Weapon = Weapon;
+	Msg.m_ModeSpecial = 0;
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+
 	Character.Freeze(10);
 	return false;
 }

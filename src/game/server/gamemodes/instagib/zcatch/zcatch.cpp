@@ -295,6 +295,7 @@ int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPl
 		ReleasePlayer(pPlayer, aBuf);
 	}
 
+	pVictim->GetPlayer()->m_vVictimIds.clear();
 	DoWincheckRound();
 
 	return 0;
@@ -460,12 +461,17 @@ bool CGameControllerZcatch::DoWincheckRound()
 			// this player ended the round
 			if(!pPlayer->m_IsDead && IsCatchGameRunning() && pPlayer->GetTeam() != TEAM_SPECTATORS)
 			{
+				char aBuf[512];
+				str_format(aBuf, sizeof(aBuf), "'%s' won the round.", Server()->ClientName(pPlayer->GetCid()));
 				if(!IsWinner(pPlayer, 0, 0))
 				{
 					// if the win did not count because there were less than 10
 					// players we still give the winner points
-					pPlayer->m_Stats.m_Points += PointsForWin(pPlayer);
+					int Points = PointsForWin(pPlayer);
+					pPlayer->m_Stats.m_Points += Points;
+					str_format(aBuf, sizeof(aBuf), "'%s' won the round and gained %d points.", Server()->ClientName(pPlayer->GetCid()), Points);
 				}
+				SendChat(-1, TEAM_ALL, aBuf);
 			}
 		}
 

@@ -144,7 +144,11 @@ int CGameControllerBaseCTF::OnCharacterDeath(class CCharacter *pVictim, class CP
 			pFlag->m_pLastCarrier = nullptr;
 
 			if(pKiller && pKiller->GetTeam() != pVictim->GetPlayer()->GetTeam())
+			{
 				pKiller->IncrementScore();
+				if(IsStatTrack())
+					pKiller->m_Stats.m_FlaggerKills++;
+			}
 
 			HadFlag |= 1;
 		}
@@ -229,13 +233,12 @@ void CGameControllerBaseCTF::OnFlagGrab(class CFlag *pFlag)
 	CPlayer *pPlayer = pFlag->m_pCarrier->GetPlayer();
 	if(IsStatTrack())
 		pPlayer->m_Stats.m_FlagGrabs++;
-
-	if(g_Config.m_SvFastcap)
-		Teams().OnCharacterStart(pPlayer->GetCid());
 }
 
-void CGameControllerBaseCTF::OnFlagCapture(class CFlag *pFlag, float Time)
+void CGameControllerBaseCTF::OnFlagCapture(class CFlag *pFlag, float Time, int TimeTicks)
 {
+	CGameControllerPvp::OnFlagCapture(pFlag, Time, TimeTicks);
+
 	if(!pFlag)
 		return;
 	if(!pFlag->m_pCarrier)
@@ -248,9 +251,6 @@ void CGameControllerBaseCTF::OnFlagCapture(class CFlag *pFlag, float Time)
 	CPlayer *pPlayer = pFlag->m_pCarrier->GetPlayer();
 	if(IsStatTrack())
 		pPlayer->m_Stats.m_FlagCaptures++;
-
-	if(g_Config.m_SvFastcap)
-		Teams().OnCharacterFinish(pPlayer->GetCid());
 }
 
 void CGameControllerBaseCTF::FlagTick()
@@ -315,7 +315,7 @@ void CGameControllerBaseCTF::FlagTick()
 
 						GameServer()->SendChatTarget(pPlayer->GetCid(), aBuf);
 					}
-					GameServer()->m_pController->OnFlagCapture(pFlag, Diff);
+					GameServer()->m_pController->OnFlagCapture(pFlag, Diff, Server()->Tick() - pFlag->GetGrabTick());
 					GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_CAPTURE, FlagColor, pFlag->GetCarrier()->GetPlayer()->GetCid(), Diff, -1);
 					GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 					for(CFlag *pF : m_apFlags)

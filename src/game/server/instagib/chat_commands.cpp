@@ -1,5 +1,6 @@
 #include <base/system.h>
 #include <engine/shared/protocol.h>
+#include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
@@ -103,6 +104,77 @@ void CGameContext::ConTopKills(IConsole::IResult *pResult, void *pUserData)
 	const char *pName = pSelf->Server()->ClientName(pResult->m_ClientId);
 	int Offset = pResult->NumArguments() ? pResult->GetInteger(0) : 1;
 	pSelf->m_pController->m_pSqlStats->ShowTop(pResult->m_ClientId, pName, "Kills", "kills", pSelf->m_pController->StatsTable(), "DESC", Offset);
+}
+
+void CGameContext::ConRankFastcaps(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	if(!pSelf->m_pController)
+		return;
+
+	if(!(pSelf->m_pController->GameFlags() & GAMEFLAG_FLAGS))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "this gamemode has no flags");
+		return;
+	}
+
+	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
+	pSelf->m_pController->m_pSqlStats->ShowFastcapRank(
+		pResult->m_ClientId,
+		pName,
+		pSelf->Server()->GetMapName(),
+		pSelf->m_pController->m_pGameType,
+		pSelf->m_pController->IsGrenadeGameType(),
+		false); // show all times stat track or not
+}
+
+void CGameContext::ConTopFastcaps(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	if(!pSelf->m_pController)
+		return;
+
+	if(!(pSelf->m_pController->GameFlags() & GAMEFLAG_FLAGS))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "this gamemode has no flags");
+		return;
+	}
+
+	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
+	int Offset = pResult->NumArguments() ? pResult->GetInteger(0) : 1;
+	pSelf->m_pController->m_pSqlStats->ShowFastcapTop(
+		pResult->m_ClientId,
+		pName,
+		pSelf->Server()->GetMapName(),
+		pSelf->m_pController->m_pGameType,
+		pSelf->m_pController->IsGrenadeGameType(),
+		false, // show all times stat track or not
+		Offset);
+}
+
+void CGameContext::ConRankFlagCaptures(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	if(!pSelf->m_pController)
+		return;
+
+	if(!(pSelf->m_pController->GameFlags() & GAMEFLAG_FLAGS))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "this gamemode has no flags");
+		return;
+	}
+
+	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
+	pSelf->m_pController->m_pSqlStats->ShowRank(pResult->m_ClientId, pName, "Flag captures", "flag_captures", pSelf->m_pController->StatsTable(), "DESC");
 }
 
 #define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) ;

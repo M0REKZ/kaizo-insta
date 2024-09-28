@@ -1,9 +1,11 @@
+#include <base/log.h>
 #include <base/system.h>
 #include <cstdlib>
 #include <engine/server/databases/connection.h>
 #include <engine/server/databases/connection_pool.h>
 #include <engine/shared/config.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
 #include <game/server/instagib/extra_columns.h>
 #include <game/server/instagib/sql_stats_player.h>
 #include <game/server/player.h>
@@ -102,6 +104,33 @@ void CSqlStats::ExecPlayerRankOrTopThread(
 	m_pPool->Execute(pFuncPtr, std::move(Tmp), pThreadName);
 }
 
+void CSqlStats::ExecPlayerFastcapRankOrTopThread(
+	bool (*pFuncPtr)(IDbConnection *, const ISqlData *, char *pError, int ErrorSize),
+	const char *pThreadName,
+	int ClientId,
+	const char *pName,
+	const char *pMap,
+	const char *pGametype,
+	bool Grenade,
+	bool OnlyStatTrack,
+	int Offset)
+{
+	auto pResult = NewInstaSqlResult(ClientId);
+	if(pResult == nullptr)
+		return;
+	auto Tmp = std::make_unique<CSqlPlayerFastcapRequest>(pResult, g_Config.m_SvDebugStats);
+
+	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
+	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));
+	Tmp->m_Offset = Offset;
+	str_copy(Tmp->m_aGametype, pGametype, sizeof(Tmp->m_aGametype));
+	str_copy(Tmp->m_aMap, pMap, sizeof(Tmp->m_aMap));
+	Tmp->m_Grenade = Grenade;
+	Tmp->m_OnlyStatTrack = OnlyStatTrack;
+
+	m_pPool->Execute(pFuncPtr, std::move(Tmp), pThreadName);
+}
+
 CSqlStats::CSqlStats(CGameContext *pGameServer, CDbConnectionPool *pPool) :
 	m_pPool(pPool),
 	m_pGameServer(pGameServer),
@@ -180,9 +209,55 @@ void CSqlStats::ShowTop(
 		Offset);
 }
 
+void CSqlStats::ShowFastcapRank(
+	int ClientId,
+	const char *pName,
+	const char *pMap,
+	const char *pGametype,
+	bool Grenade,
+	bool OnlyStatTrack)
+{
+	if(RateLimitPlayer(ClientId))
+		return;
+	ExecPlayerFastcapRankOrTopThread(
+		ShowFastcapRankWorker,
+		"show fastcap rank",
+		ClientId,
+		pName,
+		pMap,
+		pGametype,
+		Grenade,
+		OnlyStatTrack,
+		0);
+}
+
+void CSqlStats::ShowFastcapTop(
+	int ClientId,
+	const char *pName,
+	const char *pMap,
+	const char *pGametype,
+	bool Grenade,
+	bool OnlyStatTrack,
+	int Offset)
+{
+	if(RateLimitPlayer(ClientId))
+		return;
+
+	ExecPlayerFastcapRankOrTopThread(
+		ShowFastcapTopWorker,
+		"show fastcap top",
+		ClientId,
+		pName,
+		pMap,
+		pGametype,
+		Grenade,
+		OnlyStatTrack,
+		Offset);
+}
+
 void CSqlStats::SaveRoundStats(const char *pName, const char *pTable, CSqlStatsPlayer *pStats)
 {
-	auto Tmp = std::make_unique<CSqlSaveRoundStatsRequest>(g_Config.m_SvDebugStats);
+	auto Tmp = std::make_unique<CSqlSaveRoundStatsData>(g_Config.m_SvDebugStats);
 
 	if(m_pExtraColumns)
 	{
@@ -196,6 +271,26 @@ void CSqlStats::SaveRoundStats(const char *pName, const char *pTable, CSqlStatsP
 	str_copy(Tmp->m_aTable, pTable);
 	mem_copy(&Tmp->m_Stats, pStats, sizeof(Tmp->m_Stats));
 	m_pPool->ExecuteWrite(SaveRoundStatsThread, std::move(Tmp), "save round stats");
+}
+
+void CSqlStats::SaveFastcap(int ClientId, int TimeTicks, const char *pTimestamp, bool Grenade, bool StatTrack)
+{
+	CPlayer *pCurPlayer = GameServer()->m_apPlayers[ClientId];
+	if(pCurPlayer->m_FastcapQueryResult != nullptr)
+		dbg_msg("sql", "WARNING: previous save fastcap result didn't complete, overwriting it now");
+
+	pCurPlayer->m_FastcapQueryResult = std::make_shared<CInstaSqlResult>();
+	auto Tmp = std::make_unique<CSqlPlayerFastcapData>(pCurPlayer->m_FastcapQueryResult, g_Config.m_SvDebugStats);
+	str_copy(Tmp->m_aMap, Server()->GetMapName(), sizeof(Tmp->m_aMap));
+	str_copy(Tmp->m_aGametype, GameServer()->m_pController->m_pGameType, sizeof(Tmp->m_aGametype));
+	FormatUuid(GameServer()->GameUuid(), Tmp->m_aGameUuid, sizeof(Tmp->m_aGameUuid));
+	Tmp->m_StatTrack = StatTrack;
+	Tmp->m_Grenade = Grenade;
+	str_copy(Tmp->m_aName, Server()->ClientName(ClientId), sizeof(Tmp->m_aName));
+	Tmp->m_Time = (float)(TimeTicks) / (float)Server()->TickSpeed();
+	str_copy(Tmp->m_aTimestamp, pTimestamp, sizeof(Tmp->m_aTimestamp));
+
+	m_pPool->ExecuteWrite(SaveFastcapWorker, std::move(Tmp), "save fastcap");
 }
 
 bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
@@ -381,12 +476,264 @@ bool CSqlStats::ShowTopWorker(IDbConnection *pSqlServer, const ISqlData *pGameDa
 	return false;
 }
 
+bool CSqlStats::ShowFastcapTopWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	const auto *pData = dynamic_cast<const CSqlPlayerFastcapRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CInstaSqlResult *>(pGameData->m_pResult.get());
+	pResult->m_MessageKind = CInstaSqlResult::DIRECT;
+
+	int LimitStart = maximum(absolute(pData->m_Offset) - 1, 0);
+	const char *pOrder = pData->m_Offset >= 0 ? "ASC" : "DESC";
+
+	if(pData->m_OnlyStatTrack)
+	{
+		dbg_msg("sql-thread", "WARNING! only stat track is not supported yet! Showing all flag times ...");
+	}
+
+	// check sort method
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf),
+		"SELECT name, time, ranking "
+		"FROM ("
+		"  SELECT RANK() OVER w AS ranking, MIN(time) AS time, name "
+		"  FROM fastcaps "
+		"  WHERE map = ? "
+		"  AND grenade = %s "
+		"  GROUP BY name "
+		"  WINDOW w AS (ORDER BY MIN(time))"
+		") as a "
+		"ORDER BY ranking %s "
+		"LIMIT %d, ?",
+		pData->m_Grenade ? pSqlServer->True() : pSqlServer->False(),
+		pOrder,
+		LimitStart);
+
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		dbg_msg("sql-thread", "prepare top failed query: %s", aBuf);
+		return true;
+	}
+
+	// TODO: grenade and stat track filters
+
+	pSqlServer->BindString(1, pData->m_aMap);
+	pSqlServer->BindInt(2, 5);
+
+	// show top
+	int Line = 0;
+	str_copy(pResult->m_aaMessages[Line], "------------ Top flag times ------------", sizeof(pResult->m_aaMessages[Line]));
+
+	Line++;
+
+	char aTime[32];
+	bool End = false;
+
+	while(!pSqlServer->Step(&End, pError, ErrorSize) && !End)
+	{
+		char aName[MAX_NAME_LENGTH];
+		pSqlServer->GetString(1, aName, sizeof(aName));
+		float Time = pSqlServer->GetFloat(2);
+		str_time_float(Time, TIME_HOURS_CENTISECS, aTime, sizeof(aTime));
+		int Rank = pSqlServer->GetInt(3);
+		str_format(pResult->m_aaMessages[Line], sizeof(pResult->m_aaMessages[Line]),
+			"%d. '%s' - Time: %s", Rank, aName, aTime);
+
+		Line++;
+	}
+
+	str_copy(pResult->m_aaMessages[Line], "----------------------------------------------", sizeof(pResult->m_aaMessages[Line]));
+	return !End;
+}
+
+bool CSqlStats::ShowFastcapRankWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize)
+{
+	const auto *pData = dynamic_cast<const CSqlPlayerFastcapRequest *>(pGameData);
+	auto *pResult = dynamic_cast<CInstaSqlResult *>(pGameData->m_pResult.get());
+	pResult->m_MessageKind = CInstaSqlResult::DIRECT;
+
+	if(pData->m_OnlyStatTrack)
+	{
+		dbg_msg("sql-thread", "WARNING! only stat track is not supported yet! Showing all flag times ...");
+	}
+
+	// check sort method
+	char aBuf[600];
+	str_format(aBuf, sizeof(aBuf),
+		"SELECT ranking, time, percent_rank "
+		"FROM ("
+		"  SELECT RANK() OVER w AS ranking, PERCENT_RANK() OVER w as percent_rank, MIN(time) AS time, name "
+		"  FROM fastcaps "
+		"  WHERE map = ? "
+		"  AND grenade = %s "
+		"  GROUP BY name "
+		"  WINDOW w AS (ORDER BY MIN(time))"
+		") as a "
+		"WHERE name = ?",
+		pData->m_Grenade ? pSqlServer->True() : pSqlServer->False());
+
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		dbg_msg("sql-thread", "prepare top failed query: %s", aBuf);
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aMap);
+	pSqlServer->BindString(2, pData->m_aName);
+	pSqlServer->Print();
+
+	bool End;
+	if(pSqlServer->Step(&End, pError, ErrorSize))
+	{
+		return true;
+	}
+
+	if(!End)
+	{
+		int Rank = pSqlServer->GetInt(1);
+		float Time = pSqlServer->GetFloat(2);
+		// CEIL and FLOOR are not supported in SQLite
+		int BetterThanPercent = std::floor(100.0f - 100.0f * pSqlServer->GetFloat(3));
+		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
+		pResult->m_MessageKind = CInstaSqlResult::ALL;
+
+		if(str_comp_nocase(pData->m_aRequestingPlayer, pData->m_aName) == 0)
+		{
+			str_format(pResult->m_aaMessages[0], sizeof(pResult->m_aaMessages[0]),
+				"%d. '%s' - flag time %s - better than %d%%",
+				Rank, pData->m_aName, aBuf, BetterThanPercent);
+		}
+		else
+		{
+			str_format(pResult->m_aaMessages[0], sizeof(pResult->m_aaMessages[0]),
+				"%d. '%s' - flag time %s - better than %d%% - requested by %s",
+				Rank, pData->m_aName, aBuf, BetterThanPercent, pData->m_aRequestingPlayer);
+		}
+	}
+	else
+	{
+		str_format(pResult->m_aaMessages[0], sizeof(pResult->m_aaMessages[0]),
+			"'%s' is not ranked", pData->m_aName);
+	}
+	return false;
+}
+
+bool CSqlStats::SaveFastcapWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
+{
+	const auto *pData = dynamic_cast<const CSqlPlayerFastcapData *>(pGameData);
+
+	// TODO: should we print something to the user on fastcap?
+	// auto *pResult = dynamic_cast<CInstaSqlResult *>(pGameData->m_pResult.get());
+	// auto *paMessages = pResult->m_aaMessages;
+
+	char aBuf[1024];
+
+	if(w == Write::NORMAL_SUCCEEDED)
+	{
+		str_format(aBuf, sizeof(aBuf),
+			"DELETE FROM fastcaps_backup WHERE game_id=? AND name=? AND timestamp=%s",
+			pSqlServer->InsertTimestampAsUtc());
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			dbg_msg("sql-thread", "prepare failed query: %s", aBuf);
+			return true;
+		}
+		pSqlServer->BindString(1, pData->m_aGameUuid);
+		pSqlServer->BindString(2, pData->m_aName);
+		pSqlServer->BindString(3, pData->m_aTimestamp);
+		pSqlServer->Print();
+		int NumDeleted;
+		if(pSqlServer->ExecuteUpdate(&NumDeleted, pError, ErrorSize))
+		{
+			return true;
+		}
+		if(NumDeleted == 0)
+		{
+			log_warn("sql", "Fastcap rank got moved out of backup database, will show up as duplicate rank in MySQL");
+		}
+		return false;
+	}
+	if(w == Write::NORMAL_FAILED)
+	{
+		int NumUpdated;
+		// move to non-tmp table succeeded. delete from backup again
+		str_format(aBuf, sizeof(aBuf),
+			"INSERT INTO fastcaps SELECT * FROM fastcaps_backup WHERE game_id=? AND name=? AND timestamp=%s",
+			pSqlServer->InsertTimestampAsUtc());
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			dbg_msg("sql-thread", "prepare failed query: %s", aBuf);
+			return true;
+		}
+		pSqlServer->BindString(1, pData->m_aGameUuid);
+		pSqlServer->BindString(2, pData->m_aName);
+		pSqlServer->BindString(3, pData->m_aTimestamp);
+		pSqlServer->Print();
+		if(pSqlServer->ExecuteUpdate(&NumUpdated, pError, ErrorSize))
+		{
+			return true;
+		}
+
+		// move to non-tmp table succeeded. delete from backup again
+		str_format(aBuf, sizeof(aBuf),
+			"DELETE FROM fastcaps_backup WHERE game_id=? AND name=? AND timestamp=%s",
+			pSqlServer->InsertTimestampAsUtc());
+		if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+		{
+			dbg_msg("sql-thread", "prepare failed query: %s", aBuf);
+			return true;
+		}
+		pSqlServer->BindString(1, pData->m_aGameUuid);
+		pSqlServer->BindString(2, pData->m_aName);
+		pSqlServer->BindString(3, pData->m_aTimestamp);
+		pSqlServer->Print();
+		if(pSqlServer->ExecuteUpdate(&NumUpdated, pError, ErrorSize))
+		{
+			return true;
+		}
+		if(NumUpdated == 0)
+		{
+			log_warn("sql", "Fastcap rank got moved out of backup database, will show up as duplicate rank in MySQL");
+		}
+		return false;
+	}
+
+	// save fastcap. Can't fail, because no UNIQUE/PRIMARY KEY constrain is defined.
+	str_format(aBuf, sizeof(aBuf),
+		"%s INTO fastcaps%s("
+		"       name, map, timestamp, time, server, "
+		"       gametype, "
+		"       grenade, stat_track, "
+		"       game_id) "
+		"VALUES (?, ?, %s, %.2f, ?, "
+		"       ?, " // gametype
+		"       %s, %s, "
+		"       ?)", // game_id
+		pSqlServer->InsertIgnore(),
+		w == Write::NORMAL ? "" : "_backup",
+		pSqlServer->InsertTimestampAsUtc(), pData->m_Time,
+		pData->m_Grenade ? pSqlServer->True() : pSqlServer->False(),
+		pData->m_StatTrack ? pSqlServer->True() : pSqlServer->False());
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		dbg_msg("sql-thread", "prepare failed query: %s", aBuf);
+		return true;
+	}
+	pSqlServer->BindString(1, pData->m_aName);
+	pSqlServer->BindString(2, pData->m_aMap);
+	pSqlServer->BindString(3, pData->m_aTimestamp);
+	pSqlServer->BindString(4, g_Config.m_SvSqlServerName);
+	pSqlServer->BindString(5, pData->m_aGametype);
+	pSqlServer->BindString(6, pData->m_aGameUuid);
+	pSqlServer->Print();
+	int NumInserted;
+	return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
+}
+
 bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
 	if(w != Write::NORMAL)
 		return false;
 
-	const CSqlSaveRoundStatsRequest *pData = dynamic_cast<const CSqlSaveRoundStatsRequest *>(pGameData);
+	const CSqlSaveRoundStatsData *pData = dynamic_cast<const CSqlSaveRoundStatsData *>(pGameData);
 	if(pData->m_DebugStats > 1)
 	{
 		dbg_msg("sql-thread", "writing stats of player '%s'", pData->m_aName);
@@ -588,6 +935,15 @@ void CSqlStats::CreateTable(const char *pName)
 	m_pPool->ExecuteWrite(CreateTableThread, std::move(Tmp), "create table");
 }
 
+void CSqlStats::CreateFastcapTable()
+{
+	auto Tmp = std::make_unique<CSqlCreateTableRequest>();
+	Tmp->m_aName[0] = '\0';
+	Tmp->m_aColumns[0] = '\0';
+	Tmp->m_aColumns[0] = '\0';
+	m_pPool->ExecuteWrite(CreateFastcapTableThread, std::move(Tmp), "create fastcap table");
+}
+
 bool CSqlStats::CreateTableThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
 {
 	if(w == Write::NORMAL_FAILED)
@@ -626,6 +982,51 @@ bool CSqlStats::CreateTableThread(IDbConnection *pSqlServer, const ISqlData *pGa
 		pData->m_aName,
 		w == Write::NORMAL ? "" : "_backup",
 		MAX_NAME_LENGTH_SQL,
+		pSqlServer->BinaryCollate(),
+		pData->m_aColumns);
+
+	if(pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
+	{
+		return true;
+	}
+	pSqlServer->Print();
+	int NumInserted;
+	return pSqlServer->ExecuteUpdate(&NumInserted, pError, ErrorSize);
+}
+
+bool CSqlStats::CreateFastcapTableThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize)
+{
+	if(w == Write::NORMAL_FAILED)
+	{
+		if(!MysqlAvailable())
+		{
+			dbg_msg("sql-thread", "failed to create fastcap table! Make sure to compile with MySQL support if you want to use stats");
+			return true;
+		}
+
+		dbg_assert(false, "CreateFastcapTableThread failed to write");
+		return true;
+	}
+	const CSqlCreateTableRequest *pData = dynamic_cast<const CSqlCreateTableRequest *>(pGameData);
+
+	char aBuf[4096];
+	str_format(aBuf, sizeof(aBuf),
+		"CREATE TABLE IF NOT EXISTS fastcaps%s("
+		" name        VARCHAR(%d)   COLLATE %s NOT NULL,"
+		" map         VARCHAR(128)  COLLATE %s NOT NULL, "
+		" timestamp   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP, "
+		" time        FLOAT         DEFAULT 0, "
+		" server      CHAR(4), "
+		" gametype    VARCHAR(128)  COLLATE %s NOT NULL,"
+		" grenade     BOOL          DEFAULT FALSE,"
+		" stat_track  BOOL          DEFAULT FALSE,"
+		" game_id     VARCHAR(64), "
+		"PRIMARY KEY (name, map, time, timestamp)"
+		");",
+		w == Write::NORMAL ? "" : "_backup",
+		MAX_NAME_LENGTH_SQL,
+		pSqlServer->BinaryCollate(),
+		pSqlServer->BinaryCollate(),
 		pSqlServer->BinaryCollate(),
 		pData->m_aColumns);
 

@@ -5,6 +5,7 @@
 #include <engine/shared/protocol.h>
 #include <game/server/instagib/extra_columns.h>
 #include <game/server/instagib/sql_stats_player.h>
+#include <game/server/scoreworker.h>
 
 struct ISqlData;
 class IDbConnection;
@@ -67,6 +68,7 @@ struct CSqlInstaData : ISqlData
 	CExtraColumns *m_pExtraColumns = nullptr;
 };
 
+// read request
 struct CSqlPlayerStatsRequest : CSqlInstaData
 {
 	CSqlPlayerStatsRequest(std::shared_ptr<CInstaSqlResult> pResult, int DebugStats) :
@@ -94,9 +96,55 @@ struct CSqlPlayerStatsRequest : CSqlInstaData
 	char m_aOrderBy[128];
 };
 
-struct CSqlSaveRoundStatsRequest : CSqlInstaData
+// data to be writtem
+struct CSqlPlayerFastcapData : CSqlInstaData
 {
-	CSqlSaveRoundStatsRequest(int DebugStats) :
+	CSqlPlayerFastcapData(std::shared_ptr<CInstaSqlResult> pResult, int DebugStats) :
+		CSqlInstaData(std::move(pResult))
+	{
+		m_DebugStats = DebugStats;
+	}
+
+	float m_Time;
+	char m_aTimestamp[TIMESTAMP_STR_LENGTH];
+
+	char m_aGameUuid[UUID_MAXSTRSIZE];
+
+	// object being requested, player (16 bytes)
+	char m_aName[MAX_NAME_LENGTH];
+	char m_aRequestingPlayer[MAX_NAME_LENGTH];
+
+	char m_aGametype[128];
+	char m_aMap[128];
+	bool m_Grenade = false;
+	bool m_StatTrack = false;
+};
+
+// read request
+struct CSqlPlayerFastcapRequest : CSqlInstaData
+{
+	CSqlPlayerFastcapRequest(std::shared_ptr<CInstaSqlResult> pResult, int DebugStats) :
+		CSqlInstaData(std::move(pResult))
+	{
+		m_DebugStats = DebugStats;
+	}
+
+	// object being requested, player (16 bytes)
+	char m_aName[MAX_NAME_LENGTH];
+	char m_aRequestingPlayer[MAX_NAME_LENGTH];
+	// relevant for /top5 kind of requests
+	int m_Offset;
+
+	char m_aGametype[128];
+	char m_aMap[128];
+	bool m_Grenade = false;
+	bool m_OnlyStatTrack = false;
+};
+
+// data to be written
+struct CSqlSaveRoundStatsData : CSqlInstaData
+{
+	CSqlSaveRoundStatsData(int DebugStats) :
 		CSqlInstaData(nullptr)
 	{
 		m_DebugStats = DebugStats;
@@ -129,6 +177,7 @@ class CSqlStats
 
 	// non ratelimited server side queries
 	static bool CreateTableThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
+	static bool CreateFastcapTableThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
 	static bool SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
 
 	// ratelimited user queries
@@ -136,6 +185,10 @@ class CSqlStats
 	static bool ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool ShowRankWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
 	static bool ShowTopWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool ShowFastcapRankWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+	static bool ShowFastcapTopWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, char *pError, int ErrorSize);
+
+	static bool SaveFastcapWorker(IDbConnection *pSqlServer, const ISqlData *pGameData, Write w, char *pError, int ErrorSize);
 
 	std::shared_ptr<CInstaSqlResult> NewInstaSqlResult(int ClientId);
 
@@ -158,6 +211,17 @@ class CSqlStats
 		const char *pOrderBy,
 		int Offset);
 
+	void ExecPlayerFastcapRankOrTopThread(
+		bool (*pFuncPtr)(IDbConnection *, const ISqlData *, char *pError, int ErrorSize),
+		const char *pThreadName,
+		int ClientId,
+		const char *pName,
+		const char *pMap,
+		const char *pGametype,
+		bool Grenade,
+		bool OnlyStatTrack,
+		int Offset);
+
 	bool RateLimitPlayer(int ClientId);
 
 public:
@@ -167,11 +231,15 @@ public:
 	void SetExtraColumns(CExtraColumns *pExtraColumns);
 
 	void CreateTable(const char *pName);
+	void CreateFastcapTable();
 	void SaveRoundStats(const char *pName, const char *pTable, CSqlStatsPlayer *pStats);
+	void SaveFastcap(int ClientId, int TimeTicks, const char *pTimestamp, bool Grenade, bool StatTrack);
 
 	void ShowStats(int ClientId, const char *pName, const char *pTable);
 	void ShowRank(int ClientId, const char *pName, const char *pRankColumnDisplay, const char *pRankColumnSql, const char *pTable, const char *pOrderBy);
 	void ShowTop(int ClientId, const char *pName, const char *pRankColumnDisplay, const char *pRankColumnSql, const char *pTable, const char *pOrderBy, int Offset);
+	void ShowFastcapRank(int ClientId, const char *pName, const char *pMap, const char *pGametype, bool Grenade, bool OnlyStatTrack);
+	void ShowFastcapTop(int ClientId, const char *pName, const char *pMap, const char *pGametype, bool Grenade, bool OnlyStatTrack, int Offset);
 };
 
 #endif

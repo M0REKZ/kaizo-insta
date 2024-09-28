@@ -282,6 +282,9 @@ public:
 	virtual void OnSnapDDNetCharacter(class CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter, int SnappingClient){};
 	virtual CClientMask FreezeDamageIndicatorMask(class CCharacter *pChr);
 
+	// ddnet has grenade
+	// but the actual implementation is in CGameControllerPvp::IsGrenadeGameType()
+	virtual bool IsGrenadeGameType() const { return true; }
 	bool IsVanillaGameType() const { return m_IsVanillaGameType; }
 	bool m_IsVanillaGameType = false;
 	int m_DefaultWeapon = WEAPON_GUN;
@@ -408,7 +411,7 @@ public:
 	virtual bool DoWincheckRound(); // returns true when the match is over
 	virtual void OnFlagReturn(class CFlag *pFlag); // ddnet-insta
 	virtual void OnFlagGrab(class CFlag *pFlag); // ddnet-insta
-	virtual void OnFlagCapture(class CFlag *pFlag, float Time); // ddnet-insta
+	virtual void OnFlagCapture(class CFlag *pFlag, float Time, int TimeTicks); // ddnet-insta
 	virtual void OnRoundStart();
 	// return true to consume the event
 	// and supress default ddnet selfkill behavior

@@ -56,6 +56,11 @@ void CPlayer::InstagibTick()
 		ProcessStatsResult(*m_StatsQueryResult);
 		m_StatsQueryResult = nullptr;
 	}
+	if(m_FastcapQueryResult != nullptr && m_FastcapQueryResult->m_Completed)
+	{
+		ProcessStatsResult(*m_FastcapQueryResult);
+		m_FastcapQueryResult = nullptr;
+	}
 }
 
 void CPlayer::ProcessStatsResult(CInstaSqlResult &Result)

@@ -435,7 +435,7 @@ void IGameController::OnFlagGrab(CFlag *pFlag)
 {
 }
 
-void IGameController::OnFlagCapture(CFlag *pFlag, float Time)
+void IGameController::OnFlagCapture(CFlag *pFlag, float Time, int TimeTicks)
 {
 }
 

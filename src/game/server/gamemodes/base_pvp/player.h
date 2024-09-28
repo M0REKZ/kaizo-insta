@@ -109,6 +109,7 @@ public:
 	void ResetStats();
 
 	std::shared_ptr<CInstaSqlResult> m_StatsQueryResult;
+	std::shared_ptr<CInstaSqlResult> m_FastcapQueryResult;
 
 	/*
 		m_HasGhostCharInGame

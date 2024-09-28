@@ -26,6 +26,14 @@ void CGameContext::RegisterInstagibCommands()
 	Console()->Register("rank_kills", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRankKills, this, "Shows the all time kills rank of player name (your stats by default)");
 	Console()->Register("top5kills", "?i[rank to start with]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTopKills, this, "Shows the all time best ranks by kills");
 
+	// TODO: what about rank flag times with stat track on vs off? how does the user choose which to show
+	//       i think the best is to not let the user choose but show all at once
+	//       like ddnet does show regional and global rankings together
+	//       the flag ranks could show ranks for the current gametype and for all gametypes and for stat track off/on
+	Console()->Register("rank_flags", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRankFastcaps, this, "Shows the all time flag time rank of player name (your stats by default)");
+	Console()->Register("top5flags", "?i[rank to start with]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTopFastcaps, this, "Shows the all time best ranks by flag time");
+	Console()->Register("rank_caps", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRankFlagCaptures, this, "Shows the all time flag capture rank of player name (your stats by default)");
+
 #define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) ;
 #define MACRO_RANK_COLUMN(name, sql_name, display_name, order_by) \
 	Console()->Register("rank_" #sql_name, "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRank##name, this, "Shows the all time " #sql_name " rank of player name (your stats by default)");

@@ -6,6 +6,7 @@
 #include <game/server/entities/character.h>
 #include <game/server/entities/laser.h>
 #include <game/server/entities/ddnet_pvp/vanilla_projectile.h>
+#include <game/server/entities/flag.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/player.h>
@@ -36,6 +37,8 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	m_pSqlStats = new CSqlStats(GameServer(), ((CServer *)Server())->DbPool());
 	m_pExtraColumns = nullptr;
 	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+
+	m_pSqlStats->CreateFastcapTable();
 }
 
 void CGameControllerPvp::OnRoundStart()
@@ -87,7 +90,7 @@ int CGameControllerPvp::GameInfoExFlags(int SnappingClient)
 		GAMEINFOFLAG_ALLOW_HOOK_COLL |
 		GAMEINFOFLAG_ALLOW_ZOOM |
 		GAMEINFOFLAG_BUG_DDRACE_GHOST |
-		GAMEINFOFLAG_BUG_DDRACE_INPUT |
+		/* GAMEINFOFLAG_BUG_DDRACE_INPUT | */ // https://github.com/ddnet-insta/ddnet-insta/issues/161
 		GAMEINFOFLAG_PREDICT_DDRACE |
 		GAMEINFOFLAG_PREDICT_DDRACE_TILES |
 		GAMEINFOFLAG_ENTITIES_DDNET |
@@ -96,11 +99,6 @@ int CGameControllerPvp::GameInfoExFlags(int SnappingClient)
 		GAMEINFOFLAG_RACE;
 	if(!g_Config.m_SvAllowZoom) //ddnet-insta
 		Flags &= ~(GAMEINFOFLAG_ALLOW_ZOOM);
-	if(g_Config.m_SvFastcap) //ddnet-insta
-	{
-		Flags |= GAMEINFOFLAG_GAMETYPE_FASTCAP;
-		Flags |= GAMEINFOFLAG_FLAG_STARTS_RACE;
-	}
 
 	// ddnet clients do not predict sv_old_laser correctly
 	// https://github.com/ddnet/ddnet/issues/7589
@@ -113,6 +111,36 @@ int CGameControllerPvp::GameInfoExFlags(int SnappingClient)
 int CGameControllerPvp::GameInfoExFlags2(int SnappingClient)
 {
 	return GAMEINFOFLAG2_HUD_AMMO | GAMEINFOFLAG2_HUD_HEALTH_ARMOR; // ddnet-insta
+}
+
+bool CGameControllerPvp::IsGrenadeGameType() const
+{
+	// TODO: this should be done with some cleaner spawnweapons/available weapons enum flag thing
+	if(!str_comp(m_pGameType, "zCatch"))
+	{
+		return m_SpawnWeapons == SPAWN_WEAPON_GRENADE;
+	}
+	return IsVanillaGameType() || m_pGameType[0] == 'g';
+}
+
+void CGameControllerPvp::OnFlagCapture(class CFlag *pFlag, float Time, int TimeTicks)
+{
+	if(!pFlag)
+		return;
+	if(!pFlag->m_pCarrier)
+		return;
+	if(TimeTicks <= 0)
+		return;
+
+	int ClientId = pFlag->m_pCarrier->GetPlayer()->GetCid();
+
+	// TODO: find a better way to check if there is a grenade or not
+	bool Grenade = IsGrenadeGameType();
+
+	char aTimestamp[TIMESTAMP_STR_LENGTH];
+	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE); // 2019-04-02 19:41:58
+
+	m_pSqlStats->SaveFastcap(ClientId, TimeTicks, aTimestamp, Grenade, IsStatTrack());
 }
 
 void CGameControllerPvp::OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName)

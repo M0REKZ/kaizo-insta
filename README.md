@@ -246,7 +246,6 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_chat_ratelimit_non_calls` Needs sv_spamprotection 0 (0=off, 1=ratelimit all but call binds such as 'help')
 + `sv_chat_ratelimit_spam` Needs sv_spamprotection 0 (0=off, 1=ratelimit chat detected as spam)
 + `sv_chat_ratelimit_debug` Logs which of the ratelimits kicked in
-+ `sv_fastcap` Insert flag captures into ddrace rank database
 + `sv_debug_stats` Verbose logging for the SQL player stats
 + `sv_vote_checkboxes` Fill [ ] checkbox in vote name if the config is already set
 + `sv_hide_admins` Only send admin status to other authed players
