@@ -23,6 +23,8 @@
 
 MACRO_RANK_COLUMN(Wins, wins, "Wins", "DESC")
 MACRO_RANK_COLUMN(BestSpree, spree, "killing spree", "DESC")
+MACRO_RANK_COLUMN(Points, points, "Points", "DESC")
 
 MACRO_TOP_COLUMN(Wins, wins, "Wins", "DESC")
 MACRO_TOP_COLUMN(BestSpree, spree, "killing spree", "DESC")
+MACRO_TOP_COLUMN(Points, points, "Points", "DESC")

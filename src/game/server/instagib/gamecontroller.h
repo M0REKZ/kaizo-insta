@@ -286,6 +286,7 @@ public:
 	// but the actual implementation is in CGameControllerPvp::IsGrenadeGameType()
 	virtual bool IsGrenadeGameType() const { return true; }
 	bool IsVanillaGameType() const { return m_IsVanillaGameType; }
+	virtual bool IsDDRaceGameType() const { return true; }
 	bool m_IsVanillaGameType = false;
 	int m_DefaultWeapon = WEAPON_GUN;
 	void CheckReadyStates(int WithoutId = -1);

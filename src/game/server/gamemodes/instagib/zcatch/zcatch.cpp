@@ -73,6 +73,11 @@ bool CGameControllerZcatch::IsWinner(const CPlayer *pPlayer, char *pMessage, int
 		return false;
 	if(pPlayer->m_IsDead)
 		return false;
+	// you can never win with 0 kills
+	// this should cover edge cases where one spawns into the world
+	// where everyone else is currently in a death screen
+	if(!pPlayer->m_Spree)
+		return false;
 	// there are no winners in release games even if the round ends
 	if(!IsCatchGameRunning())
 		return false;
@@ -229,6 +234,22 @@ bool CGameControllerZcatch::OnSelfkill(int ClientId)
 
 void CGameControllerZcatch::KillPlayer(class CPlayer *pVictim, class CPlayer *pKiller)
 {
+	if(!pKiller)
+		return;
+	if(!pKiller->GetCharacter())
+		return;
+	if(pKiller->GetTeam() == TEAM_SPECTATORS)
+		return;
+	if(pKiller->m_IsDead)
+	{
+		dbg_msg(
+			"zcatch",
+			"warning '%s' was killed by the dead (but not spec) player '%s'",
+			Server()->ClientName(pVictim->GetCid()),
+			Server()->ClientName(pKiller->GetCid()));
+		return;
+	}
+
 	char aBuf[512];
 	str_format(aBuf, sizeof(aBuf), "You are spectator until '%s' dies", Server()->ClientName(pKiller->GetCid()));
 	GameServer()->SendChatTarget(pVictim->GetCid(), aBuf);

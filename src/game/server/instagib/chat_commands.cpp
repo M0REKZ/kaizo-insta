@@ -13,6 +13,58 @@
 // yes that is cursed
 bool CheckClientId(int ClientId);
 
+void CGameContext::ConRankCmdlist(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	if(!pSelf->m_pController)
+		return;
+
+	if(pSelf->m_pController->IsDDRaceGameType())
+	{
+		ConRank(pResult, pUserData);
+		return;
+	}
+
+	pSelf->SendChatTarget(pResult->m_ClientId, "~~~ ddnet-insta rank commands");
+	pSelf->SendChatTarget(pResult->m_ClientId, "~ /rank_kills - highest amount of kills");
+
+	if(pSelf->m_pController->GameFlags() & GAMEFLAG_FLAGS)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "~ /rank_caps - highest amount of flag captures");
+		pSelf->SendChatTarget(pResult->m_ClientId, "~ /rank_flags - best (shortest) flag capture time");
+	}
+}
+
+void CGameContext::ConTopCmdlist(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	if(!pSelf->m_pController)
+		return;
+
+	if(pSelf->m_pController->IsDDRaceGameType())
+	{
+		ConTop(pResult, pUserData);
+		return;
+	}
+
+	pSelf->SendChatTarget(pResult->m_ClientId, "~~~ ddnet-insta top commands");
+	pSelf->SendChatTarget(pResult->m_ClientId, "~ /top5kills - top killers");
+	pSelf->SendChatTarget(pResult->m_ClientId, "~ /top5wins - highest amounts of round wins");
+	pSelf->SendChatTarget(pResult->m_ClientId, "~ /top5spree - highest killing sprees");
+
+	if(pSelf->m_pController->GameFlags() & GAMEFLAG_FLAGS)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "~ /top5caps - best flag captures by amount");
+		pSelf->SendChatTarget(pResult->m_ClientId, "~ /top5flags - fastest flag capturers");
+	}
+}
+
 void CGameContext::ConStatsRound(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
@@ -179,7 +231,7 @@ void CGameContext::ConRankFlagCaptures(IConsole::IResult *pResult, void *pUserDa
 
 #define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) ;
 #define MACRO_RANK_COLUMN(name, sql_name, display_name, order_by) \
-	void CGameContext::ConRank##name(IConsole::IResult *pResult, void *pUserData) \
+	void CGameContext::ConInstaRank##name(IConsole::IResult *pResult, void *pUserData) \
 	{ \
 		CGameContext *pSelf = (CGameContext *)pUserData; \
 		if(!CheckClientId(pResult->m_ClientId)) \
@@ -192,7 +244,7 @@ void CGameContext::ConRankFlagCaptures(IConsole::IResult *pResult, void *pUserDa
 		pSelf->m_pController->m_pSqlStats->ShowRank(pResult->m_ClientId, pName, display_name, #sql_name, pSelf->m_pController->StatsTable(), order_by); \
 	}
 #define MACRO_TOP_COLUMN(name, sql_name, display_name, order_by) \
-	void CGameContext::ConTop##name(IConsole::IResult *pResult, void *pUserData) \
+	void CGameContext::ConInstaTop##name(IConsole::IResult *pResult, void *pUserData) \
 	{ \
 		CGameContext *pSelf = (CGameContext *)pUserData; \
 		if(!CheckClientId(pResult->m_ClientId)) \

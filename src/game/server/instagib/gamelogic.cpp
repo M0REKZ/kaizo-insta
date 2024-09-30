@@ -146,26 +146,22 @@ void CGameContext::UpdateVoteCheckboxes() const
 		{
 			bool Checked = false;
 			bool Found = true;
+			int Len;
+			int Val;
 
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
-	for(int val = Min; val <= Max; val++) \
+	if(str_startswith(pCurrent->m_aCommand, #ScriptName)) \
 	{ \
-		char aBuf[512]; \
-		str_format(aBuf, sizeof(aBuf), "%s %d", #ScriptName, val); \
-		if(!str_comp(pCurrent->m_aCommand, aBuf)) \
-		{ \
-			Checked = g_Config.m_##Name == val; \
-			Found = true; \
-		} \
+		Len = str_length(#ScriptName); \
 		/* \
 		votes can directly match the command or have other commands \
 		or only start with it but then they should be delimited with a semicolon \
 		this allows to detect config option votes that also run additonal commands on vote pass \
 		*/ \
-		str_format(aBuf, sizeof(aBuf), "%s %d;", #ScriptName, val); \
-		if(str_startswith(pCurrent->m_aCommand, aBuf)) \
+		if(pCurrent->m_aCommand[Len] != ';' && pCurrent->m_aCommand[Len] != '\0') \
 		{ \
-			Checked = g_Config.m_##Name == val; \
+			Val = atoi(pCurrent->m_aCommand + Len + 1); \
+			Checked = g_Config.m_##Name == Val; \
 			Found = true; \
 		} \
 	}

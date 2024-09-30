@@ -231,6 +231,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_anticamper_range` Distance how far away the player must move to escape anticamper
 + `sv_zcatch_min_players` How many active players (not spectators) are required to start a round
 + `sv_release_game` auto release on kill (only affects sv_gametype zCatch)
++ `sv_respawn_protection_ms` Delay in milliseconds a tee can not damage or get damaged after spawning
 + `sv_drop_flag_on_selfkill` drop flag on selfkill (activates chat cmd '/drop flag')
 + `sv_drop_flag_on_vote` drop flag on vote yes (activates chat cmd '/drop flag')
 + `sv_on_fire_mode` no reload delay after hitting an enemy with rifle

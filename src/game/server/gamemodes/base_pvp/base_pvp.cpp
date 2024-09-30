@@ -763,6 +763,38 @@ bool CGameControllerPvp::OnLaserHit(int Bounces, int From, int Weapon, CCharacte
 	return true;
 }
 
+bool CGameControllerPvp::IsSpawnProtected(CPlayer *pVictim, CPlayer *pKiller) const
+{
+	// there has to be a valid killer to get spawn protected
+	// one should never be spawn protected from the world
+	// if the killer left or got invalidated otherwise
+	// that should be handled elsewhere
+	if(!pKiller)
+		return false;
+	// if there is no victim nobody needs protection
+	if(!pVictim)
+		return false;
+	if(!pVictim->GetCharacter())
+		return false;
+
+	auto &&CheckRecentSpawn = [&](int64_t LastSpawn, int64_t DelayInMs) {
+		return (LastSpawn * (int64_t)1000) + (int64_t)Server()->TickSpeed() * DelayInMs > ((int64_t)Server()->Tick() * (int64_t)1000);
+	};
+
+	// victim just spawned
+	if(CheckRecentSpawn((int64_t)pVictim->GetCharacter()->m_SpawnTick, (int64_t)g_Config.m_SvRespawnProtectionMs))
+		return true;
+
+	// killer just spawned
+	if(pKiller->GetCharacter())
+	{
+		if(CheckRecentSpawn((int64_t)pKiller->GetCharacter()->m_SpawnTick, (int64_t)g_Config.m_SvRespawnProtectionMs))
+			return true;
+	}
+
+	return false;
+}
+
 bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
 	CPlayer *pPlayer = Character.GetPlayer();
@@ -789,6 +821,10 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 		if(!pChr || pChr->GetCore().HookedPlayer() != Character.GetPlayer()->GetCid())
 			return false;
 	}
+	// the "true" means tees hit during spawn protection
+	// will still be pushed around
+	if(IsSpawnProtected(pPlayer, pKiller))
+		return false;
 
 	if(IsStatTrack() && Weapon != WEAPON_HAMMER)
 	{

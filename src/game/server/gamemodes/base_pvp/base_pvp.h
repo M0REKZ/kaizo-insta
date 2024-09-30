@@ -83,6 +83,7 @@ public:
 	void OnShowRank(int Rank, int RankedScore, const char *pRankType, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
 	void OnRoundStart() override;
 	bool IsGrenadeGameType() const override;
+	bool IsDDRaceGameType() const override { return false; }
 	void OnFlagCapture(class CFlag *pFlag, float Time, int TimeTicks) override;
 
 	bool HasWinningScore(const CPlayer *pPlayer) const;
@@ -99,6 +100,8 @@ public:
 	void Anticamper();
 
 	// generic helpers
+
+	bool IsSpawnProtected(CPlayer *pVictim, CPlayer *pKiller) const;
 
 	// returns the amount of tee's that are not spectators
 	int NumActivePlayers();
