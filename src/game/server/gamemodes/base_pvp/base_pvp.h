@@ -33,8 +33,8 @@ public:
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	void Tick() override;
 	int GetAutoTeam(int NotThisId) override;
-	int GameInfoExFlags(int SnappingClient) override;
-	int GameInfoExFlags2(int SnappingClient) override;
+	int GameInfoExFlags(int SnappingClient, int DDRaceFlags) override;
+	int GameInfoExFlags2(int SnappingClient, int DDRaceFlags) override;
 	int GetDefaultWeapon(class CPlayer *pPlayer) override { return m_DefaultWeapon; }
 	int GetPlayerTeam(class CPlayer *pPlayer, bool Sixup) override;
 	void OnUpdateSpectatorVotesConfig() override;

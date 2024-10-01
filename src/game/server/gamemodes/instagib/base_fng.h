@@ -17,7 +17,7 @@ public:
 	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
 	bool OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos) override;
-	int GameInfoExFlags(int SnappingClient) override;
+	int GameInfoExFlags(int SnappingClient, int DDRaceFlags) override;
 	void OnSnapDDNetCharacter(class CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter, int SnappingClient) override;
 	CClientMask FreezeDamageIndicatorMask(class CCharacter *pChr) override;
 	bool OnSelfkill(int ClientId) override;

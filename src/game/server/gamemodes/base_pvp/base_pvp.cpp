@@ -73,7 +73,7 @@ CGameControllerPvp::~CGameControllerPvp()
 	}
 }
 
-int CGameControllerPvp::GameInfoExFlags(int SnappingClient)
+int CGameControllerPvp::GameInfoExFlags(int SnappingClient, int DDRaceFlags)
 {
 	int Flags =
 		GAMEINFOFLAG_PREDICT_VANILLA | // ddnet-insta
@@ -108,7 +108,7 @@ int CGameControllerPvp::GameInfoExFlags(int SnappingClient)
 	return Flags;
 }
 
-int CGameControllerPvp::GameInfoExFlags2(int SnappingClient)
+int CGameControllerPvp::GameInfoExFlags2(int SnappingClient, int DDRaceFlags)
 {
 	return GAMEINFOFLAG2_HUD_AMMO | GAMEINFOFLAG2_HUD_HEALTH_ARMOR; // ddnet-insta
 }
@@ -179,7 +179,23 @@ void CGameControllerPvp::OnShowRank(int Rank, int RankedScore, const char *pRank
 		sizeof(aBuf),
 		"%d. '%s' %s: %d, requested by '%s'",
 		Rank, pRequestedName, pRankType, RankedScore, Server()->ClientName(pRequestingPlayer->GetCid()));
-	GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+
+	if(AllowPublicChat(pRequestingPlayer))
+	{
+		GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+		return;
+	}
+
+	int Team = pRequestingPlayer->GetTeam();
+	for(const CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		if(pPlayer->GetTeam() != Team)
+			continue;
+
+		SendChatTarget(pPlayer->GetCid(), aBuf);
+	}
 }
 
 void CGameControllerPvp::OnUpdateSpectatorVotesConfig()
@@ -800,7 +816,7 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 	CPlayer *pPlayer = Character.GetPlayer();
 	if(Character.m_IsGodmode)
 		return true;
-	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
+	if(From >= 0 && From <= MAX_CLIENTS && GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
 	{
 		// boosting mates counts neither as hit nor as miss
 		if(IsStatTrack() && Weapon != WEAPON_HAMMER)

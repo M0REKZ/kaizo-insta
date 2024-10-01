@@ -36,9 +36,9 @@ void CGameControllerCTF::OnCharacterSpawn(class CCharacter *pChr)
 	pChr->GiveWeapon(WEAPON_GUN, false, 10);
 }
 
-int CGameControllerCTF::GameInfoExFlags(int SnappingClient)
+int CGameControllerCTF::GameInfoExFlags(int SnappingClient, int DDRaceFlags)
 {
-	int Flags = CGameControllerPvp::GameInfoExFlags(SnappingClient);
+	int Flags = CGameControllerPvp::GameInfoExFlags(SnappingClient, DDRaceFlags);
 	Flags &= ~(GAMEINFOFLAG_UNLIMITED_AMMO);
 	Flags &= ~(GAMEINFOFLAG_PREDICT_DDRACE);
 	return Flags;
@@ -46,7 +46,7 @@ int CGameControllerCTF::GameInfoExFlags(int SnappingClient)
 
 bool CGameControllerCTF::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
-	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
+	if(From >= 0 && From <= MAX_CLIENTS && GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
 		return CGameControllerPvp::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
 
 	if(Weapon == WEAPON_GUN || Weapon == WEAPON_SHOTGUN)

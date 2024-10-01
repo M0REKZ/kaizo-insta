@@ -22,9 +22,9 @@ CGameControllerVanilla::CGameControllerVanilla(class CGameContext *pGameServer) 
 
 CGameControllerVanilla::~CGameControllerVanilla() = default;
 
-int CGameControllerVanilla::GameInfoExFlags(int SnappingClient)
+int CGameControllerVanilla::GameInfoExFlags(int SnappingClient, int DDRaceFlags)
 {
-	int Flags = CGameControllerPvp::GameInfoExFlags(SnappingClient);
+	int Flags = CGameControllerPvp::GameInfoExFlags(SnappingClient, DDRaceFlags);
 	Flags &= ~(GAMEINFOFLAG_UNLIMITED_AMMO);
 	Flags &= ~(GAMEINFOFLAG_PREDICT_DDRACE);
 	return Flags;

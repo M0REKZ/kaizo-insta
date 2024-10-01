@@ -8,6 +8,7 @@
 #include <game/server/entities/character.h>
 #include <game/server/entities/flag.h>
 #include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/version.h>
@@ -36,6 +37,32 @@ CGameControllerZcatch::CGameControllerZcatch(class CGameContext *pGameServer) :
 		m_pSqlStats->SetExtraColumns(m_pExtraColumns);
 		m_pSqlStats->CreateTable(m_pStatsTable);
 	}
+}
+
+void CGameControllerZcatch::OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName)
+{
+	CGameControllerInstagib::OnShowStatsAll(pStats, pRequestingPlayer, pRequestedName);
+
+	pStats->Dump(m_pExtraColumns);
+
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "~ Seconds in game: %d", pStats->m_TicksInGame / Server()->TickSpeed());
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "~ Seconds caught: %d", pStats->m_TicksCaught / Server()->TickSpeed());
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+}
+
+void CGameControllerZcatch::OnShowRoundStats(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName)
+{
+	CGameControllerInstagib::OnShowRoundStats(pStats, pRequestingPlayer, pRequestedName);
+
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "~ Seconds in game: %d", pStats->m_TicksInGame / Server()->TickSpeed());
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "~ Seconds caught: %d", pStats->m_TicksCaught / Server()->TickSpeed());
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
 }
 
 CGameControllerZcatch::ECatchGameState CGameControllerZcatch::CatchGameState() const
@@ -188,8 +215,10 @@ int CGameControllerZcatch::GetPlayerTeam(class CPlayer *pPlayer, bool Sixup)
 void CGameControllerZcatch::ReleasePlayer(class CPlayer *pPlayer, const char *pMsg)
 {
 	GameServer()->SendChatTarget(pPlayer->GetCid(), pMsg);
-	pPlayer->m_KillerId = -1;
+
+	UpdateCatchTicks(pPlayer);
 	pPlayer->m_IsDead = false;
+	pPlayer->m_KillerId = -1;
 
 	if(pPlayer->m_WantsToJoinSpectators)
 	{
@@ -254,6 +283,7 @@ void CGameControllerZcatch::KillPlayer(class CPlayer *pVictim, class CPlayer *pK
 	str_format(aBuf, sizeof(aBuf), "You are spectator until '%s' dies", Server()->ClientName(pKiller->GetCid()));
 	GameServer()->SendChatTarget(pVictim->GetCid(), aBuf);
 
+	UpdateCatchTicks(pVictim);
 	pVictim->m_IsDead = true;
 	pVictim->m_KillerId = pKiller->GetCid();
 	if(pVictim->GetTeam() != TEAM_SPECTATORS)
@@ -295,6 +325,10 @@ int CGameControllerZcatch::OnCharacterDeath(class CCharacter *pVictim, class CPl
 	// TODO: revisit this edge case when zcatch is done
 	//       a killer leaving while the bullet is flying
 	if(!pKiller)
+		return 0;
+
+	// do not release players when the winner leaves during round end
+	if(GameState() == IGS_END_ROUND)
 		return 0;
 
 	OnCaught(pVictim->GetPlayer(), pKiller);
@@ -375,8 +409,33 @@ bool CGameControllerZcatch::CanJoinTeam(int Team, int NotThisId, char *pErrorRea
 	return true;
 }
 
+void CGameControllerZcatch::UpdateCatchTicks(class CPlayer *pPlayer)
+{
+	char aBuf[512];
+	int Ticks = Server()->Tick() - pPlayer->m_LastSetTeam;
+	if(pPlayer->m_IsDead)
+	{
+		str_format(aBuf, sizeof(aBuf), "'%s' was caught for %d ticks", Server()->ClientName(pPlayer->GetCid()), Ticks);
+		pPlayer->m_Stats.m_TicksCaught += Ticks;
+	}
+	else if(!pPlayer->m_IsDead && pPlayer->GetTeam() != TEAM_SPECTATORS)
+	{
+		str_format(aBuf, sizeof(aBuf), "'%s' was in game for %d ticks", Server()->ClientName(pPlayer->GetCid()), Ticks);
+		pPlayer->m_Stats.m_TicksInGame += Ticks;
+	}
+	else
+	{
+		str_format(aBuf, sizeof(aBuf), "spectating player '%s' left or joined (no ticks tracked)", Server()->ClientName(pPlayer->GetCid()));
+	}
+
+	if(g_Config.m_SvDebugStats > 1)
+		SendChat(-1, TEAM_ALL, aBuf);
+}
+
 void CGameControllerZcatch::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 {
+	UpdateCatchTicks(pPlayer);
+
 	CGameControllerInstagib::DoTeamChange(pPlayer, Team, DoChatMsg);
 
 	CheckGameState();
@@ -417,6 +476,17 @@ int CGameControllerZcatch::GetAutoTeam(int NotThisId)
 
 void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 {
+	// SetTeam is not called on join and m_LastSetTeam is initialized to zero
+	// m_LastSetTeam is used to track the caught and in game ticks
+	// to avoid getting a wrong (too high tick count on join)
+	// we set it manually here
+	//
+	// this also means that zCatch now has a team change cool down on first join
+	if(!pPlayer->m_LastSetTeam)
+	{
+		pPlayer->m_LastSetTeam = Server()->Tick();
+	}
+
 	CGameControllerInstagib::OnPlayerConnect(pPlayer);
 	CheckGameState();
 
@@ -453,6 +523,8 @@ void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 
 void CGameControllerZcatch::OnPlayerDisconnect(class CPlayer *pDisconnectingPlayer, const char *pReason)
 {
+	UpdateCatchTicks(pDisconnectingPlayer);
+
 	CGameControllerInstagib::OnPlayerDisconnect(pDisconnectingPlayer, pReason);
 
 	for(CPlayer *pPlayer : GameServer()->m_apPlayers)

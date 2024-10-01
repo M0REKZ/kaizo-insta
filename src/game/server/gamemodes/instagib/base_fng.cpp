@@ -22,9 +22,9 @@ CGameControllerBaseFng::CGameControllerBaseFng(class CGameContext *pGameServer) 
 
 CGameControllerBaseFng::~CGameControllerBaseFng() = default;
 
-int CGameControllerBaseFng::GameInfoExFlags(int SnappingClient)
+int CGameControllerBaseFng::GameInfoExFlags(int SnappingClient, int DDRaceFlags)
 {
-	int Flags = CGameControllerPvp::GameInfoExFlags(SnappingClient);
+	int Flags = CGameControllerPvp::GameInfoExFlags(SnappingClient, DDRaceFlags);
 	Flags &= ~(GAMEINFOFLAG_ENTITIES_DDNET);
 	Flags &= ~(GAMEINFOFLAG_ENTITIES_DDRACE);
 	Flags &= ~(GAMEINFOFLAG_ENTITIES_RACE);
@@ -309,7 +309,7 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 	CPlayer *pKiller = nullptr;
 	if(From >= 0 && From <= MAX_CLIENTS)
 		pKiller = GameServer()->m_apPlayers[From];
-	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
+	if(From >= 0 && From <= MAX_CLIENTS && GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
 	{
 		// boosting mates counts neither as hit nor as miss
 		if(IsStatTrack() && Weapon != WEAPON_HAMMER && pKiller)

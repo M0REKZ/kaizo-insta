@@ -75,6 +75,14 @@ void CSqlStats::ExecPlayerStatsThread(
 	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));
 	str_copy(Tmp->m_aTable, pTable, sizeof(Tmp->m_aTable));
 
+	if(m_pExtraColumns)
+	{
+		Tmp->m_pExtraColumns = (CExtraColumns *)malloc(sizeof(CExtraColumns));
+		mem_copy(Tmp->m_pExtraColumns, m_pExtraColumns, sizeof(CExtraColumns));
+		if(g_Config.m_SvDebugStats > 1)
+			dbg_msg("sql", "allocated memory at %p", Tmp->m_pExtraColumns);
+	}
+
 	m_pPool->Execute(pFuncPtr, std::move(Tmp), pThreadName);
 }
 
@@ -100,6 +108,14 @@ void CSqlStats::ExecPlayerRankOrTopThread(
 	str_copy(Tmp->m_aTable, pTable, sizeof(Tmp->m_aTable));
 	str_copy(Tmp->m_aOrderBy, pOrderBy, sizeof(Tmp->m_aOrderBy));
 	Tmp->m_Offset = Offset;
+
+	if(m_pExtraColumns)
+	{
+		Tmp->m_pExtraColumns = (CExtraColumns *)malloc(sizeof(CExtraColumns));
+		mem_copy(Tmp->m_pExtraColumns, m_pExtraColumns, sizeof(CExtraColumns));
+		if(g_Config.m_SvDebugStats > 1)
+			dbg_msg("sql", "allocated memory at %p", Tmp->m_pExtraColumns);
+	}
 
 	m_pPool->Execute(pFuncPtr, std::move(Tmp), pThreadName);
 }
@@ -362,8 +378,15 @@ bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGame
 
 		if(pData->m_DebugStats > 1)
 		{
-			dbg_msg("sql-thread", "loaded gametype specific stats:");
-			pResult->m_Stats.Dump(pData->m_pExtraColumns, "sql-thread");
+			if(pData->m_pExtraColumns)
+			{
+				dbg_msg("sql-thread", "loaded gametype specific stats:");
+				pResult->m_Stats.Dump(pData->m_pExtraColumns, "sql-thread");
+			}
+			else
+			{
+				dbg_msg("sql-thread", "warning no extra columns set!");
+			}
 		}
 	}
 	return false;

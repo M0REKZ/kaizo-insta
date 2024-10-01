@@ -277,8 +277,8 @@ public:
 	*/
 	virtual void SaveStatsOnDisconnect(CPlayer *pPlayer){};
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
-	virtual int GameInfoExFlags(int SnappingClient) { return 0; }; // TODO: this breaks the ddrace gametype
-	virtual int GameInfoExFlags2(int SnappingClient) { return 0; };
+	virtual int GameInfoExFlags(int SnappingClient, int DDRaceFlags) { return DDRaceFlags; };
+	virtual int GameInfoExFlags2(int SnappingClient, int DDRaceFlags) { return DDRaceFlags; };
 	virtual void OnSnapDDNetCharacter(class CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter, int SnappingClient){};
 	virtual CClientMask FreezeDamageIndicatorMask(class CCharacter *pChr);
 
