@@ -2713,9 +2713,12 @@ void CGameContext::OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int
 		SendChat(-1, TEAM_ALL, aChatText);
 
 		// reload scores
-		Score()->PlayerData(ClientId)->Reset();
-		m_apPlayers[ClientId]->m_Score.reset();
-		Score()->LoadPlayerData(ClientId);
+		if(!m_pController->LoadNewPlayerNameData(ClientId)) // ddnet-insta
+		{
+			Score()->PlayerData(ClientId)->Reset();
+			m_apPlayers[ClientId]->m_Score.reset();
+			Score()->LoadPlayerData(ClientId);
+		}
 
 		SixupNeedsUpdate = true;
 

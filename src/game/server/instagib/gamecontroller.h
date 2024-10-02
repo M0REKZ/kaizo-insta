@@ -223,6 +223,20 @@ public:
 	virtual void OnShowRoundStats(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName){};
 
 	/*
+		Function: OnLoadedNameStats
+			Called when the stats request finished that fetches the
+			stats for players that just connected or changed their name
+
+			This can be used for save servers to display the players
+			all time stats in the scoreboard
+
+		Arguments:
+			pStats - stats struct that was loaded
+			pPlayer - player the stats are from
+	*/
+	virtual void OnLoadedNameStats(const CSqlStatsPlayer *pStats, class CPlayer *pPlayer){};
+
+	/*
 		Function: OnShowRank
 			called from the main thread when a SQL worker finished querying a rank from the database
 
@@ -276,11 +290,29 @@ public:
 			pPlayer - player to save stats for
 	*/
 	virtual void SaveStatsOnDisconnect(CPlayer *pPlayer){};
+	/*
+		Function: LoadNewPlayerNameData
+			Similar to ddnets LoadPlayerData()
+			Called on player connect and name change
+			used to load stats for that name
+
+		Arguments:
+			ClientId - id of the player to load the stats for
+
+		Returns:
+			return true to not run any ddrace time loading code
+	*/
+	virtual bool LoadNewPlayerNameData(int ClientId) { return false; };
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
 	virtual int GameInfoExFlags(int SnappingClient, int DDRaceFlags) { return DDRaceFlags; };
 	virtual int GameInfoExFlags2(int SnappingClient, int DDRaceFlags) { return DDRaceFlags; };
 	virtual void OnSnapDDNetCharacter(class CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter, int SnappingClient){};
 	virtual CClientMask FreezeDamageIndicatorMask(class CCharacter *pChr);
+	virtual int SnapPlayerScore(class CPlayer *pPlayer, int SnappingClient, int DDRaceScore);
+	virtual int SnapRoundStartTick(int SnappingClient);
+	virtual int SnapTimeLimit(int SnappingClient);
+	virtual void OnDDRaceTimeLoad(class CPlayer *pPlayer, float Time);
+	virtual void ResetPlayer(class CPlayer *pPlayer){};
 
 	// ddnet has grenade
 	// but the actual implementation is in CGameControllerPvp::IsGrenadeGameType()
@@ -333,6 +365,9 @@ public:
 	EGameState m_GameState;
 	EGameState GameState() const { return m_GameState; }
 	int m_GameStateTimer;
+
+	// custom ddnet-insta timers
+	int m_UnpauseStartTick = 0;
 
 	const char *GameStateToStr(EGameState GameState)
 	{

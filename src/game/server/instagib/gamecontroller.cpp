@@ -1,6 +1,6 @@
 // ddnet-insta specific gamecontroller methods
+#include <base/system.h>
 #include <engine/shared/config.h>
-
 #include <engine/shared/protocolglue.h>
 #include <game/generated/protocol.h>
 #include <game/mapitems.h>
@@ -20,6 +20,50 @@
 #include <game/server/gamecontroller.h>
 
 // ddnet-insta
+
+void IGameController::OnDDRaceTimeLoad(class CPlayer *pPlayer, float Time)
+{
+	pPlayer->m_Score = Time;
+}
+
+int IGameController::SnapPlayerScore(class CPlayer *pPlayer, int SnappingClient, int DDRaceScore)
+{
+	if(Server()->IsSixup(SnappingClient))
+	{
+		// Times are in milliseconds for 0.7
+		return pPlayer->m_Score.has_value() ? GameServer()->Score()->PlayerData(pPlayer->GetCid())->m_BestTime * 1000 : -1;
+	}
+
+	return DDRaceScore;
+}
+
+int IGameController::SnapRoundStartTick(int SnappingClient)
+{
+	if(
+		!Server()->IsSixup(SnappingClient) &&
+		(GameState() == IGS_START_COUNTDOWN_ROUND_START || GameState() == IGS_START_COUNTDOWN_UNPAUSE))
+	{
+		return m_UnpauseStartTick;
+	}
+
+	return m_RoundStartTick;
+}
+
+int IGameController::SnapTimeLimit(int SnappingClient)
+{
+	if(
+		!Server()->IsSixup(SnappingClient) &&
+		(GameState() == IGS_START_COUNTDOWN_ROUND_START || GameState() == IGS_START_COUNTDOWN_UNPAUSE))
+	{
+		// magic number of 20 minutes fake timelimit
+		// if this is changed the place where m_UnpauseStartTick is set also has to be changed
+		// the countdown configs have a maximum of 1000 seconds each
+		// so 20 minutes is enough to display a countdown using the timelimit
+		return 20;
+	}
+
+	return g_Config.m_SvTimelimit;
+}
 
 CClientMask IGameController::FreezeDamageIndicatorMask(class CCharacter *pChr)
 {
@@ -315,6 +359,16 @@ void IGameController::SetGameState(EGameState GameState, int Timer)
 				CountDownSeconds = Config()->m_SvCountdownUnpause;
 			else
 				CountDownSeconds = Config()->m_SvCountdownRoundStart;
+
+			// there will be a fake 20 minute time limit for 0.6 clients
+			// so we also send a fake start tick that is CountDownSeconds before
+			// the 20 minute timelimit would expire
+
+			int FakeTimeLimitEndTick = Server()->Tick() - Server()->TickSpeed() * 60 * 20;
+			m_UnpauseStartTick = FakeTimeLimitEndTick + (CountDownSeconds * Server()->TickSpeed());
+
+			// m_UnpauseStartTick = Server()->Tick() - Server()->TickSpeed() * 30;
+
 			if(CountDownSeconds == 0 && m_GameFlags & protocol7::GAMEFLAG_SURVIVAL)
 			{
 				m_GameState = GameState;

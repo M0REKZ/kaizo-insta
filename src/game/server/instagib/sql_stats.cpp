@@ -28,6 +28,7 @@ void CInstaSqlResult::SetVariant(Variant v)
 	{
 	case RANK:
 	case STATS:
+	case PLAYER_DATA:
 	case DIRECT:
 	case ALL:
 		for(auto &aMessage : m_aaMessages)
@@ -35,6 +36,7 @@ void CInstaSqlResult::SetVariant(Variant v)
 		break;
 	case BROADCAST:
 		m_aBroadcast[0] = 0;
+		break;
 		break;
 	}
 }
@@ -65,7 +67,8 @@ void CSqlStats::ExecPlayerStatsThread(
 	const char *pThreadName,
 	int ClientId,
 	const char *pName,
-	const char *pTable)
+	const char *pTable,
+	bool IsLoadPlayerData)
 {
 	auto pResult = NewInstaSqlResult(ClientId);
 	if(pResult == nullptr)
@@ -74,6 +77,7 @@ void CSqlStats::ExecPlayerStatsThread(
 	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
 	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));
 	str_copy(Tmp->m_aTable, pTable, sizeof(Tmp->m_aTable));
+	Tmp->m_IsLoadPlayerData = IsLoadPlayerData;
 
 	if(m_pExtraColumns)
 	{
@@ -173,11 +177,17 @@ CSqlInstaData::~CSqlInstaData()
 	}
 }
 
+void CSqlStats::LoadInstaPlayerData(int ClientId, const char *pTable)
+{
+	const char *pName = Server()->ClientName(ClientId);
+	ExecPlayerStatsThread(ShowStatsWorker, "load insta player data", ClientId, pName, pTable, true);
+}
+
 void CSqlStats::ShowStats(int ClientId, const char *pName, const char *pTable)
 {
 	if(RateLimitPlayer(ClientId))
 		return;
-	ExecPlayerStatsThread(ShowStatsWorker, "show stats", ClientId, pName, pTable);
+	ExecPlayerStatsThread(ShowStatsWorker, "show stats", ClientId, pName, pTable, false);
 }
 
 void CSqlStats::ShowRank(
@@ -314,6 +324,9 @@ bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGame
 	const auto *pData = dynamic_cast<const CSqlPlayerStatsRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CInstaSqlResult *>(pGameData->m_pResult.get());
 
+	if(pData->m_IsLoadPlayerData)
+		pResult->m_MessageKind = CInstaSqlResult::PLAYER_DATA;
+
 	char aBuf[4096];
 	str_format(
 		aBuf,
@@ -389,6 +402,9 @@ bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGame
 			}
 		}
 	}
+
+	if(pData->m_IsLoadPlayerData)
+		pResult->m_MessageKind = CInstaSqlResult::PLAYER_DATA;
 	return false;
 }
 

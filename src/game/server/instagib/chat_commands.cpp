@@ -98,6 +98,9 @@ void CGameContext::ConStatsRound(IConsole::IResult *pResult, void *pUserData)
 	str_format(aBuf, sizeof(aBuf), "~~~ round stats for '%s'", pName);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 
+	str_format(aBuf, sizeof(aBuf), "~ Points: %d", pPlayer->m_Stats.m_Points);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+
 	aUntrackedOrAccuracy[0] = '\0';
 	if(pPlayer->m_Stats.m_ShotsFired)
 		str_format(aUntrackedOrAccuracy, sizeof(aUntrackedOrAccuracy), " (%.2f%% hit accuracy)", pPlayer->m_Stats.HitAccuracy());

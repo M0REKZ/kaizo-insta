@@ -145,12 +145,16 @@ void CGameContext::UpdateVoteCheckboxes() const
 		if(str_startswith(pCurrent->m_aDescription, "[ ]") || str_startswith(pCurrent->m_aDescription, "[x]"))
 		{
 			bool Checked = false;
-			bool Found = true;
 			int Len;
 			int Val;
 
+			if(str_startswith(pCurrent->m_aCommand, "sv_gametype "))
+			{
+				const char *pVal = pCurrent->m_aCommand + str_length("sv_gametype ");
+				Checked = str_startswith_nocase(pVal, g_Config.m_SvGametype);
+			}
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
-	if(str_startswith(pCurrent->m_aCommand, #ScriptName)) \
+	else if(str_startswith(pCurrent->m_aCommand, #ScriptName)) \
 	{ \
 		Len = str_length(#ScriptName); \
 		/* \
@@ -162,7 +166,6 @@ void CGameContext::UpdateVoteCheckboxes() const
 		{ \
 			Val = atoi(pCurrent->m_aCommand + Len + 1); \
 			Checked = g_Config.m_##Name == Val; \
-			Found = true; \
 		} \
 	}
 #define MACRO_CONFIG_COL(Name, ScriptName, Def, Flags, Desc) // only int checkboxes for now
@@ -172,8 +175,7 @@ void CGameContext::UpdateVoteCheckboxes() const
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
 
-			if(Found)
-				pCurrent->m_aDescription[1] = Checked ? 'x' : ' ';
+			pCurrent->m_aDescription[1] = Checked ? 'x' : ' ';
 		}
 		pCurrent = pCurrent->m_pNext;
 	}

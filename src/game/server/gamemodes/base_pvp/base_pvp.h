@@ -21,7 +21,6 @@ public:
 	void SendChatTarget(int To, const char *pText, int Flags = CGameContext::FLAG_SIX | CGameContext::FLAG_SIXUP) const;
 	void SendChat(int ClientId, int Team, const char *pText, int SpamProtectionClientId = -1, int Flags = CGameContext::FLAG_SIX | CGameContext::FLAG_SIXUP);
 
-	void OnPlayerConstruct(class CPlayer *pPlayer);
 	void OnCharacterConstruct(class CCharacter *pChr);
 	void OnPlayerTick(class CPlayer *pPlayer);
 
@@ -39,6 +38,11 @@ public:
 	int GetPlayerTeam(class CPlayer *pPlayer, bool Sixup) override;
 	void OnUpdateSpectatorVotesConfig() override;
 	bool OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId) override;
+	int SnapPlayerScore(class CPlayer *pPlayer, int SnappingClient, int DDRaceScore) override;
+	void OnDDRaceTimeLoad(class CPlayer *pPlayer, float Time) override{};
+	void ResetPlayer(class CPlayer *pPlayer) override;
+	bool LoadNewPlayerNameData(int ClientId) override;
+	void OnLoadedNameStats(const CSqlStatsPlayer *pStats, class CPlayer *pPlayer) override;
 
 	void ModifyWeapons(IConsole::IResult *pResult, void *pUserData, int Weapon, bool Remove);
 

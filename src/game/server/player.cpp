@@ -123,7 +123,6 @@ void CPlayer::Reset()
 
 	m_LastPause = 0;
 	m_Score.reset();
-	m_Score = 0; // ddnet-insta
 
 	// Variable initialized:
 	m_Last_Team = 0;
@@ -150,10 +149,7 @@ void CPlayer::Reset()
 	m_BirthdayAnnounced = false;
 	m_RescueMode = RESCUEMODE_AUTO;
 
-	// ddnet-insta
-	m_IsReadyToPlay = !GameServer()->m_pController->IsPlayerReadyMode();
-	m_DeadSpecMode = false;
-	m_GameStateBroadcast = false;
+	GameServer()->m_pController->ResetPlayer(this); // ddnet-insta
 }
 
 static int PlayerFlags_SixToSeven(int Flags)
@@ -341,25 +337,25 @@ void CPlayer::Snap(int SnappingClient)
 	// Due to clients expecting this as a negative value, we have to make sure it's negative.
 	// Special numbers:
 	// -9999: means no time and isn't displayed in the scoreboard.
-	// if(m_Score.has_value())
-	// {
-	// 	// shift the time by a second if the player actually took 9999
-	// 	// seconds to finish the map.
-	// 	if(m_Score.value() == 9999)
-	// 		Score = -10000;
-	// 	else
-	// 		Score = -m_Score.value();
-	// }
-	// else
-	// {
-	// 	Score = -9999;
-	// }
+	if(m_Score.has_value())
+	{
+		// shift the time by a second if the player actually took 9999
+		// seconds to finish the map.
+		if(m_Score.value() == 9999)
+			Score = -10000;
+		else
+			Score = -m_Score.value();
+	}
+	else
+	{
+		Score = -9999;
+	}
 
-	// // send 0 if times of others are not shown
-	// if(SnappingClient != m_ClientId && g_Config.m_SvHideScore)
-	// 	Score = -9999;
+	// send 0 if times of others are not shown
+	if(SnappingClient != m_ClientId && g_Config.m_SvHideScore)
+		Score = -9999;
 
-	Score = m_Score.value_or(0); // ddnet-insta
+	Score = GameServer()->m_pController->SnapPlayerScore(this, SnappingClient, Score); // ddnet-insta
 
 	if(!Server()->IsSixup(SnappingClient))
 	{
@@ -411,8 +407,7 @@ void CPlayer::Snap(int SnappingClient)
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_READY;
 
 		// Times are in milliseconds for 0.7
-		// pPlayerInfo->m_Score = m_Score.has_value() ? GameServer()->Score()->PlayerData(m_ClientId)->m_BestTime * 1000 : -1;
-		pPlayerInfo->m_Score = Score; // ddnet-insta
+		pPlayerInfo->m_Score = Score; // ddnet-insta moved milliseconds code to SnapPlayerScore()
 		pPlayerInfo->m_Latency = Latency;
 
 		// ddnet-insta dead players
@@ -982,7 +977,7 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			if(Result.m_Data.m_Info.m_Time.has_value())
 			{
 				GameServer()->Score()->PlayerData(m_ClientId)->Set(Result.m_Data.m_Info.m_Time.value(), Result.m_Data.m_Info.m_aTimeCp);
-				// m_Score = Result.m_Data.m_Info.m_Time; // ddnet-insta
+				GameServer()->m_pController->OnDDRaceTimeLoad(this, Result.m_Data.m_Info.m_Time.value()); // ddnet-insta
 			}
 			Server()->ExpireServerInfo();
 			int Birthday = Result.m_Data.m_Info.m_Birthday;

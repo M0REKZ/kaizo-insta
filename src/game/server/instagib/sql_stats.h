@@ -26,8 +26,12 @@ struct CInstaSqlResult : ISqlResult
 		DIRECT,
 		ALL,
 		BROADCAST,
+		// /statsall chat command
 		STATS,
+		// /rank_xxx chat command
 		RANK,
+		// initial stats load on connect
+		PLAYER_DATA,
 	} m_MessageKind;
 
 	char m_aaMessages[MAX_MESSAGES][512];
@@ -76,6 +80,10 @@ struct CSqlPlayerStatsRequest : CSqlInstaData
 	{
 		m_DebugStats = DebugStats;
 	}
+
+	// set to true when this is not a /stats chat command query
+	// but the initial load of the players stats for save servers
+	bool m_IsLoadPlayerData = false;
 
 	// object being requested, player (16 bytes)
 	char m_aName[MAX_NAME_LENGTH];
@@ -198,7 +206,8 @@ class CSqlStats
 		const char *pThreadName,
 		int ClientId,
 		const char *pName,
-		const char *pTable);
+		const char *pTable,
+		bool IsLoadPlayerData);
 
 	void ExecPlayerRankOrTopThread(
 		bool (*pFuncPtr)(IDbConnection *, const ISqlData *, char *pError, int ErrorSize),
@@ -234,6 +243,8 @@ public:
 	void CreateFastcapTable();
 	void SaveRoundStats(const char *pName, const char *pTable, CSqlStatsPlayer *pStats);
 	void SaveFastcap(int ClientId, int TimeTicks, const char *pTimestamp, bool Grenade, bool StatTrack);
+
+	void LoadInstaPlayerData(int ClientId, const char *pTable);
 
 	void ShowStats(int ClientId, const char *pName, const char *pTable);
 	void ShowRank(int ClientId, const char *pName, const char *pRankColumnDisplay, const char *pRankColumnSql, const char *pTable, const char *pOrderBy);

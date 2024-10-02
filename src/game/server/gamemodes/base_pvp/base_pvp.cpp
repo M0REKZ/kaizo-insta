@@ -73,6 +73,42 @@ CGameControllerPvp::~CGameControllerPvp()
 	}
 }
 
+void CGameControllerPvp::ResetPlayer(class CPlayer *pPlayer)
+{
+	pPlayer->m_IsDead = false;
+	pPlayer->m_KillerId = -1;
+	pPlayer->m_Spree = 0;
+	pPlayer->ResetStats();
+	pPlayer->m_SavedStats.Reset();
+
+	pPlayer->m_IsReadyToPlay = !GameServer()->m_pController->IsPlayerReadyMode();
+	pPlayer->m_DeadSpecMode = false;
+	pPlayer->m_GameStateBroadcast = false;
+	pPlayer->m_Score = 0; // ddnet-insta
+}
+
+int CGameControllerPvp::SnapPlayerScore(class CPlayer *pPlayer, int SnappingClient, int DDRaceScore)
+{
+	int Score = pPlayer->m_Score.value_or(0);
+	// display round score if the game ended
+	// otherwise you can not see who actually won
+	if(g_Config.m_SvSaveServer && GameState() != IGS_END_ROUND)
+	{
+		Score += pPlayer->m_SavedStats.m_Points;
+
+		// // yes this is cursed
+		// // but during the final scoreboard we already saved and reset the stats
+		// // so we manually merged the save stats
+		// // but the player still has his round score
+		// // so the round score is counted twice
+		// if(GameState() == IGS_END_ROUND)
+		// {
+		// 	Score -= pPlayer->m_Score.value_or(0);
+		// }
+	}
+	return Score;
+}
+
 int CGameControllerPvp::GameInfoExFlags(int SnappingClient, int DDRaceFlags)
 {
 	int Flags =
@@ -151,6 +187,9 @@ void CGameControllerPvp::OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPl
 		sizeof(aBuf),
 		"~~~ all time stats for '%s'",
 		pRequestedName, pStats->m_Kills, Server()->ClientName(pRequestingPlayer->GetCid()));
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "~ Points: %d", pStats->m_Points);
 	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
 
 	char aAccuracy[512];
@@ -355,6 +394,18 @@ void CGameControllerPvp::SaveStatsOnRoundEnd(CPlayer *pPlayer)
 	}
 
 	m_pSqlStats->SaveRoundStats(Server()->ClientName(pPlayer->GetCid()), StatsTable(), &pPlayer->m_Stats);
+
+	// instead of doing a db write and read for ALL players
+	// on round end we manually sum up the stats for save servers
+	// this means that if someone else is using the same name on
+	// another server the stats will be outdated
+	// but that is fine
+	//
+	// saved stats are a gimmic not a source of truth
+	pPlayer->m_SavedStats.Merge(&pPlayer->m_Stats);
+	if(m_pExtraColumns)
+		m_pExtraColumns->MergeStats(&pPlayer->m_SavedStats, &pPlayer->m_Stats);
+
 	pPlayer->ResetStats();
 }
 
@@ -996,10 +1047,39 @@ void CGameControllerPvp::EndSpree(class CPlayer *pPlayer, class CPlayer *pKiller
 	pPlayer->m_Spree = 0;
 }
 
+void CGameControllerPvp::OnLoadedNameStats(const CSqlStatsPlayer *pStats, class CPlayer *pPlayer)
+{
+	if(!pPlayer)
+		return;
+
+	pPlayer->m_SavedStats = *pStats;
+
+	if(g_Config.m_SvDebugStats > 1)
+	{
+		dbg_msg("ddnet-insta", "copied stats:");
+		pPlayer->m_SavedStats.Dump(m_pExtraColumns);
+	}
+}
+
+bool CGameControllerPvp::LoadNewPlayerNameData(int ClientId)
+{
+	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
+		return true;
+
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	if(!pPlayer)
+		return true;
+
+	pPlayer->m_SavedStats.Reset();
+	m_pSqlStats->LoadInstaPlayerData(ClientId, m_pStatsTable);
+
+	// consume the event and do not load ddrace times
+	return true;
+}
+
 void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 {
 	m_InvalidateConnectedIpsCache = true;
-	OnPlayerConstruct(pPlayer);
 	IGameController::OnPlayerConnect(pPlayer);
 	int ClientId = pPlayer->GetCid();
 	pPlayer->ResetStats();
@@ -1007,9 +1087,10 @@ void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 	// init the player
 	Score()->PlayerData(ClientId)->Reset();
 
-	// Can't set score here as LoadScore() is threaded, run it in
-	// LoadScoreThreaded() instead
-	Score()->LoadPlayerData(ClientId);
+	if(!LoadNewPlayerNameData(ClientId))
+	{
+		Score()->LoadPlayerData(ClientId);
+	}
 
 	if(!Server()->ClientPrevIngame(ClientId))
 	{

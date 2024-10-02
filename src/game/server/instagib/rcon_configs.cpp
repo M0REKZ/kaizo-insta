@@ -66,6 +66,7 @@ void CGameContext::RegisterInstagibCommands()
 #undef MACRO_CONFIG_INT
 #undef MACRO_CONFIG_COL
 #undef MACRO_CONFIG_STR
+	Console()->Chain("sv_gametype", ConchainInstaSettingsUpdate, this);
 }
 
 void CGameContext::ConchainInstaSettingsUpdate(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)

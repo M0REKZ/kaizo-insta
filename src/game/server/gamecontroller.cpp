@@ -651,11 +651,11 @@ void IGameController::Tick()
 			if(m_GameState == IGS_START_COUNTDOWN_ROUND_START || m_GameState == IGS_START_COUNTDOWN_UNPAUSE)
 			{
 				static int s_LastSecs = -1;
-				int Secs = m_GameStateTimer / Server()->TickSpeed();
+				int Secs = (m_GameStateTimer / Server()->TickSpeed()) + 1;
 				if(s_LastSecs != Secs)
 				{
 					s_LastSecs = Secs;
-					if(Secs == 0)
+					if(Secs == 1)
 						GameServer()->SendBroadcastSix("", false);
 					else
 					{
@@ -773,11 +773,11 @@ void IGameController::Snap(int SnappingClient)
 		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_SUDDENDEATH;
 	if(GameServer()->m_World.m_Paused)
 		pGameInfoObj->m_GameStateFlags |= GAMESTATEFLAG_PAUSED;
-	pGameInfoObj->m_RoundStartTick = m_RoundStartTick;
+	pGameInfoObj->m_RoundStartTick = SnapRoundStartTick(SnappingClient);
 	pGameInfoObj->m_WarmupTimer = m_Warmup;
 
 	pGameInfoObj->m_ScoreLimit = g_Config.m_SvScorelimit;
-	pGameInfoObj->m_TimeLimit = g_Config.m_SvTimelimit;
+	pGameInfoObj->m_TimeLimit = SnapTimeLimit(SnappingClient);
 
 	pGameInfoObj->m_RoundNum = 0;
 	pGameInfoObj->m_RoundCurrent = m_RoundCount + 1;

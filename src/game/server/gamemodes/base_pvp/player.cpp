@@ -1,20 +1,12 @@
 #include <base/system.h>
 #include <engine/shared/protocol.h>
 #include <game/server/entities/character.h>
+#include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/version.h>
-
-#include "base_pvp.h"
-
-void CGameControllerPvp::OnPlayerConstruct(class CPlayer *pPlayer)
-{
-	pPlayer->m_IsDead = false;
-	pPlayer->m_KillerId = -1;
-	pPlayer->m_Spree = 0;
-	pPlayer->ResetStats();
-}
 
 void CPlayer::ResetStats()
 {
@@ -102,6 +94,9 @@ void CPlayer::ProcessStatsResult(CInstaSqlResult &Result)
 			break;
 		case CInstaSqlResult::RANK:
 			GameServer()->m_pController->OnShowRank(Result.m_Rank, Result.m_RankedScore, Result.m_aRankColumnDisplay, this, Result.m_Info.m_aRequestedPlayer);
+			break;
+		case CInstaSqlResult::PLAYER_DATA:
+			GameServer()->m_pController->OnLoadedNameStats(&Result.m_Stats, this);
 			break;
 		}
 	}
