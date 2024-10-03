@@ -214,6 +214,7 @@ void CGameControllerFreeze::Melt(int Melted, int Helper)
     GameServer()->m_apPlayers[Melted]->GetCharacter()->SetDeepFrozen(false);
     GameServer()->m_apPlayers[Melted]->GetCharacter()->UnFreeze();
     GameServer()->CreateSound(GameServer()->m_apPlayers[Melted]->GetCharacter()->m_Pos, SOUND_GRENADE_EXPLODE);
+	GameServer()->CreateDeath(GameServer()->m_apPlayers[Melted]->GetCharacter()->m_Pos, Melted, GameServer()->m_apPlayers[Melted]->GetCharacter()->TeamMask());
     
     if(g_Config.m_SvFreezeMeltRespawn)
     {
