@@ -5,6 +5,8 @@
 #include "pickup.h"
 #include "projectile.h"
 
+#include "kz/mine.h"
+
 #include <antibot/antibot_data.h>
 
 #include <engine/antibot.h>
@@ -474,6 +476,14 @@ void CCharacter::FireWeapon()
 	{
 	case WEAPON_HAMMER:
 	{
+		
+		//+KZ
+		if(m_Mines)
+		{
+			new CMine(&GameServer()->m_World, m_Pos, m_pPlayer->GetCid(), true, false);
+			m_Mines--;
+		}
+		
 		// reset objects Hit
 		m_NumObjectsHit = 0;
 		GameServer()->CreateSound(m_Pos, SOUND_HAMMER_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)

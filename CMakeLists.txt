@@ -2731,6 +2731,8 @@ if(SERVER)
     entities/plasma.h
     entities/projectile.cpp
     entities/projectile.h
+    entities/kz/mine.cpp
+    entities/kz/mine.h
     entities/kz/random_weapon.cpp
     entities/kz/random_weapon.h
     entity.cpp

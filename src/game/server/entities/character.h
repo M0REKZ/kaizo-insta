@@ -276,6 +276,7 @@ private:
 	int m_InvisibleShieldId;
 public:
 	void DoKZDamage(vec2 Force, int Dmg, int From, int Weapon);
+	int m_Mines;
 };
 
 enum
