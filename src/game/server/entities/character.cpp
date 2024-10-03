@@ -2662,6 +2662,23 @@ void CCharacter::HandleKZTiles()
 		m_Invisible = false;
 	}
 	
+	if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == TILE_5_DAMAGE)
+	{
+		DoKZDamage(vec2(15,0), 5, m_pPlayer->GetCid(), WEAPON_WORLD);
+	}
+	if(Collision()->GetKZTileIndex(m_Pos.x + 15 , m_Pos.y) == TILE_5_DAMAGE)
+	{
+		DoKZDamage(vec2(-15,0), 5, m_pPlayer->GetCid(), WEAPON_WORLD);
+	}
+	if(Collision()->GetKZTileIndex(m_Pos.x , m_Pos.y - 15) == TILE_5_DAMAGE)
+	{
+		DoKZDamage(vec2(0,15), 5, m_pPlayer->GetCid(), WEAPON_WORLD);
+	}
+	if(Collision()->GetKZTileIndex(m_Pos.x, m_Pos.y + 15 ) == TILE_5_DAMAGE)
+	{
+		DoKZDamage(vec2(0,-15), 5, m_pPlayer->GetCid(), WEAPON_WORLD);
+	}
+	
 	if(GameServer()->m_pController->IsTeamplay())
 	{
 		if(m_pPlayer->GetTeam() == TEAM_BLUE)
