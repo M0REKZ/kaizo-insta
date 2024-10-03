@@ -125,19 +125,30 @@ bool CGameControllerFreeze::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &Fr
     //CGameControllerInstaTDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
 	
 	if(frz)
-		DoFreezing(From, Character);
+	{
+		if(DoFreezing(From, Character))
+		{
+			// kill message
+			CNetMsg_Sv_KillMsg Msg;
+			Msg.m_Killer = From;
+			Msg.m_Victim = Character.GetPlayer()->GetCid();
+			Msg.m_Weapon = Weapon;
+			Msg.m_ModeSpecial = 0;
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+		}
+	}
 	
     return false;
 }
 
-void CGameControllerFreeze::DoFreezing(int &From, CCharacter &Character)
+bool CGameControllerFreeze::DoFreezing(int &From, CCharacter &Character)
 {
 	if(GameServer()->m_apPlayers[From])
 	{
 		if(GameServer()->m_apPlayers[From] == Character.GetPlayer())
-			return;
+			return false;
 		if(GameServer()->m_apPlayers[From]->GetTeam() == Character.GetPlayer()->GetTeam())
-			return;
+			return false;
 		Character.Freeze();
 		Character.SetDeepFrozen(true);
 		Character.GetPlayer()->m_AutoMeltTicks = g_Config.m_SvFreezeAutomeltTime * Server()->TickSpeed();
@@ -151,7 +162,9 @@ void CGameControllerFreeze::DoFreezing(int &From, CCharacter &Character)
 		str_format(aBuf, sizeof(aBuf), "%s froze you", Server()->ClientName(From));
 		GameServer()->SendBroadcast(aBuf, Character.GetPlayer()->GetCid());
 		
+		return true;
 	}
+	return false;
 }
 	
 
