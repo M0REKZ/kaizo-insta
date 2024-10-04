@@ -38,6 +38,7 @@ void CGrenadeLauncher::Tick()
 	else
 	{
 		new CVanillaProjectile(&GameServer()->m_World, WEAPON_GRENADE, -1, m_Pos, m_Dir, (int)(Server()->TickSpeed() * GameServer()->Tuning()->m_GrenadeLifetime), false, true, SOUND_GRENADE_EXPLODE, m_Dir);
+		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE);
 		m_FireTick = 5 * Server()->TickSpeed();
 	}
 }

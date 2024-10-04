@@ -102,14 +102,16 @@ int CGameControllerFreeze::OnCharacterDeath(class CCharacter *pVictim, class CPl
 
 bool CGameControllerFreeze::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
+	bool noOwner = false;
+	
 	if(Character.m_IsGodmode)
 		return true;
-	if(GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
-		return false;
 	if(From < 0 || From > MAX_CLIENTS) //only valid CID
+		noOwner = true;
+	if(!noOwner && GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
 		return false;
 	
-	if(g_Config.m_SvOnlyHookKills && From >= 0 && From <= MAX_CLIENTS)
+	if(g_Config.m_SvOnlyHookKills && !noOwner)
 	{
 		CCharacter *pChr = GameServer()->m_apPlayers[From]->GetCharacter();
 		if(!pChr || pChr->GetCore().HookedPlayer() != Character.GetPlayer()->GetCid())
@@ -132,7 +134,10 @@ bool CGameControllerFreeze::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &Fr
 		{
 			// kill message
 			CNetMsg_Sv_KillMsg Msg;
-			Msg.m_Killer = From;
+			if(noOwner)
+				Msg.m_Killer = Character.GetPlayer()->GetCid();
+			else
+				Msg.m_Killer = From;
 			Msg.m_Victim = Character.GetPlayer()->GetCid();
 			Msg.m_Weapon = Weapon;
 			Msg.m_ModeSpecial = 0;
@@ -145,11 +150,15 @@ bool CGameControllerFreeze::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &Fr
 
 bool CGameControllerFreeze::DoFreezing(int &From, CCharacter &Character)
 {
-	if(GameServer()->m_apPlayers[From])
+	if(Character.IsAlive())
 	{
-		if(GameServer()->m_apPlayers[From] == Character.GetPlayer())
+		bool noOwner = false;
+		if(From < 0 || From > MAX_CLIENTS) //only valid CID
+			noOwner = true;
+		
+		if(!noOwner && GameServer()->m_apPlayers[From] == Character.GetPlayer())
 			return false;
-		if(GameServer()->m_apPlayers[From]->GetTeam() == Character.GetPlayer()->GetTeam())
+		if(!noOwner && GameServer()->m_apPlayers[From]->GetTeam() == Character.GetPlayer()->GetTeam())
 			return false;
 		Character.Freeze();
 		Character.SetDeepFrozen(true);
@@ -159,10 +168,17 @@ bool CGameControllerFreeze::DoFreezing(int &From, CCharacter &Character)
 		GameServer()->CreateSound(Character.m_Pos, SOUND_NINJA_HIT);
 		
 		char aBuf[128];
-		str_format(aBuf, sizeof(aBuf), "You froze %s", Server()->ClientName(Character.GetPlayer()->GetCid()));
-		GameServer()->SendBroadcast(aBuf, From);
-		str_format(aBuf, sizeof(aBuf), "%s froze you", Server()->ClientName(From));
-		GameServer()->SendBroadcast(aBuf, Character.GetPlayer()->GetCid());
+		if(!noOwner)
+		{
+			str_format(aBuf, sizeof(aBuf), "You froze %s", Server()->ClientName(Character.GetPlayer()->GetCid()));
+			GameServer()->SendBroadcast(aBuf, From);
+			str_format(aBuf, sizeof(aBuf), "%s froze you", Server()->ClientName(From));
+			GameServer()->SendBroadcast(aBuf, Character.GetPlayer()->GetCid());
+		}
+		else
+		{
+			GameServer()->SendBroadcast("You froze by yourself", Character.GetPlayer()->GetCid());
+		}
 		
 		return true;
 	}
