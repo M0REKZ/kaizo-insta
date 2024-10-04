@@ -178,6 +178,8 @@ bool CGameControllerBOMB::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From
 {
     Dmg = 0; //TODO: maybe i should add an option for bomb with damage
     CGameControllerDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
+	if(From < 0 || From > MAX_CLIENTS) //only valid CID
+		return false;
     if(GameServer()->m_apPlayers[From] == Character.GetPlayer())
         return false;
     if(Character.GetPlayer()->m_IsBomb)
