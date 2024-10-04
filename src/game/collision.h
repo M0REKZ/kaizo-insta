@@ -46,6 +46,7 @@ public:
 	int GetKZWidth() { return m_KZWidth; }
 	int GetKZHeight() { return m_KZHeight; }
 	int GetKZIndex(float x, float y) const;
+	int GetKZIndexInt(int x, int y) const;
 	int GetKZIndex(vec2 Pos) const { return GetKZIndex(Pos.x, Pos.y); }
 	int GetKZTileIndex(int Index) const;
 	int GetKZTileIndex(vec2 Pos) const { return GetKZTileIndex(GetKZIndex(Pos.x, Pos.y)); }

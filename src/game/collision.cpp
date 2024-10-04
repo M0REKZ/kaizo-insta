@@ -1342,6 +1342,11 @@ int CCollision::GetKZIndex(float x, float y) const
 	return Ny * m_KZWidth + Nx;
 }
 
+int CCollision::GetKZIndexInt(int x, int y) const
+{
+	return y * m_KZWidth + x;
+}
+
 int CCollision::GetKZTileIndex(int Index) const
 {
 	//printf("%d\n",Index);

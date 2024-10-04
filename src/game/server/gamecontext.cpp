@@ -4314,7 +4314,7 @@ void CGameContext::CreateAllEntities(bool Initial)
 			{
 				KZIndex = Collision()->GetKZTileIndex(y * Collision()->GetKZWidth() + x);
 				
-				m_pController->OnKZEntity(KZIndex, x, y, LAYER_GAME, pKZTiles[KZIndex].m_Flags, Initial);
+				m_pController->OnKZEntity(KZIndex, x, y, LAYER_GAME, pKZTiles[Collision()->GetKZIndexInt(x,y)].m_Flags, Initial);
 			}
 		}
 	}
