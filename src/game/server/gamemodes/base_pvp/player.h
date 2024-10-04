@@ -66,6 +66,8 @@ public:
 	int m_LastToucherId = -1;
 	void UpdateLastToucher(int ClientId);
 	int m_OriginalFreezerId = -1;
+	// amount of seconds to freeze on next spawn
+	int m_FreezeOnSpawn = 0;
 
 	int m_Multi = 1;
 

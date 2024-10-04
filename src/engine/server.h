@@ -29,11 +29,6 @@ enum
 class IServer : public IInterface
 {
 	MACRO_INTERFACE("server")
-
-public:
-	// ddnet-insta
-	virtual int NumConnectedIps() const = 0;
-
 protected:
 	int m_CurrentGameTick;
 

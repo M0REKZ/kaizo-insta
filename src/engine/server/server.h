@@ -63,10 +63,6 @@ public:
 
 class CServer : public IServer
 {
-	// ddnet-insta
-public:
-	int NumConnectedIps() const override;
-
 private:
 	friend class CServerLogger;
 

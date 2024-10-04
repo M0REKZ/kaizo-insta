@@ -36,7 +36,7 @@ bool CGameControllerPvp::ParseChatCmd(char Prefix, int ClientId, const char *pCm
 	// int RestOffset = m_pClient->m_ChatHelper.ChatCommandGetROffset(aCmd);
 	int RestOffset = -1; // TODO: add params with typed args: s,r,i
 
-// max 8 args of 128 len each
+// max 16 args of 128 len each
 #define MAX_ARGS 16
 	char **ppArgs = new char *[MAX_ARGS];
 	for(int x = 0; x < MAX_ARGS; ++x)
@@ -107,7 +107,7 @@ bool CGameControllerPvp::ParseChatCmd(char Prefix, int ClientId, const char *pCm
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "bang-command", aBuf);
 
 	bool match = OnBangCommand(ClientId, aCmd, NumArgs, (const char **)ppArgs);
-	for(int x = 0; x < 8; ++x)
+	for(int x = 0; x < MAX_ARGS; ++x)
 		delete[] ppArgs[x];
 	delete[] ppArgs;
 	return match;

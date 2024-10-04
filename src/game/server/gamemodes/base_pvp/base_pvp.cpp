@@ -300,6 +300,8 @@ bool CGameControllerPvp::HasWinningScore(const CPlayer *pPlayer) const
 {
 	if(IsTeamplay())
 	{
+		if(pPlayer->GetTeam() < TEAM_RED || pPlayer->GetTeam() > TEAM_BLUE)
+			return false;
 		return m_aTeamscore[pPlayer->GetTeam()] > m_aTeamscore[!pPlayer->GetTeam()];
 	}
 	else
@@ -1390,7 +1392,7 @@ int CGameControllerPvp::NumConnectedIps()
 		return m_NumConnectedIpsCached;
 
 	m_InvalidateConnectedIpsCache = false;
-	m_NumConnectedIpsCached = Server()->NumConnectedIps();
+	m_NumConnectedIpsCached = Server()->DistinctClientCount();
 	return m_NumConnectedIpsCached;
 }
 
