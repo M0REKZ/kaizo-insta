@@ -4303,15 +4303,19 @@ void CGameContext::CreateAllEntities(bool Initial)
 		}
 	}
 	
-	int KZIndex;
-	
-	for(int y = 0; y < Collision()->GetKZHeight(); y++)
+	if(Collision()->KZFound())
 	{
-		for(int x = 0; x < Collision()->GetKZWidth(); x++)
+		int KZIndex;
+		const CTile *pKZTiles = static_cast<CTile *>(Kernel()->RequestInterface<IMap>()->GetData(Collision()->GetKZTileLayer()->m_Data));
+		
+		for(int y = 0; y < Collision()->GetKZHeight(); y++)
 		{
-			KZIndex = Collision()->GetKZTileIndex(y * Collision()->GetKZWidth() + x);
-			
-			m_pController->OnKZEntity(KZIndex, x, y, LAYER_GAME, pTiles[KZIndex].m_Flags, Initial);
+			for(int x = 0; x < Collision()->GetKZWidth(); x++)
+			{
+				KZIndex = Collision()->GetKZTileIndex(y * Collision()->GetKZWidth() + x);
+				
+				m_pController->OnKZEntity(KZIndex, x, y, LAYER_GAME, pKZTiles[KZIndex].m_Flags, Initial);
+			}
 		}
 	}
 	

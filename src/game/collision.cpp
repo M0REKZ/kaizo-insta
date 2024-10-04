@@ -1378,6 +1378,7 @@ void CCollision::FindKZLayer()
 		if(!str_comp_nocase("KZCustom", aBufKZ))
 		{
 			//printf("KZCUSTOM FOUND\n");
+			m_pKZTileLayer = pKZTileLayer;
 			m_pKZTiles = static_cast<CTile *>(m_pLayers->Map()->GetData(pKZTileLayer->m_Data));
 			m_KZWidth = pKZTileLayer->m_Width;
 			m_KZHeight = pKZTileLayer->m_Height;

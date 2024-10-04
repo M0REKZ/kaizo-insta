@@ -21,6 +21,7 @@
 #include "entities/pickup.h"
 #include "entities/kz/random_weapon.h"
 #include "entities/kz/mine.h"
+#include "entities/kz/grenade_launcher.h"
 #include "entities/projectile.h"
 
 IGameController::IGameController(class CGameContext *pGameServer) :
@@ -1094,13 +1095,49 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 	
 	if(Index == TILE_MINE)
 	{
-		CMine *pMine = new CMine(&GameServer()->m_World, Pos, -1, false, true);
+		new CMine(&GameServer()->m_World, Pos, -1, false, true);
 		return true;
 	}
 	else if(Index == TILE_MINE_ACTIVE)
 	{
-		CMine *pMine = new CMine(&GameServer()->m_World, Pos, -1, true, true);
+		new CMine(&GameServer()->m_World, Pos, -1, true, true);
 		return true;
+	}
+	
+	if(Index == TILE_GRENADE_LAUNCHER_H)
+	{
+		vec2 Dir;
+		
+		if(!Flags)
+			Dir = vec2(1,0);
+		else if(Flags == ROTATION_90)
+			Dir = vec2(0,1);
+		else if(Flags == ROTATION_180)
+			Dir = vec2(-1,0);
+		else
+			Dir = vec2(0,-1);
+		
+		new CGrenadeLauncher(&GameServer()->m_World, Pos, Dir);
+	}
+	
+	if(Index == TILE_GRENADE_LAUNCHER_D)
+	{
+		vec2 Dir;
+		
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "tile flags %d", Flags);
+		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+		
+		if(!Flags)
+			Dir = vec2(1,1);
+		else if(Flags == ROTATION_90)
+			Dir = vec2(-1,1);
+		else if(Flags == ROTATION_180)
+			Dir = vec2(-1,-1);
+		else
+			Dir = vec2(1,-1);
+		
+		new CGrenadeLauncher(&GameServer()->m_World, Pos, Dir);
 	}
 
 	return false;

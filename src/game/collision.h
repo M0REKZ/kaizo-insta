@@ -9,6 +9,8 @@
 #include <map>
 #include <vector>
 
+#include <game/mapitems.h>
+
 class CTile;
 class CLayers;
 class CTeleTile;
@@ -38,6 +40,8 @@ public:
 	
 	//+KZ
 	
+	CTile* GetKZTiles() { return m_pKZTiles; }
+	CMapItemLayerTilemap* GetKZTileLayer() { return m_pKZTileLayer; }
 	bool KZFound() { return m_pKZTiles != 0; }
 	int GetKZWidth() { return m_KZWidth; }
 	int GetKZHeight() { return m_KZHeight; }
@@ -170,6 +174,7 @@ private:
 	void FindKZLayer();
 	
 	CTile *m_pKZTiles;
+	CMapItemLayerTilemap *m_pKZTileLayer;
 	
 	CTile *m_pTiles;
 	CTeleTile *m_pTele;
