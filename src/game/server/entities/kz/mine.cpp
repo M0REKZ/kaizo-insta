@@ -28,6 +28,8 @@ CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 
 void CMine::Tick()
 {
+	Move();
+	
 	if(m_RespawnTick)
 	{
 		m_RespawnTick--;
@@ -105,4 +107,18 @@ void CMine::Snap(int SnappingClient)
 void CMine::Reset()
 {
 	m_MarkedForDestroy = true;
+}
+
+void CMine::Move()
+{
+	if(Server()->Tick() % (int)(Server()->TickSpeed() * 0.15f) == 0)
+	{
+		int Flags;
+		int index = GameServer()->Collision()->IsMover(m_Pos.x, m_Pos.y, &Flags);
+		if(index)
+		{
+			m_Core = GameServer()->Collision()->CpSpeed(index, Flags);
+		}
+		m_Pos += m_Core;
+	}
 }

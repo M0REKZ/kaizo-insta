@@ -18,6 +18,11 @@ private:
 	int m_Owner;
 	int m_RespawnTick;
 	bool m_Explode = false;
+	
+	// DDRace
+
+	void Move();
+	vec2 m_Core;
 };
 
 #endif
