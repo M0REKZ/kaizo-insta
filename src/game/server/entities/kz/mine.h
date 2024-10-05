@@ -12,6 +12,8 @@ public:
 	void Tick() override;
 	void Snap(int SnappingClient) override;
 	void Reset() override;
+	
+	virtual int GetOwnerId() const override { return m_Owner; }
 private:
 	bool m_Respawn;
 	bool m_Active;

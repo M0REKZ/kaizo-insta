@@ -2743,13 +2743,18 @@ void CCharacter::HandleKZTiles()
 void CCharacter::DoKZDamage(vec2 Force, int Dmg, int From, int Weapon)
 {
 	
-	if(m_Armor)
+	if(m_Armor > 0)
 	{
+		int temp = m_Armor;
 		m_Armor -= Dmg;
+		Dmg -= temp;
+		if(Dmg < 0)
+			Dmg = 0;
+		m_Health -= Dmg;
 	}
 	else
 	{
-		m_Health-= Dmg;
+		m_Health -= Dmg;
 	}
 	
 	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_SHORT);

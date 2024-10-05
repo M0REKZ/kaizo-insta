@@ -37,7 +37,7 @@ void CMine::Tick()
 	else
 	{
 		CCharacter *apCloseChars[MAX_CLIENTS];
-		CCharacter *pChr;
+		CCharacter *pChr = nullptr;
 		 int Num = GameServer()->m_World.FindEntities(m_Pos, 10, (CEntity **)apCloseChars, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 		for(int i = 0; i < Num; ++i)
 		{
@@ -48,10 +48,12 @@ void CMine::Tick()
 				if(m_Active)
 				{
 					m_Explode = true;
+					break;
 				}
 				else
 				{
 					pChr->m_Mines++;
+					GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR);
 					if(m_Respawn)
 						m_RespawnTick = Server()->TickSpeed() * 20;
 					else
@@ -61,16 +63,56 @@ void CMine::Tick()
 			}
 		}
 		
+		char aBuf[64];
+		CEntity* Proj = nullptr;
+		
+		
+		if(m_Active)
+		{
+			CEntity *apCloseProj[20];
+			int NumProj = GameServer()->m_World.FindEntities(m_Pos, 20, apCloseProj, 20, CGameWorld::ENTTYPE_PROJECTILE);
+			for(int i = 0; i < NumProj; ++i)
+			{
+				
+				str_format(aBuf, sizeof(aBuf), "NUM='%d'", NumProj);
+				GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+				
+				if(!apCloseProj[i])
+					continue;
+				
+				if(apCloseProj[i] == this)
+					continue;
+				
+				
+				if(apCloseProj[i]->GetOwnerId() != m_Owner && apCloseProj[i]->GetOwnerId() != -1)
+				{
+					Proj = apCloseProj[i];
+					m_Explode = true;
+					break;
+				}
+			}
+		}
+		
 		if(m_Explode)
 		{
-			if(m_Owner < 0)
-				GameServer()->CreateExplosion(m_Pos, pChr->GetPlayer()->GetCid(), WEAPON_GRENADE, true, pChr->Team(), pChr->TeamMask());
-			else
-				GameServer()->CreateExplosion(m_Pos, m_Owner, WEAPON_GRENADE, true, pChr->Team(), pChr->TeamMask());
-			
-			//normal explosion does not make damage on instagib so i need to do this, also people cant put mines on instagib
-			if(GameServer()->m_pController->m_IsInstagibKZ)
-				pChr->DoKZDamage(vec2(0,0), 3, pChr->GetPlayer()->GetCid(), WEAPON_GRENADE);
+			if(pChr)
+			{
+				if(m_Owner < 0)
+					GameServer()->CreateExplosion(m_Pos, pChr->GetPlayer()->GetCid(), WEAPON_GRENADE, true, pChr->Team(), pChr->TeamMask());
+				else
+					GameServer()->CreateExplosion(m_Pos, m_Owner, WEAPON_GRENADE, true, pChr->Team(), pChr->TeamMask());
+				
+				//normal explosion does not make damage on instagib so i need to do this, also people cant put mines on instagib
+				if(GameServer()->m_pController->m_IsInstagibKZ)
+					pChr->DoKZDamage(vec2(0,0), 3, pChr->GetPlayer()->GetCid(), WEAPON_GRENADE);
+			}
+			else if(Proj)
+			{
+				if(m_Owner < 0)
+					GameServer()->CreateExplosion(m_Pos, Proj->GetOwnerId(), WEAPON_GRENADE, true, -1, CClientMask().set());
+				else
+					GameServer()->CreateExplosion(m_Pos, m_Owner, WEAPON_GRENADE, true, -1, CClientMask().set());
+			}
 			
 			GameServer()->CreateSound(m_Pos, SOUND_GRENADE_EXPLODE);
 			m_Explode = false;
