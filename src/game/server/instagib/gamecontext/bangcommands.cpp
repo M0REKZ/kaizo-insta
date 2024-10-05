@@ -1,16 +1,13 @@
 #include <engine/shared/config.h>
-#include <game/server/entities/character.h>
+#include <game/server/gamecontext.h>
+#include <game/server/gamecontroller.h>
 #include <game/server/player.h>
-#include <game/server/score.h>
-#include <game/version.h>
 
-#include "base_pvp.h"
-
-void CGameControllerPvp::BangCommandVote(int ClientId, const char *pCommand, const char *pDesc)
+void CGameContext::BangCommandVote(int ClientId, const char *pCommand, const char *pDesc)
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
 		return;
-	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	CPlayer *pPlayer = m_apPlayers[ClientId];
 	if(!pPlayer)
 		return;
 	// not needed for bang command but for slash command
@@ -21,28 +18,28 @@ void CGameControllerPvp::BangCommandVote(int ClientId, const char *pCommand, con
 	}
 	char aChatmsg[1024];
 	str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s'", Server()->ClientName(ClientId), pDesc);
-	GameServer()->m_VoteType = CGameContext::VOTE_TYPE_OPTION;
-	GameServer()->CallVote(ClientId, pDesc, pCommand, "chat cmd", aChatmsg);
+	m_VoteType = CGameContext::VOTE_TYPE_OPTION;
+	CallVote(ClientId, pDesc, pCommand, "chat cmd", aChatmsg);
 }
 
-void CGameControllerPvp::ComCallShuffleVote(int ClientId)
+void CGameContext::ComCallShuffleVote(int ClientId)
 {
 	BangCommandVote(ClientId, "shuffle_teams", "shuffle teams");
 }
 
-void CGameControllerPvp::ComCallSwapTeamsVote(int ClientId)
+void CGameContext::ComCallSwapTeamsVote(int ClientId)
 {
 	BangCommandVote(ClientId, "swap_teams", "swap teams");
 }
 
-void CGameControllerPvp::ComCallSwapTeamsRandomVote(int ClientId)
+void CGameContext::ComCallSwapTeamsRandomVote(int ClientId)
 {
 	BangCommandVote(ClientId, "swap_teams_random", "swap teams (random)");
 }
 
-void CGameControllerPvp::ComDropFlag(int ClientId)
+void CGameContext::ComDropFlag(int ClientId)
 {
-	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+	CPlayer *pPlayer = m_apPlayers[ClientId];
 	if(!pPlayer)
 		return;
 
@@ -56,5 +53,8 @@ void CGameControllerPvp::ComDropFlag(int ClientId)
 	if(!pChr)
 		return;
 
-	DropFlag(pChr);
+	if(!m_pController)
+		return;
+
+	m_pController->DropFlag(pChr);
 }

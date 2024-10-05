@@ -37,8 +37,14 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	m_pSqlStats = new CSqlStats(GameServer(), ((CServer *)Server())->DbPool());
 	m_pExtraColumns = nullptr;
 	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+}
 
-	m_pSqlStats->CreateFastcapTable();
+void CGameControllerPvp::OnInit()
+{
+	if(GameFlags() & GAMEFLAG_FLAGS)
+	{
+		m_pSqlStats->CreateFastcapTable();
+	}
 }
 
 void CGameControllerPvp::OnRoundStart()

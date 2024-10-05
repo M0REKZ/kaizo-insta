@@ -19,6 +19,8 @@ void CGameContext::OnInitInstagib()
 	ShowCurrentInstagibConfigsMotd(); // ddnet-insta
 
 	m_pHttp = Kernel()->RequestInterface<IHttp>();
+
+	m_pController->OnInit();
 }
 
 void CGameContext::AlertOnSpecialInstagibConfigs(int ClientId) const

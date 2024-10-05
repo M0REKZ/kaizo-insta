@@ -25,6 +25,7 @@ public:
 	void OnPlayerTick(class CPlayer *pPlayer);
 
 	void SendChatSpectators(const char *pMessage, int Flags);
+	void OnInit() override;
 	void OnPlayerConnect(CPlayer *pPlayer) override;
 	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason) override;
 	void DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg) override;
@@ -45,12 +46,6 @@ public:
 	void OnLoadedNameStats(const CSqlStatsPlayer *pStats, class CPlayer *pPlayer) override;
 
 	void ModifyWeapons(IConsole::IResult *pResult, void *pUserData, int Weapon, bool Remove);
-
-	void BangCommandVote(int ClientId, const char *pCommand, const char *pDesc);
-	void ComCallShuffleVote(int ClientId);
-	void ComCallSwapTeamsVote(int ClientId);
-	void ComCallSwapTeamsRandomVote(int ClientId);
-	void ComDropFlag(int ClientId);
 
 	bool AllowPublicChat(const CPlayer *pPlayer);
 	bool ParseChatCmd(char Prefix, int ClientId, const char *pCmdWithArgs);

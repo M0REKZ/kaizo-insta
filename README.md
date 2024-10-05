@@ -269,7 +269,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_round_stats_http_endpoint` If set will post score stats there on round end
 + `sv_round_stats_output_file` If set will write score stats there on round end
 
-# Rcon commmands
+# Rcon commands
 
 + `hammer` Gives a hammer to you
 + `gun` Gives a gun to you
@@ -296,6 +296,19 @@ ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat
 + `!1v1` `!2v2` `!v1` `!v2` `!1on1` ... call vote to change in game slots
 + `!restart ?(seconds)` call vote to restart game with optional parameter of warmup seconds (default: 10)
 + `/drop flag` if it is a CTF gametype the flagger can drop the flag without dieing if either `sv_drop_flag_on_selfkill` or `sv_drop_flag_on_vote` is set
++ `/rank` Lists available rank commands
++ `/top5` Lists available top commands
++ `/top` Lists available top commands
++ `/stats` Shows the current round stats of player name (your stats by default)
++ `/statsall` Shows the all time stats of player name (your stats by default)
++ `/stats_all` Shows the all time stats of player name (your stats by default)
++ `/points` Shows the all time points rank of player name (your stats by default)
++ `/rank_points` Shows the all time points rank of player name (your stats by default)
++ `/rank_kills` Shows the all time kills rank of player name (your stats by default)
++ `/top5kills` Shows the all time best ranks by kills
++ `/rank_flags` Shows the all time flag time rank of player name (your stats by default)
++ `/top5flags` Shows the all time best ranks by flag time
++ `/rank_caps` Shows the all time flag capture rank of player name (your stats by default)
 
 # Publish round stats
 

@@ -11,6 +11,13 @@ class CGameContext
 public:
 	const char *ServerInfoPlayerScoreKind() override { return "points"; }
 
+	// bang commands
+	void BangCommandVote(int ClientId, const char *pCommand, const char *pDesc);
+	void ComCallShuffleVote(int ClientId);
+	void ComCallSwapTeamsVote(int ClientId);
+	void ComCallSwapTeamsRandomVote(int ClientId);
+	void ComDropFlag(int ClientId);
+
 	void SendGameMsg(int GameMsgId, int ClientId) const;
 	void SendGameMsg(int GameMsgId, int ParaI1, int ClientId) const;
 	void SendGameMsg(int GameMsgId, int ParaI1, int ParaI2, int ParaI3, int ClientId) const; // ddnet-insta
@@ -41,6 +48,7 @@ public:
 	static void ConchainZcatchColors(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSpectatorVotes(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
+	// rcon
 	static void ConHammer(IConsole::IResult *pResult, void *pUserData);
 	static void ConGun(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnHammer(IConsole::IResult *pResult, void *pUserData);
@@ -50,6 +58,13 @@ public:
 	static void ConShuffleTeams(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwapTeams(IConsole::IResult *pResult, void *pUserData);
 	static void ConSwapTeamsRandom(IConsole::IResult *pResult, void *pUserData);
+
+	// chat
+	static void ConReadyChange(IConsole::IResult *pResult, void *pUserData);
+	static void ConInstaSwap(IConsole::IResult *pResult, void *pUserData);
+	static void ConInstaSwapRandom(IConsole::IResult *pResult, void *pUserData);
+	static void ConInstaShuffle(IConsole::IResult *pResult, void *pUserData);
+	static void ConInstaDrop(IConsole::IResult *pResult, void *pUserData);
 
 	static void ConRankCmdlist(IConsole::IResult *pResult, void *pUserData);
 	static void ConTopCmdlist(IConsole::IResult *pResult, void *pUserData);

@@ -2747,7 +2747,6 @@ if(SERVER)
     gamecontroller.h
     gamemodes/DDRace.cpp
     gamemodes/DDRace.h
-    gamemodes/base_pvp/bangcommands.cpp
     gamemodes/base_pvp/base_pvp.cpp
     gamemodes/base_pvp/base_pvp.h
     gamemodes/base_pvp/character.cpp
@@ -2843,8 +2842,10 @@ if(SERVER)
     gameworld.cpp
     gameworld.h
     instagib/chat_commands.cpp
+    instagib/chat_commands.h
     instagib/extra_columns.h
     instagib/gamecontext.h
+    instagib/gamecontext/bangcommands.cpp
     instagib/gamecontroller.cpp
     instagib/gamecontroller.h
     instagib/gamelogic.cpp

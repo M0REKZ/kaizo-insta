@@ -31,7 +31,9 @@ gen_configs() {
 	done < <(grep '^MACRO_CONFIG_STR' src/engine/shared/variables_insta.h)
 }
 
-gen_rcon_cmds() {
+gen_console_cmds() {
+	local prefix="$1"
+	local header_file="$2"
 	local cfg
 	local desc
 	local cmd
@@ -39,8 +41,17 @@ gen_rcon_cmds() {
 		desc="$(echo "$cfg" | cut -d',' -f3- | cut -d'"' -f2-)"
 		desc="${desc::-2}"
 		cmd="$(echo "$cfg" | cut -d',' -f1 | cut -d'"' -f2)"
-		echo "+ \`$cmd\` $desc"
-	done < <(grep '^CONSOLE_COMMAND' src/game/server/instagib/rcon_commands.h)
+		echo "+ \`$prefix$cmd\` $desc"
+	done < <(grep '^CONSOLE_COMMAND' "$header_file")
+}
+
+gen_rcon_cmds() {
+	gen_console_cmds "" src/game/server/instagib/rcon_commands.h
+}
+
+gen_chat_cmds() {
+	gen_console_cmds "/" src/game/server/instagib/chat_commands.h |
+		grep -Ev '(ready|pause|shuffle|swap|drop)'
 }
 
 insert_at() {
@@ -61,8 +72,8 @@ insert_at() {
 	to_ln="$((from_ln + to_ln - 2))"
 
 	{
-		head -n "$from_ln" "$filename"
-		echo "$content"
+		head -n "$((from_ln - 1))" "$filename"
+		printf '%b\n' "$content"
 		tail -n +"$to_ln" "$filename"
 	} > "$(tmp)"
 	if [ "$arg_is_dry" == "1" ]; then
@@ -77,8 +88,9 @@ insert_at() {
 	fi
 }
 
-insert_at '^## ddnet-insta configs$' '^# ' "$(gen_configs)" README.md
-insert_at '^# Rcon commmands$' '^# ' "$(gen_rcon_cmds)" README.md
+insert_at '^## ddnet-insta configs$' '^# ' "\n$(gen_configs)" README.md
+insert_at '^# Rcon commands$' '^# ' "\n$(gen_rcon_cmds)" README.md
+insert_at '^\+ `/drop flag' '^# ' "$(gen_chat_cmds)" README.md
 
 [[ -f "$(tmp)" ]] && rm "$(tmp)"
 exit 0

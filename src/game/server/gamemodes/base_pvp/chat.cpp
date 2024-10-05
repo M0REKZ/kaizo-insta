@@ -161,7 +161,7 @@ bool CGameControllerPvp::OnBangCommand(int ClientId, const char *pCmd, int NumAr
 		str_format(aCmd, sizeof(aCmd), "sv_spectator_slots %d", MAX_CLIENTS - SetSlots * 2);
 		char aDesc[512];
 		str_format(aDesc, sizeof(aDesc), "%dvs%d", SetSlots, SetSlots);
-		BangCommandVote(ClientId, aCmd, aDesc);
+		GameServer()->BangCommandVote(ClientId, aCmd, aDesc);
 	}
 	else if(!str_comp_nocase(pCmd, "restart") || !str_comp_nocase(pCmd, "reload"))
 	{
@@ -171,7 +171,7 @@ bool CGameControllerPvp::OnBangCommand(int ClientId, const char *pCmd, int NumAr
 		str_format(aCmd, sizeof(aCmd), "restart %d", Seconds);
 		char aDesc[512];
 		str_format(aDesc, sizeof(aDesc), "restart %d", Seconds);
-		BangCommandVote(ClientId, aCmd, aDesc);
+		GameServer()->BangCommandVote(ClientId, aCmd, aDesc);
 	}
 	else if(!str_comp_nocase(pCmd, "ready") || !str_comp_nocase(pCmd, "pause"))
 	{
@@ -179,15 +179,15 @@ bool CGameControllerPvp::OnBangCommand(int ClientId, const char *pCmd, int NumAr
 	}
 	else if(!str_comp_nocase(pCmd, "shuffle"))
 	{
-		ComCallShuffleVote(ClientId);
+		GameServer()->ComCallShuffleVote(ClientId);
 	}
 	else if(!str_comp_nocase(pCmd, "swap"))
 	{
-		ComCallSwapTeamsVote(ClientId);
+		GameServer()->ComCallSwapTeamsVote(ClientId);
 	}
 	else if(!str_comp_nocase(pCmd, "swap_random"))
 	{
-		ComCallSwapTeamsRandomVote(ClientId);
+		GameServer()->ComCallSwapTeamsRandomVote(ClientId);
 	}
 	else if(!str_comp_nocase(pCmd, "gamestate"))
 	{
@@ -205,7 +205,7 @@ bool CGameControllerPvp::OnBangCommand(int ClientId, const char *pCmd, int NumAr
 	}
 	else
 	{
-		SendChatTarget(ClientId, "Unknown command. Commands: !restart, !ready, !shuffle, !1on1, !settings");
+		SendChatTarget(ClientId, "Unknown command. Commands: !restart, !ready, !shuffle, !swap, !swap_random, !1on1, !settings, !gamestate");
 		return false;
 	}
 	return true;
@@ -404,42 +404,5 @@ bool CGameControllerPvp::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, i
 		return true;
 	}
 
-	if(pMsg->m_pMessage[0] == '/')
-	{
-		char aBuf[256];
-		str_format(aBuf, sizeof(aBuf), "%d used %s", ClientId, pMsg->m_pMessage);
-		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chat-command", aBuf);
-
-		if(!str_comp_nocase(pMsg->m_pMessage + 1, "ready") || !str_comp_nocase(pMsg->m_pMessage + 1, "pause")) // ddnet-insta
-		{
-			GameServer()->m_pController->OnPlayerReadyChange(pPlayer);
-			return true;
-		}
-		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "shuffle")) // ddnet-insta
-		{
-			ComCallShuffleVote(ClientId);
-			return true;
-		}
-		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "swap")) // ddnet-insta
-		{
-			ComCallSwapTeamsVote(ClientId);
-			return true;
-		}
-		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "swap_random")) // ddnet-insta
-		{
-			ComCallSwapTeamsRandomVote(ClientId);
-			return true;
-		}
-		else if(!str_comp_nocase(pMsg->m_pMessage + 1, "drop flag")) // ddnet-insta
-		{
-			ComDropFlag(ClientId);
-			return true;
-		}
-		else if(str_startswith(pMsg->m_pMessage + 1, "drop")) // ddnet-insta
-		{
-			SendChatTarget(ClientId, "Did you mean '/drop flag'?");
-			return true;
-		}
-	}
 	return false;
 }

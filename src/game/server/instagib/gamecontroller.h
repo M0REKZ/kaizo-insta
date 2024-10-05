@@ -46,6 +46,15 @@ public:
 	virtual bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) { return false; };
 
 	/*
+		Function: OnInit
+			Will be called at the end of CGameContext::OnInit
+			and can be used in addition to the controllers constructor
+
+			Its main use case is running code in a base controller after its child constructor
+	*/
+	virtual void OnInit(){};
+
+	/*
 		Function: OnLaserHit
 			Will be called before Character::TakeDamage() and CGameController::OnCharacterTakeDamage()
 
