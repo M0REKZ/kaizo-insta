@@ -63,7 +63,7 @@ void CMine::Tick()
 			}
 		}
 		
-		char aBuf[64];
+		//char aBuf[64];
 		CEntity* Proj = nullptr;
 		
 		
@@ -74,8 +74,8 @@ void CMine::Tick()
 			for(int i = 0; i < NumProj; ++i)
 			{
 				
-				str_format(aBuf, sizeof(aBuf), "NUM='%d'", NumProj);
-				GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+				//str_format(aBuf, sizeof(aBuf), "NUM='%d'", NumProj);
+				//GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
 				
 				if(!apCloseProj[i])
 					continue;
