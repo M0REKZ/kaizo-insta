@@ -44,6 +44,7 @@ CONSOLE_COMMAND("top5kills", "?i[rank to start with]", CFGFLAG_CHAT | CFGFLAG_SE
 //       the flag ranks could show ranks for the current gametype and for all gametypes and for stat track off/on
 CONSOLE_COMMAND("rank_flags", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRankFastcaps, this, "Shows the all time flag time rank of player name (your stats by default)")
 CONSOLE_COMMAND("top5flags", "?i[rank to start with]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTopFastcaps, this, "Shows the all time best ranks by flag time")
+CONSOLE_COMMAND("top5caps", "?i[rank to start with]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTopNumCaps, this, "Shows the all time best ranks by amount of flag captures")
 CONSOLE_COMMAND("rank_caps", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRankFlagCaptures, this, "Shows the all time flag capture rank of player name (your stats by default)")
 
 #undef CONSOLE_COMMAND

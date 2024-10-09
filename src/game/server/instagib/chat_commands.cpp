@@ -201,10 +201,14 @@ void CGameContext::ConStatsRound(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->m_pController->IsStatTrack())
 		str_format(aUntracked, sizeof(aUntracked), " (%d untracked)", pPlayer->m_Deaths);
 	str_format(aBuf, sizeof(aBuf), "~ Deaths: %d%s", pPlayer->m_Stats.m_Deaths, aUntracked);
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 
+	aUntracked[0] = '\0';
+	if(!pSelf->m_pController->IsStatTrack())
+		str_format(aUntracked, sizeof(aUntracked), " (%d untracked)", pPlayer->m_UntrackedSpree);
+	str_format(aBuf, sizeof(aBuf), "~ Current killing spree: %d%s", pPlayer->Spree(), aUntracked);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
-	str_format(aBuf, sizeof(aBuf), "~ Current killing spree: %d", pPlayer->Spree());
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+
 	str_format(aBuf, sizeof(aBuf), "~ Highest killing spree: %d", pPlayer->m_Stats.m_BestSpree);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 
@@ -353,6 +357,26 @@ void CGameContext::ConTopFastcaps(IConsole::IResult *pResult, void *pUserData)
 		pSelf->m_pController->IsGrenadeGameType(),
 		false, // show all times stat track or not
 		Offset);
+}
+
+void CGameContext::ConTopNumCaps(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	if(!pSelf->m_pController)
+		return;
+
+	if(pSelf->m_pController->IsDDRaceGameType())
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "This command is not available in ddrace gametypes.");
+		return;
+	}
+
+	const char *pName = pSelf->Server()->ClientName(pResult->m_ClientId);
+	int Offset = pResult->NumArguments() ? pResult->GetInteger(0) : 1;
+	pSelf->m_pController->m_pSqlStats->ShowTop(pResult->m_ClientId, pName, "Flag captures", "flag_captures", pSelf->m_pController->StatsTable(), "DESC", Offset);
 }
 
 void CGameContext::ConRankFlagCaptures(IConsole::IResult *pResult, void *pUserData)

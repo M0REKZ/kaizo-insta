@@ -165,6 +165,7 @@ void CGameControllerZcatch::OnRoundStart()
 
 		// resets the winners color
 		pPlayer->m_Spree = 0;
+		pPlayer->m_UntrackedSpree = 0;
 	}
 }
 

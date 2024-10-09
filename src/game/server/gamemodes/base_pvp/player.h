@@ -87,7 +87,11 @@ public:
 	// Will also be set if spree chat messages are turned off
 	// this is the current spree
 	// not to be confused with m_Stats.m_BestSpree which is the highscore
-	int m_Spree;
+	// it is only incremented if stat track is on (enough players connected)
+	int m_Spree = 0;
+
+	// it will only be incremented if stat track is off (not enough players connected)
+	int m_UntrackedSpree = 0;
 
 	// all metrics in m_Stats are protected by anti farm
 	// and might not be incremented if not enough players are connected

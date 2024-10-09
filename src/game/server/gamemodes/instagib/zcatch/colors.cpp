@@ -86,7 +86,10 @@ void CGameControllerZcatch::OnUpdateZcatchColorConfig()
 
 void CGameControllerZcatch::SetCatchColors(CPlayer *pPlayer)
 {
-	int Color = GetBodyColor(pPlayer->Spree());
+	int Spree = pPlayer->Spree();
+	if(!IsStatTrack())
+		Spree = pPlayer->m_UntrackedSpree;
+	int Color = GetBodyColor(Spree);
 
 	// it would be cleaner if this only applied to the winner
 	// we could make sure Spree() is not reset until the next round starts
