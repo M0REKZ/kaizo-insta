@@ -44,6 +44,9 @@ void CMine::Tick()
 			
 			if(apCloseChars[i] && apCloseChars[i]->IsAlive() && apCloseChars[i]->GetPlayer()->GetCid() != m_Owner)
 			{
+				if(m_Owner < 0 ? false : (GameServer()->m_pController->IsTeamplay() && apCloseChars[i]->GetPlayer()->GetTeam() == GameServer()->m_apPlayers[m_Owner]->GetTeam()))
+					continue;
+				
 				pChr = apCloseChars[i];
 				if(m_Active)
 				{
