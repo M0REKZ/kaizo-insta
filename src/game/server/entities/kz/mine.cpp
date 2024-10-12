@@ -112,6 +112,7 @@ void CMine::Tick()
 						continue;
 					
 					float Len = 0.0f;
+					bool boolproj = false; //its a projectile or vanillaprojectile
 					
 					//TODO: could be better by not using dynamic_cast
 					
@@ -119,11 +120,13 @@ void CMine::Tick()
 					{
 						CProjectile *pProjectile = (CProjectile*)p;
 						Len = distance(m_Pos, pProjectile->GetPos((Server()->Tick() - pProjectile->GetStartTick()) / (float)Server()->TickSpeed()));
+						boolproj = true;
 					}
 					else if(!(dynamic_cast<CVanillaProjectile*>(p) == nullptr))
 					{
 						CVanillaProjectile *pVanillaProjectile = (CVanillaProjectile*)p;
 						Len = distance(m_Pos, pVanillaProjectile->GetPos((Server()->Tick() - pVanillaProjectile->GetStartTick()) / (float)Server()->TickSpeed()));
+						boolproj = true;
 					}
 					else
 					{
@@ -132,6 +135,10 @@ void CMine::Tick()
 					
 					if(Len < 50.0f)
 					{
+						if(boolproj)
+						{
+							p->Reset(); //I think this also could destroy ddrace bullets... ohno
+						}
 						Proj = p;
 						m_Explode = true;
 						break;
