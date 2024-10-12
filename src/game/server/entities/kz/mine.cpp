@@ -66,12 +66,12 @@ void CMine::Tick()
 			}
 		}
 		
-		//char aBuf[64];
 		CEntity* Proj = nullptr;
 		
 		
 		if(m_Active)
 		{
+			/*
 			CEntity *apCloseProj[20];
 			int NumProj = GameServer()->m_World.FindEntities(m_Pos, 20, apCloseProj, 20, CGameWorld::ENTTYPE_PROJECTILE);
 			for(int i = 0; i < NumProj; ++i)
@@ -92,6 +92,28 @@ void CMine::Tick()
 					Proj = apCloseProj[i];
 					m_Explode = true;
 					break;
+				}
+			}
+			 */
+			//char aBuf[64];
+			CEntity *p = GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_PROJECTILE);
+			for(; p; p = p->TypeNext())
+			{
+				//str_format(aBuf, sizeof(aBuf), "Distance='%.9f'", distance(m_Pos, p->GetPos()));
+				//GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+				
+				if(p == this)
+					continue;
+				if(p->GetOwnerId() != m_Owner && p->GetOwnerId() != -1)
+				{
+					float Len = distance(m_Pos, p->GetPos());
+					
+					if(Len < 50.0f)
+					{
+						Proj = p;
+						m_Explode = true;
+						break;
+					}
 				}
 			}
 		}
