@@ -467,7 +467,7 @@ void CGameControllerZcatch::CheckGameState()
 
 int CGameControllerZcatch::GetAutoTeam(int NotThisId)
 {
-	if(IsCatchGameRunning())
+	if(IsCatchGameRunning() && GetHighestSpreeClientId() != -1)
 	{
 		return TEAM_SPECTATORS;
 	}
