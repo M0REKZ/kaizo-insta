@@ -14,6 +14,8 @@
 #include <engine/shared/config.h>
 //dirty:
 #include <game/server/gamecontroller.h>
+#include <game/server/entities/ddnet_pvp/vanilla_projectile.h>
+#include <game/server/entities/projectile.h>
 
 CMine::CMine(CGameWorld *pGameWorld, vec2 Pos, int Owner, bool active, bool respawn) :
 CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
@@ -106,7 +108,27 @@ void CMine::Tick()
 					continue;
 				if(p->GetOwnerId() != m_Owner && p->GetOwnerId() != -1)
 				{
-					float Len = distance(m_Pos, p->GetPos());
+					if(m_Owner < 0 ? false : (GameServer()->m_pController->IsTeamplay() && GameServer()->m_apPlayers[p->GetOwnerId()]->GetTeam() == GameServer()->m_apPlayers[m_Owner]->GetTeam()))
+						continue;
+					
+					float Len = 0.0f;
+					
+					//TODO: could be better by not using dynamic_cast
+					
+					if (!(dynamic_cast<CProjectile*>(p) == nullptr))
+					{
+						CProjectile *pProjectile = (CProjectile*)p;
+						Len = distance(m_Pos, pProjectile->GetPos((Server()->Tick() - pProjectile->GetStartTick()) / (float)Server()->TickSpeed()));
+					}
+					else if(!(dynamic_cast<CVanillaProjectile*>(p) == nullptr))
+					{
+						CVanillaProjectile *pVanillaProjectile = (CVanillaProjectile*)p;
+						Len = distance(m_Pos, pVanillaProjectile->GetPos((Server()->Tick() - pVanillaProjectile->GetStartTick()) / (float)Server()->TickSpeed()));
+					}
+					else
+					{
+						Len = distance(m_Pos, p->GetPos());
+					}
 					
 					if(Len < 50.0f)
 					{

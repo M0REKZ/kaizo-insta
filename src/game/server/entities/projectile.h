@@ -58,6 +58,8 @@ public:
 	void FillExtraInfo(CNetObj_DDNetProjectile *pProj);
 
 	virtual int GetOwnerId() const override { return m_Owner; }
+	
+	int GetStartTick() { return m_StartTick; }
 };
 
 #endif
