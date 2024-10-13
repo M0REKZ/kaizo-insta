@@ -38,6 +38,9 @@ void CMine::Tick()
 	}
 	else
 	{
+		if(!(GameServer()->m_apPlayers[m_Owner])) //avoid possible segmentation fault
+			m_Owner = -1;
+		
 		CCharacter *apCloseChars[MAX_CLIENTS];
 		CCharacter *pChr = nullptr;
 		 int Num = GameServer()->m_World.FindEntities(m_Pos, 10, (CEntity **)apCloseChars, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
@@ -151,7 +154,7 @@ void CMine::Tick()
 		{
 			if(pChr)
 			{
-				if(m_Owner < 0)
+				if(m_Owner < 0 || !(GameServer()->m_apPlayers[m_Owner]))
 					GameServer()->CreateExplosion(m_Pos, pChr->GetPlayer()->GetCid(), WEAPON_GRENADE, true, pChr->Team(), pChr->TeamMask());
 				else
 					GameServer()->CreateExplosion(m_Pos, m_Owner, WEAPON_GRENADE, true, pChr->Team(), pChr->TeamMask());
@@ -162,7 +165,7 @@ void CMine::Tick()
 			}
 			else if(Proj)
 			{
-				if(m_Owner < 0)
+				if(m_Owner < 0 || !(GameServer()->m_apPlayers[m_Owner]))
 					GameServer()->CreateExplosion(m_Pos, Proj->GetOwnerId(), WEAPON_GRENADE, true, -1, CClientMask().set());
 				else
 					GameServer()->CreateExplosion(m_Pos, m_Owner, WEAPON_GRENADE, true, -1, CClientMask().set());
