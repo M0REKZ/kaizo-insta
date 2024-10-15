@@ -155,10 +155,8 @@ void CBall::Tick()
 		GameServer()->CreateSound(CurPosition, m_SoundImpact);
 	}
 	
-	if(GameServer()->m_pController->IsTeamplay())
+	if((Collision()->KZFound()) && GameServer()->m_pController->IsTeamplay())
 	{
-		if(!(Collision()->KZFound()))
-			return;
 		
 		int TileIndex = Collision()->GetKZTileIndex(m_Pos);
 		
