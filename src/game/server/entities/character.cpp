@@ -2728,6 +2728,14 @@ void CCharacter::HandleKZTiles()
 		DoKZDamage(vec2(0,-15), 5, m_pPlayer->GetCid(), WEAPON_WORLD);
 	}
 	
+	if(m_HasBall && TileIndex == TILE_NO_BALL)
+	{
+		CBall *ball = new CBall(&GameServer()->m_World, m_pPlayer->GetCid(), m_Pos, vec2(0,0));
+		ball->GoToStartPos();
+		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, TeamMask());
+		m_HasBall = false;
+	}
+	
 	if(TileIndex == TILE_TEE_KILL)
 	{
 		if(m_HasBall)

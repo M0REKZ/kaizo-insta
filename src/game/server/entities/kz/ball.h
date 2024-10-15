@@ -26,7 +26,7 @@ private:
 	int m_SoundImpact;
 	int m_StartTick;
 	int m_FootPickupDistance; //<-foot grenade diff.
-	
+	int m_RespawnTick = 0;
 	int m_Team;
 	vec2 m_StartPos;
 	

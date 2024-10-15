@@ -44,6 +44,7 @@ CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 	}
 	else
 	{
+		m_RespawnTick = g_Config.m_SvBallRespawn * Server()->TickSpeed();
 		m_Team = GameServer()->m_apPlayers[m_Owner]->GetTeam();
 	}
 	
@@ -52,6 +53,18 @@ CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 
 void CBall::Tick()
 {
+	if(m_Owner >= 0)
+	{
+		if(m_RespawnTick)
+		{
+			m_RespawnTick--;
+		}
+		else
+		{
+			GoToStartPos();
+			m_RespawnTick = g_Config.m_SvBallRespawn * Server()->TickSpeed();
+		}
+	}
 	
 	float PreviousTick = (Server()->Tick()-m_StartTick-1)/(float)Server()->TickSpeed();
 	float CurrentTick = (Server()->Tick()-m_StartTick)/(float)Server()->TickSpeed();
@@ -172,6 +185,11 @@ void CBall::Tick()
 			GoToStartPos();
 			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 		}
+		else if(TileIndex == TILE_NO_BALL)
+		{
+			GoToStartPos();
+			GameServer()->CreateSound(CurPosition, m_SoundImpact);
+		}
 	}
 	
 	if(m_FootPickupDistance == 0)
@@ -228,15 +246,10 @@ vec2 CBall::GetPos(float Time)
 
 void CBall::GoToStartPos()
 {
-	if(m_Owner >= 0)
-	{
-		int n = rand() % GameServer()->m_pController->m_BallSpawnNum;
-		m_Pos = GameServer()->m_pController->m_BallSpawnsKZ[n];
-		m_Direction = vec2(0,0);
-	}
-	else
-	{
-		m_Pos = m_StartPos;
-		m_Direction = vec2(0,0);
-	}
+	int n = rand() % GameServer()->m_pController->m_BallSpawnNum;
+	m_Pos = GameServer()->m_pController->m_BallSpawnsKZ[n];
+	m_Direction = vec2(0,0);
+	m_Owner = -1;
+	m_RespawnTick = g_Config.m_SvBallRespawn * Server()->TickSpeed();
+
 }

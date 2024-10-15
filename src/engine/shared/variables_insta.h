@@ -80,6 +80,8 @@ MACRO_CONFIG_INT(SvFreezeMeltRange, sv_freeze_melt_range, 100, 10, 1000, CFGFLAG
 MACRO_CONFIG_INT(SvFreezeMeltTime, sv_freeze_melt_time, 1200, 500, 5000, CFGFLAG_SERVER, "Time (in ms) the player must stand next to a player to melt him")
 MACRO_CONFIG_INT(SvFreezeMeltRespawn, sv_freeze_melt_respawn, 1, 0, 1, CFGFLAG_SERVER, "If a player respawns after he was being melted")
 
+//For Ball
+MACRO_CONFIG_INT(SvBallRespawn, sv_ball_respawn, 10, 1, 1000, CFGFLAG_SERVER, "Seconds for ball to go back to ball spawn")
 
 /*
 
