@@ -171,7 +171,7 @@ void CBall::Tick()
 	if((Collision()->KZFound()) && GameServer()->m_pController->IsTeamplay())
 	{
 		
-		int TileIndex = Collision()->GetKZTileIndex(m_Pos);
+		int TileIndex = Collision()->GetKZTileIndex(CurPosition);
 		
 		if(TileIndex == TILE_BALL_REDGOAL || TileIndex == TILE_BALL_REDSLAM)
 		{

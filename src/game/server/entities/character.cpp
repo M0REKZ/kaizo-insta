@@ -2734,6 +2734,8 @@ void CCharacter::HandleKZTiles()
 		ball->GoToStartPos();
 		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, TeamMask());
 		m_HasBall = false;
+		SetWeapon(m_BallQueuedWeapon);
+		m_BallQueuedWeapon = -1;
 	}
 	
 	if(TileIndex == TILE_TEE_KILL)
