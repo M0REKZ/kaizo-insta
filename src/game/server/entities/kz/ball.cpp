@@ -17,6 +17,8 @@
 #include <game/server/entities/ddnet_pvp/vanilla_projectile.h>
 #include <game/server/entities/projectile.h>
 
+#include <game/kztiles.h>
+
 CBall::CBall(CGameWorld *pGameWorld, int Owner, vec2 Pos, vec2 Dir) :
 CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 {
@@ -150,8 +152,30 @@ void CBall::Tick()
 	if((GameServer()->Collision()->GetCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH) || (GameServer()->Collision()->GetFCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH) || GameLayerClipped(m_Pos))
 	{
 		GoToStartPos();
-		GameServer()->CreateSound(CurPosition, m_SoundImpact);;
+		GameServer()->CreateSound(CurPosition, m_SoundImpact);
 	}
+	
+	if(GameServer()->m_pController->IsTeamplay())
+	{
+		if(!(Collision()->KZFound()))
+			return;
+		
+		int TileIndex = Collision()->GetKZTileIndex(m_Pos);
+		
+		if(TileIndex == TILE_BALL_REDGOAL)
+		{
+			GameServer()->m_pController->m_aTeamscore[TEAM_BLUE]+= 100;
+			GoToStartPos();
+			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
+		}
+		else if(TileIndex == TILE_BALL_BLUEGOAL)
+		{
+			GameServer()->m_pController->m_aTeamscore[TEAM_RED]+= 100;
+			GoToStartPos();
+			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
+		}
+	}
+	
 	if(m_FootPickupDistance == 0)
 	{
 		TChar = GameServer()->m_World.IntersectCharacter(PrevPosition, CurPosition, 6.0f, CurPosition, NULL);
