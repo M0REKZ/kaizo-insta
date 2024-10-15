@@ -1150,6 +1150,14 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 		}
 		new CBall(&GameServer()->m_World, -1, Pos, vec2(0,0));
 	}
+	else if(Index == TILE_BALL_ALTSPAWN)
+	{
+		if(m_BallSpawnNum < 10)
+		{
+			m_BallSpawnsKZ[m_BallSpawnNum] = Pos;
+			m_BallSpawnNum++;
+		}
+	}
 
 	return false;
 }
