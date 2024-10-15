@@ -2728,8 +2728,49 @@ void CCharacter::HandleKZTiles()
 		DoKZDamage(vec2(0,-15), 5, m_pPlayer->GetCid(), WEAPON_WORLD);
 	}
 	
+	if(TileIndex == TILE_TEE_KILL)
+	{
+		if(m_HasBall)
+		{
+			//GameServer()->m_pController->m_aTeamscore[TEAM_BLUE]+= 100;
+			CBall *ball = new CBall(&GameServer()->m_World, m_pPlayer->GetCid(), m_Pos, vec2(0,0));
+			ball->GoToStartPos();
+			GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, TeamMask());
+			m_HasBall = false;
+		}
+		Die(m_pPlayer->GetCid(), WEAPON_WORLD);
+	}
+	
 	if(GameServer()->m_pController->IsTeamplay())
 	{
+		
+		if(TileIndex == TILE_BALL_REDSLAM)
+		{
+			if(m_HasBall)
+			{
+				GameServer()->m_pController->m_aTeamscore[TEAM_BLUE]+= 100;
+				CBall *ball = new CBall(&GameServer()->m_World, m_pPlayer->GetCid(), m_Pos, vec2(0,0));
+				ball->GoToStartPos();
+				GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
+				m_HasBall = false;
+			}
+			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
+		}
+		else if(TileIndex == TILE_BALL_BLUESLAM)
+		{
+			if(m_HasBall)
+			{
+				GameServer()->m_pController->m_aTeamscore[TEAM_RED]+= 100;
+				CBall *ball = new CBall(&GameServer()->m_World, m_pPlayer->GetCid(), m_Pos, vec2(0,0));
+				ball->GoToStartPos();
+				GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
+				m_HasBall = false;
+			}
+			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
+		}
+		
+		
+		
 		if(m_pPlayer->GetTeam() == TEAM_BLUE)
 		{
 			if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == TILE_TEAMRED)
