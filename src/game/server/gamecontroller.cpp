@@ -1148,7 +1148,7 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 			m_BallSpawnsKZ[m_BallSpawnNum] = Pos;
 			m_BallSpawnNum++;
 		}
-		new CBall(&GameServer()->m_World, -1, Pos, vec2(-1,0));
+		new CBall(&GameServer()->m_World, -1, Pos, vec2(0,0));
 	}
 
 	return false;
