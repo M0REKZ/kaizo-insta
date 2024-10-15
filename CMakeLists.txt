@@ -2732,6 +2732,8 @@ if(SERVER)
     entities/plasma.h
     entities/projectile.cpp
     entities/projectile.h
+    entities/kz/ball.cpp
+    entities/kz/ball.h
     entities/kz/grenade_launcher.cpp
     entities/kz/grenade_launcher.h
     entities/kz/mine.cpp

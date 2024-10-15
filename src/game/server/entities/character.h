@@ -276,8 +276,12 @@ private:
 	bool m_Invisible;
 	bool m_Water;
 	int m_InvisibleShieldId;
+	int m_BallQueuedWeapon;
+	
 public:
 	void DoKZDamage(vec2 Force, int Dmg, int From, int Weapon);
+	void CatchBall();
+	bool m_HasBall = false;
 	int m_Mines;
 };
 

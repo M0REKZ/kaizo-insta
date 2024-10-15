@@ -6,6 +6,7 @@
 #include "projectile.h"
 
 #include "kz/mine.h"
+#include "kz/ball.h"
 
 #include <antibot/antibot_data.h>
 
@@ -379,6 +380,9 @@ void CCharacter::DoWeaponSwitch()
 	// make sure we can switch
 	if(m_ReloadTimer != 0 || m_QueuedWeapon == -1 || m_Core.m_aWeapons[WEAPON_NINJA].m_Got || !m_Core.m_aWeapons[m_QueuedWeapon].m_Got)
 		return;
+	
+	if(m_HasBall) //+KZ Ball
+		return;
 
 	// switch Weapon
 	SetWeapon(m_QueuedWeapon);
@@ -482,6 +486,21 @@ void CCharacter::FireWeapon()
 		return;
 	}
 
+	if(m_HasBall) //+KZ
+	{
+		m_HasBall = false;
+		new CBall(&GameServer()->m_World, m_pPlayer->GetCid(), m_Pos, Direction);
+		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, TeamMask());
+		
+		float FireDelay;
+		GetTuning(m_TuneZone)->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
+		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
+		
+		SetWeapon(m_BallQueuedWeapon);
+		m_BallQueuedWeapon = -1;
+		return;
+	}
+	
 	// check for ammo
     
 	if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
@@ -1114,6 +1133,13 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 
 	m_Alive = false;
 	SetSolo(false);
+	
+	if(m_HasBall) //+KZ
+	{
+		m_HasBall = false;
+		new CBall(&GameServer()->m_World, m_pPlayer->GetCid(), m_Pos, vec2(0,0));
+		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, TeamMask());
+	}
 
 	GameServer()->m_World.RemoveEntity(this);
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCid()] = 0;
@@ -2795,4 +2821,11 @@ void CCharacter::DoKZDamage(vec2 Force, int Dmg, int From, int Weapon)
 	{
 		Die(From, Weapon);
 	}
+}
+
+void CCharacter::CatchBall()
+{
+	m_BallQueuedWeapon = m_Core.m_ActiveWeapon;
+	m_HasBall = true;
+	SetWeapon(WEAPON_GRENADE);
 }

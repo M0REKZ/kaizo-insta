@@ -19,6 +19,7 @@
 #include "entities/gun.h"
 #include "entities/light.h"
 #include "entities/pickup.h"
+#include "entities/kz/ball.h"
 #include "entities/kz/random_weapon.h"
 #include "entities/kz/mine.h"
 #include "entities/kz/grenade_launcher.h"
@@ -1138,6 +1139,16 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 			Dir = vec2(1,-1);
 		
 		new CGrenadeLauncher(&GameServer()->m_World, Pos, Dir);
+	}
+	
+	if(Index == TILE_BALL)
+	{
+		if(m_BallSpawnNum < 10)
+		{
+			m_BallSpawnsKZ[m_BallSpawnNum] = Pos;
+			m_BallSpawnNum++;
+		}
+		new CBall(&GameServer()->m_World, -1, Pos, vec2(-1,0));
 	}
 
 	return false;

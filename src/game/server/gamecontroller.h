@@ -84,6 +84,8 @@ public:
     
     bool m_DontSelfKill = false; //+KZ iFreeze
 	bool m_IsInstagibKZ = false;
+	vec2 m_BallSpawnsKZ[10];
+	int m_BallSpawnNum = 0;
     
 	IGameController(class CGameContext *pGameServer);
 	virtual ~IGameController();
