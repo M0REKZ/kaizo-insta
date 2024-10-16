@@ -283,7 +283,7 @@ void CGameControllerInstaBaseCTF::FlagTick()
 				if(distance(pFlag->GetPos(), m_apFlags[FlagColor ^ 1]->GetPos()) < CFlag::ms_PhysSize + CCharacterCore::PhysicalSize())
 				{
 					// CAPTURE! \o/
-					m_aTeamscore[FlagColor ^ 1] += 100;
+					AddTeamscore(FlagColor ^ 1, 100);
 					pFlag->GetCarrier()->GetPlayer()->AddScore(5);
 					float Diff = Server()->Tick() - pFlag->GetGrabTick();
 
@@ -368,7 +368,7 @@ void CGameControllerInstaBaseCTF::FlagTick()
 				{
 					// take the flag
 					if(pFlag->IsAtStand())
-						m_aTeamscore[FlagColor ^ 1]++;
+						AddTeamscore(FlagColor ^ 1, 1);
 
 					pFlag->Grab(apCloseCCharacters[i]);
 
@@ -440,6 +440,9 @@ void CGameControllerInstaBaseCTF::Snap(int SnappingClient)
 
 bool CGameControllerInstaBaseCTF::DoWincheckRound()
 {
+	if(IsWarmup())
+		return false;
+
 	CGameControllerPvp::DoWincheckRound();
 
 	// check score win condition

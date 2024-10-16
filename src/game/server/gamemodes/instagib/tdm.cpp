@@ -24,9 +24,9 @@ int CGameControllerInstaTDM::OnCharacterDeath(class CCharacter *pVictim, class C
 	{
 		// do team scoring
 		if(pKiller == pVictim->GetPlayer() || pKiller->GetTeam() == pVictim->GetPlayer()->GetTeam())
-			m_aTeamscore[pKiller->GetTeam() & 1]--;
+			AddTeamscore(pKiller->GetTeam() & 1, -1);
 		else
-			m_aTeamscore[pKiller->GetTeam() & 1]++;
+			AddTeamscore(pKiller->GetTeam() & 1, 1);
 	}
 
 	// check score win condition

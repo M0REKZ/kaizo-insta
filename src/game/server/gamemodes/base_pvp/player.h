@@ -22,6 +22,9 @@ public:
 
 	void ProcessStatsResult(CInstaSqlResult &Result);
 
+	int m_SentWarmupAlerts = 0;
+	void WarmupAlert();
+
 	/*******************************************************************
 	 * zCatch                                                          *
 	 *******************************************************************/

@@ -255,6 +255,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_hide_admins` Only send admin status to other authed players
 + `sv_show_settings_motd` Show insta game settings in motd on join
 + `sv_unstack_chat` Revert ddnet clients duplicated chat message stacking
++ `sv_casual_rounds` 1=start rounds automatically, 0=require restart vote to properly start game
 + `sv_tournament` Print messages saying tournament is running. No other effects.
 + `sv_tournament_chat` 0=off, 1=Spectators can not public chat, 2=Nobody can public chat
 + `sv_tournament_chat_smart` Turns sv_tournament_chat on on restart and off on round end (1=specs,2=all)
@@ -308,6 +309,7 @@ ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat
 + `/top5kills` Shows the all time best ranks by kills
 + `/rank_flags` Shows the all time flag time rank of player name (your stats by default)
 + `/top5flags` Shows the all time best ranks by flag time
++ `/top5caps` Shows the all time best ranks by amount of flag captures
 + `/rank_caps` Shows the all time flag capture rank of player name (your stats by default)
 
 # Publish round stats

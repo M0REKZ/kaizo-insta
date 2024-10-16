@@ -49,7 +49,30 @@ void CGameControllerPvp::OnInit()
 
 void CGameControllerPvp::OnRoundStart()
 {
-	dbg_msg("ddnet-insta", "starting new round ...");
+	dbg_msg(
+		"ddnet-insta",
+		"new round start! Current game state: %s",
+		GameStateToStr(GameState()));
+
+	int StartGameState = GameState();
+
+	// ddnet-insta
+	m_GameStartTick = Server()->Tick();
+	SetGameState(IGS_GAME_RUNNING);
+	m_GameStartTick = Server()->Tick();
+	m_SuddenDeath = 0;
+
+	// only auto start round if we are in casual mode and there is no tournament running
+	// otherwise set infinite warmup and wait for !restart
+	if(StartGameState == IGS_END_ROUND && (!g_Config.m_SvCasualRounds || g_Config.m_SvTournament))
+	{
+		SendChat(-1, TEAM_ALL, "Starting warmup phase. Call a restart vote to start a new game.");
+		SetGameState(IGS_WARMUP_GAME, TIMER_INFINITE);
+	}
+	else
+	{
+		SetGameState(IGS_START_COUNTDOWN_ROUND_START);
+	}
 
 	// for(CPlayer *pPlayer : GameServer()->m_apPlayers)
 	// {
@@ -364,13 +387,30 @@ bool CGameControllerPvp::IsLoser(const CPlayer *pPlayer)
 	return !IsWinner(pPlayer, 0, 0);
 }
 
-bool CGameControllerPvp::IsStatTrack()
+bool CGameControllerPvp::IsStatTrack(char *pReason, int SizeOfReason)
 {
+	if(pReason)
+		pReason[0] = '\0';
+
+	if(IsWarmup())
+	{
+		if(pReason)
+			str_copy(pReason, "warmup", SizeOfReason);
+		return false;
+	}
+
 	int MinPlayers = IsTeamPlay() ? 3 : 2;
 	int Count = NumConnectedIps();
 	bool Track = Count >= MinPlayers;
 	if(g_Config.m_SvDebugStats)
 		dbg_msg("stats", "connected unique ips=%d (%d+ needed to track) tracking=%d", Count, MinPlayers, Track);
+
+	if(!Track)
+	{
+		if(pReason)
+			str_copy(pReason, "not enough players", SizeOfReason);
+	}
+
 	return Track;
 }
 

@@ -88,7 +88,7 @@ public:
 	bool HasWinningScore(const CPlayer *pPlayer) const;
 	bool IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage) override;
 	bool IsLoser(const CPlayer *pPlayer) override;
-	bool IsStatTrack() override;
+	bool IsStatTrack(char *pReason = nullptr, int SizeOfReason = 0) override;
 	void SaveStatsOnRoundEnd(CPlayer *pPlayer) override;
 	void SaveStatsOnDisconnect(CPlayer *pPlayer) override;
 

@@ -15,11 +15,31 @@ void CPlayer::ResetStats()
 	m_Stats.Reset();
 }
 
+void CPlayer::WarmupAlert()
+{
+	// 0.7 has client side infinite warmup support
+	// so we do only need the broadcast for 0.6 players
+	if(Server()->IsSixup(GetCid()))
+		return;
+
+	m_SentWarmupAlerts++;
+	if(m_SentWarmupAlerts < 3)
+	{
+		GameServer()->SendBroadcast("This is a warmup game. Call a restart vote to start.", GetCid());
+	}
+}
+
 void CPlayer::AddScore(int Score)
 {
+	if(GameServer()->m_pController && GameServer()->m_pController->IsWarmup())
+	{
+		WarmupAlert();
+		return;
+	}
+
 	// never decrement the tracked score
 	// so fakers can not remove points from others
-	if(Score > 0 && GameServer()->m_pController->IsStatTrack())
+	if(Score > 0 && GameServer()->m_pController && GameServer()->m_pController->IsStatTrack())
 		m_Stats.m_Points += Score;
 
 	m_Score = m_Score.value_or(0) + Score;

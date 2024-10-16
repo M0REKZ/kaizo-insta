@@ -214,28 +214,28 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 		if(SpikeTile == TILE_FNG_SPIKE_NORMAL)
 		{
 			pKiller->AddScore(2);
-			m_aTeamscore[pKiller->GetTeam()] += 5;
+			AddTeamscore(pKiller->GetTeam(), 5);
 		}
 		if(SpikeTile == TILE_FNG_SPIKE_GOLD)
 		{
 			if(IsStatTrack())
 				pKiller->m_Stats.m_GoldSpikes++;
 			pKiller->AddScore(7);
-			m_aTeamscore[pKiller->GetTeam()] += 12;
+			AddTeamscore(pKiller->GetTeam(), 12);
 		}
 		if(SpikeTile == TILE_FNG_SPIKE_GREEN)
 		{
 			if(IsStatTrack())
 				pKiller->m_Stats.m_GreenSpikes++;
 			pKiller->AddScore(5);
-			m_aTeamscore[pKiller->GetTeam()] += 15;
+			AddTeamscore(pKiller->GetTeam(), 15);
 		}
 		if(SpikeTile == TILE_FNG_SPIKE_PURPLE)
 		{
 			if(IsStatTrack())
 				pKiller->m_Stats.m_PurpleSpikes++;
 			pKiller->AddScore(9);
-			m_aTeamscore[pKiller->GetTeam()] += 18;
+			AddTeamscore(pKiller->GetTeam(), 18);
 		}
 
 		if(SpikeTile == TILE_FNG_SPIKE_RED)
@@ -243,7 +243,7 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 			if(pKiller->GetTeam() == TEAM_RED || !IsTeamPlay())
 			{
 				pKiller->AddScore(4);
-				m_aTeamscore[pKiller->GetTeam()] += 10;
+				AddTeamscore(pKiller->GetTeam(), 10);
 			}
 			else
 			{
@@ -255,7 +255,7 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 			if(pKiller->GetTeam() == TEAM_BLUE || !IsTeamPlay())
 			{
 				pKiller->AddScore(4);
-				m_aTeamscore[pKiller->GetTeam()] += 10;
+				AddTeamscore(pKiller->GetTeam(), 10);
 			}
 			else
 			{
@@ -404,7 +404,7 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 		}
 
 		pKiller->IncrementScore();
-		m_aTeamscore[pKiller->GetTeam()]++;
+		AddTeamscore(pKiller->GetTeam(), 1);
 		DoWincheckRound();
 	}
 

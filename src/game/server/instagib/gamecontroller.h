@@ -55,6 +55,23 @@ public:
 	virtual void OnInit(){};
 
 	/*
+		Function: OnRoundStart
+			Will be called after OnInit when the server first launches
+			Will also be called on the beginning of every round
+
+			Beginning of a round is defined as after the warmup but before the countdown.
+
+			For example if "sv_countdown_round_start" is set to "10"
+			and someone runs the bang command "!restart 5" in chat
+			this will happen:
+				- 5 seconds warmup everyone can move around and warmup
+				- OnRoundStart() is called
+				- 10 seconds world is paused and there is a final countdown
+				- all tees will be respawned and the game starts
+	*/
+	virtual void OnRoundStart(){};
+
+	/*
 		Function: OnLaserHit
 			Will be called before Character::TakeDamage() and CGameController::OnCharacterTakeDamage()
 
@@ -270,11 +287,20 @@ public:
 			This is used to protect against farming. Define for example a minium amount of in game players
 			required to count the stats.
 
+		Arguments:
+			pReason - reason buffer for stat track being off
+			SizeOfReason - reason buffer size
+
 		Returns:
 			true - count stats
 			false - do not count stats
 	*/
-	virtual bool IsStatTrack() { return true; }
+	virtual bool IsStatTrack(char *pReason = nullptr, int SizeOfReason = 0)
+	{
+		if(pReason)
+			pReason[0] = '\0';
+		return true;
+	}
 
 	/*
 		Function: SaveStatsOnRoundEnd
@@ -334,8 +360,6 @@ public:
 	bool GetPlayersReadyState(int WithoutId = -1, int *pNumUnready = nullptr);
 	void SetPlayersReadyState(bool ReadyState);
 	bool IsPlayerReadyMode();
-	int IsGameRunning() { return m_GameState == IGS_GAME_RUNNING; }
-	int IsGameCountdown() { return m_GameState == IGS_START_COUNTDOWN_ROUND_START || m_GameState == IGS_START_COUNTDOWN_UNPAUSE; }
 	void ToggleGamePause();
 	void AbortWarmup()
 	{
@@ -353,6 +377,8 @@ public:
 		m_aTeamscore[TEAM_RED] = m_aTeamscore[TEAM_BLUE];
 		m_aTeamscore[TEAM_BLUE] = Score;
 	};
+
+	void AddTeamscore(int Team, int Score);
 
 	int m_aTeamSize[protocol7::NUM_TEAMS];
 
@@ -373,6 +399,10 @@ public:
 	};
 	EGameState m_GameState;
 	EGameState GameState() const { return m_GameState; }
+	bool IsWarmup() const { return m_GameState == IGS_WARMUP_GAME || m_GameState == IGS_WARMUP_USER; }
+	bool IsInfiniteWarmup() const { return IsWarmup() && m_GameStateTimer == TIMER_INFINITE; }
+	int IsGameRunning() const { return m_GameState == IGS_GAME_RUNNING; }
+	int IsGameCountdown() const { return m_GameState == IGS_START_COUNTDOWN_ROUND_START || m_GameState == IGS_START_COUNTDOWN_UNPAUSE; }
 	int m_GameStateTimer;
 
 	// custom ddnet-insta timers
@@ -457,7 +487,6 @@ public:
 	virtual void OnFlagReturn(class CFlag *pFlag); // ddnet-insta
 	virtual void OnFlagGrab(class CFlag *pFlag); // ddnet-insta
 	virtual void OnFlagCapture(class CFlag *pFlag, float Time, int TimeTicks); // ddnet-insta
-	virtual void OnRoundStart();
 	// return true to consume the event
 	// and supress default ddnet selfkill behavior
 	virtual bool OnSelfkill(int ClientId) { return false; };

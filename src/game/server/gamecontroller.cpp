@@ -518,12 +518,6 @@ void IGameController::ResetGame()
 		pPlayer->m_HasGhostCharInGame = pPlayer->GetCharacter() != 0;
 	}
 	GameServer()->m_World.m_ResetRequested = true;
-
-	// ddnet-insta
-	m_GameStartTick = Server()->Tick();
-	SetGameState(IGS_GAME_RUNNING);
-	m_GameStartTick = Server()->Tick();
-	m_SuddenDeath = 0;
 }
 
 const char *IGameController::GetTeamName(int Team)
@@ -558,17 +552,7 @@ void IGameController::StartRound()
 	str_format(aBuf, sizeof(aBuf), "start round type='%s' teamplay='%d'", m_pGameType, m_GameFlags & GAMEFLAG_TEAMS);
 	GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 
-	OnRoundStart();
-}
-
-void IGameController::OnRoundStart() // ddnet-insta
-{
-	// only auto start round if we are in casual mode and there is no tournament running
-	// otherwise set infinite warmup and wait for !restart
-	// if(RoundEnd && (!g_Config.m_SvCasualRounds || g_Config.m_SvTournament))
-	// 	SetGameState(IGS_WARMUP_GAME, TIMER_INFINITE);
-	// else
-	SetGameState(IGS_START_COUNTDOWN_ROUND_START);
+	OnRoundStart(); // ddnet-insta
 }
 
 void IGameController::ChangeMap(const char *pToMap)

@@ -21,6 +21,7 @@ void CGameContext::OnInitInstagib()
 	m_pHttp = Kernel()->RequestInterface<IHttp>();
 
 	m_pController->OnInit();
+	m_pController->OnRoundStart();
 }
 
 void CGameContext::AlertOnSpecialInstagibConfigs(int ClientId) const
@@ -39,6 +40,8 @@ void CGameContext::AlertOnSpecialInstagibConfigs(int ClientId) const
 		SendChatTarget(ClientId, "WARNING: the hook kills");
 	if(g_Config.m_SvOnlyWallshotKills)
 		SendChatTarget(ClientId, "WARNING: only wallshots can kill");
+	if(m_pController->IsInfiniteWarmup())
+		SendChatTarget(ClientId, "This is a warmup game until a restart vote is called.");
 }
 
 void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientId, bool Force) const

@@ -167,9 +167,15 @@ void CGameContext::ConStatsRound(IConsole::IResult *pResult, void *pUserData)
 		return;
 	}
 
-	if(!pSelf->m_pController->IsStatTrack())
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-			"! WARNING: not enough players connected to track stats");
+	char aBuf[512];
+	char aReason[512];
+	aReason[0] = 0;
+
+	if(!pSelf->m_pController->IsStatTrack(aReason, sizeof(aReason)))
+	{
+		str_format(aBuf, sizeof(aBuf), "!!! stats are currently not tracked (%s)", aReason);
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
+	}
 
 	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
 	int TargetId = pSelf->m_pController->GetCidByName(pName);
@@ -180,9 +186,8 @@ void CGameContext::ConStatsRound(IConsole::IResult *pResult, void *pUserData)
 	if(!pRequestingPlayer)
 		return;
 
-	char aBuf[512];
 	char aUntrackedOrAccuracy[512];
-	str_format(aBuf, sizeof(aBuf), "~~~ round stats for '%s'", pName);
+	str_format(aBuf, sizeof(aBuf), "~~~ round stats for '%s' (see also /statsall)", pName);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 
 	str_format(aBuf, sizeof(aBuf), "~ Points: %d", pPlayer->m_Stats.m_Points);
@@ -213,9 +218,6 @@ void CGameContext::ConStatsRound(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", aBuf);
 
 	pSelf->m_pController->OnShowRoundStats(&pPlayer->m_Stats, pRequestingPlayer, pName);
-
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"~ see also /statsall");
 }
 
 void CGameContext::ConStatsAllTime(IConsole::IResult *pResult, void *pUserData)
