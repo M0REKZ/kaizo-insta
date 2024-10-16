@@ -906,6 +906,29 @@ void CCharacter::Tick()
 		PreTick();
 	}
 
+	if(m_HasBall) //+KZ
+	{
+		if(m_BallReleaseTick > 0)
+		{
+			m_BallReleaseTick--;
+		}
+		else
+		{
+			vec2 MouseTarget = vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY);
+			vec2 Direction = normalize(MouseTarget);
+			m_HasBall = false;
+			new CBall(&GameServer()->m_World, m_pPlayer->GetCid(), m_Pos, Direction);
+			GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, TeamMask());
+			
+			float FireDelay;
+			GetTuning(m_TuneZone)->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
+			m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
+			
+			SetWeapon(m_BallQueuedWeapon);
+			m_BallQueuedWeapon = -1;
+		}
+	}
+	
 	if(!m_PrevInput.m_Hook && m_Input.m_Hook && !(m_Core.m_TriggeredEvents & COREEVENT_HOOK_ATTACH_PLAYER))
 	{
 		Antibot()->OnHookAttach(m_pPlayer->GetCid(), false);
@@ -1155,6 +1178,15 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	if(Dmg)
 	{
 		SetEmote(EMOTE_PAIN, Server()->Tick() + 500 * Server()->TickSpeed() / 1000);
+	}
+	
+	//+KZ
+	if(m_HasBall && Weapon == WEAPON_HAMMER && From >= 0 && From < MAX_CLIENTS && GameServer()->GetPlayerChar(From))
+	{
+		m_HasBall = false;
+		SetWeapon(m_BallQueuedWeapon);
+		m_BallQueuedWeapon = -1;
+		GameServer()->GetPlayerChar(From)->CatchBall();
 	}
 
 	vec2 Temp = m_Core.m_Vel + Force;
@@ -2876,6 +2908,7 @@ void CCharacter::DoKZDamage(vec2 Force, int Dmg, int From, int Weapon)
 
 void CCharacter::CatchBall()
 {
+	m_BallReleaseTick = Server()->TickSpeed() * 5;
 	m_BallQueuedWeapon = m_Core.m_ActiveWeapon;
 	m_HasBall = true;
 	SetWeapon(WEAPON_GRENADE);

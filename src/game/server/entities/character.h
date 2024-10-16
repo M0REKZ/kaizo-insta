@@ -277,6 +277,7 @@ private:
 	bool m_Water;
 	int m_InvisibleShieldId;
 	int m_BallQueuedWeapon;
+	int m_BallReleaseTick;
 	
 public:
 	void DoKZDamage(vec2 Force, int Dmg, int From, int Weapon);
