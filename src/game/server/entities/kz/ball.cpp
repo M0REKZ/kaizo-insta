@@ -251,5 +251,6 @@ void CBall::GoToStartPos()
 	m_Direction = vec2(0,0);
 	m_Owner = -1;
 	m_RespawnTick = g_Config.m_SvBallRespawn * Server()->TickSpeed();
+	m_StartTick = Server()->Tick();
 
 }
