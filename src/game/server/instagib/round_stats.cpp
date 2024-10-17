@@ -95,12 +95,16 @@ void IGameController::GetRoundEndStatsStrJson(char *pBuf, size_t Size)
 		{
 			if(!pPlayer)
 				continue;
+			if(pPlayer->GetTeam() < TEAM_RED)
+				continue;
+			if(pPlayer->GetTeam() > TEAM_BLUE)
+				continue;
 
 			Writer.BeginObject();
 			Writer.WriteAttribute("id");
 			Writer.WriteIntValue(pPlayer->GetCid());
 			Writer.WriteAttribute("team");
-			Writer.WriteStrValue(pPlayer->GetTeam() == TEAM_RED ? "red" : "blue");
+			Writer.WriteStrValue(pPlayer->GetTeamStr());
 			Writer.WriteAttribute("name");
 			Writer.WriteStrValue(Server()->ClientName(pPlayer->GetCid()));
 			Writer.WriteAttribute("score");
@@ -289,8 +293,8 @@ void IGameController::PublishRoundEndStatsStrFile(const char *pStr)
 
 void IGameController::PublishRoundEndStatsStrDiscord(const char *pStr)
 {
-	char aPayload[2048];
-	char aStatsStr[2000];
+	char aPayload[4048];
+	char aStatsStr[4000];
 	str_format(
 		aPayload,
 		sizeof(aPayload),
@@ -323,7 +327,11 @@ void IGameController::PublishRoundEndStatsStrHttp(const char *pStr)
 
 void IGameController::PublishRoundEndStats()
 {
-	char aStats[1024];
+	// should be able to fit a 10v10 player game
+	// as json easily
+	//
+	// but a 32v32 will still overflow
+	char aStats[16384];
 	aStats[0] = '\0';
 	if(g_Config.m_SvRoundStatsDiscordWebhook[0] != '\0')
 	{

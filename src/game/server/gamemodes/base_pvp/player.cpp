@@ -1,5 +1,6 @@
 #include <base/system.h>
 #include <engine/shared/protocol.h>
+#include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
@@ -27,6 +28,19 @@ void CPlayer::WarmupAlert()
 	{
 		GameServer()->SendBroadcast("This is a warmup game. Call a restart vote to start.", GetCid());
 	}
+}
+
+const char *CPlayer::GetTeamStr() const
+{
+	if(GetTeam() == TEAM_SPECTATORS)
+		return "spectator";
+
+	if(GameServer()->m_pController && !GameServer()->m_pController->IsTeamPlay())
+		return "game";
+
+	if(GetTeam() == TEAM_RED)
+		return "red";
+	return "blue";
 }
 
 void CPlayer::AddScore(int Score)

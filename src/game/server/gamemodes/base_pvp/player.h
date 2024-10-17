@@ -24,6 +24,7 @@ public:
 
 	int m_SentWarmupAlerts = 0;
 	void WarmupAlert();
+	const char *GetTeamStr() const;
 
 	/*******************************************************************
 	 * zCatch                                                          *
