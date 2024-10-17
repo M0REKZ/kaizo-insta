@@ -2817,7 +2817,7 @@ if(SERVER)
     gamemodes/vanilla/BOMB/BOMB.cpp
     gamemodes/vanilla/BOMB/BOMB.h
     gamemodes/instagib/Foot.cpp
-    gamemodes/instagib/Foot
+    gamemodes/instagib/Foot.h
     gamemodes/instagib/gFoot/gFoot.cpp
     gamemodes/instagib/gFoot/gFoot.h
     gamemodes/instagib/iFoot/iFoot.cpp
