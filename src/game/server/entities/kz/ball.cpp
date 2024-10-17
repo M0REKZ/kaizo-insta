@@ -190,6 +190,12 @@ void CBall::Tick()
 			GoToStartPos();
 			GameServer()->CreateSound(CurPosition, m_SoundImpact);
 		}
+		else if(m_Owner >=0 && (TileIndex == TILE_BALL_NOTEAMGOAL || TileIndex == TILE_BALL_NOTEAMSLAM))
+		{
+			GameServer()->m_pController->m_aTeamscore[m_Team]+= 100;
+			GoToStartPos();
+			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
+		}
 	}
 	
 	if(m_FootPickupDistance == 0)
