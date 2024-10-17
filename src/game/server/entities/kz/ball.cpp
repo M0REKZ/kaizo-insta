@@ -33,9 +33,9 @@ CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 	m_StartPos = m_Pos;
 	
 	if((Dir.x < 0?-Dir.x:Dir.x) > (Dir.y < 0?-Dir.y:Dir.y))
-		m_FootPickupDistance = abs(Dir.x * (float)Server()->TickSpeed() * GameServer()->Tuning()->m_GrenadeSpeed / 4000.0);
+		m_FootPickupDistance = std::abs(Dir.x * (float)Server()->TickSpeed() * GameServer()->Tuning()->m_GrenadeSpeed / 4000.0);
 	else
-		m_FootPickupDistance = abs(Dir.y * (float)Server()->TickSpeed() * GameServer()->Tuning()->m_GrenadeSpeed / 4000.0);
+		m_FootPickupDistance = std::abs(Dir.y * (float)Server()->TickSpeed() * GameServer()->Tuning()->m_GrenadeSpeed / 4000.0);
 	
 	if(!(GameServer()->m_apPlayers[m_Owner]))
 	{
