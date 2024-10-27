@@ -1,3 +1,4 @@
+#include <game/generated/protocol.h>
 #include <game/mapitems.h>
 #include <game/server/entities/character.h>
 #include <game/server/entities/ddnet_pvp/vanilla_pickup.h>
@@ -41,6 +42,7 @@ int CGameControllerCTF::GameInfoExFlags(int SnappingClient, int DDRaceFlags)
 	int Flags = CGameControllerPvp::GameInfoExFlags(SnappingClient, DDRaceFlags);
 	Flags &= ~(GAMEINFOFLAG_UNLIMITED_AMMO);
 	Flags &= ~(GAMEINFOFLAG_PREDICT_DDRACE);
+	Flags &= ~(GAMEINFOFLAG_PREDICT_DDRACE_TILES); // https://github.com/ddnet-insta/ddnet-insta/issues/181
 	return Flags;
 }
 
