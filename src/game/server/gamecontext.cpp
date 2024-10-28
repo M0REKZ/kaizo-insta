@@ -508,7 +508,7 @@ void CGameContext::SnapSwitchers(int SnappingClient)
 
 bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapId, const vec2 &To, const vec2 &From, int StartTick, int Owner, int LaserType, int Subtype, int SwitchNumber) const
 {
-	if(Context.GetClientVersion() >= VERSION_DDNET_MULTI_LASER)
+	if(Context.GetClientVersion() >= VERSION_DDNET_MULTI_LASER && !(g_Config.m_SvForceLaserType == 2))
 	{
 		CNetObj_DDNetLaser *pObj = Server()->SnapNewItem<CNetObj_DDNetLaser>(SnapId);
 		if(!pObj)
@@ -1013,6 +1013,10 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 				&& m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOHAMMER)
 			{
 				Msg.AddInt(0);
+			}
+			else if((i == 29 && g_Config.m_SvForceLaserType == 2)) //+KZ FORCELASER laserbouncenum
+			{
+				Msg.AddInt(1);
 			}
 			else
 			{
