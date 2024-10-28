@@ -18,11 +18,6 @@ jobs:
       matrix:
         os: [macOS-latest, windows-latest, ubuntu-20.04]
         include:
-        - os: ubuntu-latest
-          cmake-args: -G Ninja -Wno-error=dev
-          cmake-init-env: CXXFLAGS=
-          package-file: "*-linux_x86_64.tar.xz"
-          fancy: true
         - os: ubuntu-20.04
           cmake-path: /usr/bin/
           cmake-args: -G Ninja -DTEST_MYSQL=ON -Wno-error=dev
