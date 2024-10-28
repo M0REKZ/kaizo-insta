@@ -6,6 +6,7 @@ on:
       - gh-readonly-queue/**
   pull_request:
   merge_group:
+  workflow_dispatch:
 
 jobs:
   build-cmake:
