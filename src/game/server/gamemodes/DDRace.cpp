@@ -141,7 +141,7 @@ void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)
 		GameServer()->SendChatTarget(ClientId, " _| |_  | |/ / |_  /");
 		GameServer()->SendChatTarget(ClientId, "|_   _| |  <   / /");
 		GameServer()->SendChatTarget(ClientId, "  |_|_  |_|\\_\\/__|");
-		GameServer()->SendChatTarget(ClientId, "Custom DDNet-insta fork by +KZ, has changes made by +KZ and changes taken from other mods");
+		GameServer()->SendChatTarget(ClientId, "Custom DDNet-insta fork by +KZ");
 		GameServer()->SendChatTarget(ClientId, "Original DDNet-insta by ChillerDragon: https://github.com/ddnet-insta/ddnet-insta/");
         GameServer()->SendChatTarget(ClientId, "Includes some changes from JSaurusRex fork, Pointer's tw_plus, Foot and other mods");
         GameServer()->SendChatTarget(ClientId, "Anticamper from zCatch (modified)");
