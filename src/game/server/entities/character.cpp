@@ -147,8 +147,9 @@ void CCharacter::Destroy()
 	if(m_HasBall) //+KZ
 	{
 		m_HasBall = false;
-		new CBall(&GameServer()->m_World, m_pPlayer->GetCid(), m_Pos, vec2(0,0));
+		CBall* ball = new CBall(&GameServer()->m_World, m_pPlayer->GetCid(), m_Pos, vec2(0,0));
 		GameServer()->CreateSound(m_Pos, SOUND_GRENADE_FIRE, TeamMask());
+		ball->GoToStartPos();
 	}
 	
 	GameServer()->m_World.m_Core.m_apCharacters[m_pPlayer->GetCid()] = 0;
