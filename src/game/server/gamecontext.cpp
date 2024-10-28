@@ -1014,7 +1014,7 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 			{
 				Msg.AddInt(0);
 			}
-			else if((i == 29 && g_Config.m_SvForceLaserType == 2)) //+KZ FORCELASER laserbouncenum
+			else if((i == 28) && (g_Config.m_SvForceLaserType == 2)) //+KZ FORCELASER laserbouncenum
 			{
 				Msg.AddInt(1);
 			}
