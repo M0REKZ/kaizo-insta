@@ -37,7 +37,7 @@ CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
 	else
 		m_FootPickupDistance = std::abs(Dir.y * (float)Server()->TickSpeed() * GameServer()->Tuning()->m_GrenadeSpeed / 4000.0);
 	
-	if(!(GameServer()->m_apPlayers[m_Owner]))
+	if((m_Owner < 0) || (m_Owner >= MAX_CLIENTS) || !(GameServer()->m_apPlayers[m_Owner]))
 	{
 		m_Owner = -1;
 		m_Team = -1;

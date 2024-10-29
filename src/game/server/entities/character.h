@@ -278,6 +278,8 @@ private:
 	int m_InvisibleShieldId;
 	int m_BallQueuedWeapon;
 	int m_BallReleaseTick;
+	int m_slowDeathTick = 0; //from pointer
+	int m_healthArmorZoneTick = 0; // from pointer
 	
 public:
 	void DoKZDamage(vec2 Force, int Dmg, int From, int Weapon);

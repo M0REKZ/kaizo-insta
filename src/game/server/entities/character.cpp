@@ -2768,6 +2768,103 @@ void CCharacter::HandleKZTiles()
 		DoKZDamage(vec2(0,-15), 5, m_pPlayer->GetCid(), WEAPON_WORLD);
 	}
 	
+	
+	bool found = false;
+	if(Collision()->GetKZTileIndex(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_SLOWDEATH)
+	{
+		found = true;
+	}
+	if(Collision()->GetKZTileIndex(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_SLOWDEATH)
+	{
+		found = true;
+	}
+	if(Collision()->GetKZTileIndex(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_SLOWDEATH)
+	{
+		found = true;
+	}
+	if(Collision()->GetKZTileIndex(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_SLOWDEATH)
+	{
+		found = true;
+	}
+	
+	if(found)
+	{
+		m_slowDeathTick--;
+		if (m_slowDeathTick < 0) {
+			DoKZDamage(vec2(0,0), 1, m_pPlayer->GetCid(), WEAPON_WORLD);
+			m_slowDeathTick = 10;
+		}
+	}
+	
+	
+	
+	found = false;
+	if(Collision()->GetKZTileIndex(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_HEALTHZONE)
+	{
+		found = true;
+	}
+	if(Collision()->GetKZTileIndex(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_HEALTHZONE)
+	{
+		found = true;
+	}
+	if(Collision()->GetKZTileIndex(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_HEALTHZONE)
+	{
+		found = true;
+	}
+	if(Collision()->GetKZTileIndex(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_HEALTHZONE)
+	{
+		found = true;
+	}
+	
+	if(found)
+	{
+		m_healthArmorZoneTick--;
+		if (m_healthArmorZoneTick < 0) {
+			if (m_Health < 10) {
+				m_Health = m_Health + 1;
+				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH);
+			}
+			m_EmoteType = EMOTE_HAPPY;
+			m_EmoteStop = Server()->Tick() + 500 * Server()->TickSpeed() / 1000;
+			m_healthArmorZoneTick = 10;
+		}
+	}
+	
+	
+	
+	found = false;
+	if(Collision()->GetKZTileIndex(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_ARMORZONE)
+	{
+		found = true;
+	}
+	if(Collision()->GetKZTileIndex(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_ARMORZONE)
+	{
+		found = true;
+	}
+	if(Collision()->GetKZTileIndex(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_ARMORZONE)
+	{
+		found = true;
+	}
+	if(Collision()->GetKZTileIndex(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_ARMORZONE)
+	{
+		found = true;
+	}
+	
+	if(found)
+	{
+		m_healthArmorZoneTick--;
+		if (m_healthArmorZoneTick < 0) {
+			if (m_Armor < 10) {
+				m_Armor = m_Armor + 1;
+				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR);
+			}
+			m_EmoteType = EMOTE_HAPPY;
+			m_EmoteStop = Server()->Tick() + 500 * Server()->TickSpeed() / 1000;
+			m_healthArmorZoneTick = 10;
+		}
+	}
+	
+	
 	if(m_HasBall && TileIndex == TILE_NO_BALL)
 	{
 		CBall *ball = new CBall(&GameServer()->m_World, m_pPlayer->GetCid(), m_Pos, vec2(0,0));
