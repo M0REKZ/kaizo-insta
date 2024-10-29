@@ -8,6 +8,11 @@ CGameControllerGFreeze::CGameControllerGFreeze(class CGameContext *pGameServer) 
 {
     m_pGameType = "gFreeze+";
 	m_DefaultWeapon = WEAPON_GRENADE;
+	
+	m_pStatsTable = "gfreeze";
+	m_pExtraColumns = nullptr;
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerGFreeze::~CGameControllerGFreeze() = default;

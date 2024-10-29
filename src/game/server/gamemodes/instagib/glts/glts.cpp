@@ -8,6 +8,11 @@ CGameControllerGLTS::CGameControllerGLTS(class CGameContext *pGameServer) :
 {
     m_pGameType = "gLTS";
 	m_DefaultWeapon = WEAPON_GRENADE;
+	
+	m_pStatsTable = "glts";
+	m_pExtraColumns = nullptr;
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerGLTS::~CGameControllerGLTS() = default;

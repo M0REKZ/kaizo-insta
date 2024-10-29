@@ -10,6 +10,11 @@ CGameControllerLMS::CGameControllerLMS(class CGameContext *pGameServer) :
     m_GameFlags = 0;
 
     m_pGameType = "LMS*";
+	
+	m_pStatsTable = "lms";
+	m_pExtraColumns = new CLmsColumns();
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerLMS::~CGameControllerLMS() = default;

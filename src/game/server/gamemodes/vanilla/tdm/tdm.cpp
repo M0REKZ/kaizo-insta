@@ -9,6 +9,11 @@ CGameControllerTDM::CGameControllerTDM(class CGameContext *pGameServer) :
 	m_GameFlags = GAMEFLAG_TEAMS;
 	m_pGameType = "TDM*";
 	m_DefaultWeapon = WEAPON_GUN;
+	
+	m_pStatsTable = "tdm";
+	m_pExtraColumns = new CTdmColumns();
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerTDM::~CGameControllerTDM() = default;

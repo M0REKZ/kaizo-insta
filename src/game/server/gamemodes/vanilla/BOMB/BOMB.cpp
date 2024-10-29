@@ -11,6 +11,11 @@ CGameControllerBOMB::CGameControllerBOMB(class CGameContext *pGameServer) :
     m_pGameType = "BOMB";
     
     m_BombTime = g_Config.m_SvBombTime * Server()->TickSpeed();
+	
+	m_pStatsTable = "bomb";
+	m_pExtraColumns = new CBOMBColumns();
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerBOMB::~CGameControllerBOMB() = default;

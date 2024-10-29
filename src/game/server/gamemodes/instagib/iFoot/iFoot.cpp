@@ -8,6 +8,11 @@ CGameControllerInstaFoot(pGameServer)
 {
     m_pGameType = "iFoot";
 	m_DefaultWeapon = WEAPON_LASER;
+	
+	m_pStatsTable = "ifoot";
+	m_pExtraColumns = new CIfootColumns();
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerIFoot::~CGameControllerIFoot() = default;

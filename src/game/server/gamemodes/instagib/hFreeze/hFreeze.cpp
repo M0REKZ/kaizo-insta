@@ -8,6 +8,11 @@ CGameControllerHFreeze::CGameControllerHFreeze(class CGameContext *pGameServer) 
 {
     m_pGameType = "hFreeze+";
 	m_DefaultWeapon = WEAPON_HAMMER;
+	
+	m_pStatsTable = "hfreeze";
+	m_pExtraColumns = nullptr;
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerHFreeze::~CGameControllerHFreeze() = default;

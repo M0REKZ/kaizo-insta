@@ -8,6 +8,11 @@ CGameControllerIFreeze::CGameControllerIFreeze(class CGameContext *pGameServer) 
 {
     m_pGameType = "iFreeze+";
 	m_DefaultWeapon = WEAPON_LASER;
+	
+	m_pStatsTable = "ifreeze";
+	m_pExtraColumns = new CIfreezeColumns();
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerIFreeze::~CGameControllerIFreeze() = default;

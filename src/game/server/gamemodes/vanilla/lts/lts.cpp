@@ -6,10 +6,15 @@
 CGameControllerLTS::CGameControllerLTS(class CGameContext *pGameServer) :
 	CGameControllerLMS(pGameServer)
 {
-
-    m_GameFlags = GAMEFLAG_TEAMS;
-
-    m_pGameType = "LTS*";
+	
+	m_GameFlags = GAMEFLAG_TEAMS;
+	
+	m_pGameType = "LTS*";
+	
+	m_pStatsTable = "lts";
+	m_pExtraColumns = new CLtsColumns();
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerLTS::~CGameControllerLTS() = default;

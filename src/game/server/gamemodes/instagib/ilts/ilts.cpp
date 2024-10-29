@@ -8,6 +8,11 @@ CGameControllerILTS::CGameControllerILTS(class CGameContext *pGameServer) :
 {
     m_pGameType = "iLTS";
 	m_DefaultWeapon = WEAPON_LASER;
+	
+	m_pStatsTable = "ilts";
+	m_pExtraColumns = new CIltsColumns();
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerILTS::~CGameControllerILTS() = default;

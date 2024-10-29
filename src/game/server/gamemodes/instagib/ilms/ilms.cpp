@@ -8,6 +8,11 @@ CGameControllerILMS::CGameControllerILMS(class CGameContext *pGameServer) :
 {
     m_pGameType = "iLMS";
 	m_DefaultWeapon = WEAPON_LASER;
+	
+	m_pStatsTable = "ilms";
+	m_pExtraColumns = new CIlmsColumns();
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerILMS::~CGameControllerILMS() = default;

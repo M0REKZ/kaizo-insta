@@ -8,6 +8,11 @@ CGameControllerGLMS::CGameControllerGLMS(class CGameContext *pGameServer) :
 {
     m_pGameType = "gLMS";
 	m_DefaultWeapon = WEAPON_GRENADE;
+	
+	m_pStatsTable = "glms";
+	m_pExtraColumns = nullptr;
+	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+	m_pSqlStats->CreateTable(m_pStatsTable);
 }
 
 CGameControllerGLMS::~CGameControllerGLMS() = default;

@@ -2816,12 +2816,14 @@ if(SERVER)
     gamemodes/vanilla/dm/sql_columns.h
     gamemodes/vanilla/BOMB/BOMB.cpp
     gamemodes/vanilla/BOMB/BOMB.h
+    gamemodes/vanilla/BOMB/sql_columns.h
     gamemodes/instagib/Foot.cpp
     gamemodes/instagib/Foot.h
     gamemodes/instagib/gFoot/gFoot.cpp
     gamemodes/instagib/gFoot/gFoot.h
     gamemodes/instagib/iFoot/iFoot.cpp
     gamemodes/instagib/iFoot/iFoot.h
+    gamemodes/instagib/iFoot/sql_columns.h
     gamemodes/instagib/Freeze.cpp
     gamemodes/instagib/Freeze.h
     gamemodes/instagib/gFreeze/gFreeze.cpp
@@ -2830,24 +2832,30 @@ if(SERVER)
     gamemodes/instagib/hFreeze/hFreeze.h
     gamemodes/instagib/iFreeze/iFreeze.cpp
     gamemodes/instagib/iFreeze/iFreeze.h
+    gamemodes/instagib/iFreeze/sql_columns.h
     gamemodes/vanilla/tdm/tdm.cpp
     gamemodes/vanilla/tdm/tdm.h
+    gamemodes/vanilla/tdm/sql_columns.h
     gamemodes/instagib/lms.cpp
     gamemodes/instagib/lms.h
     gamemodes/instagib/lts.cpp
     gamemodes/instagib/lts.h
     gamemodes/instagib/ilms/ilms.cpp
     gamemodes/instagib/ilms/ilms.h
+    gamemodes/instagib/ilms/sql_columns.h
     gamemodes/instagib/ilts/ilts.cpp
     gamemodes/instagib/ilts/ilts.h
+    gamemodes/instagib/ilts/sql_columns.h
     gamemodes/instagib/glms/glms.cpp
     gamemodes/instagib/glms/glms.h
     gamemodes/instagib/glts/glts.cpp
     gamemodes/instagib/glts/glts.h
     gamemodes/vanilla/lms/lms.cpp
     gamemodes/vanilla/lms/lms.h
+    gamemodes/vanilla/lms/sql_columns.h
     gamemodes/vanilla/lts/lts.cpp
     gamemodes/vanilla/lts/lts.h
+    gamemodes/vanilla/lts/sql_columns.h
     gameworld.cpp
     gameworld.h
     instagib/chat_commands.cpp
