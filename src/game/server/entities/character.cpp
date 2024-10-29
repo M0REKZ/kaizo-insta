@@ -2895,7 +2895,7 @@ void CCharacter::HandleKZTiles()
 		{
 			if(m_HasBall)
 			{
-				GameServer()->m_pController->m_aTeamscore[TEAM_BLUE]+= 110;
+				GameServer()->m_pController->m_aTeamscore[TEAM_BLUE]+= 125;
 				CBall *ball = new CBall(&GameServer()->m_World, m_pPlayer->GetCid(), m_Pos, vec2(0,0));
 				ball->GoToStartPos();
 				GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
@@ -2907,7 +2907,7 @@ void CCharacter::HandleKZTiles()
 		{
 			if(m_HasBall)
 			{
-				GameServer()->m_pController->m_aTeamscore[TEAM_RED]+= 110;
+				GameServer()->m_pController->m_aTeamscore[TEAM_RED]+= 125;
 				CBall *ball = new CBall(&GameServer()->m_World, m_pPlayer->GetCid(), m_Pos, vec2(0,0));
 				ball->GoToStartPos();
 				GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
@@ -2919,7 +2919,7 @@ void CCharacter::HandleKZTiles()
 		{
 			if(m_HasBall)
 			{
-				GameServer()->m_pController->m_aTeamscore[m_pPlayer->GetTeam()]+= 110;
+				GameServer()->m_pController->m_aTeamscore[m_pPlayer->GetTeam()]+= 125;
 				CBall *ball = new CBall(&GameServer()->m_World, m_pPlayer->GetCid(), m_Pos, vec2(0,0));
 				ball->GoToStartPos();
 				GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
