@@ -508,7 +508,7 @@ void CGameContext::SnapSwitchers(int SnappingClient)
 
 bool CGameContext::SnapLaserObject(const CSnapContext &Context, int SnapId, const vec2 &To, const vec2 &From, int StartTick, int Owner, int LaserType, int Subtype, int SwitchNumber) const
 {
-	if(Context.GetClientVersion() >= VERSION_DDNET_MULTI_LASER && (g_Config.m_SvForceLaserType == 2 ? ((LaserType == LASERTYPE_RIFLE) || (LaserType == LASERTYPE_SHOTGUN && Owner >= 0)) : true))
+	if(Context.GetClientVersion() >= VERSION_DDNET_MULTI_LASER && (g_Config.m_SvForceLaserType == 2 ? (Owner < 0) : true))
 	{
 		CNetObj_DDNetLaser *pObj = Server()->SnapNewItem<CNetObj_DDNetLaser>(SnapId);
 		if(!pObj)
