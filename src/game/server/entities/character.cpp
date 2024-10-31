@@ -1180,6 +1180,9 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 
 bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 {
+	if(From < 0 || From >= MAX_CLIENTS) //+KZ
+		From = m_pPlayer->GetCid();
+	
 	if(GameServer()->m_pController->OnCharacterTakeDamage(Force, Dmg, From, Weapon, *this))
 		return false;
 
@@ -2991,6 +2994,9 @@ void CCharacter::HandleKZTiles()
 
 void CCharacter::DoKZDamage(vec2 Force, int Dmg, int From, int Weapon)
 {
+	
+	if(From < 0 || From >= MAX_CLIENTS) //+KZ
+		From = m_pPlayer->GetCid();
 	
 	if(m_Armor > 0)
 	{
