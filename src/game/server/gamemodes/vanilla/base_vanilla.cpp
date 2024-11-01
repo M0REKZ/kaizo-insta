@@ -107,6 +107,12 @@ bool CGameControllerVanilla::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 
 bool CGameControllerVanilla::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {
+	//+KZ: some non-insta game modes dont spawn certain things so im better leaving this as config variables, even if it looks "ugly"
+	if(g_Config.m_SvSpawnPickupWeapons ? false : (Index == ENTITY_WEAPON_SHOTGUN || Index == ENTITY_WEAPON_GRENADE || Index == ENTITY_WEAPON_LASER))
+		return false;
+	if(g_Config.m_SvSpawnPickups ? false : (Index == ENTITY_ARMOR_1 || Index == ENTITY_HEALTH_1))
+		return false;
+	
 	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 
 	int Type = -1;
