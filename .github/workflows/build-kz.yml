@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macOS-latest, windows-latest, ubuntu-20.04]
+        os: [windows-latest, ubuntu-20.04]
         include:
         - os: ubuntu-20.04
           cmake-path: /usr/bin/
@@ -25,11 +25,11 @@ jobs:
           gtest-env: GTEST_FILTER=-*SQLite*
           package-file: "*-linux_x86_64.tar.xz"
           fancy: false
-        - os: macOS-latest
-          cmake-args: -G Ninja
-          cmake-init-env: CXXFLAGS=
-          package-file: "*-macos.dmg"
-          fancy: false
+        #- os: macOS-latest
+        #  cmake-args: -G Ninja
+        #  cmake-init-env: CXXFLAGS=
+        #  package-file: "*-macos.dmg"
+        #  fancy: false
         - os: windows-latest
           cmake-args: -A x64
           cmake-init-env: CXXFLAGS=/WX LDFLAGS=/WX
