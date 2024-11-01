@@ -6,7 +6,7 @@
 CGameControllerGLTS::CGameControllerGLTS(class CGameContext *pGameServer) :
 	CGameControllerInstaLTS(pGameServer)
 {
-    m_pGameType = "gLTS";
+    m_pGameType = "gLTSᵏᶻ";
 	m_DefaultWeapon = WEAPON_GRENADE;
 	
 	m_pStatsTable = "glts";

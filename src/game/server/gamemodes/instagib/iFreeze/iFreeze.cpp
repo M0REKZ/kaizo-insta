@@ -6,7 +6,7 @@
 CGameControllerIFreeze::CGameControllerIFreeze(class CGameContext *pGameServer) :
 	CGameControllerFreeze(pGameServer)
 {
-    m_pGameType = "iFreeze+";
+    m_pGameType = "iFreezeᵏᶻ";
 	m_DefaultWeapon = WEAPON_LASER;
 	
 	m_pStatsTable = "ifreeze";

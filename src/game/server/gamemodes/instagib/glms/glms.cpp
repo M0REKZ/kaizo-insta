@@ -6,7 +6,7 @@
 CGameControllerGLMS::CGameControllerGLMS(class CGameContext *pGameServer) :
 	CGameControllerInstaLMS(pGameServer)
 {
-    m_pGameType = "gLMS";
+    m_pGameType = "gLMSᵏᶻ";
 	m_DefaultWeapon = WEAPON_GRENADE;
 	
 	m_pStatsTable = "glms";

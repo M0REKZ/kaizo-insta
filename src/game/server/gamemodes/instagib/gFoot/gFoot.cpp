@@ -6,7 +6,7 @@
 CGameControllerGFoot::CGameControllerGFoot(class CGameContext *pGameServer) :
 CGameControllerInstaFoot(pGameServer)
 {
-    m_pGameType = "gFoot";
+    m_pGameType = "gFootᵏᶻ";
 	m_DefaultWeapon = WEAPON_GRENADE;
 	
 	m_pStatsTable = "gfoot";

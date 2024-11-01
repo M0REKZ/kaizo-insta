@@ -6,7 +6,7 @@
 CGameControllerITDM::CGameControllerITDM(class CGameContext *pGameServer) :
 	CGameControllerInstaTDM(pGameServer)
 {
-	m_pGameType = "iTDM";
+	m_pGameType = "iTDMᵏᶻ";
 	m_DefaultWeapon = WEAPON_LASER;
 
 	m_pStatsTable = "itdm";

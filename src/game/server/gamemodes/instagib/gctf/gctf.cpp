@@ -5,7 +5,7 @@
 CGameControllerGCTF::CGameControllerGCTF(class CGameContext *pGameServer) :
 	CGameControllerInstaBaseCTF(pGameServer)
 {
-	m_pGameType = "gCTF";
+	m_pGameType = "gCTFᵏᶻ";
 	m_DefaultWeapon = WEAPON_GRENADE;
 
 	m_pStatsTable = "gctf";

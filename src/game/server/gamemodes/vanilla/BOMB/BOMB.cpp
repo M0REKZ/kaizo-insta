@@ -8,7 +8,7 @@ CGameControllerBOMB::CGameControllerBOMB(class CGameContext *pGameServer) :
 {
     m_GameFlags = 0;
 
-    m_pGameType = "BOMB";
+    m_pGameType = "BOMBᵏᶻ";
     
     m_BombTime = g_Config.m_SvBombTime * Server()->TickSpeed();
 	

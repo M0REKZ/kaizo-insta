@@ -13,7 +13,7 @@
 CGameControllerBoloFng::CGameControllerBoloFng(class CGameContext *pGameServer) :
 	CGameControllerBaseFng(pGameServer)
 {
-	m_pGameType = "bolofng";
+	m_pGameType = "bolofngᵏᶻ";
 	m_GameFlags = 0;
 
 	m_SpawnWeapons = ESpawnWeapons::SPAWN_WEAPON_GRENADE;

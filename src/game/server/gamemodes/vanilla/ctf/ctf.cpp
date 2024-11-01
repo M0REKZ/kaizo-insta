@@ -9,7 +9,7 @@
 CGameControllerCTF::CGameControllerCTF(class CGameContext *pGameServer) :
 	CGameControllerBaseCTF(pGameServer)
 {
-	m_pGameType = "CTF*";
+	m_pGameType = "CTFᵏᶻ";
 	m_IsVanillaGameType = true;
 	m_GameFlags = GAMEFLAG_TEAMS | GAMEFLAG_FLAGS;
 	m_AllowSkinChange = true;

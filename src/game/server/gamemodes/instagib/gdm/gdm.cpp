@@ -5,7 +5,7 @@
 CGameControllerGDM::CGameControllerGDM(class CGameContext *pGameServer) :
 	CGameControllerInstaBaseDM(pGameServer)
 {
-	m_pGameType = "gDM";
+	m_pGameType = "gDMᵏᶻ";
 	m_DefaultWeapon = WEAPON_GRENADE;
 
 	m_pStatsTable = "gdm";

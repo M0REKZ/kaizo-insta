@@ -7,7 +7,7 @@ CGameControllerTDM::CGameControllerTDM(class CGameContext *pGameServer) :
 	CGameControllerDM(pGameServer)
 {
 	m_GameFlags = GAMEFLAG_TEAMS;
-	m_pGameType = "TDM*";
+	m_pGameType = "TDMᵏᶻ";
 	m_DefaultWeapon = WEAPON_GUN;
 	
 	m_pStatsTable = "tdm";

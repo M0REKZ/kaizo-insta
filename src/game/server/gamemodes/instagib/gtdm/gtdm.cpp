@@ -5,7 +5,7 @@
 CGameControllerGTDM::CGameControllerGTDM(class CGameContext *pGameServer) :
 	CGameControllerInstaTDM(pGameServer)
 {
-	m_pGameType = "gTDM";
+	m_pGameType = "gTDMᵏᶻ";
 	m_DefaultWeapon = WEAPON_GRENADE;
 
 	m_pStatsTable = "gtdm";

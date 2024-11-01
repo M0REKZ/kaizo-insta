@@ -20,7 +20,7 @@ CGameControllerZcatch::CGameControllerZcatch(class CGameContext *pGameServer) :
 {
 	m_GameFlags = 0;
 	m_AllowSkinChange = false;
-	m_pGameType = "zCatch";
+	m_pGameType = "zCatchᵏᶻ";
 	m_DefaultWeapon = GetDefaultWeaponBasedOnSpawnWeapons();
 
 	for(auto &Color : m_aBodyColors)

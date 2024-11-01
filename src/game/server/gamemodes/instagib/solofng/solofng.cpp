@@ -13,7 +13,7 @@
 CGameControllerSoloFng::CGameControllerSoloFng(class CGameContext *pGameServer) :
 	CGameControllerBaseFng(pGameServer)
 {
-	m_pGameType = "solofng";
+	m_pGameType = "solofngᵏᶻ";
 	m_GameFlags = 0;
 
 	m_SpawnWeapons = ESpawnWeapons::SPAWN_WEAPON_LASER;

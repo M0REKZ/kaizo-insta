@@ -6,7 +6,7 @@
 CGameControllerILMS::CGameControllerILMS(class CGameContext *pGameServer) :
 	CGameControllerInstaLMS(pGameServer)
 {
-    m_pGameType = "iLMS";
+    m_pGameType = "iLMSᵏᶻ";
 	m_DefaultWeapon = WEAPON_LASER;
 	
 	m_pStatsTable = "ilms";

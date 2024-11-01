@@ -13,7 +13,7 @@
 CGameControllerFng::CGameControllerFng(class CGameContext *pGameServer) :
 	CGameControllerTeamFng(pGameServer)
 {
-	m_pGameType = "fng";
+	m_pGameType = "fngᵏᶻ";
 	m_GameFlags = GAMEFLAG_TEAMS;
 
 	m_SpawnWeapons = ESpawnWeapons::SPAWN_WEAPON_LASER;

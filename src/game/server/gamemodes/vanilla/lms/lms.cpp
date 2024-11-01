@@ -9,7 +9,7 @@ CGameControllerLMS::CGameControllerLMS(class CGameContext *pGameServer) :
     
     m_GameFlags = 0;
 
-    m_pGameType = "LMS*";
+    m_pGameType = "LMSᵏᶻ";
 	
 	m_pStatsTable = "lms";
 	m_pExtraColumns = new CLmsColumns();

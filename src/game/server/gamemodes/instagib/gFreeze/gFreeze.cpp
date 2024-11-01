@@ -6,7 +6,7 @@
 CGameControllerGFreeze::CGameControllerGFreeze(class CGameContext *pGameServer) :
 	CGameControllerFreeze(pGameServer)
 {
-    m_pGameType = "gFreeze+";
+    m_pGameType = "gFreezeᵏᶻ";
 	m_DefaultWeapon = WEAPON_GRENADE;
 	
 	m_pStatsTable = "gfreeze";

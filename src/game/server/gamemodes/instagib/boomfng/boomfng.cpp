@@ -13,7 +13,7 @@
 CGameControllerBoomFng::CGameControllerBoomFng(class CGameContext *pGameServer) :
 	CGameControllerTeamFng(pGameServer)
 {
-	m_pGameType = "boomfng";
+	m_pGameType = "boomfngᵏᶻ";
 	m_GameFlags = GAMEFLAG_TEAMS;
 
 	m_SpawnWeapons = ESpawnWeapons::SPAWN_WEAPON_GRENADE;

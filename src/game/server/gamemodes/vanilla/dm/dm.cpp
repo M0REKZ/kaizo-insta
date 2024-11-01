@@ -7,7 +7,7 @@ CGameControllerDM::CGameControllerDM(class CGameContext *pGameServer) :
 	CGameControllerVanilla(pGameServer)
 {
 	m_GameFlags = 0;
-	m_pGameType = "DM*";
+	m_pGameType = "DMᵏᶻ";
 	m_DefaultWeapon = WEAPON_GUN;
 
 	m_pStatsTable = "dm";

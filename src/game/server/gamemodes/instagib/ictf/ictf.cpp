@@ -5,7 +5,7 @@
 CGameControllerICTF::CGameControllerICTF(class CGameContext *pGameServer) :
 	CGameControllerInstaBaseCTF(pGameServer)
 {
-	m_pGameType = "iCTF";
+	m_pGameType = "iCTFᵏᶻ";
 	m_DefaultWeapon = WEAPON_LASER;
 
 	m_pStatsTable = "ictf";

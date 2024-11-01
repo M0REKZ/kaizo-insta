@@ -6,7 +6,7 @@
 CGameControllerIFoot::CGameControllerIFoot(class CGameContext *pGameServer) :
 CGameControllerInstaFoot(pGameServer)
 {
-    m_pGameType = "iFoot";
+    m_pGameType = "iFootᵏᶻ";
 	m_DefaultWeapon = WEAPON_LASER;
 	
 	m_pStatsTable = "ifoot";

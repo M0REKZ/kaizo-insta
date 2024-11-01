@@ -6,7 +6,7 @@
 CGameControllerILTS::CGameControllerILTS(class CGameContext *pGameServer) :
 	CGameControllerInstaLTS(pGameServer)
 {
-    m_pGameType = "iLTS";
+    m_pGameType = "iLTSᵏᶻ";
 	m_DefaultWeapon = WEAPON_LASER;
 	
 	m_pStatsTable = "ilts";

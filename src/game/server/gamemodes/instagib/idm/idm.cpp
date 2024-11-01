@@ -5,7 +5,7 @@
 CGameControllerIDM::CGameControllerIDM(class CGameContext *pGameServer) :
 	CGameControllerInstaBaseDM(pGameServer)
 {
-	m_pGameType = "iDM";
+	m_pGameType = "iDMᵏᶻ";
 	m_DefaultWeapon = WEAPON_LASER;
 
 	m_pStatsTable = "idm";

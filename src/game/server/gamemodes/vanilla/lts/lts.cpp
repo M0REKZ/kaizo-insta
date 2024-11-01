@@ -9,7 +9,7 @@ CGameControllerLTS::CGameControllerLTS(class CGameContext *pGameServer) :
 	
 	m_GameFlags = GAMEFLAG_TEAMS;
 	
-	m_pGameType = "LTS*";
+	m_pGameType = "LTSᵏᶻ";
 	
 	m_pStatsTable = "lts";
 	m_pExtraColumns = new CLtsColumns();
