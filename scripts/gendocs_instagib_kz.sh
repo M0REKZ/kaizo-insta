@@ -16,19 +16,19 @@ gen_configs() {
 	local desc
 	local cmd
 	# shellcheck disable=SC2016
-	echo '+ `sv_gametype` Game type (gctf, ictf, gdm, idm, gtdm, itdm, zcatch, bolofng, solofng, boomfng, fng)'
+	echo '+ `sv_gametype` Game type (ctf, gctf, ictf, dm, gdm, idm, tdm, gtdm, itdm, lms, ilms, glms, lts, ilts, glts, bomb, ifreeze, gfreeze, hfreeze, ifoot, gfoot, zcatch, bolofng, solofng, boomfng, fng)'
 	while read -r cfg; do
 		desc="$(echo "$cfg" | cut -d',' -f7- | cut -d'"' -f2-)"
-		desc="${desc::-2}"
+		desc="${desc::${#desc}-2}"
 		cmd="$(echo "$cfg" | cut -d',' -f2 | xargs)"
 		echo "+ \`$cmd\` $desc"
-	done < <(grep '^MACRO_CONFIG_INT' src/engine/shared/variables_insta.h)
+	done < <(grep '^MACRO_CONFIG_INT' src/engine/shared/variables_kz.h)
 	while read -r cfg; do
 		desc="$(echo "$cfg" | cut -d',' -f6- | cut -d'"' -f2-)"
-		desc="${desc::-2}"
+		desc="${desc::${#desc}-2}"
 		cmd="$(echo "$cfg" | cut -d',' -f2 | xargs)"
 		echo "+ \`$cmd\` $desc"
-	done < <(grep '^MACRO_CONFIG_STR' src/engine/shared/variables_insta.h)
+	done < <(grep '^MACRO_CONFIG_STR' src/engine/shared/variables_kz.h)
 }
 
 gen_console_cmds() {
@@ -88,9 +88,9 @@ insert_at() {
 	fi
 }
 
-insert_at '^## ddnet-insta configs$' '^# ' "\n$(gen_configs)" README.md
-insert_at '^# Rcon commands$' '^# ' "\n$(gen_rcon_cmds)" README.md
-insert_at '^\+ `/drop flag' '^# ' "$(gen_chat_cmds)" README.md
+insert_at '^## kaizo-insta configs$' '^# ' "\n$(gen_configs)" ../README_KZ.md
+#insert_at '^# Rcon commands$' '^# ' "\n$(gen_rcon_cmds)" ../README_KZ.md
+#insert_at '^\+ `/drop flag' '^# ' "$(gen_chat_cmds)" ../README_KZ.md
 
 [[ -f "$(tmp)" ]] && rm "$(tmp)"
 exit 0

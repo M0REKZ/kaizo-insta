@@ -57,32 +57,6 @@ MACRO_CONFIG_INT(SvFngHammer, sv_fng_hammer, 1, 0, 1, CFGFLAG_SERVER, "(fng only
 MACRO_CONFIG_INT(SvPunishFreezeDisconnect, sv_punish_freeze_disconnect, 1, 0, 60, CFGFLAG_SERVER, "(fng) 0=off otherwise bantime in minutes when leaving server while being frozen")
 MACRO_CONFIG_INT(SvSaveServer, sv_save_server, 0, 0, 1, CFGFLAG_SERVER, "display all time score in scoreboard based on the player name")
 
-//+KZ
-
-MACRO_CONFIG_INT(SvPlasmaKills, sv_plasma_kills, 0, 0, 100, CFGFLAG_SERVER | CFGFLAG_GAME, "Plasma turret damage for player")
-MACRO_CONFIG_INT(SvLightKills, sv_light_kills, 0, 0, 100, CFGFLAG_SERVER | CFGFLAG_GAME, "Plasma turret damage for player")
-MACRO_CONFIG_INT(SvDDraceShotgun, sv_ddrace_shotgun, 0, 0, 1, CFGFLAG_SERVER, "DDrace shotgun (0 = vanilla, 1 = ddrace)")
-MACRO_CONFIG_INT(SvForceLaserType, sv_force_laser_type, 0, 0, 2, CFGFLAG_SERVER, "Laser behavior, overriding sv_oldlaser and tunes but no tune zones (0 = default, 1 = ddrace 2 = vanilla)")
-MACRO_CONFIG_INT(SvEnableDDraceHUD, sv_ddrace_hud, 0, 0, 1, CFGFLAG_SERVER, "Toggle to enable ddrace HUD")
-MACRO_CONFIG_INT(SvLaserJump, sv_laser_jump, 0, 0, 1, CFGFLAG_SERVER, "Create an explosion on first rifle bounce, allowing laser jumps.")
-
-//For Vanilla
-MACRO_CONFIG_INT(SvSpawnPickupWeapons, sv_spawn_pickup_weapons, 1, 0, 1, CFGFLAG_SERVER, "enable or disble weapons spawning")
-MACRO_CONFIG_INT(SvSpawnPickups, sv_spawn_pickups, 1, 0, 1, CFGFLAG_SERVER, "enable or disble heart and armor spawning")
-
-//For BOMB
-MACRO_CONFIG_INT(SvBombTime, sv_bomb_time, 15, 0, 1, CFGFLAG_SERVER, "Time in seconds for bomb to explode")
-MACRO_CONFIG_INT(SvBombAmount, sv_bomb_amount, 6, 0, 1, CFGFLAG_SERVER, "1 bomb for each specified amount of players (spawns at least 1 if there is less players)")
-
-//For iFreeze
-MACRO_CONFIG_INT(SvFreezeAutomeltTime, sv_freeze_automelt_time, 30, 10, 120, CFGFLAG_SERVER, "Time till the player respawn automatically when he's frozen")
-MACRO_CONFIG_INT(SvFreezeMeltRange, sv_freeze_melt_range, 100, 10, 1000, CFGFLAG_SERVER, "Maximum range to melt a player")
-MACRO_CONFIG_INT(SvFreezeMeltTime, sv_freeze_melt_time, 1200, 500, 5000, CFGFLAG_SERVER, "Time (in ms) the player must stand next to a player to melt him")
-MACRO_CONFIG_INT(SvFreezeMeltRespawn, sv_freeze_melt_respawn, 1, 0, 1, CFGFLAG_SERVER, "If a player respawns after he was being melted")
-
-//For Ball
-MACRO_CONFIG_INT(SvBallRespawn, sv_ball_respawn, 10, 1, 1000, CFGFLAG_SERVER, "Seconds for ball to go back to ball spawn")
-
 /*
 
 sv_chat_ratelimit_long_messages
@@ -125,4 +99,7 @@ MACRO_CONFIG_INT(SvRoundStatsFormatDiscord, sv_round_stats_format_discord, 1, 0,
 MACRO_CONFIG_INT(SvRoundStatsFormatHttp, sv_round_stats_format_http, 4, 0, 4, CFGFLAG_SERVER, "0=csv 1=psv 2=ascii table 3=markdown table 4=json")
 MACRO_CONFIG_INT(SvRoundStatsFormatFile, sv_round_stats_format_file, 1, 0, 4, CFGFLAG_SERVER, "0=csv 1=psv 2=ascii table 3=markdown table 4=json")
 
+
+// ddnet-insta
+#include "variables_kz.h"
 #endif

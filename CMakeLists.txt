@@ -2137,6 +2137,7 @@ set_src(ENGINE_SHARED GLOB_RECURSE src/engine/shared
   uuid_manager.cpp
   uuid_manager.h
   variables_insta.h
+  variables_kz.h
   video.cpp
   video.h
   websockets.cpp
