@@ -282,6 +282,11 @@ void CPlayer::Tick()
 
 void CPlayer::PostTick()
 {
+	if(m_PlayerFlags & PLAYERFLAG_IN_MENU) //+KZ
+		m_MenuAFK = true;
+	else
+		m_MenuAFK = false;
+	
 	// update latency value
 	if(m_PlayerFlags & PLAYERFLAG_IN_MENU)
 		m_aCurLatency[m_ClientId] = GameServer()->m_apPlayers[m_ClientId]->m_Latency.m_Min;
@@ -758,7 +763,7 @@ void CPlayer::UpdatePlaytime()
 
 void CPlayer::AfkTimer()
 {
-	if(!m_ForceAFK)
+	if(!m_ForceAFK && !m_MenuAFK)
 		SetAfk(g_Config.m_SvMaxAfkTime != 0 && m_LastPlaytime < time_get() - time_freq() * g_Config.m_SvMaxAfkTime);
 	else
 		SetAfk(true);
@@ -775,7 +780,7 @@ void CPlayer::SetAfk(bool Afk)
 
 void CPlayer::SetInitialAfk(bool Afk)
 {
-	if(!m_ForceAFK && g_Config.m_SvMaxAfkTime == 0)
+	if(!m_ForceAFK && !m_MenuAFK && g_Config.m_SvMaxAfkTime == 0)
 	{
 		SetAfk(false);
 		return;

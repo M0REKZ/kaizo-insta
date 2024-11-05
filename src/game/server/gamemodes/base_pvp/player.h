@@ -87,6 +87,7 @@ public:
 	vec2 m_CampPos;
 	
 	bool m_ForceAFK; //+KZ
+	bool m_MenuAFK;
 
 	// Will also be set if spree chat messages are turned off
 	// this is the current spree
