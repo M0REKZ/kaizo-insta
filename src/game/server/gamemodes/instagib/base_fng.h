@@ -29,6 +29,7 @@ public:
 	void OnSnapDDNetCharacter(class CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter, int SnappingClient) override;
 	CClientMask FreezeDamageIndicatorMask(class CCharacter *pChr) override;
 	bool OnSelfkill(int ClientId) override;
+	bool CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize) override;
 	bool OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim) override;
 
 	void OnSpike(class CCharacter *pChr, int SpikeTile);

@@ -342,6 +342,23 @@ bool CGameControllerBaseFng::OnSelfkill(int ClientId)
 	return true;
 }
 
+// called after spam protection on client team join request
+bool CGameControllerBaseFng::CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[NotThisId];
+	if(!pPlayer)
+		return false;
+
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return true;
+	if(!pChr->m_FreezeTime)
+		return true;
+
+	str_copy(pErrorReason, "You can't join spectators while being frozen", ErrorReasonSize);
+	return false;
+}
+
 bool CGameControllerBaseFng::OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim)
 {
 	// do not track wallshots on frozen tees

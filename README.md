@@ -327,11 +327,25 @@ And these configs determin where the stats will be sent to.
 + `sv_round_stats_discord_webhook` Will do a discord webhook POST request to that url. The url has to look like this: `https://discord.com/api/webhooks/1232962289217568799/8i_a89XXXXXXXXXXXXXXXXXXXXXXX`
   If you don't know how to setup a discord webhook, don't worry its quite simple. You need to have admin access to a discord server and then you can follow this [1 minute youtube tutorial](https://www.youtube.com/watch?v=fKksxz2Gdnc).
 + `sv_round_stats_http_endpoint` It will do a http POST request to that url with the round stats as payload. You can set this to your custom api endpoint that collect stats. Example: `https://api.zillyhuhn.com/insta/round_stats`
-+ `sv_round_stats_output_file` **NOT IMPLEMENTED YET** It will write the round stats to a file located at that path. You could then read that file with another tool or expose it with an http server. Example value: `stats.json`
++ `sv_round_stats_output_file` It will write the round stats to a file located at that path. You could then read that file with another tool or expose it with an http server.
+  It can be a relaltive path then it uses your storage.cfg location. Or a absolute path if it starts with a slash. The file will be overwritten on every round end.
+  To avoid that you can use the `%t` placeholder in the filename and it will expand to a timestamp to avoid file name collisions.
+  Example values: `stats.json`, `/tmp/round_stats_%t.csv`
 
 ## csv - comma separated values (format 0)
 
-NOT IMPLEMENTED YET
+The first two rows are special. The first is a csv header.
+The second one is the red and blue team score.
+After that each row is two players each. Red player first and blue player second.
+If player names include commas their name will be quoted (see the example player `foo,bar`).
+So this is how the result of a 2x2 could look like:
+
+```
+red_name, red_score, blue_name, blue_score
+red, 24, blue, 3
+"foo,bar", 15, (1)ChillerDrago, 2
+ChillerDragon, 0, ChillerDragon.*, 1
+```
 
 ## psv - pipe separated values (format 1)
 
@@ -355,7 +369,22 @@ Here is how it would display when posted on discord:
 
 ## Ascii table (format 2)
 
-NOT IMPLEMENTED YET
+```
++-----------------+-----------+------------+
+| map             | red_score | blue_score |
++-----------------+-----------+------------+
+| ctf5            | 203       | 1          |
++-----------------+-----------+------------+
+
++-----+------+-----------------+--------+--------+--------+--------+------------+---------------+
+| id  | team | name            | score  | kills  | deaths | ratio  | flag_grabs | flag_captures |
++-----+------+-----------------+--------+--------+--------+--------+------------+---------------+
+| 0   | red  | foo             | 1      | 1      | 3      | 0.3%   | 0          | 0             |
+| 1   | blue | bar             | 1      | 2      | 5      | 0.4%   | 0          | 0             |
+| 2   | red  | ChillerDragon   | 19     | 7      | 2      | 3.5%   | 0          | 0             |
+| 3   | blue | ChillerDragon.* | 2      | 2      | 5      | 0.4%   | 0          | 0             |
++-----+------+-----------------+--------+--------+--------+--------+------------+---------------+
+```
 
 ## Markdown (format 3)
 

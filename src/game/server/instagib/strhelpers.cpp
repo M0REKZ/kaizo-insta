@@ -1,3 +1,5 @@
+#include <base/system.h>
+
 #include "strhelpers.h"
 
 const char *str_find_digit(const char *Haystack)
@@ -62,6 +64,58 @@ bool str_contains_ip(const char *pStr)
 		}
 	}
 	return false;
+}
+
+void str_expand_timestamps(const char *pStr, char *pBuf, size_t SizeOfBuf)
+{
+	char aDate[64];
+	str_timestamp(aDate, sizeof(aDate));
+	int WriteIndex = 0;
+	for(int ReadIndex = 0; pStr[ReadIndex] && WriteIndex < (int)(SizeOfBuf - 1); ReadIndex++)
+	{
+		if(pStr[ReadIndex] == '%' && pStr[ReadIndex + 1] == 't')
+		{
+			ReadIndex++;
+			pBuf[WriteIndex] = '\0';
+			str_append(pBuf, aDate, SizeOfBuf - str_length(pBuf));
+			WriteIndex += str_length(aDate);
+			continue;
+		}
+		pBuf[WriteIndex++] = pStr[ReadIndex];
+	}
+	// the timestamp can expand out of the buffer
+	if(WriteIndex >= (int)SizeOfBuf)
+		WriteIndex = (int)(SizeOfBuf - 1);
+	pBuf[WriteIndex] = '\0';
+}
+
+char *str_escape_csv(char *pBuffer, int BufferSize, const char *pString)
+{
+	if(!str_find(pString, "\"") && !str_find(pString, ","))
+	{
+		str_copy(pBuffer, pString, BufferSize);
+		return pBuffer;
+	}
+
+	int WriteIndex = 0;
+	pBuffer[WriteIndex++] = '"';
+	for(int ReadIndex = 0; pString[ReadIndex] && WriteIndex < (BufferSize - 1); ReadIndex++)
+	{
+		if(pString[ReadIndex] == '"')
+		{
+			pBuffer[WriteIndex++] = '"';
+			pBuffer[WriteIndex++] = '"';
+			continue;
+		}
+		pBuffer[WriteIndex++] = pString[ReadIndex];
+	}
+	if(WriteIndex >= BufferSize)
+		WriteIndex = BufferSize - 1;
+	pBuffer[WriteIndex++] = '"';
+	if(WriteIndex >= BufferSize)
+		WriteIndex = BufferSize - 1;
+	pBuffer[WriteIndex] = '\0';
+	return pBuffer;
 }
 
 // int test_thing()

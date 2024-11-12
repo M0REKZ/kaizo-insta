@@ -328,7 +328,10 @@ void CGameClient::OnInit()
 	for(int i = 0; i < OLD_NUM_NETOBJTYPES; i++)
 		Client()->SnapSetStaticsize7(i, m_NetObjHandler7.GetObjSize(i));
 
-	TextRender()->LoadFonts();
+	if(!TextRender()->LoadFonts())
+	{
+		Client()->AddWarning(SWarning(Localize("Some fonts could not be loaded. Check the local console for details.")));
+	}
 	TextRender()->SetFontLanguageVariant(g_Config.m_ClLanguagefile);
 
 	// update and swap after font loading, they are quite huge
@@ -605,7 +608,7 @@ void CGameClient::OnReset()
 
 	// m_Snap was cleared in InvalidateSnapshot
 
-	std::fill(std::begin(m_aLocalTuneZone), std::end(m_aLocalTuneZone), 0);
+	std::fill(std::begin(m_aLocalTuneZone), std::end(m_aLocalTuneZone), -1);
 	std::fill(std::begin(m_aReceivedTuning), std::end(m_aReceivedTuning), false);
 	std::fill(std::begin(m_aExpectingTuningForZone), std::end(m_aExpectingTuningForZone), -1);
 	std::fill(std::begin(m_aExpectingTuningSince), std::end(m_aExpectingTuningSince), 0);
@@ -766,6 +769,8 @@ void CGameClient::OnRender()
 
 	CLineInput::RenderCandidates();
 
+	const bool WasNewTick = m_NewTick;
+
 	// clear new tick flags
 	m_NewTick = false;
 	m_NewPredictedTick = false;
@@ -774,7 +779,7 @@ void CGameClient::OnRender()
 		g_Config.m_ClDummy = 0;
 
 	// resend player and dummy info if it was filtered by server
-	if(Client()->State() == IClient::STATE_ONLINE && !m_Menus.IsActive())
+	if(Client()->State() == IClient::STATE_ONLINE && !m_Menus.IsActive() && WasNewTick)
 	{
 		if(m_aCheckInfo[0] == 0)
 		{
@@ -802,7 +807,9 @@ void CGameClient::OnRender()
 		}
 
 		if(m_aCheckInfo[0] > 0)
-			m_aCheckInfo[0]--;
+		{
+			m_aCheckInfo[0] -= minimum(Client()->GameTick(0) - Client()->PrevGameTick(0), m_aCheckInfo[0]);
+		}
 
 		if(Client()->DummyConnected())
 		{
@@ -832,7 +839,9 @@ void CGameClient::OnRender()
 			}
 
 			if(m_aCheckInfo[1] > 0)
-				m_aCheckInfo[1]--;
+			{
+				m_aCheckInfo[1] -= minimum(Client()->GameTick(1) - Client()->PrevGameTick(1), m_aCheckInfo[1]);
+			}
 		}
 	}
 }
@@ -950,7 +959,6 @@ void CGameClient::OnMessage(int MsgId, CUnpacker *pUnpacker, int Conn, bool Dumm
 		m_aReceivedTuning[Conn] = true;
 		// apply new tuning
 		m_aTuning[Conn] = NewTuning;
-		TuningList()[0] = NewTuning;
 		return;
 	}
 
@@ -2538,7 +2546,7 @@ void CGameClient::SendSwitchTeam(int Team) const
 	Client()->SendPackMsgActive(&Msg, MSGFLAG_VITAL);
 }
 
-void CGameClient::SendStartInfo7(bool Dummy) const
+void CGameClient::SendStartInfo7(bool Dummy)
 {
 	protocol7::CNetMsg_Cl_StartInfo Msg;
 	Msg.m_pName = Dummy ? Client()->DummyName() : Client()->PlayerName();
@@ -2554,6 +2562,7 @@ void CGameClient::SendStartInfo7(bool Dummy) const
 	if(Msg.Pack(&Packer))
 		return;
 	Client()->SendMsg((int)Dummy, &Packer, MSGFLAG_VITAL | MSGFLAG_FLUSH);
+	m_aCheckInfo[(int)Dummy] = -1;
 }
 
 void CGameClient::SendSkinChange7(bool Dummy)
@@ -2885,6 +2894,7 @@ void CGameClient::UpdatePrediction()
 		{
 			if(m_aReceivedTuning[g_Config.m_ClDummy])
 			{
+				TuningList()[m_aExpectingTuningForZone[g_Config.m_ClDummy]] = m_aTuning[g_Config.m_ClDummy];
 				m_GameWorld.TuningList()[m_aExpectingTuningForZone[g_Config.m_ClDummy]] = m_aTuning[g_Config.m_ClDummy];
 				m_aReceivedTuning[g_Config.m_ClDummy] = false;
 				m_aExpectingTuningForZone[g_Config.m_ClDummy] = -1;

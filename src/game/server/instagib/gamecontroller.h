@@ -462,12 +462,16 @@ public:
 		SetGameState(IGS_END_ROUND, TIMER_END);
 	}
 
+	float CalcKillDeathRatio(int Kills, int Deaths) const;
+
 	void OnEndRoundInsta();
 	void GetRoundEndStatsStrCsv(char *pBuf, size_t Size);
+	void GetRoundEndStatsStrCsvTeamPlay(char *pBuf, size_t Size);
+	void GetRoundEndStatsStrCsvNoTeamPlay(char *pBuf, size_t Size);
 	void PsvRowPlayer(const CPlayer *pPlayer, char *pBuf, size_t Size);
 	void GetRoundEndStatsStrJson(char *pBuf, size_t Size);
 	void GetRoundEndStatsStrPsv(char *pBuf, size_t Size);
-	void GetRoundEndStatsStrAsciiTable(char *pBuf, size_t Size);
+	void GetRoundEndStatsStrAsciiTable(char *pBuf, size_t SizeOfBuf);
 	void GetRoundEndStatsStrHttp(char *pBuf, size_t Size);
 	void GetRoundEndStatsStrDiscord(char *pBuf, size_t Size);
 	void GetRoundEndStatsStrFile(char *pBuf, size_t Size);
