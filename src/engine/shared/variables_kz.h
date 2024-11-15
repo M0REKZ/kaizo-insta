@@ -25,7 +25,9 @@ MACRO_CONFIG_INT(SvSpawnPickups, sv_spawn_pickups, 1, 0, 1, CFGFLAG_SERVER, "ena
 
 //For BOMB
 MACRO_CONFIG_INT(SvBombTime, sv_bomb_time, 15, 0, 1, CFGFLAG_SERVER, "Time in seconds for bomb to explode")
-MACRO_CONFIG_INT(SvBombAmount, sv_bomb_amount, 6, 0, 1, CFGFLAG_SERVER, "1 bomb for each specified amount of players (spawns at least 1 if there is less players)")
+MACRO_CONFIG_INT(SvBombAmount, sv_bomb_amount, 6, 0, 64, CFGFLAG_SERVER, "1 bomb for each specified amount of players (spawns at least 1 if there is less players)")
+MACRO_CONFIG_INT(SvBombDamage, sv_bomb_damage, 0, 0, 1, CFGFLAG_SERVER, "Enable damage in BOMB")
+MACRO_CONFIG_INT(SvBombWeapon, sv_bomb_weapon, 0, -1, 5, CFGFLAG_SERVER, "BOMB weapon")
 
 //For iFreeze
 MACRO_CONFIG_INT(SvFreezeAutomeltTime, sv_freeze_automelt_time, 30, 10, 120, CFGFLAG_SERVER, "Time until the player respawns automatically when he's frozen")

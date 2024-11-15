@@ -170,7 +170,8 @@ void CGameControllerBOMB::OnCharacterSpawn(class CCharacter *pChr)
     pChr->IncreaseHealth(10);
     pChr->IncreaseArmor(10);
     
-    pChr->GiveWeapon(WEAPON_HAMMER);
+    pChr->GiveWeapon(g_Config.m_SvBombWeapon);
+	pChr->SetActiveWeapon(g_Config.m_SvBombWeapon);
 }
 
 bool CGameControllerBOMB::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
@@ -181,7 +182,9 @@ bool CGameControllerBOMB::OnEntity(int Index, int x, int y, int Layer, int Flags
 
 bool CGameControllerBOMB::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
-    Dmg = 0; //TODO: maybe i should add an option for bomb with damage
+	if(!g_Config.m_SvBombDamage)
+    	Dmg = 0;
+	
     CGameControllerDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
 	if(From < 0 || From > MAX_CLIENTS) //only valid CID
 		return false;

@@ -1183,7 +1183,11 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	if(From < 0 || From >= MAX_CLIENTS) //+KZ
 	{
 		From = m_pPlayer->GetCid();
-		DoKZDamage(Force,Dmg,From,Weapon);
+		
+		if(GameServer()->m_pController->m_IsInstagibKZ)
+		{
+			DoKZDamage(Force,Dmg,From,Weapon);
+		}
 	}
 	
 	if(GameServer()->m_pController->OnCharacterTakeDamage(Force, Dmg, From, Weapon, *this))
