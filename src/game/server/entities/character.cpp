@@ -2938,7 +2938,14 @@ void CCharacter::HandleKZTiles()
 			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
 		}
 		
-		
+		if(m_pPlayer->GetTeam() == TEAM_BLUE && TileIndex == TILE_TEAMRED_DEATH)
+		{
+			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
+		}
+		else if(m_pPlayer->GetTeam() == TEAM_RED && TileIndex == TILE_TEAMBLUE_DEATH)
+		{
+			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
+		}
 		
 		if(m_pPlayer->GetTeam() == TEAM_BLUE)
 		{

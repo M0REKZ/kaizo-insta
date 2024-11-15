@@ -989,6 +989,38 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 			{
 				continue;
 			}
+			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 12)) //+KZ Water
+			{
+				Msg.AddInt((int)0.3f);
+			}
+			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 2)) //+KZ Water
+			{
+				Msg.AddInt((int)0.9f);
+			}
+			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 0)) //+KZ Water
+			{
+				Msg.AddInt((int)6.0f);
+			}
+			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 3)) //+KZ Water
+			{
+				Msg.AddInt((int)6.0f);
+			}
+			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 7)) //+KZ Water
+			{
+				Msg.AddInt((int)0.9f);
+			}
+			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 5)) //+KZ Water
+			{
+				Msg.AddInt((int)6.0f);
+			}
+			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 4)) //+KZ Water
+			{
+				Msg.AddInt((int)6.0f);
+			}
+			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 11)) //+KZ Water
+			{
+				Msg.AddInt((int)7.0f);
+			}
 			else if((i == 31) // collision
 				&& (m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO || m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOCOLL))
 			{

@@ -283,6 +283,7 @@ private:
 	
 public:
 	void DoKZDamage(vec2 Force, int Dmg, int From, int Weapon);
+	bool InWater() { return m_Water; }
 	void CatchBall();
 	bool m_HasBall = false;
 	int m_Mines;
