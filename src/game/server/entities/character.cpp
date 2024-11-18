@@ -1285,7 +1285,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 			AmmoCount = (m_FreezeTime == 0) ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : 0;
 	}
     
-	if(GetPlayer()->IsAfk() || GetPlayer()->IsPaused())
+	if(GetPlayer()->IsAfk() || GetPlayer()->IsPaused() || GetPlayer()->m_MenuAFK)
 	{
 		if(m_FreezeTime > 0 || m_Core.m_DeepFrozen || m_Core.m_LiveFrozen)
 			Emote = EMOTE_NORMAL;
@@ -1457,7 +1457,7 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_COLLISION_DISABLED;
 	if(m_Core.m_HookHitDisabled || !Tuning()->m_PlayerHooking)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_HOOK_HIT_DISABLED;
-	if(m_Core.m_EndlessJump)
+	if(m_Core.m_EndlessJump || m_Water)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_JUMP;
 	if(m_Core.m_Jetpack)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_JETPACK;
@@ -1475,15 +1475,15 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_GRENADE;
 	if(m_Core.m_HasTelegunLaser)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_LASER;
-	if(m_Core.m_aWeapons[WEAPON_HAMMER].m_Got)
+	if(m_Core.m_aWeapons[WEAPON_HAMMER].m_Got && !m_HasBall)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_HAMMER;
-	if(m_Core.m_aWeapons[WEAPON_GUN].m_Got)
+	if(m_Core.m_aWeapons[WEAPON_GUN].m_Got && !m_HasBall)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_GUN;
-	if(m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Got)
+	if(m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Got && !m_HasBall)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_SHOTGUN;
-	if(m_Core.m_aWeapons[WEAPON_GRENADE].m_Got)
+	if(m_Core.m_aWeapons[WEAPON_GRENADE].m_Got && !m_HasBall)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_GRENADE;
-	if(m_Core.m_aWeapons[WEAPON_LASER].m_Got)
+	if(m_Core.m_aWeapons[WEAPON_LASER].m_Got && !m_HasBall)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_LASER;
 	if(m_Core.m_ActiveWeapon == WEAPON_NINJA)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_NINJA;

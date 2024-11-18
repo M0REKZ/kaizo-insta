@@ -980,6 +980,11 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 	else
 		pParams = (int *)&(m_aTuningList[Zone]);
 
+	union { //+KZ for modded tunes
+		float a;
+		int b;
+	} tempunionkz;
+	
 	for(unsigned i = 0; i < sizeof(m_Tuning) / sizeof(int); i++)
 	{
 		if(m_apPlayers[ClientId] && m_apPlayers[ClientId]->GetCharacter())
@@ -991,35 +996,43 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 			}
 			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 12)) //+KZ Water
 			{
-				Msg.AddInt((int)0.3f);
+				tempunionkz.a = 0.3f;
+				Msg.AddInt(tempunionkz.b);
 			}
 			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 2)) //+KZ Water
 			{
-				Msg.AddInt((int)0.9f);
+				tempunionkz.a = 0.9f;
+				Msg.AddInt(tempunionkz.b);
 			}
 			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 0)) //+KZ Water
 			{
-				Msg.AddInt((int)6.0f);
+				tempunionkz.a = 6.0f;
+				Msg.AddInt(tempunionkz.b);
 			}
 			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 3)) //+KZ Water
 			{
-				Msg.AddInt((int)6.0f);
+				tempunionkz.a = 6.0f;
+				Msg.AddInt(tempunionkz.b);
 			}
 			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 7)) //+KZ Water
 			{
-				Msg.AddInt((int)0.9f);
+				tempunionkz.a = 0.9f;
+				Msg.AddInt(tempunionkz.b);
 			}
 			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 5)) //+KZ Water
 			{
-				Msg.AddInt((int)6.0f);
+				tempunionkz.a = 6.0f;
+				Msg.AddInt(tempunionkz.b);
 			}
 			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 4)) //+KZ Water
 			{
-				Msg.AddInt((int)6.0f);
+				tempunionkz.a = 6.0f;
+				Msg.AddInt(tempunionkz.b);
 			}
 			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 11)) //+KZ Water
 			{
-				Msg.AddInt((int)7.0f);
+				tempunionkz.a = 7.0f;
+				Msg.AddInt(tempunionkz.b);
 			}
 			else if((i == 31) // collision
 				&& (m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO || m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOCOLL))
