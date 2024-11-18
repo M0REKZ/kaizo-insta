@@ -33,6 +33,9 @@ int CGameControllerVanilla::GameInfoExFlags(int SnappingClient, int DDRaceFlags)
 
 bool CGameControllerVanilla::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
+	if(!str_comp(m_pGameType, "BOMBᵏᶻ") && !g_Config.m_SvBombDamage)
+		return false;
+	
 	if(Weapon == WEAPON_GUN || Weapon == WEAPON_SHOTGUN)
 		Dmg = 1;
 	if(Weapon == WEAPON_LASER)

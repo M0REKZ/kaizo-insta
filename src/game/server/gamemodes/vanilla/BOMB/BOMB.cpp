@@ -120,7 +120,7 @@ void CGameControllerBOMB::ExplodeBomb(CPlayer* BombPlayer)
     vec2 BombPos = BombPlayer->GetCharacter()->m_Pos;
     
     GameServer()->CreateSound(BombPos, SOUND_GRENADE_EXPLODE);
-    BombPlayer->KillCharacter();
+    BombPlayer->KillCharacter(WEAPON_SELF);
     GameServer()->CreateExplosion(BombPos, BombPlayer->GetCid(), WEAPON_GAME, false, 0);
     BombPlayer->m_IsBomb = false;
     
@@ -199,6 +199,9 @@ bool CGameControllerBOMB::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From
 
 int CGameControllerBOMB::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
+	if(WeaponId == WEAPON_GAME)
+		return false;
+	
     if(m_RoundActive && pVictim)
     {
         pVictim->GetPlayer()->m_IsBomb = false;
