@@ -183,9 +183,14 @@ bool CGameControllerBOMB::OnEntity(int Index, int x, int y, int Layer, int Flags
 bool CGameControllerBOMB::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
 	if(!g_Config.m_SvBombDamage)
-    	Dmg = 0;
+	{
+		Dmg = 0;
+	}
+	else
+	{
+		CGameControllerDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
+	}
 	
-    CGameControllerDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
 	if(From < 0 || From > MAX_CLIENTS) //only valid CID
 		return false;
     if(GameServer()->m_apPlayers[From] == Character.GetPlayer())
