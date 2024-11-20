@@ -11,6 +11,8 @@
 // ideally the ddnet-insta commands call the original command
 // if sv_gametype is "ddnet"
 
+CONSOLE_COMMAND("credits_ddnet", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConCredits, this, "Shows the credits of the DDNet mod");
+
 // "rank" shadows a ddnet command
 CONSOLE_COMMAND("rank", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConRankCmdlist, this, "Lists available rank commands")
 // "top5" shadows a ddnet command

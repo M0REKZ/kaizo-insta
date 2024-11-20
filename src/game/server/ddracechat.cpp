@@ -7,6 +7,8 @@
 #include <game/server/teams.h>
 #include <game/version.h>
 
+#include <game/server/instagib/version.h>
+
 #include "entities/character.h"
 #include "player.h"
 #include "score.h"
@@ -26,7 +28,9 @@ void CGameContext::ConCreditsGctf(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"https://github.com/ddnet-insta/ddnet-insta/");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"Thanks to AssassinTee and Cuube");
+		"Thanks to AssassinTee, Cuube, Anime-pdf, M0REKZ");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+		"JSaurusRex, jxsl13 and lukure");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"based on ddnet see /credits_ddnet");
 }
@@ -85,9 +89,11 @@ void CGameContext::ConInfo(IConsole::IResult *pResult, void *pUserData)
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"Custom DDNet-insta fork by +KZ");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
-		"DDNet-insta by ChillerDragon");
+		"DDNet-insta " DDNET_INSTA_VERSIONSTR " by ChillerDragon");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"https://github.com/ddnet-insta/ddnet-insta/");
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
+		"built on: " DDNET_INSTA_BUILD_DATE);
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
 		"based on:");
 	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp",
