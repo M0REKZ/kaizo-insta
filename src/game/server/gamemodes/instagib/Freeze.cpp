@@ -56,48 +56,38 @@ void CGameControllerFreeze::Tick()
         ResetFrozenPlayer();
         GameServer()->SendBroadcast((BlueScored) ? "Blue team scores" : "Red team scores", -1);
         GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
+		
+		
+		//DoWinCheck
+		if((m_GameInfo.m_ScoreLimit > 0 && (m_aTeamscore[TEAM_RED] >= m_GameInfo.m_ScoreLimit || m_aTeamscore[TEAM_BLUE] >= m_GameInfo.m_ScoreLimit)) ||
+			(m_GameInfo.m_TimeLimit > 0 && (Server()->Tick() - m_GameStartTick) >= m_GameInfo.m_TimeLimit * Server()->TickSpeed() * 60))
+		{
+			if(m_SuddenDeath)
+			{
+				if(m_aTeamscore[TEAM_RED] / 100 != m_aTeamscore[TEAM_BLUE] / 100)
+				{
+					EndRound();
+					//return true;
+				}
+			}
+			else
+			{
+				if(m_aTeamscore[TEAM_RED] != m_aTeamscore[TEAM_BLUE])
+				{
+					EndRound();
+					//return true;
+				}
+				else
+					m_SuddenDeath = 1;
+			}
+		}
+		
     }
 }
 
 int CGameControllerFreeze::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
-	//CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
-
-    /*
-	if(pKiller && WeaponId != WEAPON_GAME)
-	{
-		// do team scoring
-		if(pKiller == pVictim->GetPlayer() || pKiller->GetTeam() == pVictim->GetPlayer()->GetTeam())
-			m_aTeamscore[pKiller->GetTeam() & 1]--;
-		else
-			m_aTeamscore[pKiller->GetTeam() & 1]++;
-	}
-     */
-
-	// check score win condition
-	if((m_GameInfo.m_ScoreLimit > 0 && (m_aTeamscore[TEAM_RED] >= m_GameInfo.m_ScoreLimit || m_aTeamscore[TEAM_BLUE] >= m_GameInfo.m_ScoreLimit)) ||
-		(m_GameInfo.m_TimeLimit > 0 && (Server()->Tick() - m_GameStartTick) >= m_GameInfo.m_TimeLimit * Server()->TickSpeed() * 60))
-	{
-		if(m_SuddenDeath)
-		{
-			if(m_aTeamscore[TEAM_RED] / 100 != m_aTeamscore[TEAM_BLUE] / 100)
-			{
-				EndRound();
-				return true;
-			}
-		}
-		else
-		{
-			if(m_aTeamscore[TEAM_RED] != m_aTeamscore[TEAM_BLUE])
-			{
-				EndRound();
-				return true;
-			}
-			else
-				m_SuddenDeath = 1;
-		}
-	}
-	return false;
+	return CGameControllerInstagib::OnCharacterDeath(pVictim, pKiller, WeaponId);
 }
 
 bool CGameControllerFreeze::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
