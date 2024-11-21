@@ -24,7 +24,7 @@ void CGameControllerBOMB::Tick()
 {
     CGameControllerDM::Tick();
     
-    SetSkins(); //a lot of ugly loops...
+    //SetSkins(); //a lot of ugly loops...
 	
 	if(m_RoundActive && !(GameServer()->m_World.m_Paused))
 	{
@@ -55,7 +55,8 @@ void CGameControllerBOMB::Tick()
     }
     if(PlayerAmount == 1 && !m_RoundActive)
     {
-        GameServer()->SendBroadcast("Waiting for players...", -1);
+		if(Server()->Tick() % Server()->TickSpeed() == 0)
+        	GameServer()->SendBroadcast("Waiting for players...", -1);
     }
     if(PlayerAmount == 1 && m_RoundActive)
     {
@@ -172,6 +173,8 @@ void CGameControllerBOMB::OnCharacterSpawn(class CCharacter *pChr)
     
     pChr->GiveWeapon(g_Config.m_SvBombWeapon);
 	pChr->SetActiveWeapon(g_Config.m_SvBombWeapon);
+	
+	SetSkins();
 }
 
 bool CGameControllerBOMB::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
@@ -351,6 +354,17 @@ void CGameControllerBOMB::SetSkins()
                     GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[4] = 16777215;
                     GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[5] = 16777215;
                 }
+				
+				protocol7::CNetMsg_Sv_SkinChange Msg;
+				Msg.m_ClientId = i;
+				for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+				{
+					Msg.m_apSkinPartNames[p] = GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[p];
+					Msg.m_aSkinPartColors[p] = GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[p];
+					Msg.m_aUseCustomColors[p] = GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[p];
+				}
+
+				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
             }
         }
     }
