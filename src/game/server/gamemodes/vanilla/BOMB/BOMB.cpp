@@ -374,7 +374,7 @@ void CGameControllerBOMB::SetSkins()
 
 bool CGameControllerBOMB::DoWincheckRound()
 {
-    if(!m_RoundActive && m_RoundPauseTime == -1)
+    if((!m_RoundActive && m_RoundPauseTime == -1) || GameServer()->m_World.m_Paused)
         return false;
     
     // check score win condition
@@ -446,7 +446,7 @@ bool CGameControllerBOMB::DoWincheckRound()
         {
             pAlivePlayer->IncrementScore();
             m_BombTime = g_Config.m_SvBombTime * Server()->TickSpeed();
-            FakeEndRound();
+            FakeEndRound(pAlivePlayer);
             SetAllUndead();
             return true;
         }
@@ -462,20 +462,33 @@ void CGameControllerBOMB::SetAllUndead()
         {
             if((GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_IsDead ) || GameServer()->m_apPlayers[i]->m_IsDead)
             {
+				GameServer()->m_apPlayers[i]->m_IsDead = false;
                 GameServer()->m_apPlayers[i]->SetTeamRaw(TEAM_RED);
                 GameServer()->m_apPlayers[i]->Respawn();
             }
-            GameServer()->m_apPlayers[i]->m_IsDead = false;
+			else
+			{
+				GameServer()->m_apPlayers[i]->m_IsDead = false;
+			}
         }
     }
 }
 
-void CGameControllerBOMB::FakeEndRound()
+void CGameControllerBOMB::FakeEndRound(class CPlayer *pAlivePlayer)
 {
     //m_GameOverTick = Server()->Tick();
     GameServer()->m_World.m_Paused = true;
     m_RoundPauseTime = 150;
-    GameServer()->SendBroadcast("Round Finish", -1);
+	if(pAlivePlayer)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "'%s' wins the round!", Server()->ClientName(pAlivePlayer->GetCid()));
+		GameServer()->SendBroadcast(aBuf, -1);
+	}
+	else
+	{
+		GameServer()->SendBroadcast("Round Finish", -1);
+	}
     KillEveryone();
     //SetGameState(IGS_END_MATCH, TIMER_END);
 }

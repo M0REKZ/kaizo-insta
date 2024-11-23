@@ -94,7 +94,7 @@ class CGameControllerBOMB : public CGameControllerDM
 protected:
     virtual bool DoWincheckRound() override;
     virtual void SetAllUndead();
-    virtual void FakeEndRound();
+    virtual void FakeEndRound(class CPlayer *pAlivePlayer = nullptr);
     virtual void KillEveryone();
     int m_RoundPauseTime = -1;
 public:
