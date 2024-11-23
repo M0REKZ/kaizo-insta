@@ -259,6 +259,7 @@ void CGameControllerBOMB::TransferBomb(CPlayer* From, CPlayer* To)
 {
     To->m_IsBomb = From->m_IsBomb;
     From->m_IsBomb = false;
+	SetSkins();
 }
 
 void CGameControllerBOMB::SetBombs()
