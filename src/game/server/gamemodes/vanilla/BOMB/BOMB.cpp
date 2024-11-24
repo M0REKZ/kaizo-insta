@@ -185,15 +185,16 @@ bool CGameControllerBOMB::OnEntity(int Index, int x, int y, int Layer, int Flags
 
 bool CGameControllerBOMB::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
-	if(!g_Config.m_SvBombDamage && !Character.m_TakingNoOwnerDamage)
+	if(g_Config.m_SvBombDamage || Character.m_TakingNoOwnerDamage)
+	{
+		CGameControllerDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
+	}
+	else
 	{
 		Dmg = 0;
 		CGameControllerPvp::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
 	}
-	else
-	{
-		CGameControllerDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
-	}
+
 	
 	if(From < 0 || From > MAX_CLIENTS) //only valid CID
 		return false;
