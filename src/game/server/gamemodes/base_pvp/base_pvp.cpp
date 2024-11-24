@@ -1164,7 +1164,7 @@ void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 		GameServer()->SendChatTarget(ClientId, "Custom DDNet-insta fork by +KZ: https://m0rekz.github.io/Kaizo-insta/");
 		GameServer()->SendChatTarget(ClientId, "Original DDNet-insta by ChillerDragon");
 		GameServer()->SendChatTarget(ClientId, "Includes some changes from JSaurusRex fork, Pointer's tw_plus, Foot and other mods");
-		GameServer()->SendChatTarget(ClientId, "DDraceNetwork Mod. Version: " GAME_VERSION);
+		//GameServer()->SendChatTarget(ClientId, "DDraceNetwork Mod. Version: " GAME_VERSION);
 
 		GameServer()->AlertOnSpecialInstagibConfigs(ClientId);
 		GameServer()->ShowCurrentInstagibConfigsMotd(ClientId);
