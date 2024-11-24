@@ -287,6 +287,7 @@ public:
 	void CatchBall();
 	bool m_HasBall = false;
 	int m_Mines;
+	bool m_TakingNoOwnerDamage = false;
 };
 
 enum

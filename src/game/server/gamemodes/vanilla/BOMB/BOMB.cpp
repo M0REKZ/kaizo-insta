@@ -185,9 +185,10 @@ bool CGameControllerBOMB::OnEntity(int Index, int x, int y, int Layer, int Flags
 
 bool CGameControllerBOMB::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
-	if(!g_Config.m_SvBombDamage)
+	if(!g_Config.m_SvBombDamage && !Character.m_TakingNoOwnerDamage)
 	{
 		Dmg = 0;
+		CGameControllerPvp::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
 	}
 	else
 	{

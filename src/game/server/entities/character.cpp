@@ -1182,6 +1182,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 {
 	if(From < 0 || From >= MAX_CLIENTS) //+KZ
 	{
+		m_TakingNoOwnerDamage = true;
 		From = m_pPlayer->GetCid();
 		
 		if(GameServer()->m_pController->m_IsInstagibKZ)
@@ -1191,7 +1192,10 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	}
 	
 	if(GameServer()->m_pController->OnCharacterTakeDamage(Force, Dmg, From, Weapon, *this))
+	{
+		m_TakingNoOwnerDamage = false;
 		return false;
+	}
 
 	if(Dmg)
 	{
@@ -1210,6 +1214,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	vec2 Temp = m_Core.m_Vel + Force;
 	m_Core.m_Vel = ClampVel(m_MoveRestrictions, Temp);
 
+	m_TakingNoOwnerDamage = false;
 	return true;
 }
 
