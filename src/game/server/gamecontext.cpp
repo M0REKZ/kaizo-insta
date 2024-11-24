@@ -2304,9 +2304,11 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 		pPlayer->UpdatePlaytime();
 		char aCensoredMessage[256];
 		CensorMessage(aCensoredMessage, pMsg->m_pMessage, sizeof(aCensoredMessage));
+		char aChatMessage[256];
+		str_copy(aChatMessage, aCensoredMessage);
 		if(g_Config.m_SvUnstackChat)
-			InstagibUnstackChatMessage(aCensoredMessage, pMsg->m_pMessage, sizeof(aCensoredMessage));
-		SendChat(ClientId, Team, aCensoredMessage, ClientId);
+			InstagibUnstackChatMessage(aChatMessage, aCensoredMessage, sizeof(aChatMessage));
+		SendChat(ClientId, Team, aChatMessage, ClientId);
 	}
 }
 
