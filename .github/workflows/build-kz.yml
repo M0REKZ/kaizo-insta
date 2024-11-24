@@ -107,5 +107,5 @@ jobs:
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: ddnet-${{ matrix.os }}
+        name: Kaizo-Insta-${{ matrix.os }}
         path: release/artifacts
