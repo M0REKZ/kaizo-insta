@@ -368,18 +368,19 @@ void CGameControllerBOMB::SetSkins()
                     GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[4] = 16777215;
                     GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[5] = 16777215;
                 }
-				/*
-				protocol7::CNetMsg_Sv_SkinChange Msg;
-				Msg.m_ClientId = i;
-				for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
-				{
-					Msg.m_apSkinPartNames[p] = GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[p];
-					Msg.m_aSkinPartColors[p] = GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[p];
-					Msg.m_aUseCustomColors[p] = GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[p];
-				}
-
-				Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);*/
+				
             }
+			
+			protocol7::CNetMsg_Sv_SkinChange Msg;
+			Msg.m_ClientId = i;
+			for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+			{
+				Msg.m_apSkinPartNames[p] = GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[p];
+				Msg.m_aSkinPartColors[p] = GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[p];
+				Msg.m_aUseCustomColors[p] = GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[p];
+			}
+
+			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
         }
     }
 }
