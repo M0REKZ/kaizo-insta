@@ -9,7 +9,7 @@ CGameControllerBOMB::CGameControllerBOMB(class CGameContext *pGameServer) :
     m_GameFlags = 0;
 
     m_pGameType = "BOMBᵏᶻ";
-    
+	m_AllowSkinChange = false;
     m_BombTime = g_Config.m_SvBombTime * Server()->TickSpeed();
 	
 	m_pStatsTable = "bomb";
@@ -25,6 +25,17 @@ void CGameControllerBOMB::Tick()
     CGameControllerDM::Tick();
     
     //SetSkins(); //a lot of ugly loops...
+	
+	if(g_Config.m_SvBombWeapon == WEAPON_NINJA && (Server()->Tick() % (Server()->TickSpeed() * 5) == 0))
+	{
+		for(int i = 0; i < MAX_CLIENTS; ++i)
+		{
+			if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetCharacter())
+			{
+				GameServer()->m_apPlayers[i]->GetCharacter()->SetNinjaActivationTick(Server()->Tick());
+			}
+		}
+	}
 	
 	if(m_RoundActive && !(GameServer()->m_World.m_Paused))
 	{
