@@ -4250,11 +4250,16 @@ void CGameContext::OnInit(const void *pPersistentData)
 
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
-			int Level = Server()->GetAuthedState(i);
-			if(Level)
+			if(Server()->ClientSlotEmpty(i))
 			{
-				m_TeeHistorian.RecordAuthInitial(i, Level, Server()->GetAuthName(i));
+				continue;
 			}
+			const int Level = Server()->GetAuthedState(i);
+			if(Level == AUTHED_NO)
+			{
+				continue;
+			}
+			m_TeeHistorian.RecordAuthInitial(i, Level, Server()->GetAuthName(i));
 		}
 	}
 
@@ -4717,7 +4722,7 @@ void CGameContext::OnSetAuthed(int ClientId, int Level)
 	}
 	if(m_TeeHistorianActive)
 	{
-		if(Level)
+		if(Level != AUTHED_NO)
 		{
 			m_TeeHistorian.RecordAuthLogin(ClientId, Level, Server()->GetAuthName(ClientId));
 		}

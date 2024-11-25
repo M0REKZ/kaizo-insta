@@ -407,7 +407,7 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_PlayerFlags = PlayerFlags_SixToSeven(m_PlayerFlags);
 		if(SnappingClientVersion >= VERSION_DDRACE && (m_PlayerFlags & PLAYERFLAG_AIM))
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_AIM;
-		if(Server()->ClientAuthed(m_ClientId) && (!g_Config.m_SvHideAdmins || Server()->GetAuthedState(SnappingClient) != AUTHED_NO))
+		if(Server()->GetAuthedState(m_ClientId) != AUTHED_NO && (!g_Config.m_SvHideAdmins || Server()->GetAuthedState(SnappingClient) != AUTHED_NO))
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_ADMIN;
 		if(!GameServer()->m_pController->IsPlayerReadyMode() || m_IsReadyToPlay)
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_READY;
