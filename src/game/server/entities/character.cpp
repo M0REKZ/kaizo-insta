@@ -2711,7 +2711,7 @@ void CCharacter::HandleKZTiles()
 	
 	if(TileIndex == TILE_ADMIN)
 	{
-		if(!(Server()->ClientAuthed(m_pPlayer->GetCid())))
+		if(Server()->GetAuthedState(m_pPlayer->GetCid()) == AUTHED_NO)
 		{
 			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
 			GameServer()->SendChatTarget(m_pPlayer->GetCid(), "Only Admins allowed");
