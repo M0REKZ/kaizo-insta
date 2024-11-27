@@ -613,6 +613,7 @@ public:
 	void OnSetAuthed(int ClientId, int Level) override;
 
 	void ResetTuning();
+	void HandleKZBot(int CID, CNetObj_PlayerInput &Input); //+KZ
 };
 
 #endif

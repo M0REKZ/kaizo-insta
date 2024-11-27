@@ -236,6 +236,8 @@ public:
 	int m_RescueMode;
 
 	CSaveTee m_LastTeleTee;
+	
+	void HandleKZBot(CNetObj_PlayerInput &Input);
 };
 
 #endif

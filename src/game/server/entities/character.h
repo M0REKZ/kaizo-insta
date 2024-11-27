@@ -280,8 +280,10 @@ private:
 	int m_BallReleaseTick;
 	int m_slowDeathTick = 0; //from pointer
 	int m_healthArmorZoneTick = 0; // from pointer
+	int m_KZBotDirection;
 	
 public:
+	void HandleKZBot(CNetObj_PlayerInput &Input);
 	void DoKZDamage(vec2 Force, int Dmg, int From, int Weapon);
 	bool InWater() { return m_Water; }
 	void CatchBall();

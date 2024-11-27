@@ -5,6 +5,8 @@
 #include "pickup.h"
 #include "projectile.h"
 
+#include "ddnet_pvp/vanilla_pickup.h"
+
 #include "kz/mine.h"
 #include "kz/ball.h"
 
@@ -23,6 +25,8 @@
 #include <game/server/score.h>
 #include <game/server/teams.h>
 #include <game/kztiles.h>
+
+#include <engine/server/server.h>
 
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
@@ -3054,4 +3058,132 @@ void CCharacter::CatchBall()
 	m_BallQueuedWeapon = m_Core.m_ActiveWeapon;
 	m_HasBall = true;
 	SetWeapon(WEAPON_GRENADE);
+}
+
+void CCharacter::HandleKZBot(CNetObj_PlayerInput &Input)
+{
+	switch(g_Config.m_SvKZBotsIA)
+	{
+		case 0:
+			CCharacter *pClosestChar = nullptr;
+			pClosestChar = GameWorld()->ClosestCharacter(m_Pos,10000.0f,this);
+			CVanillaPickup *pClosestPickup = nullptr;
+			
+		{
+			float ClosestRange = 100000.0f;
+			CVanillaPickup *pClosest = 0;
+			
+			CVanillaPickup *p = (CVanillaPickup *)GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_PICKUP);
+			for(; p; p = (CVanillaPickup *)p->TypeNext())
+			{
+				if(Collision()->IntersectLine(m_Pos,p->m_Pos,nullptr,nullptr))
+					continue;
+				
+				if((p->Type() == POWERUP_HEALTH && m_Health >= 10) || (p->Type() == POWERUP_ARMOR && m_Armor >= 10) || (p->Type() == WEAPON_SHOTGUN && m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Ammo) || (p->Type() == WEAPON_LASER && m_Core.m_aWeapons[WEAPON_LASER].m_Ammo) || (p->Type() == WEAPON_GRENADE && m_Core.m_aWeapons[WEAPON_GRENADE].m_Ammo)  || (p->Type() == WEAPON_NINJA && m_Core.m_aWeapons[WEAPON_NINJA].m_Got))
+					continue;
+				
+				if(p->GetSpawnTick() > 0)
+				{
+					//printf("%d",((CVanillaPickup*)p)->GetSpawnTick());
+					continue;
+				}
+						
+				
+				float Len = distance(m_Pos, p->m_Pos);
+				if(Len < p->GetProximityRadius() + 100000.0f)
+				{
+					if(Len < ClosestRange)
+					{
+						ClosestRange = Len;
+						pClosest = p;
+					}
+				}
+			}
+			
+			pClosestPickup = pClosest;
+		}
+			if(pClosestPickup)
+			{
+				Input.m_Direction = pClosestPickup->m_Pos.x > m_Pos.x ? 1 : -1;
+				
+				if(pClosestPickup->m_Pos.y < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
+				{
+					if(IsGrounded() || (m_Core.m_Jumps > 0 && m_Core.m_Vel.y > 0))
+						Input.m_Jump = true;
+					else
+						Input.m_Jump = false;
+				}
+			}
+			
+			if(pClosestChar)
+			{
+				Input.m_TargetX = pClosestChar->m_Pos.x - m_Pos.x; // aim
+				Input.m_TargetY = pClosestChar->m_Pos.y - m_Pos.y;
+				
+				if(!pClosestPickup)
+					Input.m_Direction = pClosestChar->m_Pos.x > m_Pos.x ? 1 : -1;
+				
+				//printf("%.5f %.5f \n",distance(m_Pos, pClosestChar->m_Pos),30.0f);
+
+				if(m_Core.m_aWeapons[WEAPON_NINJA].m_Got)
+				{
+					//SetWeapon(WEAPON_LASER);
+				}
+				else if(m_Core.m_aWeapons[WEAPON_LASER].m_Got && m_Core.m_aWeapons[WEAPON_LASER].m_Ammo && distance(m_Pos, pClosestChar->m_Pos) < GameServer()->Tuning()->m_LaserReach)
+				{
+					SetWeapon(WEAPON_LASER);
+				}
+				else if(m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Got && m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Ammo && distance(m_Pos, pClosestChar->m_Pos) < GameServer()->Tuning()->m_ShotgunLifetime * 3000.0f)
+				{
+					SetWeapon(WEAPON_SHOTGUN);
+				}
+				else if(m_Core.m_aWeapons[WEAPON_HAMMER].m_Got && distance(m_Pos, pClosestChar->m_Pos) < 40.0f)
+				{
+					SetWeapon(WEAPON_HAMMER);
+				}
+				else if(m_Core.m_aWeapons[WEAPON_GUN].m_Got)
+				{
+					SetWeapon(WEAPON_GUN);
+				}
+				
+				if(pClosestChar->m_Pos.y < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
+				{
+					if(IsGrounded() || (m_Core.m_Jumps > 0 && m_Core.m_Vel.y > 0))
+						Input.m_Jump = true;
+					else
+						Input.m_Jump = false;
+				}
+				
+				if(!Collision()->IntersectLine(m_Pos,pClosestChar->m_Pos,nullptr,nullptr) || m_Core.m_aWeapons[WEAPON_NINJA].m_Got)
+				{
+					if(!m_LatestInput.m_Fire)
+						Input.m_Fire = true;
+					else
+						Input.m_Fire = false;
+				}
+			}
+			
+			if(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH)
+			{
+				if(IsGrounded() || (m_Core.m_Jumps > 0 && m_Core.m_Vel.y > 0))
+					Input.m_Jump = true;
+				else
+					Input.m_Jump = false;
+			}
+			
+			break;
+			/*
+			Input.m_Fire = GameServer()->Server()->Tick() % (2) == 1;
+			Input.m_WantedWeapon = WEAPON_GUN-1;
+			Input.m_Direction = 0;
+			Input.m_TargetX = (rand() % 128) - 64; // look randomly
+			Input.m_TargetY = (rand() % 128) - 64;
+			if (rand() % (SERVER_TICK_SPEED*2) == 1)
+				m_KZBotDirection = -m_KZBotDirection;
+			Input.m_Direction = m_KZBotDirection;
+			if (rand() % (SERVER_TICK_SPEED*2) == 1)
+				Input.m_Jump = true;*/
+	}
+	
+	
 }

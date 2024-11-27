@@ -15,6 +15,8 @@
 #include <game/gamecore.h>
 #include <game/teamscore.h>
 
+#include <engine/server/server.h>
+
 MACRO_ALLOC_POOL_ID_IMPL(CPlayer, MAX_CLIENTS)
 
 IServer *CPlayer::Server() const { return m_pGameServer->Server(); }
@@ -1014,4 +1016,11 @@ void CPlayer::ProcessScoreResult(CScorePlayerResult &Result)
 			break;
 		}
 	}
+}
+
+void CPlayer::HandleKZBot(CNetObj_PlayerInput &Input)
+{
+	if(!GetCharacter())
+		return;
+	GetCharacter()->HandleKZBot(Input);
 }

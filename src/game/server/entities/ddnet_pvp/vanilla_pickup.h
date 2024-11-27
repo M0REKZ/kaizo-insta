@@ -20,6 +20,8 @@ public:
 	int Type() const { return m_Type; }
 	int Subtype() const { return m_Subtype; }
 
+	int GetSpawnTick() { return m_SpawnTick; } //+KZ
+	
 protected:
 	int m_Type;
 	int m_Subtype;

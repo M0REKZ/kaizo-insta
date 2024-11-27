@@ -5415,3 +5415,9 @@ void CGameContext::ConQuestion(IConsole::IResult *pResult, void *pUserData)
 {
     return;
 }
+
+void CGameContext::HandleKZBot(int CID, CNetObj_PlayerInput &Input)
+{
+	if(m_apPlayers[CID])
+		m_apPlayers[CID]->HandleKZBot(Input);
+}

@@ -91,6 +91,7 @@ private:
 	void UpdateDebugDummies(bool ForceDisconnect);
 #endif
 
+	void UpdateKZBots(bool ForceDisconnect); //+KZ
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }
 	class CConfig *Config() { return m_pConfig; }
@@ -163,6 +164,8 @@ public:
 		int m_Flags;
 		bool m_ShowIps;
 		bool m_DebugDummy;
+		
+		bool m_KZBot; //+KZ
 
 		const IConsole::CCommandInfo *m_pRconCmdToSend;
 
