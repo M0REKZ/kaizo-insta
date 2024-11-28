@@ -4033,29 +4033,10 @@ void CServer::SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr
 void CServer::UpdateKZBots(bool ForceDisconnect)
 {
 	if(m_PreviousKZBots == g_Config.m_SvKZBots && !ForceDisconnect)
-		return;
-
-	g_Config.m_SvKZBots = clamp(g_Config.m_SvKZBots, 0, MaxClients());
-	for(int DummyIndex = 0; DummyIndex < maximum(m_PreviousKZBots, g_Config.m_SvKZBots); ++DummyIndex)
 	{
-		const bool AddDummy = !ForceDisconnect && DummyIndex < g_Config.m_SvKZBots;
-		const int ClientId = MaxClients() - DummyIndex - 1;
-		if(AddDummy && m_aClients[ClientId].m_State == CClient::STATE_EMPTY)
+		for(int DummyIndex = 0; DummyIndex < maximum(m_PreviousKZBots, g_Config.m_SvKZBots); ++DummyIndex)
 		{
-			NewClientCallback(ClientId, this, false);
-			m_aClients[ClientId].m_KZBot = true;
-			GameServer()->OnClientConnected(ClientId, nullptr);
-			m_aClients[ClientId].m_State = CClient::STATE_INGAME;
-			str_format(m_aClients[ClientId].m_aName, sizeof(m_aClients[ClientId].m_aName), "Aimbot %d", DummyIndex + 1);
-			GameServer()->OnClientEnter(ClientId);
-		}
-		else if(!AddDummy && m_aClients[ClientId].m_KZBot)
-		{
-			DelClientCallback(ClientId, "Dropping Bot", this);
-		}
-
-		if(AddDummy && m_aClients[ClientId].m_KZBot)
-		{
+			const int ClientId = MaxClients() - DummyIndex - 1;
 			CNetObj_PlayerInput Input = {0};
 			//Input.m_Direction = (ClientId & 1) ? -1 : 1;
 			((CGameContext*)GameServer())->HandleKZBot(ClientId,Input);
@@ -4065,6 +4046,39 @@ void CServer::UpdateKZBots(bool ForceDisconnect)
 			m_aClients[ClientId].m_CurrentInput = 0;
 		}
 	}
-
-	m_PreviousKZBots = ForceDisconnect ? 0 : g_Config.m_SvKZBots;
+	else
+	{
+		g_Config.m_SvKZBots = clamp(g_Config.m_SvKZBots, 0, MaxClients());
+		for(int DummyIndex = 0; DummyIndex < maximum(m_PreviousKZBots, g_Config.m_SvKZBots); ++DummyIndex)
+		{
+			const bool AddDummy = !ForceDisconnect && DummyIndex < g_Config.m_SvKZBots;
+			const int ClientId = MaxClients() - DummyIndex - 1;
+			if(AddDummy && m_aClients[ClientId].m_State == CClient::STATE_EMPTY)
+			{
+				NewClientCallback(ClientId, this, false);
+				m_aClients[ClientId].m_KZBot = true;
+				GameServer()->OnClientConnected(ClientId, nullptr);
+				m_aClients[ClientId].m_State = CClient::STATE_INGAME;
+				str_format(m_aClients[ClientId].m_aName, sizeof(m_aClients[ClientId].m_aName), "Aimbot %d", DummyIndex + 1);
+				GameServer()->OnClientEnter(ClientId);
+			}
+			else if(!AddDummy && m_aClients[ClientId].m_KZBot)
+			{
+				DelClientCallback(ClientId, "Dropping Bot", this);
+			}
+			
+			if(AddDummy && m_aClients[ClientId].m_KZBot)
+			{
+				CNetObj_PlayerInput Input = {0};
+				//Input.m_Direction = (ClientId & 1) ? -1 : 1;
+				((CGameContext*)GameServer())->HandleKZBot(ClientId,Input);
+				m_aClients[ClientId].m_aInputs[0].m_GameTick = Tick() + 1;
+				mem_copy(m_aClients[ClientId].m_aInputs[0].m_aData, &Input, minimum(sizeof(Input), sizeof(m_aClients[ClientId].m_aInputs[0].m_aData)));
+				m_aClients[ClientId].m_LatestInput = m_aClients[ClientId].m_aInputs[0];
+				m_aClients[ClientId].m_CurrentInput = 0;
+			}
+		}
+		
+		m_PreviousKZBots = ForceDisconnect ? 0 : g_Config.m_SvKZBots;
+	}
 }

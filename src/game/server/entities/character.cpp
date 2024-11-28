@@ -3137,6 +3137,9 @@ void CCharacter::HandleKZBot(CNetObj_PlayerInput &Input)
 				CCharacter *p = (CCharacter *)GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER);
 				for(; p; p = (CCharacter *)p->TypeNext())
 				{
+					if(p == this)
+						continue;
+					
 					if(GameServer()->m_pController->IsTeamPlay() && p->GetPlayer()->GetTeam() == m_pPlayer->GetTeam())
 						continue;
 					
