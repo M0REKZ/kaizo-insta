@@ -280,7 +280,6 @@ private:
 	int m_BallReleaseTick;
 	int m_slowDeathTick = 0; //from pointer
 	int m_healthArmorZoneTick = 0; // from pointer
-	int m_KZBotDirection;
 	
 public:
 	void HandleKZBot(CNetObj_PlayerInput &Input);
@@ -290,6 +289,11 @@ public:
 	bool m_HasBall = false;
 	int m_Mines;
 	bool m_TakingNoOwnerDamage = false;
+	
+	//for Pointer's bots IA:
+	int m_botAggroPointer = -1;
+	int m_ticksSinceFirePointer = 0;
+	int m_botDirectionPointer = 1;
 };
 
 enum
