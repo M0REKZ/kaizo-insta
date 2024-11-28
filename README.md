@@ -281,6 +281,9 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `shuffle_teams` Shuffle the current teams
 + `swap_teams` Swap the current teams
 + `swap_teams_random` Swap the current teams or not (random chance)
++ `add_map_to_pool` Can be picked by random_map_from_pool command (entries can be duplicated to increase chance)
++ `clear_map_pool` Clears pool used by random_map_from_pool command
++ `random_map_from_pool` Changes to random map from pool (see add_map_to_pool)
 
 # Chat commands
 
@@ -297,6 +300,7 @@ ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat
 + `!1v1` `!2v2` `!v1` `!v2` `!1on1` ... call vote to change in game slots
 + `!restart ?(seconds)` call vote to restart game with optional parameter of warmup seconds (default: 10)
 + `/drop flag` if it is a CTF gametype the flagger can drop the flag without dieing if either `sv_drop_flag_on_selfkill` or `sv_drop_flag_on_vote` is set
++ `/credits_ddnet` Shows the credits of the DDNet mod"
 + `/rank` Lists available rank commands
 + `/top5` Lists available top commands
 + `/top` Lists available top commands

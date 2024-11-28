@@ -6,6 +6,8 @@
 #include <engine/console.h>
 #include <engine/http.h> // ddnet-insta m_pHttp
 #include <engine/server.h>
+#include <string> // ddnet-insta map pool
+#include <vector> // ddnet-insta map pool
 
 #include <game/collision.h>
 #include <game/generated/protocol.h>

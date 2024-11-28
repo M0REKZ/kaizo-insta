@@ -1,3 +1,4 @@
+#include <base/system.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/player.h>
@@ -5,6 +6,7 @@
 #include <game/version.h>
 
 #include <game/server/gamecontext.h>
+#include <string>
 
 void CGameContext::ConHammer(IConsole::IResult *pResult, void *pUserData)
 {
@@ -134,4 +136,36 @@ void CGameContext::SwapTeams()
 	}
 
 	m_pController->SwapTeamscore();
+}
+
+void CGameContext::ConAddMapToPool(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->m_vMapPool.emplace_back(pResult->GetString(0));
+}
+
+void CGameContext::ConClearMapPool(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	pSelf->m_vMapPool.clear();
+}
+
+void CGameContext::ConRandomMapFromPool(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	if(pSelf->m_vMapPool.empty())
+	{
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", "map pool is empty add one with 'add_map_to_pool [map name]'");
+		return;
+	}
+
+	int RandIdx = rand() % pSelf->m_vMapPool.size();
+	const char *pMap = pSelf->m_vMapPool[RandIdx].c_str();
+
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "Chose random map '%s' out of %d maps", pMap, pSelf->m_vMapPool.size());
+	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", aBuf);
+
+	pSelf->m_pController->ChangeMap(pMap);
 }
