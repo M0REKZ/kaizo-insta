@@ -29,8 +29,6 @@
 
 #include <engine/server/server.h>
 
-#include <cstdio>
-
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
 // Character, "physical" player's part
@@ -3065,6 +3063,9 @@ void CCharacter::CatchBall()
 
 void CCharacter::HandleKZBot(CNetObj_PlayerInput &Input)
 {
+	if(!(GameServer()->CountPlayersKZ()))
+		return;
+	
 	switch(g_Config.m_SvKZBotsIA)
 	{
 		case 0:

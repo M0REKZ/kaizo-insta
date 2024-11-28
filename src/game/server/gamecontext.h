@@ -614,6 +614,7 @@ public:
 
 	void ResetTuning();
 	void HandleKZBot(int CID, CNetObj_PlayerInput &Input); //+KZ
+	int CountPlayersKZ();
 };
 
 #endif
