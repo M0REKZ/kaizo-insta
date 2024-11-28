@@ -283,6 +283,9 @@ private:
 	
 public:
 	void HandleKZBot(CNetObj_PlayerInput &Input);
+	void DoKZBotAI(CNetObj_PlayerInput &Input);
+	void DoPointerBotAI(CNetObj_PlayerInput &Input);
+	
 	void DoKZDamage(vec2 Force, int Dmg, int From, int Weapon);
 	bool InWater() { return m_Water; }
 	void CatchBall();

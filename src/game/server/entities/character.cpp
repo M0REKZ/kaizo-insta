@@ -3066,315 +3066,310 @@ void CCharacter::HandleKZBot(CNetObj_PlayerInput &Input)
 	if(!(GameServer()->CountPlayersKZ()))
 		return;
 	
-	switch(g_Config.m_SvKZBotsIA)
+	switch(g_Config.m_SvKZBotsAI)
 	{
 		case 0: //+KZ's IA
-		{
-			//Spaghetti yummy
-			
-			CCharacter *pClosestChar = nullptr;
-			CVanillaPickup *pClosestPickup = nullptr;
-			CFlag *pEnemyFlag = nullptr;
-			CFlag *pTeamFlag = nullptr;
-			bool targetisup = false;
-			bool dontjump = false;
-			bool butjumpifwall = false;
-			
-			//if(str_find_nocase(GameServer()->m_pController->m_pGameType, "CTF"))
-			{
-				CFlag *p = (CFlag *)GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_FLAG);
-				for(; p; p = (CFlag *)p->TypeNext())
-				{
-					
-					if(p->GetTeam() == m_pPlayer->GetTeam())
-					{
-						pTeamFlag = p;
-						continue;
-					}
-					
-					pEnemyFlag = p;
-				}
-			}
-			
-			{
-				float ClosestRange = 100000.0f;
-				CVanillaPickup *pClosest = 0;
-				
-				CVanillaPickup *p = (CVanillaPickup *)GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_PICKUP);
-				for(; p; p = (CVanillaPickup *)p->TypeNext())
-				{
-					if(Collision()->IntersectLine(m_Pos,p->m_Pos,nullptr,nullptr))
-						continue;
-					
-					if((p->Type() == POWERUP_HEALTH && m_Health >= 10) || (p->Type() == POWERUP_ARMOR && m_Armor >= 10) || (p->Subtype() == WEAPON_SHOTGUN && m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Ammo) || (p->Subtype() == WEAPON_LASER && m_Core.m_aWeapons[WEAPON_LASER].m_Ammo) || (p->Subtype() == WEAPON_GRENADE && m_Core.m_aWeapons[WEAPON_GRENADE].m_Ammo)  || (p->Type() == POWERUP_NINJA && m_Core.m_aWeapons[WEAPON_NINJA].m_Got))
-						continue;
-					
-					if(p->GetSpawnTick() > 0)
-					{
-						//printf("%d",((CVanillaPickup*)p)->GetSpawnTick());
-						continue;
-					}
-					
-					
-					float Len = distance(m_Pos, p->m_Pos);
-					if(Len < p->GetProximityRadius() + 100000.0f)
-					{
-						if(Len < ClosestRange)
-						{
-							ClosestRange = Len;
-							pClosest = p;
-						}
-					}
-				}
-				
-				pClosestPickup = pClosest;
-			}
-			
-			{
-				float ClosestRange = 100000.0f;
-				CCharacter *pClosest = 0;
-				
-				CCharacter *p = (CCharacter *)GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER);
-				for(; p; p = (CCharacter *)p->TypeNext())
-				{
-					if(p == this)
-						continue;
-					
-					if(GameServer()->m_pController->IsTeamPlay() && p->GetPlayer()->GetTeam() == m_pPlayer->GetTeam())
-						continue;
-					
-					if(str_find_nocase(GameServer()->m_pController->m_pGameType, "freeze") && p->GetCore().m_DeepFrozen)
-						continue;
-					
-					
-					float Len = distance(m_Pos, p->m_Pos);
-					if(Len < p->GetProximityRadius() + 100000.0f)
-					{
-						if(Len < ClosestRange)
-						{
-							ClosestRange = Len;
-							pClosest = p;
-						}
-					}
-				}
-				
-				pClosestChar = pClosest;
-			}
-			
-			if(pEnemyFlag)
-			{
-				Input.m_Direction = pEnemyFlag->m_Pos.x > m_Pos.x ? 1 : -1;
-				
-				if((pEnemyFlag->m_Pos.y + 56.0f) < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
-				{
-					targetisup = true;
-				}
-				else
-				{
-					dontjump = true;
-					butjumpifwall = true;
-				}
-				
-				if(pTeamFlag && pEnemyFlag->m_pCarrier == this)
-				{
-					Input.m_Direction = pTeamFlag->m_Pos.x > m_Pos.x ? 1 : -1;
-					
-					if((pTeamFlag->m_Pos.y + 56.0f) < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
-					{
-						targetisup = true;
-					}
-					else
-					{
-						dontjump = true;
-						butjumpifwall = true;
-					}
-				}
-			}
-			
-			if(pClosestPickup && !pEnemyFlag && !pTeamFlag)
-			{
-				Input.m_Direction = pClosestPickup->m_Pos.x > m_Pos.x ? 1 : -1;
-				
-				if((pClosestPickup->m_Pos.y + pClosestPickup->GetProximityRadius() * 2.f) < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
-				{
-					targetisup = true;
-				}
-			}
-			
-			if(pClosestChar)
-			{
-				Input.m_TargetX = pClosestChar->m_Pos.x - m_Pos.x; // aim
-				Input.m_TargetY = pClosestChar->m_Pos.y - m_Pos.y;
-				
-				if(!pClosestPickup && !pEnemyFlag  && !pTeamFlag)
-					Input.m_Direction = pClosestChar->m_Pos.x > m_Pos.x ? 1 : -1;
-				
-				//printf("%.5f %.5f \n",distance(m_Pos, pClosestChar->m_Pos),30.0f);
-				
-				if(m_Core.m_aWeapons[WEAPON_NINJA].m_Got)
-				{
-					//SetWeapon(WEAPON_LASER);
-				}
-				else if(m_Core.m_aWeapons[WEAPON_LASER].m_Got && m_Core.m_aWeapons[WEAPON_LASER].m_Ammo && distance(m_Pos, pClosestChar->m_Pos) < GameServer()->Tuning()->m_LaserReach)
-				{
-					SetWeapon(WEAPON_LASER);
-				}
-				else if(m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Got && m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Ammo && distance(m_Pos, pClosestChar->m_Pos) < GameServer()->Tuning()->m_ShotgunLifetime * 3000.0f)
-				{
-					SetWeapon(WEAPON_SHOTGUN);
-				}
-				else if(m_Core.m_aWeapons[WEAPON_HAMMER].m_Got && distance(m_Pos, pClosestChar->m_Pos) < 40.0f)
-				{
-					SetWeapon(WEAPON_HAMMER);
-				}
-				else if(m_Core.m_aWeapons[WEAPON_GUN].m_Got)
-				{
-					SetWeapon(WEAPON_GUN);
-				}
-				
-				if(pClosestChar->m_Pos.y < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
-				{
-					targetisup = true;
-				}
-				
-				if(!Collision()->IntersectLine(m_Pos,pClosestChar->m_Pos,nullptr,nullptr) || m_Core.m_aWeapons[WEAPON_NINJA].m_Got)
-				{
-					if(!m_LatestInput.m_Fire)
-						Input.m_Fire = true;
-					else
-						Input.m_Fire = false;
-					
-					if(Server()->Tick() % Server()->TickSpeed() == 0)
-					{
-						Input.m_Hook = false;
-					}
-					else if(distance(m_Pos, pClosestChar->m_Pos) < GameServer()->Tuning()->m_HookLength)
-					{
-						Input.m_Hook = true;
-					}
-				}
-			}
-			
-			//HELP
-			if((butjumpifwall ? m_Core.m_Colliding : false) || (!dontjump && ((Collision()->GetCollisionAt(m_Pos.x , m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH) || m_Core.m_Colliding || (((Collision()->CheckPoint(m_Pos.x + GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)) && !(Collision()->CheckPoint(m_Pos.x - GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)))) || ((!(Collision()->CheckPoint(m_Pos.x + GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)) && (Collision()->CheckPoint(m_Pos.x - GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)))) || targetisup)))
-			{
-				
-				if(IsGrounded() || (m_Core.m_Jumps > 0 && m_Core.m_Vel.y > 0))
-					Input.m_Jump = true;
-				else
-					Input.m_Jump = false;
-			}
-		}
+			DoKZBotAI(Input);
 			break;
 		case 1: //Pointer's harder IA
-		{
-			
-			Input.m_Direction = 0;
-			Input.m_TargetX = (rand() % 128) - 64; // look randomly
-			Input.m_TargetY = (rand() % 128) - 64;
-			Input.m_Jump = false;
-			Input.m_Fire = true;
-			if (!GameServer()->m_pController->m_IsInstagibKZ) // make non-automatic weapons work, but still have ammo reload work in instagib
-				Input.m_Fire = Server()->Tick() % (2) == 1;
-			Input.m_Hook = false;
-			Input.m_PlayerFlags = PLAYERFLAG_PLAYING;
-			Input.m_WantedWeapon = WEAPON_GUN+1;
-			if (GameServer()->m_pController->m_IsInstagibKZ)
-			{
-				if(GameServer()->m_pController->m_pGameType[0] == 'i')
-					Input.m_WantedWeapon = WEAPON_LASER+1;
-				else if (GameServer()->m_pController->m_pGameType[0] == 'g')
-					Input.m_WantedWeapon = WEAPON_GRENADE+1;
-			}
-			Input.m_NextWeapon = WEAPON_GUN+1;
-			Input.m_PrevWeapon = WEAPON_GUN+1;
-			// move, and occasionally jump
-			if (rand() % (Server()->TickSpeed()*2) == 1)
-				m_botDirectionPointer = -m_botDirectionPointer;
-			Input.m_Direction = m_botDirectionPointer;
-			if (rand() % (Server()->TickSpeed()*2) == 1)
-				Input.m_Jump = true;
-			
-			
-			if (GameServer()->Server()->Tick() % (Server()->TickSpeed()) == 1)
-			{
-				// get a new aggro
-				float smallestDistance = 850.0;
-				m_botAggroPointer = -1;
-				
-				for (int i = 0; i < MAX_CLIENTS; i++)
-				{
-					if (i != m_pPlayer->GetCid() && GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetCharacter()) {
-						vec2 pos = GameServer()->m_apPlayers[i]->GetCharacter()->m_Pos;
-						float d = sqrt((pos.x - m_Pos.x)*(pos.x - m_Pos.x) + (1.35)*(pos.y - m_Pos.y)*(pos.y - m_Pos.y));
-						// vertical distance is multiplied by a factor, since screens are larger horizontally
-						if (d < smallestDistance && !(GameServer()->m_pController->IsTeamplay() && GameServer()->m_apPlayers[i]->GetTeam() == m_pPlayer->GetTeam())) {
-							smallestDistance = d;
-							m_botAggroPointer = i;
-						}
-					}
-				}
-			}
-			if (m_botAggroPointer == -1)
-			{
-				m_ticksSinceFirePointer = 0; // reset
-				Input.m_Fire = false; // do not shoot by default
-			}
-			else
-			{
-				m_ticksSinceFirePointer++;
-				if (GameServer()->m_pController->m_pGameType[0] == 'g')
-				{
-					if (m_ticksSinceFirePointer > 50)
-					{
-						m_ticksSinceFirePointer = 0; // reset
-						Input.m_Fire = true; // fire
-					}
-					else
-						Input.m_Fire = false; // do not shoot by default
-				}
-				else if(GameServer()->m_pController->m_IsInstagibKZ)
-				{
-					m_ticksSinceFirePointer = 0; // reset
-					Input.m_Fire = true; // fire
-				}
-				else
-				{
-					if (m_ticksSinceFirePointer > 10)
-					{ // 10 = 0.2s
-						m_ticksSinceFirePointer = 0; // reset
-						Input.m_Fire = true; // fire
-					} else
-						Input.m_Fire = false; // do not shoot by default
-					Input.m_Fire = GameServer()->Server()->Tick() % (2) == 1;
-				}
-				
-				// aim
-				if (GameServer()->m_apPlayers[m_botAggroPointer] && GameServer()->m_apPlayers[m_botAggroPointer]->GetCharacter()) {
-					vec2 pos = GameServer()->m_apPlayers[m_botAggroPointer]->GetCharacter()->m_Pos;
-					//float d = sqrt((pos.x - m_Pos.x)*(pos.x - m_Pos.x) + (pos.y - m_Pos.y)*(pos.y - m_Pos.y)); unused
-					Input.m_TargetX = pos.x - m_Pos.x; // aim
-					Input.m_TargetY = pos.y - m_Pos.y;
-					if (GameServer()->m_pController->m_pGameType[0] == 'g') // grenade curve correction, somewhat
-						Input.m_TargetY = Input.m_TargetY + (-abs(Input.m_TargetX)*0.3);
-				}
-			}
-			
-			m_Core.m_aWeapons[WEAPON_GUN].m_Ammo = 10;
-		}
+			DoPointerBotAI(Input);
 			break;
-			/*
-			Input.m_Fire = GameServer()->Server()->Tick() % (2) == 1;
-			Input.m_WantedWeapon = WEAPON_GUN-1;
-			Input.m_Direction = 0;
-			Input.m_TargetX = (rand() % 128) - 64; // look randomly
-			Input.m_TargetY = (rand() % 128) - 64;
-			if (rand() % (SERVER_TICK_SPEED*2) == 1)
-				m_KZBotDirection = -m_KZBotDirection;
-			Input.m_Direction = m_KZBotDirection;
-			if (rand() % (SERVER_TICK_SPEED*2) == 1)
-				Input.m_Jump = true;*/
 	}
 	
 	
+}
+
+void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
+{
+	//Spaghetti yummy
+	
+	CCharacter *pClosestChar = nullptr;
+	CVanillaPickup *pClosestPickup = nullptr;
+	CFlag *pEnemyFlag = nullptr;
+	CFlag *pTeamFlag = nullptr;
+	bool targetisup = false;
+	bool dontjump = false;
+	bool butjumpifwall = false;
+	
+	//if(str_find_nocase(GameServer()->m_pController->m_pGameType, "CTF"))
+	{
+		CFlag *p = (CFlag *)GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_FLAG);
+		for(; p; p = (CFlag *)p->TypeNext())
+		{
+			
+			if(p->GetTeam() == m_pPlayer->GetTeam())
+			{
+				pTeamFlag = p;
+				continue;
+			}
+			
+			pEnemyFlag = p;
+		}
+	}
+	
+	{
+		float ClosestRange = 100000.0f;
+		CVanillaPickup *pClosest = 0;
+		
+		CVanillaPickup *p = (CVanillaPickup *)GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_PICKUP);
+		for(; p; p = (CVanillaPickup *)p->TypeNext())
+		{
+			if(Collision()->IntersectLine(m_Pos,p->m_Pos,nullptr,nullptr))
+				continue;
+			
+			if((p->Type() == POWERUP_HEALTH && m_Health >= 10) || (p->Type() == POWERUP_ARMOR && m_Armor >= 10) || (p->Subtype() == WEAPON_SHOTGUN && m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Ammo) || (p->Subtype() == WEAPON_LASER && m_Core.m_aWeapons[WEAPON_LASER].m_Ammo) || (p->Subtype() == WEAPON_GRENADE && m_Core.m_aWeapons[WEAPON_GRENADE].m_Ammo)  || (p->Type() == POWERUP_NINJA && m_Core.m_aWeapons[WEAPON_NINJA].m_Got))
+				continue;
+			
+			if(p->GetSpawnTick() > 0)
+			{
+				//printf("%d",((CVanillaPickup*)p)->GetSpawnTick());
+				continue;
+			}
+			
+			
+			float Len = distance(m_Pos, p->m_Pos);
+			if(Len < p->GetProximityRadius() + 100000.0f)
+			{
+				if(Len < ClosestRange)
+				{
+					ClosestRange = Len;
+					pClosest = p;
+				}
+			}
+		}
+		
+		pClosestPickup = pClosest;
+	}
+	
+	{
+		float ClosestRange = 100000.0f;
+		CCharacter *pClosest = 0;
+		
+		CCharacter *p = (CCharacter *)GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER);
+		for(; p; p = (CCharacter *)p->TypeNext())
+		{
+			if(p == this)
+				continue;
+			
+			if(GameServer()->m_pController->IsTeamPlay() && p->GetPlayer()->GetTeam() == m_pPlayer->GetTeam())
+				continue;
+			
+			if(str_find_nocase(GameServer()->m_pController->m_pGameType, "freeze") && p->GetCore().m_DeepFrozen)
+				continue;
+			
+			
+			float Len = distance(m_Pos, p->m_Pos);
+			if(Len < p->GetProximityRadius() + 100000.0f)
+			{
+				if(Len < ClosestRange)
+				{
+					ClosestRange = Len;
+					pClosest = p;
+				}
+			}
+		}
+		
+		pClosestChar = pClosest;
+	}
+	
+	if(pEnemyFlag)
+	{
+		Input.m_Direction = pEnemyFlag->m_Pos.x > m_Pos.x ? 1 : -1;
+		
+		if((pEnemyFlag->m_Pos.y + 56.0f) < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
+		{
+			targetisup = true;
+		}
+		else
+		{
+			dontjump = true;
+			butjumpifwall = true;
+		}
+		
+		if(pTeamFlag && pEnemyFlag->m_pCarrier == this)
+		{
+			Input.m_Direction = pTeamFlag->m_Pos.x > m_Pos.x ? 1 : -1;
+			
+			if((pTeamFlag->m_Pos.y + 56.0f) < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
+			{
+				targetisup = true;
+			}
+			else
+			{
+				dontjump = true;
+				butjumpifwall = true;
+			}
+		}
+	}
+	
+	if(pClosestPickup && !pEnemyFlag && !pTeamFlag)
+	{
+		Input.m_Direction = pClosestPickup->m_Pos.x > m_Pos.x ? 1 : -1;
+		
+		if((pClosestPickup->m_Pos.y + pClosestPickup->GetProximityRadius() * 2.f) < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
+		{
+			targetisup = true;
+		}
+	}
+	
+	if(pClosestChar)
+	{
+		Input.m_TargetX = pClosestChar->m_Pos.x - m_Pos.x; // aim
+		Input.m_TargetY = pClosestChar->m_Pos.y - m_Pos.y;
+		
+		if(!pClosestPickup && !pEnemyFlag  && !pTeamFlag)
+			Input.m_Direction = pClosestChar->m_Pos.x > m_Pos.x ? 1 : -1;
+		
+		//printf("%.5f %.5f \n",distance(m_Pos, pClosestChar->m_Pos),30.0f);
+		
+		if(m_Core.m_aWeapons[WEAPON_NINJA].m_Got)
+		{
+			//SetWeapon(WEAPON_LASER);
+		}
+		else if(m_Core.m_aWeapons[WEAPON_LASER].m_Got && m_Core.m_aWeapons[WEAPON_LASER].m_Ammo && distance(m_Pos, pClosestChar->m_Pos) < GameServer()->Tuning()->m_LaserReach)
+		{
+			SetWeapon(WEAPON_LASER);
+		}
+		else if(m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Got && m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Ammo && distance(m_Pos, pClosestChar->m_Pos) < GameServer()->Tuning()->m_ShotgunLifetime * 3000.0f)
+		{
+			SetWeapon(WEAPON_SHOTGUN);
+		}
+		else if(m_Core.m_aWeapons[WEAPON_HAMMER].m_Got && distance(m_Pos, pClosestChar->m_Pos) < 40.0f)
+		{
+			SetWeapon(WEAPON_HAMMER);
+		}
+		else if(m_Core.m_aWeapons[WEAPON_GUN].m_Got)
+		{
+			SetWeapon(WEAPON_GUN);
+		}
+		
+		if(pClosestChar->m_Pos.y < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
+		{
+			targetisup = true;
+		}
+		
+		if(!Collision()->IntersectLine(m_Pos,pClosestChar->m_Pos,nullptr,nullptr) || m_Core.m_aWeapons[WEAPON_NINJA].m_Got)
+		{
+			if(!m_LatestInput.m_Fire)
+				Input.m_Fire = true;
+			else
+				Input.m_Fire = false;
+			
+			if(Server()->Tick() % Server()->TickSpeed() == 0)
+			{
+				Input.m_Hook = false;
+			}
+			else if(distance(m_Pos, pClosestChar->m_Pos) < GameServer()->Tuning()->m_HookLength)
+			{
+				Input.m_Hook = true;
+			}
+		}
+	}
+	
+	//HELP
+	if((butjumpifwall ? m_Core.m_Colliding : false) || (!dontjump && ((Collision()->GetCollisionAt(m_Pos.x , m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH) || m_Core.m_Colliding || (((Collision()->CheckPoint(m_Pos.x + GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)) && !(Collision()->CheckPoint(m_Pos.x - GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)))) || ((!(Collision()->CheckPoint(m_Pos.x + GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)) && (Collision()->CheckPoint(m_Pos.x - GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)))) || targetisup)))
+	{
+		
+		if(IsGrounded() || (m_Core.m_Jumps > 0 && m_Core.m_Vel.y > 0))
+			Input.m_Jump = true;
+		else
+			Input.m_Jump = false;
+	}
+}
+
+void CCharacter::DoPointerBotAI(CNetObj_PlayerInput &Input)
+{
+	
+	Input.m_Direction = 0;
+	Input.m_TargetX = (rand() % 128) - 64; // look randomly
+	Input.m_TargetY = (rand() % 128) - 64;
+	Input.m_Jump = false;
+	Input.m_Fire = true;
+	if (!GameServer()->m_pController->m_IsInstagibKZ) // make non-automatic weapons work, but still have ammo reload work in instagib
+		Input.m_Fire = Server()->Tick() % (2) == 1;
+	Input.m_Hook = false;
+	Input.m_PlayerFlags = PLAYERFLAG_PLAYING;
+	Input.m_WantedWeapon = WEAPON_GUN+1;
+	if (GameServer()->m_pController->m_IsInstagibKZ)
+	{
+		if(GameServer()->m_pController->m_pGameType[0] == 'i')
+			Input.m_WantedWeapon = WEAPON_LASER+1;
+		else if (GameServer()->m_pController->m_pGameType[0] == 'g')
+			Input.m_WantedWeapon = WEAPON_GRENADE+1;
+	}
+	Input.m_NextWeapon = WEAPON_GUN+1;
+	Input.m_PrevWeapon = WEAPON_GUN+1;
+	// move, and occasionally jump
+	if (rand() % (Server()->TickSpeed()*2) == 1)
+		m_botDirectionPointer = -m_botDirectionPointer;
+	Input.m_Direction = m_botDirectionPointer;
+	if (rand() % (Server()->TickSpeed()*2) == 1)
+		Input.m_Jump = true;
+	
+	
+	if (GameServer()->Server()->Tick() % (Server()->TickSpeed()) == 1)
+	{
+		// get a new aggro
+		float smallestDistance = 850.0;
+		m_botAggroPointer = -1;
+		
+		for (int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if (i != m_pPlayer->GetCid() && GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetCharacter()) {
+				vec2 pos = GameServer()->m_apPlayers[i]->GetCharacter()->m_Pos;
+				float d = sqrt((pos.x - m_Pos.x)*(pos.x - m_Pos.x) + (1.35)*(pos.y - m_Pos.y)*(pos.y - m_Pos.y));
+				// vertical distance is multiplied by a factor, since screens are larger horizontally
+				if (d < smallestDistance && !(GameServer()->m_pController->IsTeamplay() && GameServer()->m_apPlayers[i]->GetTeam() == m_pPlayer->GetTeam())) {
+					smallestDistance = d;
+					m_botAggroPointer = i;
+				}
+			}
+		}
+	}
+	if (m_botAggroPointer == -1)
+	{
+		m_ticksSinceFirePointer = 0; // reset
+		Input.m_Fire = false; // do not shoot by default
+	}
+	else
+	{
+		m_ticksSinceFirePointer++;
+		if (GameServer()->m_pController->m_pGameType[0] == 'g')
+		{
+			if (m_ticksSinceFirePointer > 50)
+			{
+				m_ticksSinceFirePointer = 0; // reset
+				Input.m_Fire = true; // fire
+			}
+			else
+				Input.m_Fire = false; // do not shoot by default
+		}
+		else if(GameServer()->m_pController->m_IsInstagibKZ)
+		{
+			m_ticksSinceFirePointer = 0; // reset
+			Input.m_Fire = true; // fire
+		}
+		else
+		{
+			if (m_ticksSinceFirePointer > 10)
+			{ // 10 = 0.2s
+				m_ticksSinceFirePointer = 0; // reset
+				Input.m_Fire = true; // fire
+			} else
+				Input.m_Fire = false; // do not shoot by default
+			Input.m_Fire = GameServer()->Server()->Tick() % (2) == 1;
+		}
+		
+		// aim
+		if (GameServer()->m_apPlayers[m_botAggroPointer] && GameServer()->m_apPlayers[m_botAggroPointer]->GetCharacter()) {
+			vec2 pos = GameServer()->m_apPlayers[m_botAggroPointer]->GetCharacter()->m_Pos;
+			//float d = sqrt((pos.x - m_Pos.x)*(pos.x - m_Pos.x) + (pos.y - m_Pos.y)*(pos.y - m_Pos.y)); unused
+			Input.m_TargetX = pos.x - m_Pos.x; // aim
+			Input.m_TargetY = pos.y - m_Pos.y;
+			if (GameServer()->m_pController->m_pGameType[0] == 'g') // grenade curve correction, somewhat
+				Input.m_TargetY = Input.m_TargetY + (-abs(Input.m_TargetX)*0.3);
+		}
+	}
+	
+	m_Core.m_aWeapons[WEAPON_GUN].m_Ammo = 10;
 }
