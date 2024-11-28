@@ -3091,6 +3091,9 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 	bool dontjump = false;
 	bool butjumpifwall = false;
 	
+	vec2 TargetPos = vec2(0,0);
+	bool TargetPosSet = false;
+	
 	//if(str_find_nocase(GameServer()->m_pController->m_pGameType, "CTF"))
 	{
 		CFlag *p = (CFlag *)GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_FLAG);
@@ -3174,42 +3177,30 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 	
 	if(pEnemyFlag)
 	{
-		Input.m_Direction = pEnemyFlag->m_Pos.x > m_Pos.x ? 1 : -1;
-		
-		if((pEnemyFlag->m_Pos.y + 56.0f) < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
+		if(pTeamFlag && pEnemyFlag->m_pCarrier == this)
 		{
-			targetisup = true;
+			//Input.m_Direction = pTeamFlag->m_Pos.x > m_Pos.x ? 1 : -1;
+			TargetPos = pTeamFlag->m_Pos;
+			TargetPosSet = true;
 		}
 		else
 		{
-			dontjump = true;
-			butjumpifwall = true;
-		}
-		
-		if(pTeamFlag && pEnemyFlag->m_pCarrier == this)
-		{
-			Input.m_Direction = pTeamFlag->m_Pos.x > m_Pos.x ? 1 : -1;
-			
-			if((pTeamFlag->m_Pos.y + 56.0f) < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
-			{
-				targetisup = true;
-			}
-			else
-			{
-				dontjump = true;
-				butjumpifwall = true;
-			}
+			//Input.m_Direction = pEnemyFlag->m_Pos.x > m_Pos.x ? 1 : -1;
+			TargetPos = pEnemyFlag->m_Pos;
+			TargetPosSet = true;
 		}
 	}
 	
 	if(pClosestPickup && !pEnemyFlag && !pTeamFlag)
 	{
-		Input.m_Direction = pClosestPickup->m_Pos.x > m_Pos.x ? 1 : -1;
+		//Input.m_Direction = pClosestPickup->m_Pos.x > m_Pos.x ? 1 : -1;
+		TargetPos = pClosestPickup->m_Pos;
+		TargetPosSet = true;
 		
-		if((pClosestPickup->m_Pos.y + pClosestPickup->GetProximityRadius() * 2.f) < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
+		/*if((pClosestPickup->m_Pos.y + pClosestPickup->GetProximityRadius() * 2.f) < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
 		{
 			targetisup = true;
-		}
+		}*/
 	}
 	
 	if(pClosestChar)
@@ -3218,7 +3209,11 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 		Input.m_TargetY = pClosestChar->m_Pos.y - m_Pos.y;
 		
 		if(!pClosestPickup && !pEnemyFlag  && !pTeamFlag)
-			Input.m_Direction = pClosestChar->m_Pos.x > m_Pos.x ? 1 : -1;
+		{
+			//Input.m_Direction = pClosestChar->m_Pos.x > m_Pos.x ? 1 : -1;
+			TargetPos = pClosestChar->m_Pos;
+			TargetPosSet = true;
+		}
 		
 		//printf("%.5f %.5f \n",distance(m_Pos, pClosestChar->m_Pos),30.0f);
 		
@@ -3243,10 +3238,10 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 			SetWeapon(WEAPON_GUN);
 		}
 		
-		if(pClosestChar->m_Pos.y < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
+		/*if(pClosestChar->m_Pos.y < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
 		{
 			targetisup = true;
-		}
+		}*/
 		
 		if(!Collision()->IntersectLine(m_Pos,pClosestChar->m_Pos,nullptr,nullptr) || m_Core.m_aWeapons[WEAPON_NINJA].m_Got)
 		{
@@ -3263,6 +3258,22 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 			{
 				Input.m_Hook = true;
 			}
+		}
+	}
+	
+	
+	if(TargetPosSet)
+	{
+		Input.m_Direction = TargetPos.x > m_Pos.x ? 1 : -1;
+		
+		if((TargetPos.y + 56.0f) < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
+		{
+			targetisup = true;
+		}
+		else
+		{
+			dontjump = true;
+			butjumpifwall = true;
 		}
 	}
 	
