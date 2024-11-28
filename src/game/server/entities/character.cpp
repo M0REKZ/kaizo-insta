@@ -3243,6 +3243,15 @@ void CCharacter::HandleKZBot(CNetObj_PlayerInput &Input)
 						Input.m_Fire = true;
 					else
 						Input.m_Fire = false;
+					
+					if(Server()->Tick() % Server()->TickSpeed() == 0)
+					{
+						Input.m_Hook = false;
+					}
+					else if(distance(m_Pos, pClosestChar->m_Pos) < GameServer()->Tuning()->m_HookLength)
+					{
+						Input.m_Hook = true;
+					}
 				}
 			}
 			
