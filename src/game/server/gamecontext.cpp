@@ -4697,7 +4697,10 @@ bool CGameContext::IsClientReady(int ClientId) const
 
 bool CGameContext::IsClientPlayer(int ClientId) const
 {
-	return m_apPlayers[ClientId] && m_apPlayers[ClientId]->GetTeam() != TEAM_SPECTATORS;
+	if(((CServer*)Server())->m_aClients[ClientId].m_KZBot)
+		return false;
+	else
+		return m_apPlayers[ClientId] && m_apPlayers[ClientId]->GetTeam() != TEAM_SPECTATORS;
 }
 
 CUuid CGameContext::GameUuid() const { return m_GameUuid; }

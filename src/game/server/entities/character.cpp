@@ -4,6 +4,7 @@
 #include "laser.h"
 #include "pickup.h"
 #include "projectile.h"
+#include "flag.h"
 
 #include "ddnet_pvp/vanilla_pickup.h"
 
@@ -27,6 +28,8 @@
 #include <game/kztiles.h>
 
 #include <engine/server/server.h>
+
+#include <cstdio>
 
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
@@ -1293,7 +1296,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 		if(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo > 0)
 			AmmoCount = (m_FreezeTime == 0) ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : 0;
 	}
-    
+    if(!(((CServer*)Server())->m_aClients[m_pPlayer->GetCid()].m_KZBot))
 	if(GetPlayer()->IsAfk() || GetPlayer()->IsPaused() || GetPlayer()->m_MenuAFK)
 	{
 		if(m_FreezeTime > 0 || m_Core.m_DeepFrozen || m_Core.m_LiveFrozen)
@@ -3065,53 +3068,133 @@ void CCharacter::HandleKZBot(CNetObj_PlayerInput &Input)
 	switch(g_Config.m_SvKZBotsIA)
 	{
 		case 0:
-			CCharacter *pClosestChar = nullptr;
-			pClosestChar = GameWorld()->ClosestCharacter(m_Pos,10000.0f,this);
-			CVanillaPickup *pClosestPickup = nullptr;
-			
 		{
-			float ClosestRange = 100000.0f;
-			CVanillaPickup *pClosest = 0;
+			//Spaghetti yummy
 			
-			CVanillaPickup *p = (CVanillaPickup *)GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_PICKUP);
-			for(; p; p = (CVanillaPickup *)p->TypeNext())
+			CCharacter *pClosestChar = nullptr;
+			pClosestChar = nullptr;
+			CVanillaPickup *pClosestPickup = nullptr;
+			CFlag *pEnemyFlag = nullptr;
+			CFlag *pTeamFlag = nullptr;
+			bool targetisup = false;
+			bool dontjump = false;
+			bool butjumpifwall = false;
+			
+			//if(str_find_nocase(GameServer()->m_pController->m_pGameType, "CTF"))
 			{
-				if(Collision()->IntersectLine(m_Pos,p->m_Pos,nullptr,nullptr))
-					continue;
-				
-				if((p->Type() == POWERUP_HEALTH && m_Health >= 10) || (p->Type() == POWERUP_ARMOR && m_Armor >= 10) || (p->Type() == WEAPON_SHOTGUN && m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Ammo) || (p->Type() == WEAPON_LASER && m_Core.m_aWeapons[WEAPON_LASER].m_Ammo) || (p->Type() == WEAPON_GRENADE && m_Core.m_aWeapons[WEAPON_GRENADE].m_Ammo)  || (p->Type() == WEAPON_NINJA && m_Core.m_aWeapons[WEAPON_NINJA].m_Got))
-					continue;
-				
-				if(p->GetSpawnTick() > 0)
+				CFlag *p = (CFlag *)GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_FLAG);
+				for(; p; p = (CFlag *)p->TypeNext())
 				{
-					//printf("%d",((CVanillaPickup*)p)->GetSpawnTick());
-					continue;
-				}
-						
-				
-				float Len = distance(m_Pos, p->m_Pos);
-				if(Len < p->GetProximityRadius() + 100000.0f)
-				{
-					if(Len < ClosestRange)
+					
+					if(p->GetTeam() == m_pPlayer->GetTeam())
 					{
-						ClosestRange = Len;
-						pClosest = p;
+						pTeamFlag = p;
+						continue;
+					}
+					
+					pEnemyFlag = p;
+				}
+			}
+			
+			{
+				float ClosestRange = 100000.0f;
+				CVanillaPickup *pClosest = 0;
+				
+				CVanillaPickup *p = (CVanillaPickup *)GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_PICKUP);
+				for(; p; p = (CVanillaPickup *)p->TypeNext())
+				{
+					if(Collision()->IntersectLine(m_Pos,p->m_Pos,nullptr,nullptr))
+						continue;
+					
+					if((p->Type() == POWERUP_HEALTH && m_Health >= 10) || (p->Type() == POWERUP_ARMOR && m_Armor >= 10) || (p->Subtype() == WEAPON_SHOTGUN && m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Ammo) || (p->Subtype() == WEAPON_LASER && m_Core.m_aWeapons[WEAPON_LASER].m_Ammo) || (p->Subtype() == WEAPON_GRENADE && m_Core.m_aWeapons[WEAPON_GRENADE].m_Ammo)  || (p->Type() == POWERUP_NINJA && m_Core.m_aWeapons[WEAPON_NINJA].m_Got))
+						continue;
+					
+					if(p->GetSpawnTick() > 0)
+					{
+						//printf("%d",((CVanillaPickup*)p)->GetSpawnTick());
+						continue;
+					}
+					
+					
+					float Len = distance(m_Pos, p->m_Pos);
+					if(Len < p->GetProximityRadius() + 100000.0f)
+					{
+						if(Len < ClosestRange)
+						{
+							ClosestRange = Len;
+							pClosest = p;
+						}
+					}
+				}
+				
+				pClosestPickup = pClosest;
+			}
+			
+			{
+				float ClosestRange = 100000.0f;
+				CCharacter *pClosest = 0;
+				
+				CCharacter *p = (CCharacter *)GameServer()->m_World.FindFirst(CGameWorld::ENTTYPE_CHARACTER);
+				for(; p; p = (CCharacter *)p->TypeNext())
+				{
+					if(GameServer()->m_pController->IsTeamPlay() && p->GetPlayer()->GetTeam() == m_pPlayer->GetTeam())
+						continue;
+					
+					if(str_find_nocase(GameServer()->m_pController->m_pGameType, "freeze") && p->GetCore().m_DeepFrozen)
+						continue;
+					
+					
+					float Len = distance(m_Pos, p->m_Pos);
+					if(Len < p->GetProximityRadius() + 100000.0f)
+					{
+						if(Len < ClosestRange)
+						{
+							ClosestRange = Len;
+							pClosest = p;
+						}
+					}
+				}
+				
+				pClosestChar = pClosest;
+			}
+			
+			if(pEnemyFlag)
+			{
+				Input.m_Direction = pEnemyFlag->m_Pos.x > m_Pos.x ? 1 : -1;
+				
+				if((pEnemyFlag->m_Pos.y + 56.0f) < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
+				{
+					targetisup = true;
+				}
+				else
+				{
+					dontjump = true;
+					butjumpifwall = true;
+				}
+				
+				if(pTeamFlag && pEnemyFlag->m_pCarrier == this)
+				{
+					Input.m_Direction = pTeamFlag->m_Pos.x > m_Pos.x ? 1 : -1;
+					
+					if((pTeamFlag->m_Pos.y + 56.0f) < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
+					{
+						targetisup = true;
+					}
+					else
+					{
+						dontjump = true;
+						butjumpifwall = true;
 					}
 				}
 			}
 			
-			pClosestPickup = pClosest;
-		}
-			if(pClosestPickup)
+			if(pClosestPickup && !pEnemyFlag && !pTeamFlag)
 			{
 				Input.m_Direction = pClosestPickup->m_Pos.x > m_Pos.x ? 1 : -1;
 				
-				if(pClosestPickup->m_Pos.y < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
+				if((pClosestPickup->m_Pos.y + pClosestPickup->GetProximityRadius() * 2.f) < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
 				{
-					if(IsGrounded() || (m_Core.m_Jumps > 0 && m_Core.m_Vel.y > 0))
-						Input.m_Jump = true;
-					else
-						Input.m_Jump = false;
+					targetisup = true;
 				}
 			}
 			
@@ -3120,11 +3203,11 @@ void CCharacter::HandleKZBot(CNetObj_PlayerInput &Input)
 				Input.m_TargetX = pClosestChar->m_Pos.x - m_Pos.x; // aim
 				Input.m_TargetY = pClosestChar->m_Pos.y - m_Pos.y;
 				
-				if(!pClosestPickup)
+				if(!pClosestPickup && !pEnemyFlag  && !pTeamFlag)
 					Input.m_Direction = pClosestChar->m_Pos.x > m_Pos.x ? 1 : -1;
 				
 				//printf("%.5f %.5f \n",distance(m_Pos, pClosestChar->m_Pos),30.0f);
-
+				
 				if(m_Core.m_aWeapons[WEAPON_NINJA].m_Got)
 				{
 					//SetWeapon(WEAPON_LASER);
@@ -3148,10 +3231,7 @@ void CCharacter::HandleKZBot(CNetObj_PlayerInput &Input)
 				
 				if(pClosestChar->m_Pos.y < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
 				{
-					if(IsGrounded() || (m_Core.m_Jumps > 0 && m_Core.m_Vel.y > 0))
-						Input.m_Jump = true;
-					else
-						Input.m_Jump = false;
+					targetisup = true;
 				}
 				
 				if(!Collision()->IntersectLine(m_Pos,pClosestChar->m_Pos,nullptr,nullptr) || m_Core.m_aWeapons[WEAPON_NINJA].m_Got)
@@ -3163,14 +3243,16 @@ void CCharacter::HandleKZBot(CNetObj_PlayerInput &Input)
 				}
 			}
 			
-			if(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH)
+			//HELP
+			if((butjumpifwall ? m_Core.m_Colliding : false) || (!dontjump && ((Collision()->GetCollisionAt(m_Pos.x , m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH) || m_Core.m_Colliding || (((Collision()->CheckPoint(m_Pos.x + GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)) && !(Collision()->CheckPoint(m_Pos.x - GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)))) || ((!(Collision()->CheckPoint(m_Pos.x + GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)) && (Collision()->CheckPoint(m_Pos.x - GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)))) || targetisup)))
 			{
+				
 				if(IsGrounded() || (m_Core.m_Jumps > 0 && m_Core.m_Vel.y > 0))
 					Input.m_Jump = true;
 				else
 					Input.m_Jump = false;
 			}
-			
+		}
 			break;
 			/*
 			Input.m_Fire = GameServer()->Server()->Tick() % (2) == 1;
