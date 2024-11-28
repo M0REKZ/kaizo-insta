@@ -5430,7 +5430,7 @@ int CGameContext::CountPlayersKZ()
 	int count = 0;
 	for(int i=0;i<MAX_CLIENTS;i++)
 	{
-		if(!(((CServer*)Server())->m_aClients[i].m_KZBot) && m_apPlayers[i] && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
+		if(!(((CServer*)Server())->m_aClients[i].m_KZBot) && m_apPlayers[i] && !(m_apPlayers[i]->IsAfk()) && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
 			count++;
 	}
 	return count;
