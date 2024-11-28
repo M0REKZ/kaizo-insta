@@ -90,7 +90,7 @@ private:
 	int m_PreviousDebugDummies = 0;
 	void UpdateDebugDummies(bool ForceDisconnect);
 #endif
-
+	int m_PreviousKZBots = 0;
 	void UpdateKZBots(bool ForceDisconnect); //+KZ
 public:
 	class IGameServer *GameServer() { return m_pGameServer; }

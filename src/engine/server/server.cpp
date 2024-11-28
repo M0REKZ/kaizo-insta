@@ -4032,11 +4032,11 @@ void CServer::SetLoggers(std::shared_ptr<ILogger> &&pFileLogger, std::shared_ptr
 
 void CServer::UpdateKZBots(bool ForceDisconnect)
 {
-	if(m_PreviousDebugDummies == g_Config.m_SvKZBots && !ForceDisconnect)
+	if(m_PreviousKZBots == g_Config.m_SvKZBots && !ForceDisconnect)
 		return;
 
 	g_Config.m_SvKZBots = clamp(g_Config.m_SvKZBots, 0, MaxClients());
-	for(int DummyIndex = 0; DummyIndex < maximum(m_PreviousDebugDummies, g_Config.m_SvKZBots); ++DummyIndex)
+	for(int DummyIndex = 0; DummyIndex < maximum(m_PreviousKZBots, g_Config.m_SvKZBots); ++DummyIndex)
 	{
 		const bool AddDummy = !ForceDisconnect && DummyIndex < g_Config.m_SvKZBots;
 		const int ClientId = MaxClients() - DummyIndex - 1;
@@ -4066,5 +4066,5 @@ void CServer::UpdateKZBots(bool ForceDisconnect)
 		}
 	}
 
-	m_PreviousDebugDummies = ForceDisconnect ? 0 : g_Config.m_SvKZBots;
+	m_PreviousKZBots = ForceDisconnect ? 0 : g_Config.m_SvKZBots;
 }
