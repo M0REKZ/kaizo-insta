@@ -3073,7 +3073,6 @@ void CCharacter::HandleKZBot(CNetObj_PlayerInput &Input)
 			//Spaghetti yummy
 			
 			CCharacter *pClosestChar = nullptr;
-			pClosestChar = nullptr;
 			CVanillaPickup *pClosestPickup = nullptr;
 			CFlag *pEnemyFlag = nullptr;
 			CFlag *pTeamFlag = nullptr;
