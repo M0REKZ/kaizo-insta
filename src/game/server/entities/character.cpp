@@ -3304,13 +3304,13 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 			}
 			
 			//try y
-			if(Bounced_Right && (BouncePos_Right.y > (halfy + m_Pos.y) - 5.f && BouncePos_Right.y < (halfy + m_Pos.y) + 5.f) && !Collision()->IntersectLine(BouncePos_Right,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Right, pClosestChar->m_Pos, 0.f, At, this))
+			if(Bounced_Right && (BouncePos_Right.y > (halfy + m_Pos.y) - 5.f && BouncePos_Right.y < (halfy + m_Pos.y) + 5.f) && !Collision()->IntersectLine(BouncePos_Right,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Right, vec2(m_Pos.x,m_Pos.y + (BouncePos_Right.y - m_Pos.y)*2), 0.f, At, this))
 			{
 				Input.m_TargetX = BouncePos_Right.x - m_Pos.x; // aim
 				Input.m_TargetY = BouncePos_Right.y - m_Pos.y;
 				fire = true;
 			}
-			else if(Bounced_Left && (BouncePos_Left.y > (halfy + m_Pos.y) - 5.f && BouncePos_Left.y < (halfy + m_Pos.y) + 5.f) && !Collision()->IntersectLine(BouncePos_Left,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Left, pClosestChar->m_Pos, 0.f, At, this))
+			else if(Bounced_Left && (BouncePos_Left.y > (halfy + m_Pos.y) - 5.f && BouncePos_Left.y < (halfy + m_Pos.y) + 5.f) && !Collision()->IntersectLine(BouncePos_Left,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Left, vec2(m_Pos.x,m_Pos.y + (BouncePos_Left.y - m_Pos.y)*2), 0.f, At, this))
 			{
 				Input.m_TargetX = BouncePos_Left.x - m_Pos.x; // aim
 				Input.m_TargetY = BouncePos_Left.y - m_Pos.y;
@@ -3318,13 +3318,13 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 			}
 				
 			//try x
-			if(Bounced_Up && (BouncePos_Up.x > (halfx + m_Pos.x) - 5.f && BouncePos_Up.x < (halfx + m_Pos.x) + 5.f) && !Collision()->IntersectLine(BouncePos_Up,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Up, pClosestChar->m_Pos, 0.f, At, this))
+			if(Bounced_Up && (BouncePos_Up.x > (halfx + m_Pos.x) - 5.f && BouncePos_Up.x < (halfx + m_Pos.x) + 5.f) && !Collision()->IntersectLine(BouncePos_Up,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Up, vec2(m_Pos.x + (BouncePos_Up.x - m_Pos.x)*2,m_Pos.y), 0.f, At, this))
 			{
 				Input.m_TargetX = BouncePos_Up.x - m_Pos.x; // aim
 				Input.m_TargetY = BouncePos_Up.y - m_Pos.y;
 				fire = true;
 			}
-			else if(Bounced_Down && (BouncePos_Down.x > (halfx + m_Pos.x) - 5.f && BouncePos_Down.x < (halfx + m_Pos.x) + 5.f) && !Collision()->IntersectLine(BouncePos_Down,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Down, pClosestChar->m_Pos, 0.f, At, this))
+			else if(Bounced_Down && (BouncePos_Down.x > (halfx + m_Pos.x) - 5.f && BouncePos_Down.x < (halfx + m_Pos.x) + 5.f) && !Collision()->IntersectLine(BouncePos_Down,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Down, vec2(m_Pos.x + (BouncePos_Down.x - m_Pos.x)*2,m_Pos.y), 0.f, At, this))
 			{
 				Input.m_TargetX = BouncePos_Down.x - m_Pos.x; // aim
 				Input.m_TargetY = BouncePos_Down.y - m_Pos.y;
@@ -3405,13 +3405,13 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 				}
 				
 				//try y
-				if(Bounced_Right && (BouncePos_Right.y > (halfy + m_Pos.y) - 5.f && BouncePos_Right.y < (halfy + m_Pos.y) + 5.f) && !Collision()->IntersectLine(BouncePos_Right,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Right, pClosestChar->m_Pos, 0.f, At, this))
+				if(Bounced_Right && (BouncePos_Right.y > (halfy + m_Pos.y) - 5.f && BouncePos_Right.y < (halfy + m_Pos.y) + 5.f) && !Collision()->IntersectLine(BouncePos_Right,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Right, vec2(m_Pos.x,m_Pos.y + (BouncePos_Right.y - m_Pos.y)*2), 0.f, At, this))
 				{
 					Input.m_TargetX = BouncePos_Right.x - m_Pos.x; // aim
 					Input.m_TargetY = BouncePos_Right.y - m_Pos.y;
 					fire = true;
 				}
-				else if(Bounced_Left && (BouncePos_Left.y > (halfy + m_Pos.y) - 5.f && BouncePos_Left.y < (halfy + m_Pos.y) + 5.f) && !Collision()->IntersectLine(BouncePos_Left,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Left, pClosestChar->m_Pos, 0.f, At, this))
+				else if(Bounced_Left && (BouncePos_Left.y > (halfy + m_Pos.y) - 5.f && BouncePos_Left.y < (halfy + m_Pos.y) + 5.f) && !Collision()->IntersectLine(BouncePos_Left,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Left, vec2(m_Pos.x,m_Pos.y + (BouncePos_Left.y - m_Pos.y)*2), 0.f, At, this))
 				{
 					Input.m_TargetX = BouncePos_Left.x - m_Pos.x; // aim
 					Input.m_TargetY = BouncePos_Left.y - m_Pos.y;
@@ -3419,13 +3419,13 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 				}
 					
 				//try x
-				if(Bounced_Up && (BouncePos_Up.x > (halfx + m_Pos.x) - 5.f && BouncePos_Up.x < (halfx + m_Pos.x) + 5.f) && !Collision()->IntersectLine(BouncePos_Up,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Up, pClosestChar->m_Pos, 0.f, At, this))
+				if(Bounced_Up && (BouncePos_Up.x > (halfx + m_Pos.x) - 5.f && BouncePos_Up.x < (halfx + m_Pos.x) + 5.f) && !Collision()->IntersectLine(BouncePos_Up,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Up, vec2(m_Pos.x + (BouncePos_Up.x - m_Pos.x)*2,m_Pos.y), 0.f, At, this))
 				{
 					Input.m_TargetX = BouncePos_Up.x - m_Pos.x; // aim
 					Input.m_TargetY = BouncePos_Up.y - m_Pos.y;
 					fire = true;
 				}
-				else if(Bounced_Down && (BouncePos_Down.x > (halfx + m_Pos.x) - 5.f && BouncePos_Down.x < (halfx + m_Pos.x) + 5.f) && !Collision()->IntersectLine(BouncePos_Down,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Down, pClosestChar->m_Pos, 0.f, At, this))
+				else if(Bounced_Down && (BouncePos_Down.x > (halfx + m_Pos.x) - 5.f && BouncePos_Down.x < (halfx + m_Pos.x) + 5.f) && !Collision()->IntersectLine(BouncePos_Down,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Down, vec2(m_Pos.x + (BouncePos_Down.x - m_Pos.x)*2,m_Pos.y), 0.f, At, this))
 				{
 					Input.m_TargetX = BouncePos_Down.x - m_Pos.x; // aim
 					Input.m_TargetY = BouncePos_Down.y - m_Pos.y;
