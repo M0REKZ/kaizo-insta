@@ -3331,7 +3331,107 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 				fire = true;
 			}
 					
-
+			if(!fire)
+			{
+				//try again but moving point
+				{
+					float tempfloat =0.0f;
+					
+					tempfloat = halfy; //save halfy
+					
+					//move point
+					halfx = halfx - m_Pos.x > 0 ? halfx + (tempfloat/2 + tempfloat/halfx) : halfx - (tempfloat/2 + tempfloat/halfx);
+					if(halfy - m_Pos.y > 0)
+					{
+						halfy += (halfx/2 + halfx/halfy);
+						if(halfy - m_Pos.y < 0)
+							halfy += (halfy - m_Pos.y)*2;
+					}
+					else if(halfy - m_Pos.y < 0)
+					{
+						halfy -= (halfx/2 + halfx/halfy);
+						if(halfy - m_Pos.y > 0)
+							halfy -= (halfy - m_Pos.y)*2;
+					}
+					
+					if(halfx - m_Pos.x > 0)
+					{
+						halfx += (tempfloat/2 + tempfloat/halfx);
+						if(halfx - m_Pos.x < 0)
+						{
+							halfx += (halfx - m_Pos.x)*2;
+						}
+					}
+					else if(halfx - m_Pos.x < 0)
+					{
+						halfx -= (tempfloat/2 + tempfloat/halfx);
+						if(halfx - m_Pos.x > 0)
+						{
+							halfx -= (halfx - m_Pos.x)*2;
+						}
+					}
+				}
+				
+				//vec2 BouncePos_Right,BouncePos_Left,BouncePos_Up,BouncePos_Down;
+				Bounced_Right = false,Bounced_Left = false,Bounced_Up = false,Bounced_Down = false;
+				
+				//vec2 At, tempvar;
+				
+				//try y first
+				if(Collision()->IntersectLine(vec2(m_Pos.x + GameServer()->Tuning()->m_LaserReach / 2.f,halfy + m_Pos.y),vec2(m_Pos.x,halfy + m_Pos.y),nullptr,&tempvar))
+				{
+					Collision()->UnIntersectLineKZ(vec2(m_Pos.x + GameServer()->Tuning()->m_LaserReach / 2.f,halfy + m_Pos.y),vec2(m_Pos.x,halfy + m_Pos.y),&BouncePos_Right,nullptr);
+					if(!Collision()->IntersectLine(m_Pos,BouncePos_Right,nullptr,nullptr) && tempvar.x > BouncePos_Right.x)
+						Bounced_Right = true;
+				}
+				if(Collision()->IntersectLine(vec2(m_Pos.x - GameServer()->Tuning()->m_LaserReach / 2.f,halfy + m_Pos.y),vec2(m_Pos.x,halfy + m_Pos.y),nullptr,&tempvar))
+				{
+					Collision()->UnIntersectLineKZ(vec2(m_Pos.x - GameServer()->Tuning()->m_LaserReach / 2.f,halfy + m_Pos.y),vec2(m_Pos.x,halfy + m_Pos.y),&BouncePos_Left,nullptr);
+					if(!Collision()->IntersectLine(m_Pos,BouncePos_Left,nullptr,nullptr) && tempvar.x < BouncePos_Left.x)
+						Bounced_Left = true;
+				}
+				//try x now
+				if(Collision()->IntersectLine(vec2(halfx + m_Pos.x,m_Pos.y + GameServer()->Tuning()->m_LaserReach / 2.f),vec2(halfx + m_Pos.x,m_Pos.y),nullptr,&tempvar))
+				{
+					Collision()->UnIntersectLineKZ(vec2(halfx + m_Pos.x,m_Pos.y + GameServer()->Tuning()->m_LaserReach / 2.f),vec2(halfx + m_Pos.x,m_Pos.y),&BouncePos_Down,nullptr);
+					if(!Collision()->IntersectLine(m_Pos,BouncePos_Down,nullptr,nullptr) && tempvar.y > BouncePos_Down.y)
+						Bounced_Down = true;
+				}
+				if(Collision()->IntersectLine(vec2(halfx + m_Pos.x,m_Pos.y - GameServer()->Tuning()->m_LaserReach / 2.f),vec2(halfx + m_Pos.x,m_Pos.y),nullptr,&BouncePos_Up))
+				{
+					Collision()->UnIntersectLineKZ(vec2(halfx + m_Pos.x,m_Pos.y - GameServer()->Tuning()->m_LaserReach / 2.f),vec2(halfx + m_Pos.x,m_Pos.y),&BouncePos_Up,nullptr);
+					if(!Collision()->IntersectLine(m_Pos,BouncePos_Up,nullptr,nullptr) && tempvar.y < BouncePos_Up.y)
+						Bounced_Up = true;
+				}
+				
+				//try y
+				if(Bounced_Right && (BouncePos_Right.y > (halfy + m_Pos.y) - 5.f && BouncePos_Right.y < (halfy + m_Pos.y) + 5.f) && !Collision()->IntersectLine(BouncePos_Right,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Right, pClosestChar->m_Pos, 0.f, At, this))
+				{
+					Input.m_TargetX = BouncePos_Right.x - m_Pos.x; // aim
+					Input.m_TargetY = BouncePos_Right.y - m_Pos.y;
+					fire = true;
+				}
+				else if(Bounced_Left && (BouncePos_Left.y > (halfy + m_Pos.y) - 5.f && BouncePos_Left.y < (halfy + m_Pos.y) + 5.f) && !Collision()->IntersectLine(BouncePos_Left,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Left, pClosestChar->m_Pos, 0.f, At, this))
+				{
+					Input.m_TargetX = BouncePos_Left.x - m_Pos.x; // aim
+					Input.m_TargetY = BouncePos_Left.y - m_Pos.y;
+					fire = true;
+				}
+					
+				//try x
+				if(Bounced_Up && (BouncePos_Up.x > (halfx + m_Pos.x) - 5.f && BouncePos_Up.x < (halfx + m_Pos.x) + 5.f) && !Collision()->IntersectLine(BouncePos_Up,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Up, pClosestChar->m_Pos, 0.f, At, this))
+				{
+					Input.m_TargetX = BouncePos_Up.x - m_Pos.x; // aim
+					Input.m_TargetY = BouncePos_Up.y - m_Pos.y;
+					fire = true;
+				}
+				else if(Bounced_Down && (BouncePos_Down.x > (halfx + m_Pos.x) - 5.f && BouncePos_Down.x < (halfx + m_Pos.x) + 5.f) && !Collision()->IntersectLine(BouncePos_Down,pClosestChar->m_Pos,nullptr,nullptr) && GameServer()->m_World.IntersectCharacter(BouncePos_Down, pClosestChar->m_Pos, 0.f, At, this))
+				{
+					Input.m_TargetX = BouncePos_Down.x - m_Pos.x; // aim
+					Input.m_TargetY = BouncePos_Down.y - m_Pos.y;
+					fire = true;
+				}
+			}
 				
 			
 			if(fire)
