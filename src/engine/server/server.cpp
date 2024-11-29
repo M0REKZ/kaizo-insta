@@ -4037,6 +4037,9 @@ void CServer::UpdateKZBots(bool ForceDisconnect)
 		for(int DummyIndex = 0; DummyIndex < maximum(m_PreviousKZBots, g_Config.m_SvKZBots); ++DummyIndex)
 		{
 			const int ClientId = MaxClients() - DummyIndex - 1;
+			if(!m_aClients[ClientId].m_KZBot)
+				continue;
+			
 			CNetObj_PlayerInput Input = {0};
 			//Input.m_Direction = (ClientId & 1) ? -1 : 1;
 			((CGameContext*)GameServer())->HandleKZBot(ClientId,Input);
