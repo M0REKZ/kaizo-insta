@@ -293,7 +293,13 @@ public:
 	int m_Mines;
 	bool m_TakingNoOwnerDamage = false;
 	
-	//for Pointer's bots IA:
+	//for +KZ AI:
+	int m_TryingDirectionSmart = 0;
+	bool m_TryingOppositeSmart = false;
+	bool m_StopUntilTouchGround = false;
+	int m_DontDoSmartTargetChase = 0;
+	
+	//for Pointer's bots AI:
 	int m_botAggroPointer = -1;
 	int m_ticksSinceFirePointer = 0;
 	int m_botDirectionPointer = 1;

@@ -3090,9 +3090,11 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 	bool targetisup = false;
 	bool dontjump = false;
 	bool butjumpifwall = false;
+	bool jumpifgoingtofall = false;
 	
 	vec2 TargetPos = vec2(0,0);
 	bool TargetPosSet = false;
+	bool DoSmartTargetChase = false;
 	
 	Input.m_Fire = false;
 	
@@ -3184,12 +3186,14 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 			//Input.m_Direction = pTeamFlag->m_Pos.x > m_Pos.x ? 1 : -1;
 			TargetPos = pTeamFlag->m_Pos;
 			TargetPosSet = true;
+			DoSmartTargetChase = true;
 		}
 		else
 		{
 			//Input.m_Direction = pEnemyFlag->m_Pos.x > m_Pos.x ? 1 : -1;
 			TargetPos = pEnemyFlag->m_Pos;
 			TargetPosSet = true;
+			DoSmartTargetChase = true;
 		}
 	}
 	
@@ -3445,23 +3449,266 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 	}
 	
 	
-	if(TargetPosSet)
+	if(TargetPosSet && !m_StopUntilTouchGround)
 	{
-		Input.m_Direction = TargetPos.x > m_Pos.x ? 1 : -1;
-		
-		if((TargetPos.y + 56.0f) < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
+		if(DoSmartTargetChase && !m_DontDoSmartTargetChase)
 		{
-			targetisup = true;
+			if(m_TryingDirectionSmart)
+			{
+				Input.m_Direction = m_TryingDirectionSmart;
+				if((TargetPos.y + 56.0f) < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
+				{
+					targetisup = true;
+				}
+				else
+				{
+					dontjump = true;
+					butjumpifwall = true;
+				}
+			}
+			else if(((TargetPos.x - m_Pos.x < 0 ? (TargetPos.y - m_Pos.y < 0 ? TargetPos.x - m_Pos.x > TargetPos.y - m_Pos.y : (TargetPos.x - m_Pos.x)*-1 < TargetPos.y - m_Pos.y) : (TargetPos.y - m_Pos.y < 0 ? TargetPos.x - m_Pos.x < (TargetPos.y - m_Pos.y)*-1 : TargetPos.x - m_Pos.x < TargetPos.y - m_Pos.y)) && TargetPos.x > m_Pos.x - 500.0f && TargetPos.x < m_Pos.x + 500.0f))
+			{
+				//is up/down
+				
+				bool left = false,middle = false,right = false;
+				
+				if(TargetPos.y < m_Pos.y)
+				{
+					left = Collision()->IntersectLine(m_Pos,m_Pos + vec2(-400.f,-400.f),nullptr,nullptr);
+					middle = Collision()->IntersectLine(m_Pos,m_Pos + vec2(0,-350.f),nullptr,nullptr);
+					right = Collision()->IntersectLine(m_Pos,m_Pos + vec2(400.f,-400.f),nullptr,nullptr);
+					
+					if(!middle && left && right && !m_TryingDirectionSmart)
+					{
+						targetisup = true;
+					}
+					else if(!left && !m_TryingDirectionSmart)
+					{
+						Input.m_Direction = -1;
+						targetisup = true;
+					}
+					else if(!right && !m_TryingDirectionSmart)
+					{
+						Input.m_Direction = 1;
+						targetisup = true;
+					}
+					else
+					{
+						bool leftside = false,rightside = false;
+						vec2 leftcol,rightcol;
+						
+						leftside = Collision()->IntersectLine(m_Pos,m_Pos + vec2(-250.f,0),nullptr,&leftcol);
+						rightside = Collision()->IntersectLine(m_Pos,m_Pos + vec2(250.f,0),nullptr,&rightcol);
+						
+						if(!m_TryingDirectionSmart)
+						{
+							if(!leftside)
+							{
+								m_TryingDirectionSmart = -1;
+							}
+							else if(!rightside)
+							{
+								m_TryingDirectionSmart = 1;
+							}
+							else
+							{
+								float d1,d2;
+								d1 = distance(m_Pos,leftcol);
+								d2 = distance(m_Pos,rightcol);
+								
+								if(d1 > d2)
+								{
+									m_TryingDirectionSmart = 1;
+								}
+								else
+								{
+									m_TryingDirectionSmart = -1;
+								}
+							}
+						}
+						else
+						{
+							Input.m_Direction = m_TryingDirectionSmart;
+						}
+					}
+				}
+				else
+				{
+					left = Collision()->IntersectLine(m_Pos + vec2(-100.f,0),m_Pos + vec2(-100.f,-100.f),nullptr,nullptr);
+					middle = Collision()->IntersectLine(m_Pos + vec2(0,0),m_Pos + vec2(0,-100.f),nullptr,nullptr);
+					right = Collision()->IntersectLine(m_Pos + vec2(100.f,0),m_Pos + vec2(100.f,-100.f),nullptr,nullptr);
+					
+					if(!middle && left && right && !m_TryingDirectionSmart)
+					{
+						dontjump = true;
+					}
+					else if(!left && !m_TryingDirectionSmart)
+					{
+						Input.m_Direction = -1;
+						dontjump = true;
+						butjumpifwall = true;
+					}
+					else if(!right && !m_TryingDirectionSmart)
+					{
+						Input.m_Direction = 1;
+						dontjump = true;
+						butjumpifwall = true;
+					}
+					else
+					{
+						bool leftside = false,rightside = false;
+						vec2 leftcol,rightcol;
+						
+						leftside = Collision()->IntersectLine(m_Pos,m_Pos + vec2(-1500.f,0),nullptr,&leftcol);
+						rightside = Collision()->IntersectLine(m_Pos,m_Pos + vec2(1500.f,0),nullptr,&rightcol);
+						
+						if(!m_TryingDirectionSmart)
+						{
+							if(!leftside)
+							{
+								m_TryingDirectionSmart = -1;
+							}
+							else if(!rightside)
+							{
+								m_TryingDirectionSmart = 1;
+							}
+							else
+							{
+								float d1,d2;
+								d1 = distance(m_Pos,leftcol);
+								d2 = distance(m_Pos,rightcol);
+								
+								if(d1 > d2)
+								{
+									m_TryingDirectionSmart = 1;
+								}
+								else
+								{
+									m_TryingDirectionSmart = -1;
+								}
+							}
+						}
+						else
+						{
+							Input.m_Direction = m_TryingDirectionSmart;
+						}
+					}
+				}
+			}
+			else
+			{
+				//is still away
+				
+				bool up = false,middle = false,down = false;
+				
+				if(TargetPos.x > m_Pos.x)
+				{
+					up = Collision()->IntersectLine(m_Pos,m_Pos + vec2(100.f,-100.f),nullptr,nullptr) || Collision()->IntersectLine(m_Pos + vec2(0,-100.f),m_Pos + vec2(50.f,-150.f),nullptr,nullptr);
+					middle = Collision()->IntersectLine(m_Pos,m_Pos + vec2(150.f,0),nullptr,nullptr);
+					down = Collision()->IntersectLine(m_Pos,m_Pos + vec2(100.f,100.f),nullptr,nullptr)  || Collision()->IntersectLine(m_Pos + vec2(0,100.f),m_Pos + vec2(50.f,150.f),nullptr,nullptr);
+					
+					if(!middle)
+					{
+						Input.m_Direction = 1;
+						dontjump = true;
+						jumpifgoingtofall = true;
+						butjumpifwall = true;
+					}
+					else if(!down)
+					{
+						Input.m_Direction = 1;
+						jumpifgoingtofall = true;
+						dontjump = true;
+						butjumpifwall = true;
+					}
+					else if(!up)
+					{
+						Input.m_Direction = 1;
+						targetisup = true;
+					}
+					else
+					{
+						targetisup = true;
+					}
+				}
+				else
+				{
+					up = Collision()->IntersectLine(m_Pos,m_Pos + vec2(-100.f,-100.f),nullptr,nullptr) || Collision()->IntersectLine(m_Pos + vec2(0,-100.f),m_Pos + vec2(-50.f,-150.f),nullptr,nullptr);
+					middle = Collision()->IntersectLine(m_Pos,m_Pos + vec2(-150.f,0),nullptr,nullptr);
+					down = Collision()->IntersectLine(m_Pos,m_Pos + vec2(-100.f,100.f),nullptr,nullptr)  || Collision()->IntersectLine(m_Pos + vec2(0,100.f),m_Pos + vec2(-50.f,150.f),nullptr,nullptr);
+					
+					if(!middle)
+					{
+						Input.m_Direction = -1;
+						jumpifgoingtofall = true;
+						dontjump = true;
+						butjumpifwall = true;
+					}
+					else if(!down)
+					{
+						Input.m_Direction = -1;
+						jumpifgoingtofall = true;
+						dontjump = true;
+						butjumpifwall = true;
+					}
+					else if(!up)
+					{
+						Input.m_Direction = -1;
+						targetisup = true;
+					}
+					else
+					{
+						targetisup = true;
+					}
+				}
+			}
+			
 		}
 		else
 		{
-			dontjump = true;
-			butjumpifwall = true;
+			Input.m_Direction = TargetPos.x > m_Pos.x ? 1 : -1;
+			
+			if((TargetPos.y + 56.0f) < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
+			{
+				targetisup = true;
+			}
+			else
+			{
+				dontjump = true;
+				butjumpifwall = true;
+			}
+			m_DontDoSmartTargetChase--;
 		}
 	}
 	
+	if(!Collision()->IntersectLine(m_Pos,TargetPos,nullptr,nullptr) && m_TryingDirectionSmart)
+	{
+		m_TryingOppositeSmart = m_TryingDirectionSmart = 0;
+		m_StopUntilTouchGround = true;
+	}
+	
+	if(m_StopUntilTouchGround && IsGrounded())
+	{
+		m_StopUntilTouchGround = false;
+		m_DontDoSmartTargetChase = Server()->TickSpeed() * 2;
+	}
+	if(m_Core.m_Colliding && IsGrounded())
+	{
+		if(!m_TryingOppositeSmart)
+		{
+			m_TryingDirectionSmart *= -1;
+			m_TryingOppositeSmart = true;
+		}
+		else
+		{
+			m_TryingDirectionSmart = 0;
+			m_TryingOppositeSmart = false;
+		}
+	}
+	
+	
 	//HELP
-	if((butjumpifwall ? m_Core.m_Colliding : false) || (!dontjump && ((Collision()->GetCollisionAt(m_Pos.x , m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH) || m_Core.m_Colliding || (((Collision()->CheckPoint(m_Pos.x + GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)) && !(Collision()->CheckPoint(m_Pos.x - GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)))) || ((!(Collision()->CheckPoint(m_Pos.x + GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)) && (Collision()->CheckPoint(m_Pos.x - GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)))) || targetisup)))
+	if((jumpifgoingtofall ? !(Collision()->IntersectLine(m_Pos,m_Pos + vec2(0.f,1000.f),nullptr,nullptr)) : false) || (butjumpifwall ? m_Core.m_Colliding : false) || (!dontjump && ((Collision()->GetCollisionAt(m_Pos.x , m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH) || !Collision()->IntersectLine(m_Pos,m_Pos + vec2(0.f,1000.f),nullptr,nullptr) || m_Core.m_Colliding || (((Collision()->CheckPoint(m_Pos.x + GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)) && !(Collision()->CheckPoint(m_Pos.x - GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)))) || ((!(Collision()->CheckPoint(m_Pos.x + GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)) && (Collision()->CheckPoint(m_Pos.x - GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)))) || targetisup)))
 	{
 		
 		if(IsGrounded() || (m_Core.m_Jumps > 0 && m_Core.m_Vel.y > 0))
