@@ -3219,6 +3219,7 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 			//Input.m_Direction = pClosestChar->m_Pos.x > m_Pos.x ? 1 : -1;
 			TargetPos = pClosestChar->m_Pos;
 			TargetPosSet = true;
+			DoSmartTargetChase = true;
 		}
 		
 		//printf("%.5f %.5f \n",distance(m_Pos, pClosestChar->m_Pos),30.0f);
@@ -3470,24 +3471,24 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 			{
 				//is up/down
 				
-				bool left = false,middle = false,right = false;
+				bool left = false,right = false;
 				
 				if(TargetPos.y < m_Pos.y)
 				{
 					left = Collision()->IntersectLine(m_Pos,m_Pos + vec2(-400.f,-400.f),nullptr,nullptr);
-					middle = Collision()->IntersectLine(m_Pos,m_Pos + vec2(0,-350.f),nullptr,nullptr);
+					//middle = Collision()->IntersectLine(m_Pos,m_Pos + vec2(0,-350.f),nullptr,nullptr);
 					right = Collision()->IntersectLine(m_Pos,m_Pos + vec2(400.f,-400.f),nullptr,nullptr);
 					
-					if(!middle && left && right && !m_TryingDirectionSmart)
+					if(left && right && !m_TryingDirectionSmart && !Collision()->IntersectLine(m_Pos,m_Pos + vec2(0,-350.f),nullptr,nullptr))//middle
 					{
 						targetisup = true;
 					}
-					else if(!left && !m_TryingDirectionSmart)
+					else if(!m_TryingDirectionSmart && !left)//left
 					{
 						Input.m_Direction = -1;
 						targetisup = true;
 					}
-					else if(!right && !m_TryingDirectionSmart)
+					else if(!m_TryingDirectionSmart && !right)//right
 					{
 						Input.m_Direction = 1;
 						targetisup = true;
@@ -3497,16 +3498,14 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 						bool leftside = false,rightside = false;
 						vec2 leftcol,rightcol;
 						
-						leftside = Collision()->IntersectLine(m_Pos,m_Pos + vec2(-250.f,0),nullptr,&leftcol);
-						rightside = Collision()->IntersectLine(m_Pos,m_Pos + vec2(250.f,0),nullptr,&rightcol);
 						
 						if(!m_TryingDirectionSmart)
 						{
-							if(!leftside)
+							if(!(leftside = Collision()->IntersectLine(m_Pos,m_Pos + vec2(-250.f,0),nullptr,&leftcol)))
 							{
 								m_TryingDirectionSmart = -1;
 							}
-							else if(!rightside)
+							else if(!(rightside = Collision()->IntersectLine(m_Pos,m_Pos + vec2(250.f,0),nullptr,&rightcol)))
 							{
 								m_TryingDirectionSmart = 1;
 							}
@@ -3535,10 +3534,10 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 				else
 				{
 					left = Collision()->IntersectLine(m_Pos + vec2(-100.f,0),m_Pos + vec2(-100.f,-100.f),nullptr,nullptr);
-					middle = Collision()->IntersectLine(m_Pos + vec2(0,0),m_Pos + vec2(0,-100.f),nullptr,nullptr);
+					//middle = Collision()->IntersectLine(m_Pos + vec2(0,0),m_Pos + vec2(0,-100.f),nullptr,nullptr);
 					right = Collision()->IntersectLine(m_Pos + vec2(100.f,0),m_Pos + vec2(100.f,-100.f),nullptr,nullptr);
 					
-					if(!middle && left && right && !m_TryingDirectionSmart)
+					if(left && right && !m_TryingDirectionSmart && !Collision()->IntersectLine(m_Pos + vec2(0,0),m_Pos + vec2(0,-100.f),nullptr,nullptr))//middle
 					{
 						dontjump = true;
 					}
@@ -3559,16 +3558,14 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 						bool leftside = false,rightside = false;
 						vec2 leftcol,rightcol;
 						
-						leftside = Collision()->IntersectLine(m_Pos,m_Pos + vec2(-1500.f,0),nullptr,&leftcol);
-						rightside = Collision()->IntersectLine(m_Pos,m_Pos + vec2(1500.f,0),nullptr,&rightcol);
 						
 						if(!m_TryingDirectionSmart)
 						{
-							if(!leftside)
+							if(!(leftside = Collision()->IntersectLine(m_Pos,m_Pos + vec2(-1500.f,0),nullptr,&leftcol)))
 							{
 								m_TryingDirectionSmart = -1;
 							}
-							else if(!rightside)
+							else if(!(rightside = Collision()->IntersectLine(m_Pos,m_Pos + vec2(1500.f,0),nullptr,&rightcol)))
 							{
 								m_TryingDirectionSmart = 1;
 							}
@@ -3599,29 +3596,29 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 			{
 				//is still away
 				
-				bool up = false,middle = false,down = false;
+				//bool up = false,middle = false,down = false;
 				
 				if(TargetPos.x > m_Pos.x)
 				{
-					up = Collision()->IntersectLine(m_Pos,m_Pos + vec2(100.f,-100.f),nullptr,nullptr) || Collision()->IntersectLine(m_Pos + vec2(0,-100.f),m_Pos + vec2(50.f,-150.f),nullptr,nullptr);
-					middle = Collision()->IntersectLine(m_Pos,m_Pos + vec2(150.f,0),nullptr,nullptr);
-					down = Collision()->IntersectLine(m_Pos,m_Pos + vec2(100.f,100.f),nullptr,nullptr)  || Collision()->IntersectLine(m_Pos + vec2(0,100.f),m_Pos + vec2(50.f,150.f),nullptr,nullptr);
+					//up = Collision()->IntersectLine(m_Pos,m_Pos + vec2(100.f,-100.f),nullptr,nullptr) || Collision()->IntersectLine(m_Pos + vec2(0,-100.f),m_Pos + vec2(50.f,-150.f),nullptr,nullptr);
+					//middle = Collision()->IntersectLine(m_Pos,m_Pos + vec2(150.f,0),nullptr,nullptr);
+					//down = Collision()->IntersectLine(m_Pos,m_Pos + vec2(100.f,100.f),nullptr,nullptr)  || Collision()->IntersectLine(m_Pos + vec2(0,100.f),m_Pos + vec2(50.f,150.f),nullptr,nullptr);
 					
-					if(!middle)
+					if(!Collision()->IntersectLine(m_Pos,m_Pos + vec2(150.f,0),nullptr,nullptr))//middle
 					{
 						Input.m_Direction = 1;
 						dontjump = true;
 						jumpifgoingtofall = true;
 						butjumpifwall = true;
 					}
-					else if(!down)
+					else if(!(Collision()->IntersectLine(m_Pos,m_Pos + vec2(100.f,100.f),nullptr,nullptr)  || Collision()->IntersectLine(m_Pos + vec2(0,100.f),m_Pos + vec2(50.f,150.f),nullptr,nullptr)))//down
 					{
 						Input.m_Direction = 1;
 						jumpifgoingtofall = true;
 						dontjump = true;
 						butjumpifwall = true;
 					}
-					else if(!up)
+					else if(!(Collision()->IntersectLine(m_Pos,m_Pos + vec2(100.f,-100.f),nullptr,nullptr) || Collision()->IntersectLine(m_Pos + vec2(0,-100.f),m_Pos + vec2(50.f,-150.f),nullptr,nullptr)))//up
 					{
 						Input.m_Direction = 1;
 						targetisup = true;
@@ -3633,25 +3630,25 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 				}
 				else
 				{
-					up = Collision()->IntersectLine(m_Pos,m_Pos + vec2(-100.f,-100.f),nullptr,nullptr) || Collision()->IntersectLine(m_Pos + vec2(0,-100.f),m_Pos + vec2(-50.f,-150.f),nullptr,nullptr);
-					middle = Collision()->IntersectLine(m_Pos,m_Pos + vec2(-150.f,0),nullptr,nullptr);
-					down = Collision()->IntersectLine(m_Pos,m_Pos + vec2(-100.f,100.f),nullptr,nullptr)  || Collision()->IntersectLine(m_Pos + vec2(0,100.f),m_Pos + vec2(-50.f,150.f),nullptr,nullptr);
+					//up = Collision()->IntersectLine(m_Pos,m_Pos + vec2(-100.f,-100.f),nullptr,nullptr) || Collision()->IntersectLine(m_Pos + vec2(0,-100.f),m_Pos + vec2(-50.f,-150.f),nullptr,nullptr);
+					//middle = Collision()->IntersectLine(m_Pos,m_Pos + vec2(-150.f,0),nullptr,nullptr);
+					//down = Collision()->IntersectLine(m_Pos,m_Pos + vec2(-100.f,100.f),nullptr,nullptr)  || Collision()->IntersectLine(m_Pos + vec2(0,100.f),m_Pos + vec2(-50.f,150.f),nullptr,nullptr);
 					
-					if(!middle)
+					if(!Collision()->IntersectLine(m_Pos,m_Pos + vec2(-150.f,0),nullptr,nullptr))//middle
 					{
 						Input.m_Direction = -1;
 						jumpifgoingtofall = true;
 						dontjump = true;
 						butjumpifwall = true;
 					}
-					else if(!down)
+					else if(!(Collision()->IntersectLine(m_Pos,m_Pos + vec2(-100.f,100.f),nullptr,nullptr)  || Collision()->IntersectLine(m_Pos + vec2(0,100.f),m_Pos + vec2(-50.f,150.f),nullptr,nullptr)))//down
 					{
 						Input.m_Direction = -1;
 						jumpifgoingtofall = true;
 						dontjump = true;
 						butjumpifwall = true;
 					}
-					else if(!up)
+					else if(!(Collision()->IntersectLine(m_Pos,m_Pos + vec2(-100.f,-100.f),nullptr,nullptr) || Collision()->IntersectLine(m_Pos + vec2(0,-100.f),m_Pos + vec2(-50.f,-150.f),nullptr,nullptr)))//up
 					{
 						Input.m_Direction = -1;
 						targetisup = true;
@@ -3681,7 +3678,7 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 		}
 	}
 	
-	if(!Collision()->IntersectLine(m_Pos,TargetPos,nullptr,nullptr) && m_TryingDirectionSmart)
+	if(m_TryingDirectionSmart && !Collision()->IntersectLine(m_Pos,TargetPos,nullptr,nullptr))
 	{
 		m_TryingOppositeSmart = m_TryingDirectionSmart = 0;
 		m_StopUntilTouchGround = true;
