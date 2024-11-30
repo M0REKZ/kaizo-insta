@@ -159,7 +159,7 @@ void CGameContext::UpdateVoteCheckboxes() const
 				Checked = str_startswith_nocase(pVal, g_Config.m_SvGametype);
 			}
 #define MACRO_CONFIG_INT(Name, ScriptName, Def, Min, Max, Flags, Desc) \
-	else if(str_startswith(pCurrent->m_aCommand, #ScriptName)) \
+	else if(str_startswith(pCurrent->m_aCommand, #ScriptName) && pCurrent->m_aCommand[str_length(#ScriptName)] == ' ') \
 	{ \
 		Len = str_length(#ScriptName); \
 		/* \
