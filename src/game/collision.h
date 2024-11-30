@@ -52,6 +52,7 @@ public:
 	int GetKZTileIndex(vec2 Pos) const { return GetKZTileIndex(GetKZIndex(Pos.x, Pos.y)); }
 	int GetKZTileIndex(float x, float y) const { return GetKZTileIndex(GetKZIndex(x, y)); }
 	int UnIntersectLineKZ(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
+	int FastIntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
 	
 	void Init(CLayers *pLayers);
 	void Unload();
