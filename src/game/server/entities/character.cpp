@@ -3252,7 +3252,7 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 			targetisup = true;
 		}*/
 		
-		if(!Collision()->FastIntersectLine(m_Pos,pClosestChar->m_Pos,nullptr,nullptr) || m_Core.m_aWeapons[WEAPON_NINJA].m_Got)
+		if((m_Core.m_ActiveWeapon == WEAPON_LASER ? (!Collision()->FastIntersectLine(m_Pos,pClosestChar->m_Pos,nullptr,nullptr) && distance(m_Pos, pClosestChar->m_Pos) < GameServer()->Tuning()->m_LaserReach) : !Collision()->FastIntersectLine(m_Pos,pClosestChar->m_Pos,nullptr,nullptr)) || m_Core.m_aWeapons[WEAPON_NINJA].m_Got)
 		{
 			if(!m_LatestInput.m_Fire)
 				Input.m_Fire = true;
