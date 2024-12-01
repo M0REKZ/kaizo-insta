@@ -113,6 +113,24 @@ bool CGameControllerPvp::ParseChatCmd(char Prefix, int ClientId, const char *pCm
 	return match;
 }
 
+// checks if it matches !1v1 !1vs1 and so on chat commands
+// where 1 is the TeamSlots argument
+static int Match1v1ChatCommand(const char *pCmd, int TeamSlots)
+{
+	const char aaVs[][16] = {"on", "n", "vs", "v"};
+	for(const auto *pVs : aaVs)
+	{
+		char a1on1[32];
+		str_format(a1on1, sizeof(a1on1), "%d%s%d", TeamSlots, pVs, TeamSlots);
+		if(!str_comp_nocase(pCmd, a1on1))
+			return true;
+		str_format(a1on1, sizeof(a1on1), "%s%d", pVs, TeamSlots);
+		if(!str_comp_nocase(pCmd, a1on1))
+			return true;
+	}
+	return false;
+}
+
 bool CGameControllerPvp::OnBangCommand(int ClientId, const char *pCmd, int NumArgs, const char **ppArgs)
 {
 	if(ClientId < 0 || ClientId >= MAX_CLIENTS)
@@ -134,31 +152,20 @@ bool CGameControllerPvp::OnBangCommand(int ClientId, const char *pCmd, int NumAr
 	}
 
 	int SetSlots = -1;
-	const char aaVs[][16] = {"on", "n", "vs", "v"};
-	for(const auto *pVs : aaVs)
+	const int aSlotCommandValues[] = {1, 2, 3, 4, 5, 6, 7, 8, 32};
+	for(int Slots : aSlotCommandValues)
 	{
-		for(int i = 1; i <= 8; i++)
+		if(Match1v1ChatCommand(pCmd, Slots))
 		{
-			char a1on1[32];
-			str_format(a1on1, sizeof(a1on1), "%d%s%d", i, pVs, i);
-			if(!str_comp_nocase(pCmd, a1on1))
-			{
-				SetSlots = i;
-				break;
-			}
-			str_format(a1on1, sizeof(a1on1), "%s%d", pVs, i);
-			if(!str_comp_nocase(pCmd, a1on1))
-			{
-				SetSlots = i;
-				break;
-			}
+			SetSlots = Slots;
+			break;
 		}
 	}
 
 	if(SetSlots != -1)
 	{
 		char aCmd[512];
-		str_format(aCmd, sizeof(aCmd), "sv_spectator_slots %d", MAX_CLIENTS - SetSlots * 2);
+		str_format(aCmd, sizeof(aCmd), "sv_spectator_slots %d", MAX_CLIENTS - (SetSlots * 2));
 		char aDesc[512];
 		str_format(aDesc, sizeof(aDesc), "%dvs%d", SetSlots, SetSlots);
 		GameServer()->BangCommandVote(ClientId, aCmd, aDesc);
