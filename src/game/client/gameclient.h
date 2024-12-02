@@ -58,6 +58,7 @@
 #include "components/spectator.h"
 #include "components/statboard.h"
 #include "components/tooltips.h"
+#include "components/touch_controls.h"
 #include "components/voting.h"
 
 class CGameInfo
@@ -146,6 +147,7 @@ public:
 	CSounds m_Sounds;
 	CEmoticon m_Emoticon;
 	CDamageInd m_DamageInd;
+	CTouchControls m_TouchControls;
 	CVoting m_Voting;
 	CSpectator m_Spectator;
 
@@ -780,7 +782,7 @@ public:
 	const std::vector<CSnapEntities> &SnapEntities() { return m_vSnapEntities; }
 
 	int m_MultiViewTeam;
-	int m_MultiViewPersonalZoom;
+	float m_MultiViewPersonalZoom;
 	bool m_MultiViewShowHud;
 	bool m_MultiViewActivated;
 	bool m_aMultiViewId[MAX_CLIENTS];

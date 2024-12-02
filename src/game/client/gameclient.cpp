@@ -146,6 +146,7 @@ void CGameClient::OnConsoleInit()
 					      &m_Chat,
 					      &m_Broadcast,
 					      &m_DebugHud,
+					      &m_TouchControls,
 					      &m_Scoreboard,
 					      &m_Statboard,
 					      &m_Motd,
@@ -165,6 +166,7 @@ void CGameClient::OnConsoleInit()
 						  &m_Emoticon,
 						  &m_Menus,
 						  &m_Controls,
+						  &m_TouchControls,
 						  &m_Binds});
 
 	// add basic console commands
@@ -444,6 +446,23 @@ void CGameClient::OnUpdate()
 		}
 	}
 
+	// handle touch events
+	const std::vector<IInput::CTouchFingerState> &vTouchFingerStates = Input()->TouchFingerStates();
+	bool TouchHandled = false;
+	for(auto &pComponent : m_vpInput)
+	{
+		if(TouchHandled)
+		{
+			// Also update inactive components so they can handle touch fingers being released.
+			pComponent->OnTouchState({});
+		}
+		else if(pComponent->OnTouchState(vTouchFingerStates))
+		{
+			Input()->ClearTouchDeltas();
+			TouchHandled = true;
+		}
+	}
+
 	// handle key presses
 	Input()->ConsumeEvents([&](const IInput::CEvent &Event) {
 		for(auto &pComponent : m_vpInput)
@@ -647,7 +666,7 @@ void CGameClient::OnReset()
 	m_LastScreenAspect = 0.0f;
 	m_LastDummyConnected = false;
 
-	m_MultiViewPersonalZoom = 0;
+	m_MultiViewPersonalZoom = 0.0f;
 	m_MultiViewActivated = false;
 	m_MultiView.m_IsInit = false;
 
@@ -756,6 +775,9 @@ void CGameClient::OnRender()
 			pWarning->m_WasShown = true;
 		}
 	}
+
+	// update camera data prior to CControls::OnRender to allow CControls::m_aTargetPos to compensate using camera data
+	m_Camera.UpdateCamera();
 
 	// render all systems
 	for(auto &pComponent : m_vpAll)
@@ -4081,6 +4103,9 @@ bool CGameClient::InitMultiView(int Team)
 		int Count = 0;
 		for(int i = 0; i < MAX_CLIENTS; i++)
 		{
+			if(Client()->State() != IClient::STATE_DEMOPLAYBACK && m_Snap.m_apPlayerInfos[i] && m_Snap.m_apPlayerInfos[i]->m_ClientId == m_Snap.m_LocalClientId)
+				continue;
+
 			vec2 PlayerPos;
 
 			// get the position of the player
@@ -4221,7 +4246,7 @@ float CGameClient::MapValue(float MaxValue, float MinValue, float MaxRange, floa
 void CGameClient::ResetMultiView()
 {
 	m_Camera.SetZoom(std::pow(CCamera::ZOOM_STEP, g_Config.m_ClDefaultZoom - 10), g_Config.m_ClSmoothZoomTime);
-	m_MultiViewPersonalZoom = 0;
+	m_MultiViewPersonalZoom = 0.0f;
 	m_MultiViewActivated = false;
 	m_MultiView.m_Solo = false;
 	m_MultiView.m_IsInit = false;

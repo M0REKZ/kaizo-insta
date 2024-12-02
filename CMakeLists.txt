@@ -1408,7 +1408,6 @@ set(EXPECTED_DATA
   editor/automap/round_tiles.rules
   editor/automap/water.rules
   editor/automap/winter_main.rules
-  editor/background.png
   editor/checker.png
   editor/cursor.png
   editor/cursor_resize.png
@@ -1846,6 +1845,7 @@ set(EXPECTED_DATA
   themes/winter.png
   themes/winter_day.map
   themes/winter_night.map
+  touch_controls.json
   wordlist.txt
 )
 
@@ -2406,6 +2406,8 @@ if(CLIENT)
     components/statboard.h
     components/tooltips.cpp
     components/tooltips.h
+    components/touch_controls.cpp
+    components/touch_controls.h
     components/voting.cpp
     components/voting.h
     gameclient.cpp
