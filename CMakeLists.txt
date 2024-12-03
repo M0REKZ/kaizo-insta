@@ -2736,6 +2736,8 @@ if(SERVER)
     entities/projectile.h
     entities/kz/ball.cpp
     entities/kz/ball.h
+    entities/kz/flagball.cpp
+    entities/kz/flagball.h
     entities/kz/grenade_launcher.cpp
     entities/kz/grenade_launcher.h
     entities/kz/mine.cpp
@@ -2835,6 +2837,11 @@ if(SERVER)
     gamemodes/instagib/iFreeze/iFreeze.cpp
     gamemodes/instagib/iFreeze/iFreeze.h
     gamemodes/instagib/iFreeze/sql_columns.h
+    gamemodes/instagib/fb.cpp
+    gamemodes/instagib/fb.h
+    gamemodes/instagib/ifb/ifb.cpp
+    gamemodes/instagib/ifb/ifb.h
+    gamemodes/instagib/ifb/sql_columns.h
     gamemodes/vanilla/tdm/tdm.cpp
     gamemodes/vanilla/tdm/tdm.h
     gamemodes/vanilla/tdm/sql_columns.h

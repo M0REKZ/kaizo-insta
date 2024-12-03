@@ -290,6 +290,7 @@ public:
 	bool InWater() { return m_Water; }
 	void CatchBall();
 	bool m_HasBall = false;
+	bool m_HasFlagBall = false;
 	int m_Mines;
 	bool m_TakingNoOwnerDamage = false;
 	

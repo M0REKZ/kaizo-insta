@@ -45,7 +45,6 @@ public:
 	void Grab(class CCharacter *pChar);
 	void Drop(vec2 Direction = vec2(0, 0));
 	
-private:
 	//+KZ
 	void HandleKZTiles();
 };

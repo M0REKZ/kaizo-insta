@@ -39,6 +39,8 @@
 #include "gamemodes/instagib/gFreeze/gFreeze.h"
 #include "gamemodes/instagib/hFreeze/hFreeze.h"
 #include "gamemodes/instagib/iFreeze/iFreeze.h"
+#include "gamemodes/instagib/fb.h"
+#include "gamemodes/instagib/ifb/ifb.h"
 #include "gamemodes/instagib/glms/glms.h"
 #include "gamemodes/instagib/glts/glts.h"
 #include "gamemodes/instagib/ilms/ilms.h"
@@ -4179,6 +4181,8 @@ void CGameContext::OnInit(const void *pPersistentData)
 		m_pController = new CGameControllerGFreeze(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "hfreeze"))
 		m_pController = new CGameControllerHFreeze(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "ifb"))
+		m_pController = new CGameControllerIFB(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "gdm"))
 		m_pController = new CGameControllerGDM(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "idm"))

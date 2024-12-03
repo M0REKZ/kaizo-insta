@@ -15,6 +15,7 @@ class CCharacter : public CEntity
 	friend class CGameControllerPvp;
 	friend class CGameControllerCTF;
 	friend class CGameControllerBaseFng;
+	friend class CGameControllerInstaFB; //+KZ
 
 public:
 	// ddnet-insta

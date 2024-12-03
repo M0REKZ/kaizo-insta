@@ -1328,7 +1328,10 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 
 		pCharacter->m_AttackTick = m_AttackTick;
 		pCharacter->m_Direction = m_Input.m_Direction;
-		pCharacter->m_Weapon = Weapon;
+		if(m_HasFlagBall)
+			pCharacter->m_Weapon = -1;
+		else
+			pCharacter->m_Weapon = Weapon;
 		pCharacter->m_AmmoCount = AmmoCount;
 		pCharacter->m_Health = Health;
 		pCharacter->m_Armor = Armor;
@@ -1354,7 +1357,10 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 		pCharacter->m_Emote = Emote;
 		pCharacter->m_AttackTick = m_AttackTick;
 		pCharacter->m_Direction = m_Input.m_Direction;
-		pCharacter->m_Weapon = Weapon;
+		if(m_HasFlagBall)
+			pCharacter->m_Weapon = -1;
+		else
+			pCharacter->m_Weapon = Weapon;
 		pCharacter->m_AmmoCount = AmmoCount;
 
 		if(m_FreezeTime > 0 || m_Core.m_DeepFrozen)
@@ -1485,17 +1491,17 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_GRENADE;
 	if(m_Core.m_HasTelegunLaser)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_TELEGUN_LASER;
-	if(m_Core.m_aWeapons[WEAPON_HAMMER].m_Got && !m_HasBall)
+	if(m_Core.m_aWeapons[WEAPON_HAMMER].m_Got && !m_HasBall && !m_HasFlagBall)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_HAMMER;
-	if(m_Core.m_aWeapons[WEAPON_GUN].m_Got && !m_HasBall)
+	if(m_Core.m_aWeapons[WEAPON_GUN].m_Got && !m_HasBall && !m_HasFlagBall)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_GUN;
-	if(m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Got && !m_HasBall)
+	if(m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Got && !m_HasBall && !m_HasFlagBall)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_SHOTGUN;
-	if(m_Core.m_aWeapons[WEAPON_GRENADE].m_Got && !m_HasBall)
+	if(m_Core.m_aWeapons[WEAPON_GRENADE].m_Got && !m_HasBall && !m_HasFlagBall)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_GRENADE;
-	if(m_Core.m_aWeapons[WEAPON_LASER].m_Got && !m_HasBall)
+	if(m_Core.m_aWeapons[WEAPON_LASER].m_Got && !m_HasBall && !m_HasFlagBall)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_LASER;
-	if(m_Core.m_ActiveWeapon == WEAPON_NINJA)
+	if(m_Core.m_ActiveWeapon == WEAPON_NINJA && !m_HasBall && !m_HasFlagBall)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_WEAPON_NINJA;
 	if(m_Core.m_LiveFrozen)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_MOVEMENTS_DISABLED;
