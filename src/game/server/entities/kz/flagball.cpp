@@ -114,13 +114,19 @@ void CFlagBall::HandleKZTiles()
 		
 		if(TileIndex == TILE_BALL_REDGOAL || TileIndex == TILE_BALL_REDSLAM)
 		{
-			GameServer()->m_pController->m_aTeamscore[TEAM_BLUE]+= 100;
+			if(m_pCarrier)
+				GameServer()->m_pController->m_aTeamscore[TEAM_BLUE]+= 100;
+			else
+				GameServer()->m_pController->m_aTeamscore[TEAM_BLUE]+= 50;
 			Reset();
 			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 		}
 		else if(TileIndex == TILE_BALL_BLUEGOAL || TileIndex == TILE_BALL_BLUESLAM)
 		{
-			GameServer()->m_pController->m_aTeamscore[TEAM_RED]+= 100;
+			if(m_pCarrier)
+				GameServer()->m_pController->m_aTeamscore[TEAM_RED]+= 100;
+			else
+				GameServer()->m_pController->m_aTeamscore[TEAM_RED]+= 50;
 			Reset();
 			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 		}
@@ -131,7 +137,46 @@ void CFlagBall::HandleKZTiles()
 		}
 		else if(m_pLastCarrier && (TileIndex == TILE_BALL_NOTEAMGOAL || TileIndex == TILE_BALL_NOTEAMSLAM))
 		{
-			GameServer()->m_pController->m_aTeamscore[m_pLastCarrier->GetPlayer()->GetTeam()]+= 100;
+			if(m_pCarrier)
+				GameServer()->m_pController->m_aTeamscore[m_pCarrier->GetPlayer()->GetTeam()]+= 100;
+			else
+				GameServer()->m_pController->m_aTeamscore[m_pLastCarrier->GetPlayer()->GetTeam()]+= 50;
+			Reset();
+			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
+		}
+		else if(TileIndex == TILE_FLAGBALL_REDGOAL) //FLAGBALL TILES +KZ
+		{
+			if(m_pCarrier)
+			{
+				GameServer()->m_pController->m_aTeamscore[TEAM_BLUE]+= 100;
+				m_pCarrier->Die(m_pCarrier->GetPlayer()->GetCid(), WEAPON_WORLD);
+			}
+			else
+				GameServer()->m_pController->m_aTeamscore[TEAM_BLUE]+= 50;;
+			Reset();
+			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
+		}
+		else if(TileIndex == TILE_FLAGBALL_BLUEGOAL)
+		{
+			if(m_pCarrier)
+			{
+				GameServer()->m_pController->m_aTeamscore[TEAM_RED]+= 100;
+				m_pCarrier->Die(m_pCarrier->GetPlayer()->GetCid(), WEAPON_WORLD);
+			}
+			else
+				GameServer()->m_pController->m_aTeamscore[TEAM_RED]+= 50;
+			Reset();
+			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
+		}
+		else if(TileIndex == TILE_FLAGBALL_NOTEAMGOAL)
+		{
+			if(m_pCarrier)
+			{
+				GameServer()->m_pController->m_aTeamscore[m_pCarrier->GetPlayer()->GetTeam()]+= 100;
+				m_pCarrier->Die(m_pCarrier->GetPlayer()->GetCid(), WEAPON_WORLD);
+			}
+			else
+				GameServer()->m_pController->m_aTeamscore[m_pLastCarrier->GetPlayer()->GetTeam()]+= 50;
 			Reset();
 			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 		}
