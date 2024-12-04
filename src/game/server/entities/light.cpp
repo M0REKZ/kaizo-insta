@@ -175,12 +175,12 @@ void CLight::Snap(int SnappingClient)
 		if(m_DamageTick)
 		{
 			GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetId(),
-										  m_Pos, From, StartTick, -1, LASERTYPE_SHOTGUN, 0, m_Number);
+										  m_Pos, From, Server()->Tick()-4, -1, LASERTYPE_SHOTGUN, 0, m_Number);
 		}
 		else
 		{
 			GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetId(),
-										  m_Pos, From, StartTick, -1, LASERTYPE_DOOR, 0, m_Number);
+										  m_Pos, From, Server()->Tick(), -1, LASERTYPE_DOOR, 0, m_Number);
 		}
 	}
 }
