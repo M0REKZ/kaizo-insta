@@ -9,7 +9,7 @@ class CFlagBall : public CFlag
 {
 public:
 //	int m_LastCarrier;
-	int m_LastCarrierTeam;
+//	int m_LastCarrierTeam;
 //	int m_IdleTick;
 
 	CFlagBall(CGameWorld *pGameWorld, int Team);

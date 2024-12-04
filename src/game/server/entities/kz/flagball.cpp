@@ -21,6 +21,8 @@ CFlagBall::CFlagBall(CGameWorld *pGameWorld, int Team)
 {
 	//m_StandPos = Pos;
 	//m_Pos = Pos;
+	//m_FlagSnapOffset = Server()->m_pController->m_FlagSnapTeamOffset;
+	//Server()->m_pController->m_FlagSnapTeamOffset++;
 }
 
 void CFlagBall::Reset()
@@ -29,7 +31,7 @@ void CFlagBall::Reset()
 //	m_LastCarrier = -1;
 	m_DropTick = 0;
 	//m_IdleTick = -1;
-	m_LastCarrierTeam = !m_Team;
+	//m_LastCarrierTeam = !m_Team;
 }
 
 void CFlagBall::Tick()
@@ -85,6 +87,7 @@ void CFlagBall::Grab(class CCharacter *pChar)
 {
 	CFlag::Grab(pChar);
 	pChar->m_HasFlagBall = true;
+	m_Team = pChar->GetPlayer()->GetTeam();
 }
 
 void CFlagBall::Drop(vec2 Direction)

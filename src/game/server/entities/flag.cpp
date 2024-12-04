@@ -17,6 +17,8 @@ CFlag::CFlag(CGameWorld *pGameWorld, int Team) :
 	m_pCarrier = NULL;
 	m_GrabTick = 0;
 	m_no_stands = 1; //+KZ twplus pointer
+	m_FlagSnapOffset = GameServer()->m_pController->m_FlagSnapTeamOffset;
+	GameServer()->m_pController->m_FlagSnapTeamOffset++;
 	
 	Reset();
 }
@@ -141,9 +143,11 @@ void CFlag::Snap(int SnappingClient)
 	if(m_pCarrier)
 		m_Pos = m_pCarrier->GetPos();
 
+	int offset_team = m_Team + m_FlagSnapOffset * 2;
+
 	if(Server()->IsSixup(SnappingClient))
 	{
-		protocol7::CNetObj_Flag *pFlag = Server()->SnapNewItem<protocol7::CNetObj_Flag>(m_Team);
+		protocol7::CNetObj_Flag *pFlag = Server()->SnapNewItem<protocol7::CNetObj_Flag>(m_pCarrier ? (m_pCarrier->GetPlayer()->GetTeam() == m_Team ?  offset_team : (1 ^ offset_team)) : offset_team);
 		if(!pFlag)
 			return;
 		pFlag->m_X = round_to_int(m_Pos.x);
@@ -152,7 +156,7 @@ void CFlag::Snap(int SnappingClient)
 	}
 	else
 	{
-		CNetObj_Flag *pFlag = Server()->SnapNewItem<CNetObj_Flag>(m_Team);
+		CNetObj_Flag *pFlag = Server()->SnapNewItem<CNetObj_Flag>(m_pCarrier ? (m_pCarrier->GetPlayer()->GetTeam() == m_Team ?  offset_team : (1 ^ offset_team)) : offset_team);
 		if(!pFlag)
 			return;
 		pFlag->m_X = round_to_int(m_Pos.x);

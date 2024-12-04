@@ -82,10 +82,13 @@ protected:
 public:
 	const char *m_pGameType;
     
-    bool m_DontSelfKill = false; //+KZ iFreeze
+	//+KZ
+
+    bool m_DontSelfKill = false; //+KZ for iFreeze
 	bool m_IsInstagibKZ = false;
-	vec2 m_BallSpawnsKZ[10];
-	int m_BallSpawnNum = 0;
+	vec2 m_BallSpawnsKZ[10]; //+KZ for Foot
+	int m_BallSpawnNum = 0; // Foot
+	int m_FlagSnapTeamOffset = 0; // +KZ Flagball
     
 	IGameController(class CGameContext *pGameServer);
 	virtual ~IGameController();
