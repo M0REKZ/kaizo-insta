@@ -143,6 +143,24 @@ void CFlag::Snap(int SnappingClient)
 	if(m_pCarrier)
 		m_Pos = m_pCarrier->GetPos();
 
+	int SnapTeam = m_Team;
+	CFlag *f = GetOtherFlag();
+	if(f)
+	{
+		if((f->m_pCarrier && f->m_Team == m_Team))
+		{
+			SnapTeam = f->m_Team ^ 1;
+		}
+
+		if(m_pCarrier && f->m_pCarrier && m_pCarrier->GetPlayer()->GetTeam() == f->m_pCarrier->GetPlayer()->GetTeam())
+		{
+			if(m_pCarrier->GetPlayer()->GetCid() == SnappingClient)
+				SnapTeam = m_pCarrier->GetPlayer()->GetTeam();
+			else
+				SnapTeam = m_pCarrier->GetPlayer()->GetTeam() ^ 1;
+		}
+	}
+
 	int offset_team = m_Team + m_FlagSnapOffset * 2;
 
 	if(Server()->IsSixup(SnappingClient))
@@ -152,7 +170,7 @@ void CFlag::Snap(int SnappingClient)
 			return;
 		pFlag->m_X = round_to_int(m_Pos.x);
 		pFlag->m_Y = round_to_int(m_Pos.y);
-		pFlag->m_Team = m_Team;
+		pFlag->m_Team = SnapTeam;
 	}
 	else
 	{
@@ -161,7 +179,7 @@ void CFlag::Snap(int SnappingClient)
 			return;
 		pFlag->m_X = round_to_int(m_Pos.x);
 		pFlag->m_Y = round_to_int(m_Pos.y);
-		pFlag->m_Team = m_Team;
+		pFlag->m_Team = SnapTeam;
 	}
 }
 
@@ -177,4 +195,14 @@ void CFlag::HandleKZTiles()
 		Reset();
 		GameServer()->m_pController->OnFlagReturn(this);
 	}
+}
+
+CFlag* CFlag::GetOtherFlag()
+{
+	CFlag* f = (CFlag*)GameWorld()->FindFirst(CGameWorld::ENTTYPE_FLAG);
+
+	if(f != this)
+		return f;
+	
+	return (CFlag*)f->TypeNext();
 }

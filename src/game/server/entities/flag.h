@@ -48,6 +48,8 @@ public:
 	//+KZ
 	void HandleKZTiles();
 	int m_FlagSnapOffset = 0;
+
+	CFlag *GetOtherFlag();
 };
 
 #endif

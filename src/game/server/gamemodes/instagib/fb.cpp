@@ -149,6 +149,8 @@ void CGameControllerInstaFB::Snap(int SnappingClient)
 {
 	CGameControllerPvp::Snap(SnappingClient);
 
+	bool invert = false;
+
 	int FlagCarrierRed = FLAG_MISSING;
 	if(m_apFlagBalls[TEAM_RED])
 	{
@@ -171,14 +173,39 @@ void CGameControllerInstaFB::Snap(int SnappingClient)
 			FlagCarrierBlue = FLAG_TAKEN;
 	}
 
+	if((FlagCarrierRed == SnappingClient && m_apFlagBalls[TEAM_RED]->m_Team != TEAM_RED) || (FlagCarrierBlue == SnappingClient && m_apFlagBalls[TEAM_BLUE]->m_Team != TEAM_BLUE))
+		invert = true;
+	
+	if((m_apFlagBalls[TEAM_BLUE] && m_apFlagBalls[TEAM_BLUE]->GetCarrier() && m_apFlagBalls[TEAM_BLUE]->GetCarrier()->GetPlayer()->GetTeam() == TEAM_RED) || (m_apFlagBalls[TEAM_RED] && m_apFlagBalls[TEAM_RED]->GetCarrier() && m_apFlagBalls[TEAM_RED]->GetCarrier()->GetPlayer()->GetTeam() == TEAM_BLUE))
+		invert = true;
+
+	if(m_apFlagBalls[TEAM_BLUE]->GetCarrier() && m_apFlagBalls[TEAM_RED]->GetCarrier() && m_apFlagBalls[TEAM_BLUE]->GetCarrier()->GetPlayer()->GetTeam() == m_apFlagBalls[TEAM_RED]->GetCarrier()->GetPlayer()->GetTeam())
+	{
+		if(m_apFlagBalls[TEAM_BLUE]->GetCarrier()->GetPlayer()->GetCid() == SnappingClient && m_apFlagBalls[TEAM_BLUE]->GetCarrier()->GetPlayer()->GetTeam() == TEAM_RED)
+			invert = true;
+		else if(m_apFlagBalls[TEAM_RED]->GetCarrier()->GetPlayer()->GetCid() == SnappingClient && m_apFlagBalls[TEAM_RED]->GetCarrier()->GetPlayer()->GetTeam() == TEAM_BLUE)
+			invert = true;
+		else
+			invert = false;
+	}
+
 	if(Server()->IsSixup(SnappingClient))
 	{
 		protocol7::CNetObj_GameDataFlag *pGameDataObj = Server()->SnapNewItem<protocol7::CNetObj_GameDataFlag>(0);
 		if(!pGameDataObj)
 			return;
 
-		pGameDataObj->m_FlagCarrierRed = FlagCarrierRed;
-		pGameDataObj->m_FlagCarrierBlue = FlagCarrierBlue;
+		if(invert)
+		{
+			pGameDataObj->m_FlagCarrierRed = FlagCarrierBlue;
+			pGameDataObj->m_FlagCarrierBlue = FlagCarrierRed;
+		}
+		else
+		{
+			pGameDataObj->m_FlagCarrierRed = FlagCarrierRed;
+			pGameDataObj->m_FlagCarrierBlue = FlagCarrierBlue;
+		}
+
 	}
 	else
 	{
@@ -186,8 +213,16 @@ void CGameControllerInstaFB::Snap(int SnappingClient)
 		if(!pGameDataObj)
 			return;
 
-		pGameDataObj->m_FlagCarrierRed = FlagCarrierRed;
-		pGameDataObj->m_FlagCarrierBlue = FlagCarrierBlue;
+		if(invert)
+		{
+			pGameDataObj->m_FlagCarrierRed = FlagCarrierBlue;
+			pGameDataObj->m_FlagCarrierBlue = FlagCarrierRed;
+		}
+		else
+		{
+			pGameDataObj->m_FlagCarrierRed = FlagCarrierRed;
+			pGameDataObj->m_FlagCarrierBlue = FlagCarrierBlue;
+		}
 
 		pGameDataObj->m_TeamscoreRed = m_aTeamscore[TEAM_RED];
 		pGameDataObj->m_TeamscoreBlue = m_aTeamscore[TEAM_BLUE];
