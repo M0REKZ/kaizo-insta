@@ -291,6 +291,7 @@ public:
 	void CatchBall();
 	bool m_HasBall = false;
 	bool m_HasFlagBall = false;
+	int m_DropFlagBallTicks = 0;
 	int m_Mines;
 	bool m_TakingNoOwnerDamage = false;
 	

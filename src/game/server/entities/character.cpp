@@ -907,6 +907,9 @@ void CCharacter::PreTick()
 
 void CCharacter::Tick()
 {
+	if(m_DropFlagBallTicks > 0) //+KZ
+		m_DropFlagBallTicks--;
+
 	if(g_Config.m_SvNoWeakHook)
 	{
 		if(m_Paused)
@@ -1328,7 +1331,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 
 		pCharacter->m_AttackTick = m_AttackTick;
 		pCharacter->m_Direction = m_Input.m_Direction;
-		if(m_HasFlagBall)
+		if(m_HasFlagBall || m_DropFlagBallTicks > 0)
 			pCharacter->m_Weapon = -1;
 		else
 			pCharacter->m_Weapon = Weapon;
@@ -1357,7 +1360,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 		pCharacter->m_Emote = Emote;
 		pCharacter->m_AttackTick = m_AttackTick;
 		pCharacter->m_Direction = m_Input.m_Direction;
-		if(m_HasFlagBall)
+		if(m_HasFlagBall || m_DropFlagBallTicks > 0)
 			pCharacter->m_Weapon = -1;
 		else
 			pCharacter->m_Weapon = Weapon;

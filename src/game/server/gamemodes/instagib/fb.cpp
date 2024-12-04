@@ -288,6 +288,7 @@ bool CGameControllerInstaFB::OnFireWeapon(CCharacter &Character, int &Weapon, ve
 		{
 			pFlag->Drop(Direction);
 			Character.m_ReloadTimer = 1 * Server()->TickSpeed();
+			Character.m_DropFlagBallTicks = Character.m_ReloadTimer;
 			return true;
 		}
 	}
