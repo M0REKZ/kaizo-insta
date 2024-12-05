@@ -31,6 +31,8 @@ public:
 	virtual void Snap(int SnappingClient) override;
 	virtual void SwapClients(int Client1, int Client2) override;
 
+	int HitFlag(vec2 From, vec2 To); //+KZ
+
 private:
 	vec2 m_Direction;
 	int m_LifeSpan;

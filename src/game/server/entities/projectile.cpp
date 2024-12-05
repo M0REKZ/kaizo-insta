@@ -2,6 +2,7 @@
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 #include "projectile.h"
 #include "character.h"
+#include "flag.h" //+KZ
 
 #include <engine/shared/config.h>
 
@@ -158,6 +159,10 @@ void CProjectile::Tick()
 	vec2 NewPos;
 	int Collide = GameServer()->Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos);
 	CCharacter *pOwnerChar = 0;
+
+	//+KZ
+	if(!Collide)
+		Collide = HitFlag(PrevPos, CurPos);
 
 	if(m_Owner >= 0)
 		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
@@ -521,4 +526,35 @@ void CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj)
 	pProj->m_Flags = Flags;
 	pProj->m_SwitchNumber = m_Number;
 	pProj->m_TuneZone = m_TuneZone;
+}
+
+
+//+KZ
+int CProjectile::HitFlag(vec2 From, vec2 To)
+{
+	if (g_Config.m_SvFlagProjectileMomentum == 0)
+		return 0;
+
+	int Collided = 0;
+	
+	vec2 outpos;
+ 	for (CFlag *flag = (CFlag*)GameWorld()->FindFirst(CGameWorld::ENTTYPE_FLAG); flag; flag = (CFlag *)flag->TypeNext())
+ 	{
+		if(flag->m_pCarrier)
+			continue;
+		closest_point_on_line(From, To, flag->m_Pos, outpos);
+ 		if (distance(flag->m_Pos, outpos) < 40.f)
+ 		{
+ 			flag->m_Vel += normalize(To - From) * g_Config.m_SvFlagProjectileMomentum * 10.f;
+ 			flag->m_DropTick = Server()->Tick();
+			if(m_Owner >= 0 && m_Owner < MAX_CLIENTS)
+ 				flag->m_pLastCarrier = GameServer()->GetPlayerChar(m_Owner);
+			else
+				flag->m_pLastCarrier = nullptr;
+			flag->m_AtStand = false;
+			Collided = TILE_SOLID;
+ 		}
+ 	};
+
+	return Collided;
 }
