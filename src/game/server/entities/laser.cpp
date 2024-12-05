@@ -11,6 +11,9 @@
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
 
+//+KZ
+#include "flag.h"
+
 CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
 {
@@ -128,6 +131,7 @@ void CLaser::DoBounce()
 
 	CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner); //+KZ
 	
+	HitFlag(m_Pos, To); //+KZ
 	
 	if(Res)
 	{
@@ -334,4 +338,29 @@ void CLaser::Snap(int SnappingClient)
 void CLaser::SwapClients(int Client1, int Client2)
 {
 	m_Owner = m_Owner == Client1 ? Client2 : m_Owner == Client2 ? Client1 : m_Owner;
+}
+
+void CLaser::HitFlag(vec2 From,vec2 To)
+{
+	if (g_Config.m_SvFlagLaserMomentum == 0)
+		return;
+
+	
+	vec2 outpos;
+ 	for (CFlag *flag = (CFlag*)GameWorld()->FindFirst(CGameWorld::ENTTYPE_FLAG); flag; flag = (CFlag *)flag->TypeNext())
+ 	{
+		if(flag->m_pCarrier)
+			continue;
+		closest_point_on_line(From, To, flag->m_Pos, outpos);
+ 		if (distance(flag->m_Pos, outpos) < 40.f)
+ 		{
+ 			flag->m_Vel += normalize(To - From) * g_Config.m_SvFlagLaserMomentum * 0.1f;
+ 			flag->m_DropTick = Server()->Tick();
+			if(m_Owner >= 0 && m_Owner < MAX_CLIENTS)
+ 				flag->m_pLastCarrier = GameServer()->GetPlayerChar(m_Owner);
+			else
+				flag->m_pLastCarrier = nullptr;
+			flag->m_AtStand = false;
+ 		}
+ 	};
 }

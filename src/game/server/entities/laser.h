@@ -22,6 +22,9 @@ protected:
 	bool HitCharacter(vec2 From, vec2 To);
 	void DoBounce();
 
+	//+KZ
+	void HitFlag(vec2 From, vec2 To);
+
 private:
 	vec2 m_From;
 	vec2 m_Dir;
