@@ -295,6 +295,10 @@ public:
 	int m_DropFlagBallTicks = 0;
 	int m_Mines;
 	bool m_TakingNoOwnerDamage = false;
+	//void Die(int Killer, int Weapon, int tick, bool SendKillMsg = true); //JSAURUS rollback
+	bool TakeDamage(vec2 Force, int Dmg, int From, int Weapon, int tick); //JSAURUS rollback
+	int m_RollbackAttacker, m_RollbackAttackerWeapon, m_RollbackDamageTick; //JSAURUS rollback
+	vec2 m_RollbackDamagePos; //JSAURUS rollback
 	
 	//for +KZ AI:
 	int m_TryingDirectionSmart = 0;

@@ -10,6 +10,7 @@
 
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/DDRace.h>
+#include <game/server/player.h>
 
 //+KZ
 #include "flag.h"
@@ -34,6 +35,16 @@ CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEner
 	m_TeamMask = pOwnerChar ? pOwnerChar->TeamMask() : CClientMask();
 	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
 
+	m_StartTick = Server()->Tick(); //JSAURUS rollback
+
+	if(m_StartTick > SERVER_TICK_SPEED)
+	{
+		for(;m_StartTick > SERVER_TICK_SPEED; m_StartTick -= SERVER_TICK_SPEED)
+		{
+
+		}
+	}
+	//-------
 	GameWorld()->InsertEntity(this);
 	DoBounce();
 }
@@ -46,10 +57,15 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	CCharacter *pHit;
 	bool pDontHitSelf = (g_Config.m_SvForceLaserType ? g_Config.m_SvForceLaserType != 1 : g_Config.m_SvOldLaser) || (m_Bounces == 0 && !m_WasTele);
 
+	int tick = -1; //JSAURUS rollback
+
+	if(g_Config.m_SvRollback && m_Owner >= 0 && m_Owner < MAX_CLIENTS && GameServer()->m_apPlayers[m_Owner]->GetCharacter())
+		tick = GameServer()->m_apPlayers[m_Owner]->GetCharacter()->GetCore().m_LastAckedSnapshot; //--------
+
 	if(pOwnerChar ? (!pOwnerChar->LaserHitDisabled() && m_Type == WEAPON_LASER) || (!pOwnerChar->ShotgunHitDisabled() && m_Type == WEAPON_SHOTGUN) : g_Config.m_SvHit)
-		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner);
+		pHit = GameWorld()->IntersectCharacterTick(m_Pos, To, 0.f, At, tick, pDontHitSelf ? pOwnerChar : 0, m_Owner, nullptr);
 	else
-		pHit = GameWorld()->IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : 0, m_Owner, pOwnerChar);
+		pHit = GameWorld()->IntersectCharacterTick(m_Pos, To, 0.f, At, tick, pDontHitSelf ? pOwnerChar : 0, m_Owner, pOwnerChar);
 
 	if(!pHit || (pHit == pOwnerChar && (g_Config.m_SvForceLaserType ? g_Config.m_SvForceLaserType != 1 : g_Config.m_SvOldLaser)) || (pHit != pOwnerChar && pOwnerChar ? (pOwnerChar->LaserHitDisabled() && m_Type == WEAPON_LASER) || (pOwnerChar->ShotgunHitDisabled() && m_Type == WEAPON_SHOTGUN) : !g_Config.m_SvHit))
 		return false;
@@ -99,7 +115,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 		// pHit->UnFreeze();
 	}
 	if(GameServer()->m_pController->OnLaserHit(m_Bounces, m_Owner, m_Type, pHit))
-		pHit->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type);
+		pHit->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type, m_StartTick); //Starttick JSAURUS rollback
 	return true;
 }
 

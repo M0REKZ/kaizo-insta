@@ -355,7 +355,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 					continue;
 
 				vec2 ClosestPoint;
-				if(closest_point_on_line(m_HookPos, NewPos, pCharCore->m_Pos, ClosestPoint))
+				if(closest_point_on_line(m_HookPos, NewPos, pCharCore->m_Pos, ClosestPoint)) //pos -> JSAURUS rollback
 				{
 					if(distance(pCharCore->m_Pos, ClosestPoint) < PhysicalSize() + 2.0f)
 					{

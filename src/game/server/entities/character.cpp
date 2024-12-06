@@ -56,6 +56,11 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	{
 		CurrentTimeCp = 0.0f;
 	}
+
+	m_RollbackAttacker = -1;  //JSAURUS rollback
+	m_RollbackAttackerWeapon = -1; //JSAURUS rollback
+	m_RollbackDamageTick = 0; //JSAURUS rollback
+
 }
 
 void CCharacter::Reset()
@@ -66,6 +71,7 @@ void CCharacter::Reset()
 
 bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 {
+	m_Core.m_DeathTick = -1; //JSAURUS rollback
 	m_EmoteStop = -1;
 	m_LastAction = -1;
 	m_LastNoAmmoSound = -1;
@@ -80,6 +86,11 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	m_pPlayer = pPlayer;
 	m_Pos = Pos;
+
+	for(int i = 0; i < POSITION_HISTORY; i++) // JSAURUS rollback
+	{
+		m_Core.m_Positions[i] = Pos;
+	} // ---
 
 	mem_zero(&m_LatestPrevPrevInput, sizeof(m_LatestPrevPrevInput));
 	m_LatestPrevPrevInput.m_TargetY = -1;
@@ -1002,6 +1013,19 @@ void CCharacter::TickDeferred()
 	bool StuckAfterQuant = Collision()->TestBox(m_Core.m_Pos, CCharacterCore::PhysicalSizeVec2());
 	m_Pos = m_Core.m_Pos;
 
+	int position_index = Server()->Tick() % POSITION_HISTORY; //JSAURUS rollback
+	m_Core.m_Positions[position_index] = m_Pos;
+	if(m_pPlayer)
+	{
+		m_Core.m_LastAckedSnapshot++;
+		if(m_Core.m_LastAckedSnapshot > Server()->TickSpeed())
+		{
+			m_Core.m_LastAckedSnapshot = 1;
+		}
+		if(m_Core.m_LastAckedSnapshot < 1)
+			m_Core.m_LastAckedSnapshot = 1;
+	} //------
+
 	if(!StuckBefore && (StuckAfterMove || StuckAfterQuant))
 	{
 		// Hackish solution to get rid of strict-aliasing warning
@@ -1322,6 +1346,14 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 
 		pCore->Write(pCharacter);
 
+		if(SnappingClient == m_RollbackAttacker && m_Core.m_DeathTick != -1) //JSAURUS rollback
+		{
+			pCharacter->m_X = m_RollbackDamagePos.x;
+			pCharacter->m_X = m_RollbackDamagePos.x;
+			pCharacter->m_VelX = 0;
+			pCharacter->m_VelY = 0;
+		}//---
+
 		pCharacter->m_Tick = Tick;
 		pCharacter->m_Emote = Emote;
 
@@ -1353,6 +1385,14 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 		{
 			pCharacter->m_Angle -= (int)(2.0f * pi * 256.0f);
 		}
+
+		if(SnappingClient == m_RollbackAttacker && m_Core.m_DeathTick != -1) //JSAURUS rollback
+		{
+			pCharacter->m_X = m_RollbackDamagePos.x;
+			pCharacter->m_X = m_RollbackDamagePos.x;
+			pCharacter->m_VelX = 0;
+			pCharacter->m_VelY = 0;
+		}//---
 
 		// m_HookTick can be negative when using the hook_duration tune, which 0.7 clients
 		// will consider invalid. https://github.com/ddnet/ddnet/issues/3915
@@ -3888,4 +3928,35 @@ void CCharacter::DoPointerBotAI(CNetObj_PlayerInput &Input)
 	}
 	
 	m_Core.m_aWeapons[WEAPON_GUN].m_Ammo = 10;
+}
+
+ //JSAURUS rollback
+bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon, int tick)
+{
+	m_Core.m_DeathTick = Server()->Tick() + (m_pPlayer->m_Latency.m_Avg * Server()->TickSpeed())/1000;
+
+	//m_KillTick = tick;
+	m_RollbackAttacker = From;
+	m_RollbackAttackerWeapon = Weapon;
+	m_RollbackDamagePos = m_Pos;
+
+	if(m_RollbackAttacker >= 0 && m_RollbackAttacker < MAX_CLIENTS)
+	{
+		if(GameServer()->m_apPlayers[m_RollbackAttacker] && GameServer()->m_apPlayers[m_RollbackAttacker]->GetCharacter())
+			m_RollbackDamagePos = m_Core.m_Positions[(GameServer()->m_apPlayers[m_RollbackAttacker]->GetCharacter()->GetCore().m_LastAckedSnapshot-1) % POSITION_HISTORY];
+	}
+
+	if(m_RollbackAttacker >= 0 && m_RollbackAttacker < MAX_CLIENTS && m_RollbackAttacker != m_pPlayer->GetCid() && GameServer()->m_apPlayers[m_RollbackAttacker])
+	{
+		GameServer()->CreateSound(GameServer()->m_apPlayers[m_RollbackAttacker]->m_ViewPos, SOUND_HIT, TeamMask());
+		bool a = TakeDamage(Force, Dmg, m_RollbackAttacker, m_RollbackAttackerWeapon);
+		return a;
+	}
+	if(m_RollbackAttacker < 0 || m_Core.m_Id == From || !m_pPlayer || !g_Config.m_SvRollback)
+	{
+		bool a = TakeDamage(Force, Dmg, From, Weapon);
+		return a;
+	}
+
+	return false;
 }

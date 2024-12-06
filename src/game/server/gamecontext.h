@@ -617,6 +617,9 @@ public:
 	void ResetTuning();
 	void HandleKZBot(int CID, CNetObj_PlayerInput &Input); //+KZ
 	int CountPlayersKZ();
+
+	virtual void SetPlayer_LastAckedSnapshot(int ClientID, int tick) override;  //JSAURUS rollback
+	virtual void OnClientPredictedInput(int ClientID, void *pInput, int tick) override;	 //JSAURUS rollback
 };
 
 #endif

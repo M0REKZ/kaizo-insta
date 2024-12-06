@@ -14,6 +14,8 @@
 
 #include "prng.h"
 
+#define POSITION_HISTORY SERVER_TICK_SPEED //JSAURUS rollback
+
 class CCollision;
 class CTeamsCore;
 
@@ -267,6 +269,9 @@ public:
 	bool m_LiveFrozen;
 	CTuningParams m_Tuning;
 
+	int m_DeathTick; //JSAURUS rollback
+	int m_LastAckedSnapshot; //JSAURUS rollback
+	vec2 m_Positions[POSITION_HISTORY];  //JSAURUS rollback
 private:
 	CTeamsCore *m_pTeams;
 	int m_MoveRestrictions;

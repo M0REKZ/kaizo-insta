@@ -24,6 +24,7 @@ protected:
 
 	//+KZ
 	void HitFlag(vec2 From, vec2 To);
+	int m_StartTick; //JSAURUS rollback
 
 private:
 	vec2 m_From;

@@ -400,3 +400,49 @@ CTuningParams *CGameWorld::Tuning()
 {
 	return &m_Core.m_aTuning[0];
 }
+
+//JSAURUS rollback
+CCharacter *CGameWorld::IntersectCharacterTick(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, int tick, class CCharacter *pNotThis, int CollideWith, class CCharacter *pThisOnly)
+{
+	// Find other players
+	float ClosestLen = distance(Pos0, Pos1) * 100.0f;
+	CCharacter *pClosest = 0;
+
+	CCharacter *p = (CCharacter *)FindFirst(ENTTYPE_CHARACTER);
+	for(; p; p = (CCharacter *)p->TypeNext())
+	{
+		if(p == pNotThis)
+			continue;
+
+		if(pThisOnly && p != pThisOnly)
+			continue;
+
+		if(CollideWith != -1 && !p->CanCollide(CollideWith))
+			continue;
+
+		vec2 pos = p->m_Pos;
+		if(tick > 0)
+		{
+			tick = tick % POSITION_HISTORY;
+			pos = p->GetCore().m_Positions[tick];
+		}
+
+		vec2 IntersectPos;
+		if(closest_point_on_line(Pos0, Pos1, pos, IntersectPos))
+		{
+			float Len = distance(pos, IntersectPos);
+			if(Len < p->m_ProximityRadius + Radius)
+			{
+				Len = distance(Pos0, IntersectPos);
+				if(Len < ClosestLen)
+				{
+					NewPos = IntersectPos;
+					ClosestLen = Len;
+					pClosest = p;
+				}
+			}
+		}
+	}
+
+	return pClosest;
+}

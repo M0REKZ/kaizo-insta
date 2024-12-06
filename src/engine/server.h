@@ -374,6 +374,9 @@ public:
 	 * @param i The client id.
 	 */
 	virtual void OnUpdatePlayerServerInfo(CJsonStringWriter *pJSonWriter, int Id) = 0;
+
+	virtual void SetPlayer_LastAckedSnapshot(int ClientID, int tick) = 0; //JSAURUS rollback
+	virtual void OnClientPredictedInput(int ClientId, void *pInput, int tick) = 0; //JSAURUS rollback
 };
 
 extern IGameServer *CreateGameServer();

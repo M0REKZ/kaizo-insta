@@ -1667,6 +1667,7 @@ void CServer::ProcessClientPacket(CNetChunk *pPacket)
 				IntendedTick = Tick() + 1;
 
 			pInput->m_GameTick = IntendedTick;
+			pInput->m_AckedTick = LastAckedSnapshot; //JSAURUS rollback
 
 			for(int i = 0; i < Size / 4; i++)
 			{
@@ -2917,7 +2918,7 @@ int CServer::Run()
 					{
 						if(Input.m_GameTick == Tick())
 						{
-							GameServer()->OnClientPredictedInput(c, Input.m_aData);
+							GameServer()->OnClientPredictedInput(c, Input.m_aData, Input.m_AckedTick); //JSAURUS rollback
 							ClientHadInput = true;
 							break;
 						}
