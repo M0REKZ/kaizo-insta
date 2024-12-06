@@ -21,7 +21,7 @@ MACRO_CONFIG_INT(SvLaserJump, sv_laser_jump, 0, 0, 1, CFGFLAG_SERVER, "Create an
 MACRO_CONFIG_INT(SvFlagLaserMomentum, sv_flag_laser_momentum, 0, -3000, 3000, CFGFLAG_SERVER, "If set, laser pushes flag with the force specified. (recommended value: 207)")
 MACRO_CONFIG_INT(SvFlagProjectileMomentum, sv_flag_projectile_momentum, 0, -3000, 3000, CFGFLAG_SERVER, "If set, projectile pushes flag with the force specified. (recommended value: 207)")
 MACRO_CONFIG_INT(SvFlagHookGrab, sv_flag_hook_grab, 0, 0, 1, CFGFLAG_SERVER, "Instantly grab flag when hooked")
-MACRO_CONFIG_INT(SvRollback, sv_rollback, 1, 0, 1, CFGFLAG_SERVER, "Enables / Disables rollback support")
+MACRO_CONFIG_INT(SvRollback, sv_rollback, 0, 0, 1, CFGFLAG_SERVER, "Enables / Disables rollback support")
 
 //For Vanilla
 MACRO_CONFIG_INT(SvSpawnPickupWeapons, sv_spawn_pickup_weapons, 1, 0, 1, CFGFLAG_SERVER, "enable or disable weapons spawning (does not work on instagib)")
