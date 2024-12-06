@@ -974,6 +974,8 @@ void CCharacter::Tick()
 	m_PrevInput = m_Input;
 
 	m_PrevPos = m_Core.m_Pos;
+
+	HandleFlagHookCatch(); //+KZ
 }
 
 void CCharacter::TickDeferred()
@@ -3071,6 +3073,24 @@ void CCharacter::CatchBall()
 	m_BallQueuedWeapon = m_Core.m_ActiveWeapon;
 	m_HasBall = true;
 	SetWeapon(WEAPON_GRENADE);
+}
+
+void CCharacter::HandleFlagHookCatch()
+{
+	if(!g_Config.m_SvFlagHookGrab)
+		return;
+
+	if(m_Core.m_HookState == HOOK_FLYING)
+	{
+	 	for (CFlag *flag = (CFlag*)GameWorld()->FindFirst(CGameWorld::ENTTYPE_FLAG); flag; flag = (CFlag *)flag->TypeNext())
+ 		{
+			if(!(flag->CanHookGrabKZ(this)))
+				continue;
+
+			if(distance(m_Core.m_HookPos,flag->m_Pos) < 30.f)
+				flag->Grab(this);
+		}
+	}
 }
 
 void CCharacter::HandleKZBot(CNetObj_PlayerInput &Input)

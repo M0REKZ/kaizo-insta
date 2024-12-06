@@ -22,6 +22,8 @@ public:
 	void Drop(vec2 Direction = vec2(0, 0));
 
 	void HandleKZTiles();
+
+	virtual bool CanHookGrabKZ(CCharacter * pChr) override;
 };
 
 #endif

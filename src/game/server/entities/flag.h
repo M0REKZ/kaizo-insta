@@ -48,6 +48,7 @@ public:
 	//+KZ
 	void HandleKZTiles();
 	int m_FlagSnapOffset = 0;
+	virtual bool CanHookGrabKZ(CCharacter *pChr);
 
 	CFlag *GetOtherFlag();
 };

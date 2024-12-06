@@ -480,7 +480,7 @@ int CVanillaProjectile::HitFlag(vec2 From, vec2 To)
 		closest_point_on_line(From, To, flag->m_Pos, outpos);
  		if (distance(flag->m_Pos, outpos) < 40.f)
  		{
- 			flag->m_Vel += normalize(To - From) * g_Config.m_SvFlagProjectileMomentum * 10.f;
+ 			flag->m_Vel += normalize(To - From) * g_Config.m_SvFlagProjectileMomentum * 0.1f;
  			flag->m_DropTick = Server()->Tick();
 			if(m_Owner >= 0 && m_Owner < MAX_CLIENTS)
  				flag->m_pLastCarrier = GameServer()->GetPlayerChar(m_Owner);

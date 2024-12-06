@@ -182,3 +182,13 @@ void CFlagBall::HandleKZTiles()
 		}
 	}
 }
+
+bool CFlagBall::CanHookGrabKZ(CCharacter *pChr)
+{
+	if(m_pCarrier)
+		return false;
+
+	if(pChr == GetOtherFlag()->m_pCarrier)
+		return false;
+	return true;
+}

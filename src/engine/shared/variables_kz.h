@@ -19,7 +19,8 @@ MACRO_CONFIG_INT(SvForceLaserType, sv_force_laser_type, 0, 0, 2, CFGFLAG_SERVER,
 MACRO_CONFIG_INT(SvEnableDDraceHUD, sv_ddrace_hud, 0, 0, 1, CFGFLAG_SERVER, "Toggle to enable ddrace HUD")
 MACRO_CONFIG_INT(SvLaserJump, sv_laser_jump, 0, 0, 1, CFGFLAG_SERVER, "Create an explosion on first rifle bounce, allowing laser jumps.")
 MACRO_CONFIG_INT(SvFlagLaserMomentum, sv_flag_laser_momentum, 0, -3000, 3000, CFGFLAG_SERVER, "If set, laser pushes flag with the force specified. (recommended value: 207)")
-MACRO_CONFIG_INT(SvFlagProjectileMomentum, sv_flag_projectile_momentum, 0, 0, 1, CFGFLAG_SERVER, "If set, projectile pushes flag with the force specified. (recommended value: 207)")
+MACRO_CONFIG_INT(SvFlagProjectileMomentum, sv_flag_projectile_momentum, 0, -3000, 3000, CFGFLAG_SERVER, "If set, projectile pushes flag with the force specified. (recommended value: 207)")
+MACRO_CONFIG_INT(SvFlagHookGrab, sv_flag_hook_grab, 0, 0, 1, CFGFLAG_SERVER, "Instantly grab flag when hooked")
 
 //For Vanilla
 MACRO_CONFIG_INT(SvSpawnPickupWeapons, sv_spawn_pickup_weapons, 1, 0, 1, CFGFLAG_SERVER, "enable or disable weapons spawning (does not work on instagib)")
