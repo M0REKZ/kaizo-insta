@@ -272,6 +272,7 @@ public:
 	int m_DeathTick; //JSAURUS rollback
 	int m_LastAckedSnapshot; //JSAURUS rollback
 	vec2 m_Positions[POSITION_HISTORY];  //JSAURUS rollback
+	bool m_PlayerRollback = false;
 private:
 	CTeamsCore *m_pTeams;
 	int m_MoveRestrictions;

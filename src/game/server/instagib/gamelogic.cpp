@@ -133,6 +133,8 @@ void CGameContext::ShowCurrentInstagibConfigsMotd(int ClientId, bool Force) cons
 		str_append(aMotd, "! WARNING: only wallshots can kill\n");
 	if(g_Config.m_SvKillHook)
 		str_append(aMotd, "! WARNING: the hook kills\n");
+	if(g_Config.m_SvRollback) //JSAURUS rollback
+		str_append(aMotd, "! WARNING: !rollback and /rollback allowed\n");
 
 	CNetMsg_Sv_Motd Msg;
 	Msg.m_pMessage = aMotd;

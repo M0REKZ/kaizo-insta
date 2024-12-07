@@ -59,7 +59,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 
 	int tick = -1; //JSAURUS rollback
 
-	if(g_Config.m_SvRollback && m_Owner >= 0 && m_Owner < MAX_CLIENTS && GameServer()->m_apPlayers[m_Owner]->GetCharacter())
+	if(g_Config.m_SvRollback && m_Owner >= 0 && m_Owner < MAX_CLIENTS && GameServer()->m_apPlayers[m_Owner]->m_Rollback && GameServer()->m_apPlayers[m_Owner]->GetCharacter())
 		tick = GameServer()->m_apPlayers[m_Owner]->GetCharacter()->GetCore().m_LastAckedSnapshot; //--------
 
 	if(pOwnerChar ? (!pOwnerChar->LaserHitDisabled() && m_Type == WEAPON_LASER) || (!pOwnerChar->ShotgunHitDisabled() && m_Type == WEAPON_SHOTGUN) : g_Config.m_SvHit)

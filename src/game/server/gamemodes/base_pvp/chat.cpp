@@ -145,6 +145,35 @@ bool CGameControllerPvp::OnBangCommand(int ClientId, const char *pCmd, int NumAr
 		return true;
 	}
 
+	//+KZ JSAURUS rollback
+	if(!str_comp_nocase(pCmd, "rollback"))
+	{
+		if(g_Config.m_SvRollback)
+		{
+		if(!pPlayer->m_Rollback)
+		{
+			pPlayer->m_Rollback = true;
+			if(pPlayer->GetCharacter())
+				((CCharacterCore *)(pPlayer->GetCharacter()->Core()))->m_PlayerRollback = true;
+			SendChatTarget(pPlayer->GetCid(), "Rollback enabled");
+			return true;
+		}
+		else
+		{
+			pPlayer->m_Rollback = false;
+			if(pPlayer->GetCharacter())
+				((CCharacterCore *)(pPlayer->GetCharacter()->Core()))->m_PlayerRollback = false;
+			SendChatTarget(pPlayer->GetCid(), "Rollback disabled");
+			return true;
+		}
+		}
+		else
+		{
+			SendChatTarget(pPlayer->GetCid(), "Rollback is not enabled in this server");
+			return false;
+		}
+	}
+
 	if(pPlayer->GetTeam() == TEAM_SPECTATORS && !g_Config.m_SvSpectatorVotes)
 	{
 		SendChatTarget(ClientId, "Spectators aren't allowed to vote.");

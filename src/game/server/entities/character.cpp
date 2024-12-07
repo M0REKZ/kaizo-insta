@@ -61,6 +61,9 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	m_RollbackAttackerWeapon = -1; //JSAURUS rollback
 	m_RollbackDamageTick = 0; //JSAURUS rollback
 
+	if(m_pPlayer)
+		m_Core.m_PlayerRollback = m_pPlayer->m_Rollback; //JSAURUS rollback
+
 }
 
 void CCharacter::Reset()
@@ -71,6 +74,8 @@ void CCharacter::Reset()
 
 bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 {
+	if(m_pPlayer)
+		m_Core.m_PlayerRollback = m_pPlayer->m_Rollback; //JSAURUS rollback
 	m_Core.m_DeathTick = -1; //JSAURUS rollback
 	m_EmoteStop = -1;
 	m_LastAction = -1;
@@ -3961,7 +3966,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon, int tick)
 		bool a = TakeDamage(Force, Dmg, m_RollbackAttacker, m_RollbackAttackerWeapon);
 		return a;
 	}
-	if(m_RollbackAttacker < 0 || m_Core.m_Id == From || !m_pPlayer || !g_Config.m_SvRollback)
+	if(m_RollbackAttacker < 0 || m_Core.m_Id == From || !m_pPlayer || !m_pPlayer->m_Rollback || !g_Config.m_SvRollback)
 	{
 		bool a = TakeDamage(Force, Dmg, From, Weapon);
 		return a;

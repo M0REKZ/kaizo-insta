@@ -152,6 +152,7 @@ class CGameContext : public IGameServer
     static void ConRandomCmd(IConsole::IResult *pResult, void *pUserData);
     static void ConQuestion(IConsole::IResult *pResult, void *pUserData);
 	static void ConAfkKZ(IConsole::IResult *pResult, void *pUserData);
+	static void ConRollback(IConsole::IResult *pResult, void *pUserData);
 
 	void Construct(int Resetting);
 	void Destruct(int Resetting);

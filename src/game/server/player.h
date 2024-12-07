@@ -251,6 +251,7 @@ public:
 	CSaveTee m_LastTeleTee;
 	
 	void HandleKZBot(CNetObj_PlayerInput &Input);
+	bool m_Rollback = false;
 };
 
 #endif

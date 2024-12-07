@@ -2417,3 +2417,35 @@ void CGameContext::ConAfkKZ(IConsole::IResult *pResult, void *pUserData)
 		}
 	}
 }
+
+void CGameContext::ConRollback(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+	CPlayer *pPlayer = pSelf->m_apPlayers[pResult->m_ClientId];
+	if(pPlayer)
+	{
+		if(g_Config.m_SvRollback)
+		{
+		if(!pPlayer->m_Rollback)
+		{
+			pPlayer->m_Rollback = true;
+			if(pPlayer->GetCharacter())
+				((CCharacterCore *)(pPlayer->GetCharacter()->Core()))->m_PlayerRollback = true;
+			pSelf->SendChatTarget(pPlayer->GetCid(), "Rollback enabled");
+		}
+		else
+		{
+			pPlayer->m_Rollback = false;
+			if(pPlayer->GetCharacter())
+				((CCharacterCore *)(pPlayer->GetCharacter()->Core()))->m_PlayerRollback = false;
+			pSelf->SendChatTarget(pPlayer->GetCid(), "Rollback disabled");
+		}
+		}
+		else
+		{
+			pSelf->SendChatTarget(pPlayer->GetCid(), "Rollback is not enabled in this server");
+		}
+	}
+}

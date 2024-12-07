@@ -3827,6 +3827,7 @@ void CGameContext::OnConsoleInit()
     Console()->Register("random_cmd", "s[command1] s[command2] ?s[...]", CFGFLAG_SERVER, ConRandomCmd, this, "Run random command from the list given");
     Console()->Register("question", "", CFGFLAG_SERVER, ConQuestion, this, "Make a question (only works on vote)");
 	Console()->Register("afk", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConAfkKZ, this, "Set afk");
+	Console()->Register("rollback", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConRollback, this, "Set Rollback");
     
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 

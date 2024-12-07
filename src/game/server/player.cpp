@@ -155,6 +155,7 @@ void CPlayer::Reset()
 	m_CameraInfo.Reset();
 
 	GameServer()->m_pController->ResetPlayer(this); // ddnet-insta
+	m_Rollback = false; //JSAURUS rollback
 }
 
 static int PlayerFlags_SixToSeven(int Flags)
