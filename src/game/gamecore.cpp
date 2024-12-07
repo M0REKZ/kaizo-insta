@@ -354,17 +354,26 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 				if(!pCharCore || pCharCore == this || (!(m_Super || pCharCore->m_Super) && ((m_Id != -1 && !m_pTeams->CanCollide(i, m_Id)) || pCharCore->m_Solo || m_Solo)))
 					continue;
 
-				vec2 ClosestPoint;
-				if(closest_point_on_line(m_HookPos, NewPos, pCharCore->m_Pos, ClosestPoint))
+				vec2 pos = pCharCore->m_Pos; //JSAURUS rollback
+
+				if(pCharCore->m_PlayerRollback && g_Config.m_SvRollback)
 				{
-					if(distance(pCharCore->m_Pos, ClosestPoint) < PhysicalSize() + 2.0f)
+					int tick = pCharCore->m_LastAckedSnapshot;
+					tick = tick % POSITION_HISTORY;
+					pos = pCharCore->m_Positions[tick];
+				} //---------
+
+				vec2 ClosestPoint;
+				if(closest_point_on_line(m_HookPos, NewPos, pos, ClosestPoint)) //pos JSAURUS rollback
+				{
+					if(distance(pos, ClosestPoint) < PhysicalSize() + 2.0f) //pos JSAURUS rollback
 					{
-						if(m_HookedPlayer == -1 || distance(m_HookPos, pCharCore->m_Pos) < Distance)
+						if(m_HookedPlayer == -1 || distance(m_HookPos, pos) < Distance) //pos JSAURUS rollback
 						{
 							m_TriggeredEvents |= COREEVENT_HOOK_ATTACH_PLAYER;
 							m_HookState = HOOK_GRABBED;
 							SetHookedPlayer(i);
-							Distance = distance(m_HookPos, pCharCore->m_Pos);
+							Distance = distance(m_HookPos, pos); //pos JSAURUS rollback
 						}
 					}
 				}

@@ -1744,6 +1744,8 @@ bool CGameContext::OnClientDataPersist(int ClientId, void *pData)
 	}
 	pPersistent->m_IsSpectator = m_apPlayers[ClientId]->GetTeam() == TEAM_SPECTATORS;
 	pPersistent->m_IsAfk = m_apPlayers[ClientId]->IsAfk();
+	pPersistent->m_ForceAFK = m_apPlayers[ClientId]->m_ForceAFK; //+KZ
+	pPersistent->m_Rollback = m_apPlayers[ClientId]->m_Rollback; //+KZ JSAURUS rollback
 	return true;
 }
 
@@ -1783,6 +1785,13 @@ void CGameContext::OnClientConnected(int ClientId, void *pData)
 	m_apPlayers[ClientId] = new(ClientId) CPlayer(this, NextUniqueClientId, ClientId, StartTeam);
 	m_apPlayers[ClientId]->SetInitialAfk(Afk);
 	NextUniqueClientId += 1;
+
+	//+KZ
+	if(pPersistentData)
+	{
+		m_apPlayers[ClientId]->m_ForceAFK = pPersistentData->m_ForceAFK;
+		m_apPlayers[ClientId]->m_Rollback = pPersistentData->m_Rollback; //jsaurus rollback
+	}
 
 	SendMotd(ClientId);
 	SendSettings(ClientId);

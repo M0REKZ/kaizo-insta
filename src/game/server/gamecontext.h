@@ -168,6 +168,8 @@ class CGameContext : public IGameServer
 	{
 		bool m_IsSpectator;
 		bool m_IsAfk;
+		bool m_ForceAFK;
+		bool m_Rollback;
 	};
 
 public:
