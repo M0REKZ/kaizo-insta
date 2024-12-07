@@ -2366,9 +2366,15 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 				}
                 if(str_comp_nocase("question", pOption->m_aCommand) == 0)
                 {
-                    
-                    str_format(aChatmsg, sizeof(aChatmsg), "'%s' asked (%s)", Server()->ClientName(ClientId),
-                        aReason);
+                    if(str_comp_nocase(aReason, "No reason given"))
+					{
+                    	str_format(aChatmsg, sizeof(aChatmsg), "'%s' asked (%s)", Server()->ClientName(ClientId), aReason);
+					}
+					else
+					{
+						SendChatTarget(ClientId, "Please put your question in 'Reason'");
+						return;
+					}
                 }else
                 {
                     str_format(aChatmsg, sizeof(aChatmsg), "'%s' called vote to change server option '%s' (%s)", Server()->ClientName(ClientId),
@@ -2586,7 +2592,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
         if(str_comp_nocase(aCmd, "question") == 0)
         {
             if(aReason[0])
-                CallVote(ClientId, aReason, aCmd, "", aChatmsg, aSixupDesc[0] ? aSixupDesc : 0);
+                CallVote(ClientId, aReason, "", "", aChatmsg, aSixupDesc[0] ? aSixupDesc : 0);
             else
                 SendChatTarget(ClientId, "Please put your question in 'Reason'");
             
@@ -3825,7 +3831,7 @@ void CGameContext::OnConsoleInit()
     //custom +KZ
     Console()->Register("if_gametypes", "s[gametypes] ?s[true result command] ?s[alternate result command]", CFGFLAG_SERVER, ConIfGameTypes, this, "Run command if running certain gametypes");
     Console()->Register("random_cmd", "s[command1] s[command2] ?s[...]", CFGFLAG_SERVER, ConRandomCmd, this, "Run random command from the list given");
-    Console()->Register("question", "", CFGFLAG_SERVER, ConQuestion, this, "Make a question (only works on vote)");
+    Console()->Register("question", "?r[question]", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConQuestion, this, "Make a question");
 	Console()->Register("afk", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConAfkKZ, this, "Set afk");
 	Console()->Register("rollback", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConRollback, this, "Set Rollback");
     
@@ -5432,6 +5438,22 @@ void CGameContext::ConRandomCmd(IConsole::IResult *pResult, void *pUserData)
 
 void CGameContext::ConQuestion(IConsole::IResult *pResult, void *pUserData)
 {
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!(pResult->NumArguments()))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "Please specify a question");
+		return;
+	}
+	else
+	{
+		char aBuf[256];
+
+		str_copy(aBuf, pResult->GetString(0), sizeof(aBuf));
+		char aChatmsg[256];
+		str_format(aChatmsg, sizeof(aChatmsg), "'%s' asked (%s)", pSelf->Server()->ClientName(pResult->m_ClientId), aBuf);
+		pSelf->CallVote(pResult->m_ClientId, aBuf, "", "", aChatmsg, 0);
+	}
+
     return;
 }
 
