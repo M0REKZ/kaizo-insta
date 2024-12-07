@@ -3946,7 +3946,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon, int tick)
 
 	if(m_RollbackAttacker >= 0 && m_RollbackAttacker < MAX_CLIENTS && m_RollbackAttacker != m_pPlayer->GetCid() && GameServer()->m_apPlayers[m_RollbackAttacker])
 	{
-		GameServer()->CreateSound(GameServer()->m_apPlayers[m_RollbackAttacker]->m_ViewPos, SOUND_HIT, TeamMask());
+		//GameServer()->CreateSound(GameServer()->m_apPlayers[m_RollbackAttacker]->m_ViewPos, SOUND_HIT, TeamMask());
 		bool a = TakeDamage(Force, Dmg, m_RollbackAttacker, m_RollbackAttackerWeapon);
 		return a;
 	}
