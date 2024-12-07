@@ -5449,7 +5449,7 @@ void CGameContext::ConQuestion(IConsole::IResult *pResult, void *pUserData)
 		char aBuf[256];
 
 		str_copy(aBuf, pResult->GetString(0), sizeof(aBuf));
-		char aChatmsg[256];
+		char aChatmsg[274];
 		str_format(aChatmsg, sizeof(aChatmsg), "'%s' asked (%s)", pSelf->Server()->ClientName(pResult->m_ClientId), aBuf);
 		pSelf->CallVote(pResult->m_ClientId, aBuf, "", "", aChatmsg, 0);
 	}
