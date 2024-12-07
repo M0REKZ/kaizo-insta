@@ -1351,14 +1351,6 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 
 		pCore->Write(pCharacter);
 
-		if(SnappingClient == m_RollbackAttacker && m_Core.m_DeathTick != -1) //JSAURUS rollback
-		{
-			pCharacter->m_X = m_RollbackDamagePos.x;
-			pCharacter->m_X = m_RollbackDamagePos.x;
-			pCharacter->m_VelX = 0;
-			pCharacter->m_VelY = 0;
-		}//---
-
 		pCharacter->m_Tick = Tick;
 		pCharacter->m_Emote = Emote;
 
@@ -1390,14 +1382,6 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 		{
 			pCharacter->m_Angle -= (int)(2.0f * pi * 256.0f);
 		}
-
-		if(SnappingClient == m_RollbackAttacker && m_Core.m_DeathTick != -1) //JSAURUS rollback
-		{
-			pCharacter->m_X = m_RollbackDamagePos.x;
-			pCharacter->m_X = m_RollbackDamagePos.x;
-			pCharacter->m_VelX = 0;
-			pCharacter->m_VelY = 0;
-		}//---
 
 		// m_HookTick can be negative when using the hook_duration tune, which 0.7 clients
 		// will consider invalid. https://github.com/ddnet/ddnet/issues/3915
