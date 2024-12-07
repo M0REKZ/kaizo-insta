@@ -46,7 +46,8 @@ void CFlagBall::Tick()
 		else
 		{
 			
-			if (GameLayerClipped(m_Pos))
+			if ((GameServer()->Collision()->GetCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH) ||
+			(GameServer()->Collision()->GetFCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH) || GameLayerClipped(m_Pos))
 			{
 				Reset();
 				GameServer()->CreateSoundGlobal(SOUND_CTF_RETURN);
@@ -71,6 +72,27 @@ void CFlagBall::Tick()
 				}
 				else
 					m_IdleTick = -1;*/
+					
+				//ICTFX Flag teleport
+				int index = GameServer()->Collision()->GetMapIndex(m_Pos);
+				//CCollision * col = GameServer()->Collision();
+				int tele = GameServer()->Collision()->IsTeleport(index);
+				if(!tele)
+					tele = GameServer()->Collision()->IsEvilTeleport(index);
+				if(!tele)
+					tele = GameServer()->Collision()->IsCheckTeleport(index);
+				if(!tele)
+					tele = GameServer()->Collision()->IsCheckEvilTeleport(index);
+
+				if(tele)
+				{
+					int size = GameServer()->Collision()->TeleOuts(tele-1).size();
+					if(size)
+					{
+						int RandomOut = rand() % size;
+						m_Pos = GameServer()->Collision()->TeleOuts(tele-1)[RandomOut];
+					}
+				}
 			}
 		}
 		

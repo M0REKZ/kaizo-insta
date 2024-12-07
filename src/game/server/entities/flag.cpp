@@ -114,6 +114,27 @@ void CFlag::TickDeferred()
 				// Gravity
 				m_Vel.y += GameWorld()->m_Core.m_aTuning[0].m_Gravity;
 				GameServer()->Collision()->MoveBox(&m_Pos, &m_Vel, vec2(ms_PhysSize, ms_PhysSize), vec2(0.5, 0.5));
+
+				//ICTFX Flag teleport
+				int index = GameServer()->Collision()->GetMapIndex(m_Pos);
+				//CCollision * col = GameServer()->Collision();
+				int tele = GameServer()->Collision()->IsTeleport(index);
+				if(!tele)
+					tele = GameServer()->Collision()->IsEvilTeleport(index);
+				if(!tele)
+					tele = GameServer()->Collision()->IsCheckTeleport(index);
+				if(!tele)
+					tele = GameServer()->Collision()->IsCheckEvilTeleport(index);
+
+				if(tele)
+				{
+					int size = GameServer()->Collision()->TeleOuts(tele-1).size();
+					if(size)
+					{
+						int RandomOut = rand() % size;
+						m_Pos = GameServer()->Collision()->TeleOuts(tele-1)[RandomOut];
+					}
+				}
 			}
 		}
 	}
