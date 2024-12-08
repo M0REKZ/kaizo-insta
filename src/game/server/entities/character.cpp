@@ -3125,7 +3125,7 @@ void CCharacter::HandleFlagHookCatch()
 			if(!(flag->CanHookGrabKZ(this)))
 				continue;
 
-			if(distance(m_Core.m_HookPos,flag->m_Pos) < 30.f)
+			if(distance(m_Core.m_HookPos,flag->m_Pos) < 60.f)
 				flag->Grab(this);
 		}
 	}
