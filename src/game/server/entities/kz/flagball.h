@@ -18,10 +18,10 @@ public:
 	virtual void Tick() override;
 	void TickDeferred() override;
 
-	void Grab(class CCharacter *pChar);
-	void Drop(vec2 Direction = vec2(0, 0));
+	virtual void Grab(class CCharacter *pChar) override;
+	virtual void Drop(vec2 Direction = vec2(0, 0)) override;
 
-	void HandleKZTiles();
+	virtual void HandleKZTiles() override;
 
 	virtual bool CanHookGrabKZ(CCharacter * pChr) override;
 };

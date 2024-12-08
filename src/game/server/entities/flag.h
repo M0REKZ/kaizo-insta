@@ -42,11 +42,11 @@ public:
 	void TickDeferred() override;
 
 	/* Functions */
-	void Grab(class CCharacter *pChar);
-	void Drop(vec2 Direction = vec2(0, 0));
+	virtual void Grab(class CCharacter *pChar);
+	virtual void Drop(vec2 Direction = vec2(0, 0));
 	
 	//+KZ
-	void HandleKZTiles();
+	virtual void HandleKZTiles();
 	int m_FlagSnapOffset = 0;
 	virtual bool CanHookGrabKZ(CCharacter *pChr);
 
