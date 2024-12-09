@@ -154,7 +154,7 @@ int CGameControllerPvp::GameInfoExFlags(int SnappingClient, int DDRaceFlags)
 		GAMEINFOFLAG_UNLIMITED_AMMO |
 		GAMEINFOFLAG_RACE_RECORD_MESSAGE |
 		GAMEINFOFLAG_ALLOW_EYE_WHEEL |
-		GAMEINFOFLAG_ALLOW_HOOK_COLL |
+		/* GAMEINFOFLAG_ALLOW_HOOK_COLL | */ // https://github.com/ddnet-insta/ddnet-insta/issues/195
 		GAMEINFOFLAG_ALLOW_ZOOM |
 		GAMEINFOFLAG_BUG_DDRACE_GHOST |
 		/* GAMEINFOFLAG_BUG_DDRACE_INPUT | */ // https://github.com/ddnet-insta/ddnet-insta/issues/161

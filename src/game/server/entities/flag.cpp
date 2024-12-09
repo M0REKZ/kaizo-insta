@@ -79,7 +79,7 @@ void CFlag::TickDeferred()
 	{
 		// flag hits death-tile or left the game layer, reset it
 		if((GameServer()->Collision()->GetCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH) ||
-			(GameServer()->Collision()->GetFCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH) ||
+			(GameServer()->Collision()->GetFrontCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH) ||
 			GameLayerClipped(m_Pos))
 		{
 			Reset();

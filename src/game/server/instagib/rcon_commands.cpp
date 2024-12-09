@@ -160,7 +160,7 @@ void CGameContext::ConRandomMapFromPool(IConsole::IResult *pResult, void *pUserD
 		return;
 	}
 
-	int RandIdx = rand() % pSelf->m_vMapPool.size();
+	int RandIdx = secure_rand() % pSelf->m_vMapPool.size();
 	const char *pMap = pSelf->m_vMapPool[RandIdx].c_str();
 
 	char aBuf[512];
