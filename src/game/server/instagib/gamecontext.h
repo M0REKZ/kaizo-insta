@@ -16,8 +16,6 @@ class CGameContext : public IGameServer
 #endif // IN_CLASS_IGAMECONTEXT
 
 public:
-	std::vector<std::string> m_vMapPool;
-
 	const char *ServerInfoPlayerScoreKind() override { return "points"; }
 
 	// bang commands

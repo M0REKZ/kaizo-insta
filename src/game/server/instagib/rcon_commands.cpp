@@ -141,31 +141,20 @@ void CGameContext::SwapTeams()
 void CGameContext::ConAddMapToPool(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->m_vMapPool.emplace_back(pResult->GetString(0));
+	pSelf->Server()->AddMapToRandomPool(pResult->GetString(0));
 }
 
 void CGameContext::ConClearMapPool(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
-	pSelf->m_vMapPool.clear();
+	pSelf->Server()->ClearRandomMapPool();
 }
 
 void CGameContext::ConRandomMapFromPool(IConsole::IResult *pResult, void *pUserData)
 {
 	CGameContext *pSelf = (CGameContext *)pUserData;
 
-	if(pSelf->m_vMapPool.empty())
-	{
-		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", "map pool is empty add one with 'add_map_to_pool [map name]'");
-		return;
-	}
-
-	int RandIdx = secure_rand() % pSelf->m_vMapPool.size();
-	const char *pMap = pSelf->m_vMapPool[RandIdx].c_str();
-
-	char aBuf[512];
-	str_format(aBuf, sizeof(aBuf), "Chose random map '%s' out of %d maps", pMap, pSelf->m_vMapPool.size());
-	pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", aBuf);
-
-	pSelf->m_pController->ChangeMap(pMap);
+	const char *pMap = pSelf->Server()->GetRandomMapFromPool();
+	if(pMap && pMap[0])
+		pSelf->m_pController->ChangeMap(pMap);
 }

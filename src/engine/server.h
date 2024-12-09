@@ -28,6 +28,12 @@ enum
 
 class IServer : public IInterface
 {
+	// ddnet-insta
+public:
+	virtual void AddMapToRandomPool(const char *pMap) = 0;
+	virtual void ClearRandomMapPool() = 0;
+	virtual const char *GetRandomMapFromPool() = 0;
+
 	MACRO_INTERFACE("server")
 protected:
 	int m_CurrentGameTick;
