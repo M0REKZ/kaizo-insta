@@ -59,6 +59,7 @@ public:
 	virtual int GetOwnerId() const override { return m_Owner; }
 	
 	int GetStartTick() { return m_StartTick; }
+	bool m_FirstTick;
 };
 
 #endif

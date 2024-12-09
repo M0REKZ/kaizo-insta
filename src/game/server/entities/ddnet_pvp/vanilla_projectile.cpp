@@ -12,6 +12,7 @@
 #include "vanilla_projectile.h"
 
 #include <game/server/entities/flag.h> //+KZ
+#include <game/server/player.h>
 
 CVanillaProjectile::CVanillaProjectile(
 	CGameWorld *pGameWorld,
@@ -49,6 +50,8 @@ CVanillaProjectile::CVanillaProjectile(
 	m_BelongsToPracticeTeam = pOwnerChar && pOwnerChar->Teams()->IsPractice(pOwnerChar->Team());
 
 	GameWorld()->InsertEntity(this);
+
+	m_FirstTick = true;
 }
 
 void CVanillaProjectile::Reset()
@@ -110,32 +113,92 @@ vec2 CVanillaProjectile::GetPos(float Time)
 
 void CVanillaProjectile::Tick()
 {
-	float Pt = (Server()->Tick() - m_StartTick - 1) / (float)Server()->TickSpeed();
-	float Ct = (Server()->Tick() - m_StartTick) / (float)Server()->TickSpeed();
-	vec2 PrevPos = GetPos(Pt);
-	vec2 CurPos = GetPos(Ct);
+	int tick = m_StartTick; //JSAURUS rollback
+	int origstart = m_StartTick;
+	bool IsRollbackDamage = false;
+	int RollbackDamageTick = 0;
+
+	int Collide = 0;
+	CCharacter *pTargetChr = 0;
+	float Pt;
+	float Ct;
+	vec2 PrevPos;
+	vec2 CurPos;
 	vec2 ColPos;
 	vec2 NewPos;
-	int Collide = GameServer()->Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos);
+	
 	CCharacter *pOwnerChar = 0;
+
+	bool IsWeaponCollide = false;
+
+	if(m_Owner >= 0)
+		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+
+	if(m_FirstTick && g_Config.m_SvRollback && m_Owner >= 0 && m_Owner < MAX_CLIENTS && GameServer()->m_apPlayers[m_Owner]->m_Rollback && GameServer()->m_apPlayers[m_Owner]->GetCharacter())
+	{
+		tick = GameServer()->m_apPlayers[m_Owner]->GetCharacter()->GetCore().m_LastAckedSnapshot;
+		m_StartTick = tick;
+
+	//int diff = origstart - tick;
+
+		//Collide with wall and tee
+		int CollideTick;
+		for(CollideTick = m_StartTick; CollideTick <= origstart;CollideTick++)
+		{
+			Pt = (CollideTick - m_StartTick - 1) / (float)Server()->TickSpeed();
+			Ct = (CollideTick - m_StartTick) / (float)Server()->TickSpeed();
+			PrevPos = GetPos(Pt);
+			CurPos = GetPos(Ct);
+			Collide = GameServer()->Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos); //wall
+
+			if(m_LifeSpan > -1)
+				m_LifeSpan--;
+
+			if(Collide)
+				break;
+
+			pTargetChr = GameServer()->m_World.IntersectCharacterTick(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, CollideTick, pOwnerChar, m_Owner); //tee
+
+			if(pTargetChr)
+			{
+				IsWeaponCollide = false; //just explode >:(
+				IsRollbackDamage = true;
+				RollbackDamageTick = CollideTick;
+				break;
+			}
+		}
+	}
+	else
+	{
+
+	Pt = (Server()->Tick() - m_StartTick - 1) / (float)Server()->TickSpeed();
+	Ct = (Server()->Tick() - m_StartTick) / (float)Server()->TickSpeed();
+	PrevPos = GetPos(Pt);
+	CurPos = GetPos(Ct);
+	//ColPos;
+	//NewPos;
+	if(!Collide)
+		Collide = GameServer()->Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos);
+	//CCharacter *pOwnerChar = 0;
+
+	//if(m_Owner >= 0)
+	//	pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+
+	//CCharacter *pTargetChr = 0;
+
+	if(!pTargetChr && (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit))
+		pTargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
+	}
 
 	//+KZ
 	if(!Collide)
 		Collide = HitFlag(PrevPos, CurPos);
 
-	if(m_Owner >= 0)
-		pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
-
-	CCharacter *pTargetChr = 0;
-
-	if(pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit)
-		pTargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
-
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
 
 	CClientMask TeamMask = CClientMask().set();
-	bool IsWeaponCollide = false;
+	//bool IsWeaponCollide = false;
 	if(
 		pOwnerChar &&
 		pTargetChr &&
@@ -166,6 +229,11 @@ void CVanillaProjectile::Tick()
 			}
 			for(int i = 0; i < Number; i++)
 			{
+				if(IsRollbackDamage)
+				{
+					GameServer()->CreateExplosionTick(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()), RollbackDamageTick, (m_Owner != -1) ? TeamMask : CClientMask().set());
+				}
+				else
 				GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
 					(m_Owner != -1) ? TeamMask : CClientMask().set());
 				GameServer()->CreateSound(ColPos, m_SoundImpact,
@@ -184,7 +252,12 @@ void CVanillaProjectile::Tick()
 			}
 		}
 		else if(pTargetChr) // ddnet-insta
-			pTargetChr->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type);
+		{
+			if(IsRollbackDamage)
+				pTargetChr->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type, RollbackDamageTick);
+			else
+				pTargetChr->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type);
+		}
 
 		if(pOwnerChar && !GameLayerClipped(ColPos) &&
 			((m_Type == WEAPON_GRENADE && pOwnerChar->HasTelegunGrenade()) || (m_Type == WEAPON_GUN && pOwnerChar->HasTelegunGun())))
@@ -291,6 +364,8 @@ void CVanillaProjectile::Tick()
 		m_Pos = GameServer()->Collision()->TeleOuts(z - 1)[TeleOut];
 		m_StartTick = Server()->Tick();
 	}
+
+	m_FirstTick = false;
 }
 
 void CVanillaProjectile::TickPaused()

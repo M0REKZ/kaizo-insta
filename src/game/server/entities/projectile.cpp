@@ -192,6 +192,9 @@ void CProjectile::Tick()
 			CurPos = GetPos(Ct);
 			Collide = GameServer()->Collision()->IntersectLine(PrevPos, CurPos, &ColPos, &NewPos); //wall
 
+			if(m_LifeSpan > -1)
+				m_LifeSpan--;
+
 			if(Collide)
 				break;
 
