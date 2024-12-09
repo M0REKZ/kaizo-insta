@@ -1023,12 +1023,6 @@ void CCharacter::TickDeferred()
 	if(m_pPlayer)
 	{
 		m_Core.m_LastAckedSnapshot++;
-		if(m_Core.m_LastAckedSnapshot > Server()->TickSpeed())
-		{
-			m_Core.m_LastAckedSnapshot = 1;
-		}
-		if(m_Core.m_LastAckedSnapshot < 1)
-			m_Core.m_LastAckedSnapshot = 1;
 	} //------
 
 	if(!StuckBefore && (StuckAfterMove || StuckAfterQuant))

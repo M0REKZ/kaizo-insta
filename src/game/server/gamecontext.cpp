@@ -5488,13 +5488,6 @@ void CGameContext::SetPlayer_LastAckedSnapshot(int ClientID, int tick)
 {
 	if(m_apPlayers[ClientID]->GetCharacter())
 	{
-		for(;tick > SERVER_TICK_SPEED; tick -= SERVER_TICK_SPEED)
-		{
-			
-		}
-		if(tick < 1)
-			tick = 1;
-
 		((CCharacterCore *)(m_apPlayers[ClientID]->GetCharacter()->Core()))->m_LastAckedSnapshot = tick;
 	}
 }
@@ -5506,13 +5499,6 @@ void CGameContext::OnClientPredictedInput(int ClientID, void *pInput, int tick)
 
 	if(m_apPlayers[ClientID]->GetCharacter())
 	{
-		for(;tick > SERVER_TICK_SPEED; tick -= SERVER_TICK_SPEED)
-		{
-			
-		}
-		if(tick < 1)
-			tick = 1;
-
 		((CCharacterCore *)(m_apPlayers[ClientID]->GetCharacter()->Core()))->m_LastAckedSnapshot = tick;
 	}
 	m_apPlayers[ClientID]->OnPredictedInput((CNetObj_PlayerInput *)pInput);
