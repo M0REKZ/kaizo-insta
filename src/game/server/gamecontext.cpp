@@ -5518,7 +5518,7 @@ void CGameContext::CreateExplosionTick(vec2 Pos, int Owner, int Weapon, bool NoD
 	}
 
 	// deal damage
-	CEntity *apEnts[MAX_CLIENTS];
+	//CEntity *apEnts[MAX_CLIENTS];
 	float Radius = 135.0f;
 	float InnerRadius = 48.0f;
 	//int Num = m_World.FindEntities(Pos, Radius, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
