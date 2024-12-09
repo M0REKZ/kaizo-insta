@@ -269,15 +269,7 @@ void CProjectile::Tick()
 			{
 				if(IsRollbackDamage)
 				{
-					// create the event
-					CNetEvent_Explosion *pEvent = GameServer()->m_Events.Create<CNetEvent_Explosion>((m_Owner != -1) ? TeamMask : CClientMask().set());
-					if(pEvent)
-					{
-						pEvent->m_X = (int)ColPos.x;
-						pEvent->m_Y = (int)ColPos.y;
-					}
-
-					pTargetChr->TakeDamage(normalize(pTargetChr->m_Pos - ColPos),5,m_Owner,WEAPON_GRENADE,RollbackDamageTick); //for now only damage targetchar //TODO: fix this
+					GameServer()->CreateExplosionTick(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()), RollbackDamageTick, (m_Owner != -1) ? TeamMask : CClientMask().set(), m_AffectedCharacters);
 				}
 				else
 				GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),

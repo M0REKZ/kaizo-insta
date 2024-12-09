@@ -620,6 +620,7 @@ public:
 	void ResetTuning();
 	void HandleKZBot(int CID, CNetObj_PlayerInput &Input); //+KZ
 	int CountPlayersKZ();
+	void CreateExplosionTick(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int Tick, CClientMask Mask = CClientMask().set(), CClientMask SprayMask = CClientMask().set());
 
 	virtual void SetPlayer_LastAckedSnapshot(int ClientID, int tick) override;  //JSAURUS rollback
 	virtual void OnClientPredictedInput(int ClientID, void *pInput, int tick) override;	 //JSAURUS rollback

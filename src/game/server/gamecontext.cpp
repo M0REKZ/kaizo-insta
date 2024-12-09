@@ -5503,3 +5503,78 @@ void CGameContext::OnClientPredictedInput(int ClientID, void *pInput, int tick)
 	}
 	m_apPlayers[ClientID]->OnPredictedInput((CNetObj_PlayerInput *)pInput);
 }
+
+void CGameContext::CreateExplosionTick(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int Tick, CClientMask Mask, CClientMask SprayMask)
+{
+
+	Tick = Tick % POSITION_HISTORY;
+
+	// create the event
+	CNetEvent_Explosion *pEvent = m_Events.Create<CNetEvent_Explosion>(Mask);
+	if(pEvent)
+	{
+		pEvent->m_X = (int)Pos.x;
+		pEvent->m_Y = (int)Pos.y;
+	}
+
+	// deal damage
+	CEntity *apEnts[MAX_CLIENTS];
+	float Radius = 135.0f;
+	float InnerRadius = 48.0f;
+	//int Num = m_World.FindEntities(Pos, Radius, apEnts, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+	CClientMask TeamMask = CClientMask().set();
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!m_apPlayers[i])
+			continue;
+
+		CCharacter *pChr = m_apPlayers[i]->GetCharacter();
+
+		if(!pChr)
+			continue;
+
+		if(!pChr->Core())
+			continue;
+
+		if(distance(pChr->Core()->m_Positions[Tick], Pos) > Radius)
+			continue;
+
+		vec2 Diff = pChr->Core()->m_Positions[Tick] - Pos;
+		vec2 ForceDir(0, 1);
+		float l = length(Diff);
+		if(l)
+			ForceDir = normalize(Diff);
+		l = 1 - clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
+		float Strength;
+		if(Owner == -1 || !m_apPlayers[Owner] || !m_apPlayers[Owner]->m_TuneZone)
+			Strength = Tuning()->m_ExplosionStrength;
+		else
+			Strength = TuningList()[m_apPlayers[Owner]->m_TuneZone].m_ExplosionStrength;
+
+		float Dmg = Strength * l;
+		if(!(int)Dmg)
+			continue;
+
+		if((GetPlayerChar(Owner) ? !GetPlayerChar(Owner)->GrenadeHitDisabled() : g_Config.m_SvHit) || NoDamage || Owner == pChr->GetPlayer()->GetCid())
+		{
+			if(Owner != -1 && pChr->IsAlive() && !pChr->CanCollide(Owner))
+				continue;
+			if(Owner == -1 && ActivatedTeam != -1 && pChr->IsAlive() && pChr->Team() != ActivatedTeam)
+				continue;
+
+			// Explode at most once per team
+			int PlayerTeam = pChr->Team();
+			if((GetPlayerChar(Owner) ? GetPlayerChar(Owner)->GrenadeHitDisabled() : !g_Config.m_SvHit) || NoDamage)
+			{
+				if(PlayerTeam == TEAM_SUPER)
+					continue;
+				if(!TeamMask.test(PlayerTeam))
+					continue;
+				TeamMask.reset(PlayerTeam);
+			}
+
+			if(!g_Config.m_SvSprayprotection || SprayMask.test(pChr->GetPlayer()->GetCid()))
+				pChr->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon, Tick);
+		}
+	}
+}
