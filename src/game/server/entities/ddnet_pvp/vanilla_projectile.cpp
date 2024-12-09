@@ -173,6 +173,9 @@ void CVanillaProjectile::Tick()
 
 			if(Collide)
 				break;
+
+			if(m_LifeSpan == -1)
+				break;
 		}
 	}
 	else
