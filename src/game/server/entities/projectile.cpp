@@ -155,6 +155,8 @@ void CProjectile::Tick()
 {
 	int tick = m_StartTick; //JSAURUS rollback
 	int origstart = m_StartTick;
+	bool IsRollbackDamage = false;
+	int RollbackDamageTick = 0;
 
 	int Collide = 0;
 	CCharacter *pTargetChr = 0;
@@ -198,6 +200,8 @@ void CProjectile::Tick()
 			if(pTargetChr)
 			{
 				IsWeaponCollide = false; //just explode >:(
+				IsRollbackDamage = true;
+				RollbackDamageTick = CollideTick;
 				break;
 			}
 		}
@@ -263,6 +267,19 @@ void CProjectile::Tick()
 			}
 			for(int i = 0; i < Number; i++)
 			{
+				if(IsRollbackDamage)
+				{
+					// create the event
+					CNetEvent_Explosion *pEvent = GameServer()->m_Events.Create<CNetEvent_Explosion>((m_Owner != -1) ? TeamMask : CClientMask().set());
+					if(pEvent)
+					{
+						pEvent->m_X = (int)ColPos.x;
+						pEvent->m_Y = (int)ColPos.y;
+					}
+
+					pTargetChr->TakeDamage(normalize(pTargetChr->m_Pos - ColPos),5,m_Owner,WEAPON_GRENADE,RollbackDamageTick); //for now only damage targetchar //TODO: fix this
+				}
+				else
 				GameServer()->CreateExplosion(ColPos, m_Owner, m_Type, m_Owner == -1, (!pTargetChr ? -1 : pTargetChr->Team()),
 					(m_Owner != -1) ? TeamMask : CClientMask().set(), m_AffectedCharacters);
 				GameServer()->CreateSound(ColPos, m_SoundImpact,
