@@ -166,6 +166,13 @@ void CVanillaProjectile::Tick()
 				RollbackDamageTick = CollideTick;
 				break;
 			}
+
+			//+KZ
+			if(!Collide)
+				Collide = HitFlag(PrevPos, CurPos);
+
+			if(Collide)
+				break;
 		}
 	}
 	else
@@ -188,11 +195,13 @@ void CVanillaProjectile::Tick()
 
 	if(!pTargetChr && (pOwnerChar ? !pOwnerChar->GrenadeHitDisabled() : g_Config.m_SvHit))
 		pTargetChr = GameServer()->m_World.IntersectCharacter(PrevPos, ColPos, m_Freeze ? 1.0f : 6.0f, ColPos, pOwnerChar, m_Owner);
-	}
 
 	//+KZ
 	if(!Collide)
 		Collide = HitFlag(PrevPos, CurPos);
+	}
+
+
 
 	if(m_LifeSpan > -1)
 		m_LifeSpan--;
