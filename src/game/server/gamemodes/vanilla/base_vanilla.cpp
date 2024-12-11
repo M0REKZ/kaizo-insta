@@ -22,9 +22,9 @@ CGameControllerVanilla::CGameControllerVanilla(class CGameContext *pGameServer) 
 
 CGameControllerVanilla::~CGameControllerVanilla() = default;
 
-int CGameControllerVanilla::GameInfoExFlags(int SnappingClient, int DDRaceFlags)
+int CGameControllerVanilla::SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags)
 {
-	int Flags = CGameControllerPvp::GameInfoExFlags(SnappingClient, DDRaceFlags);
+	int Flags = CGameControllerPvp::SnapGameInfoExFlags(SnappingClient, DDRaceFlags);
 	Flags &= ~(GAMEINFOFLAG_UNLIMITED_AMMO);
 	Flags &= ~(GAMEINFOFLAG_PREDICT_DDRACE);
 	Flags &= ~(GAMEINFOFLAG_PREDICT_DDRACE_TILES); // https://github.com/ddnet-insta/ddnet-insta/issues/181

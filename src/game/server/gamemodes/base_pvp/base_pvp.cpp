@@ -118,29 +118,7 @@ void CGameControllerPvp::ResetPlayer(class CPlayer *pPlayer)
 	pPlayer->m_Score = 0; // ddnet-insta
 }
 
-int CGameControllerPvp::SnapPlayerScore(class CPlayer *pPlayer, int SnappingClient, int DDRaceScore)
-{
-	int Score = pPlayer->m_Score.value_or(0);
-	// display round score if the game ended
-	// otherwise you can not see who actually won
-	if(g_Config.m_SvSaveServer && GameState() != IGS_END_ROUND)
-	{
-		Score += pPlayer->m_SavedStats.m_Points;
-
-		// // yes this is cursed
-		// // but during the final scoreboard we already saved and reset the stats
-		// // so we manually merged the save stats
-		// // but the player still has his round score
-		// // so the round score is counted twice
-		// if(GameState() == IGS_END_ROUND)
-		// {
-		// 	Score -= pPlayer->m_Score.value_or(0);
-		// }
-	}
-	return Score;
-}
-
-int CGameControllerPvp::GameInfoExFlags(int SnappingClient, int DDRaceFlags)
+int CGameControllerPvp::SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags)
 {
 	int Flags =
 		GAMEINFOFLAG_PREDICT_VANILLA | // ddnet-insta
@@ -175,9 +153,69 @@ int CGameControllerPvp::GameInfoExFlags(int SnappingClient, int DDRaceFlags)
 	return Flags;
 }
 
-int CGameControllerPvp::GameInfoExFlags2(int SnappingClient, int DDRaceFlags)
+int CGameControllerPvp::SnapGameInfoExFlags2(int SnappingClient, int DDRaceFlags)
 {
-	return GAMEINFOFLAG2_HUD_AMMO | GAMEINFOFLAG2_HUD_HEALTH_ARMOR; // ddnet-insta
+	return GAMEINFOFLAG2_HUD_AMMO | GAMEINFOFLAG2_HUD_HEALTH_ARMOR;
+}
+
+int CGameControllerPvp::SnapPlayerFlags7(int SnappingClient, CPlayer *pPlayer, int PlayerFlags7)
+{
+	if(pPlayer->m_IsDead && (!pPlayer->GetCharacter() || !pPlayer->GetCharacter()->IsAlive()))
+		PlayerFlags7 |= protocol7::PLAYERFLAG_DEAD;
+	// hack to let 0.7 players vote as spectators
+	if(g_Config.m_SvSpectatorVotes && g_Config.m_SvSpectatorVotesSixup && pPlayer->GetTeam() == TEAM_SPECTATORS)
+		PlayerFlags7 |= protocol7::PLAYERFLAG_DEAD;
+	if(g_Config.m_SvHideAdmins && Server()->GetAuthedState(SnappingClient) == AUTHED_NO)
+		PlayerFlags7 &= ~(protocol7::PLAYERFLAG_ADMIN);
+	return PlayerFlags7;
+}
+
+void CGameControllerPvp::SnapPlayer6(int SnappingClient, CPlayer *pPlayer, CNetObj_ClientInfo *pClientInfo, CNetObj_PlayerInfo *pPlayerInfo)
+{
+	if(!IsGameRunning() &&
+		GameServer()->m_World.m_Paused &&
+		GameState() != IGameController::IGS_END_ROUND &&
+		pPlayer->GetTeam() != TEAM_SPECTATORS &&
+		(!IsPlayerReadyMode() || pPlayer->m_IsReadyToPlay))
+	{
+		char aReady[512];
+		char aName[64];
+		static const int MaxNameLen = MAX_NAME_LENGTH - (str_length("\xE2\x9C\x93") + 2);
+		str_truncate(aName, sizeof(aName), Server()->ClientName(pPlayer->GetCid()), MaxNameLen);
+		str_format(aReady, sizeof(aReady), "\xE2\x9C\x93 %s", aName);
+		// 0.7 puts the checkmark at the end
+		// we put it in the beginning because ddnet scoreboard cuts off long names
+		// such as WWWWWWWWWW... which would also hide the checkmark in the end
+		StrToInts(&pClientInfo->m_Name0, 4, aReady);
+	}
+}
+
+void CGameControllerPvp::SnapDDNetPlayer(int SnappingClient, CPlayer *pPlayer, CNetObj_DDNetPlayer *pDDNetPlayer)
+{
+	if(g_Config.m_SvHideAdmins && Server()->GetAuthedState(SnappingClient) == AUTHED_NO)
+		pDDNetPlayer->m_AuthLevel = AUTHED_NO;
+}
+
+int CGameControllerPvp::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer, int DDRaceScore)
+{
+	int Score = pPlayer->m_Score.value_or(0);
+	// display round score if the game ended
+	// otherwise you can not see who actually won
+	if(g_Config.m_SvSaveServer && GameState() != IGS_END_ROUND)
+	{
+		Score += pPlayer->m_SavedStats.m_Points;
+
+		// // yes this is cursed
+		// // but during the final scoreboard we already saved and reset the stats
+		// // so we manually merged the save stats
+		// // but the player still has his round score
+		// // so the round score is counted twice
+		// if(GameState() == IGS_END_ROUND)
+		// {
+		// 	Score -= pPlayer->m_Score.value_or(0);
+		// }
+	}
+	return Score;
 }
 
 bool CGameControllerPvp::IsGrenadeGameType() const

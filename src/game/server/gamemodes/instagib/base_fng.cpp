@@ -24,9 +24,9 @@ CGameControllerBaseFng::CGameControllerBaseFng(class CGameContext *pGameServer) 
 
 CGameControllerBaseFng::~CGameControllerBaseFng() = default;
 
-int CGameControllerBaseFng::GameInfoExFlags(int SnappingClient, int DDRaceFlags)
+int CGameControllerBaseFng::SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags)
 {
-	int Flags = CGameControllerPvp::GameInfoExFlags(SnappingClient, DDRaceFlags);
+	int Flags = CGameControllerPvp::SnapGameInfoExFlags(SnappingClient, DDRaceFlags);
 	Flags &= ~(GAMEINFOFLAG_ENTITIES_DDNET);
 	Flags &= ~(GAMEINFOFLAG_ENTITIES_DDRACE);
 	Flags &= ~(GAMEINFOFLAG_ENTITIES_RACE);
@@ -298,9 +298,9 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 		pChr->Die(LastToucherId, WEAPON_NINJA);
 }
 
-void CGameControllerBaseFng::OnSnapDDNetCharacter(CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter, int SnappingClient)
+void CGameControllerBaseFng::SnapDDNetCharacter(int SnappingClient, CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter)
 {
-	CGameControllerInstagib::OnSnapDDNetCharacter(pChr, pDDNetCharacter, SnappingClient);
+	CGameControllerInstagib::SnapDDNetCharacter(SnappingClient, pChr, pDDNetCharacter);
 
 	CPlayer *pSnapReceiver = GameServer()->m_apPlayers[SnappingClient];
 	bool IsTeamMate = pChr->GetPlayer()->GetCid() == SnappingClient;

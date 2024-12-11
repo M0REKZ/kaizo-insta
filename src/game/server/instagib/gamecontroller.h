@@ -339,13 +339,57 @@ public:
 	*/
 	virtual bool LoadNewPlayerNameData(int ClientId) { return false; };
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer); // 0.7 ready change
-	virtual int GameInfoExFlags(int SnappingClient, int DDRaceFlags) { return DDRaceFlags; };
-	virtual int GameInfoExFlags2(int SnappingClient, int DDRaceFlags) { return DDRaceFlags; };
-	virtual void OnSnapDDNetCharacter(class CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter, int SnappingClient){};
-	virtual CClientMask FreezeDamageIndicatorMask(class CCharacter *pChr);
-	virtual int SnapPlayerScore(class CPlayer *pPlayer, int SnappingClient, int DDRaceScore);
+	virtual int SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags) { return DDRaceFlags; };
+	virtual int SnapGameInfoExFlags2(int SnappingClient, int DDRaceFlags) { return DDRaceFlags; };
+
+	/*
+		Function: SnapPlayerFlags7
+			Set custom player flags for 0.7 connections.
+
+		Arguments:
+			SnappingClient - Client Id of the player that will receive the snapshot
+			pPlayer - CPlayer that is being snapped
+			PlayerFlags7 - the flags that were already set for that player by ddnet
+
+		Returns:
+			return the new flags value that should be snapped to the SnappingClient
+	*/
+	virtual int SnapPlayerFlags7(int SnappingClient, CPlayer *pPlayer, int PlayerFlags7) { return PlayerFlags7; };
+
+	/*
+		Function: SnapPlayer6
+			Alter snap values for 0.6 snapshots.
+			For 0.7 use `SnapPlayerFlags7()` and `SnapPlayerScore()`
+
+			Be careful with setting `pPlayerInfo->m_Score` to not overwrite
+			what `SnapPlayerScore()` tries to set.
+
+		Arguments:
+			SnappingClient - Client Id of the player that will receive the snapshot
+			pPlayer - CPlayer that is being snapped
+			pClientInfo - (in and output) info that is being snappend which is already pre filled by ddnet and can be altered.
+			pPlayerInfo - (in and output) info that is being snappend which is already pre filled by ddnet and can be altered.
+	*/
+	virtual void SnapPlayer6(int SnappingClient, CPlayer *pPlayer, CNetObj_ClientInfo *pClientInfo, CNetObj_PlayerInfo *pPlayerInfo){};
+
+	/*
+		Function: SnapPlayerScore
+			Warning its value could be overwritten by `SnapPlayer6()`
+
+		Arguments:
+			SnappingClient - Client Id of the player that will receive the snapshot
+			pPlayer - CPlayer that is being snapped
+			DDRaceScore - Current value of the score set by the ddnet code
+
+		Returns:
+			return the new score value that will be included in the snapshot
+	*/
+	virtual int SnapPlayerScore(int SnappingClient, CPlayer *pPlayer, int DDRaceScore);
+	virtual void SnapDDNetCharacter(int SnappingClient, CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter){};
+	virtual void SnapDDNetPlayer(int SnappingClient, CPlayer *pPlayer, CNetObj_DDNetPlayer *pDDNetPlayer){};
 	virtual int SnapRoundStartTick(int SnappingClient);
 	virtual int SnapTimeLimit(int SnappingClient);
+	virtual CClientMask FreezeDamageIndicatorMask(CCharacter *pChr);
 	virtual void OnDDRaceTimeLoad(class CPlayer *pPlayer, float Time);
 	virtual void ResetPlayer(class CPlayer *pPlayer){};
 

@@ -26,7 +26,7 @@ void IGameController::OnDDRaceTimeLoad(class CPlayer *pPlayer, float Time)
 	pPlayer->m_Score = Time;
 }
 
-int IGameController::SnapPlayerScore(class CPlayer *pPlayer, int SnappingClient, int DDRaceScore)
+int IGameController::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer, int DDRaceScore)
 {
 	if(Server()->IsSixup(SnappingClient))
 	{

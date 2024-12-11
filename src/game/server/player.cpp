@@ -369,7 +369,7 @@ void CPlayer::Snap(int SnappingClient)
 	if(SnappingClient != m_ClientId && g_Config.m_SvHideScore)
 		Score = -9999;
 
-	Score = GameServer()->m_pController->SnapPlayerScore(this, SnappingClient, Score); // ddnet-insta
+	Score = GameServer()->m_pController->SnapPlayerScore(SnappingClient, this, Score); // ddnet-insta
 
 	if(!Server()->IsSixup(SnappingClient))
 	{
@@ -389,22 +389,7 @@ void CPlayer::Snap(int SnappingClient)
 		}
 
 		// ddnet-insta
-		if(!GameServer()->m_pController->IsGameRunning() &&
-			GameServer()->m_World.m_Paused &&
-			GameServer()->m_pController->GameState() != IGameController::IGS_END_ROUND &&
-			GetTeam() != TEAM_SPECTATORS &&
-			(!GameServer()->m_pController->IsPlayerReadyMode() || m_IsReadyToPlay))
-		{
-			char aReady[512];
-			char aName[64];
-			static const int MaxNameLen = MAX_NAME_LENGTH - (str_length("\xE2\x9C\x93") + 2);
-			str_truncate(aName, sizeof(aName), Server()->ClientName(m_ClientId), MaxNameLen);
-			str_format(aReady, sizeof(aReady), "\xE2\x9C\x93 %s", aName);
-			// 0.7 puts the checkmark at the end
-			// we put it in the beginning because ddnet scoreboard cuts off long names
-			// such as WWWWWWWWWW... which would also hide the checkmark in the end
-			StrToInts(&pClientInfo->m_Name0, 4, aReady);
-		}
+		GameServer()->m_pController->SnapPlayer6(SnappingClient, this, pClientInfo, pPlayerInfo);
 	}
 	else
 	{
@@ -424,15 +409,8 @@ void CPlayer::Snap(int SnappingClient)
 		pPlayerInfo->m_Score = Score; // ddnet-insta moved milliseconds code to SnapPlayerScore()
 		pPlayerInfo->m_Latency = Latency;
 
-		// ddnet-insta dead players
-		if(m_IsDead && (!GetCharacter() || !GetCharacter()->IsAlive()))
-			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_DEAD;
-		// ddnet-insta hack to let 0.7 players vote as spectators
-		if(g_Config.m_SvSpectatorVotes && g_Config.m_SvSpectatorVotesSixup && GetTeam() == TEAM_SPECTATORS)
-			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_DEAD;
-		// ddnet-insta hide admins
-		if(g_Config.m_SvHideAdmins && Server()->GetAuthedState(SnappingClient) == AUTHED_NO)
-			pPlayerInfo->m_PlayerFlags &= ~(protocol7::PLAYERFLAG_ADMIN);
+		// ddnet-insta
+		pPlayerInfo->m_PlayerFlags = GameServer()->m_pController->SnapPlayerFlags7(SnappingClient, this, pPlayerInfo->m_PlayerFlags);
 	}
 
 	if(m_ClientId == SnappingClient && (m_Team == TEAM_SPECTATORS || m_Paused))
@@ -465,9 +443,6 @@ void CPlayer::Snap(int SnappingClient)
 		return;
 
 	pDDNetPlayer->m_AuthLevel = Server()->GetAuthedState(m_ClientId);
-	// ddnet-insta
-	if(g_Config.m_SvHideAdmins && Server()->GetAuthedState(SnappingClient) == AUTHED_NO)
-		pDDNetPlayer->m_AuthLevel = AUTHED_NO;
 	pDDNetPlayer->m_Flags = 0;
 	if(((CServer*)Server())->m_aClients[m_ClientId].m_KZBot ? false : (m_Afk || m_MenuAFK))
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_AFK;
@@ -502,6 +477,9 @@ void CPlayer::Snap(int SnappingClient)
 		pSpecChar->m_X = m_pCharacter->Core()->m_Pos.x;
 		pSpecChar->m_Y = m_pCharacter->Core()->m_Pos.y;
 	}
+
+	// ddnet-insta
+	GameServer()->m_pController->SnapDDNetPlayer(SnappingClient, this, pDDNetPlayer);
 }
 
 void CPlayer::FakeSnap()

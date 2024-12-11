@@ -111,11 +111,13 @@ bool CGameControllerZcatch::IsWinner(const CPlayer *pPlayer, char *pMessage, int
 	// the win does not count in casual rounds
 	if(CatchGameState() != ECatchGameState::RUNNING_COMPETITIVE)
 	{
-		str_copy(pMessage, "The win did not count because the round was started with less than 10 players.", SizeOfMessage);
+		if(pMessage)
+			str_copy(pMessage, "The win did not count because the round was started with less than 10 players.", SizeOfMessage);
 		return false;
 	}
 
-	str_copy(pMessage, "+1 win was saved on your name (see /rank_wins).", SizeOfMessage);
+	if(pMessage)
+		str_copy(pMessage, "+1 win was saved on your name (see /rank_wins).", SizeOfMessage);
 	return !pPlayer->m_IsDead;
 }
 

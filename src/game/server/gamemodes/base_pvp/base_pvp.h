@@ -33,13 +33,16 @@ public:
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	void Tick() override;
 	int GetAutoTeam(int NotThisId) override;
-	int GameInfoExFlags(int SnappingClient, int DDRaceFlags) override;
-	int GameInfoExFlags2(int SnappingClient, int DDRaceFlags) override;
+	int SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags) override;
+	int SnapGameInfoExFlags2(int SnappingClient, int DDRaceFlags) override;
+	int SnapPlayerFlags7(int SnappingClient, CPlayer *pPlayer, int PlayerFlags7) override;
+	void SnapPlayer6(int SnappingClient, CPlayer *pPlayer, CNetObj_ClientInfo *pClientInfo, CNetObj_PlayerInfo *pPlayerInfo) override;
+	void SnapDDNetPlayer(int SnappingClient, CPlayer *pPlayer, CNetObj_DDNetPlayer *pDDNetPlayer) override;
+	int SnapPlayerScore(int SnappingClient, CPlayer *pPlayer, int DDRaceScore) override;
 	int GetDefaultWeapon(class CPlayer *pPlayer) override { return m_DefaultWeapon; }
 	int GetPlayerTeam(class CPlayer *pPlayer, bool Sixup) override;
 	void OnUpdateSpectatorVotesConfig() override;
 	bool OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId) override;
-	int SnapPlayerScore(class CPlayer *pPlayer, int SnappingClient, int DDRaceScore) override;
 	void OnDDRaceTimeLoad(class CPlayer *pPlayer, float Time) override{};
 	void ResetPlayer(class CPlayer *pPlayer) override;
 	bool LoadNewPlayerNameData(int ClientId) override;
