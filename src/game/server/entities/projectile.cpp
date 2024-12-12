@@ -499,9 +499,9 @@ void CProjectile::Snap(int SnappingClient)
 		{
 			return;
 		}
+		FillExtraInfo(pDDNetProjectile);
 		if(m_Owner == SnappingClient)
 			pDDNetProjectile->m_StartTick = m_OrigStartTick;
-		FillExtraInfo(pDDNetProjectile);
 	}
 	else if(SnappingClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE && FillExtraInfoLegacy(&DDRaceProjectile))
 	{
