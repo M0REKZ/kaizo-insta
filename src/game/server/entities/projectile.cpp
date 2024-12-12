@@ -499,6 +499,8 @@ void CProjectile::Snap(int SnappingClient)
 		{
 			return;
 		}
+		if(m_Owner == SnappingClient)
+			pDDNetProjectile->m_StartTick = m_OrigStartTick;
 		FillExtraInfo(pDDNetProjectile);
 	}
 	else if(SnappingClientVersion >= VERSION_DDNET_ANTIPING_PROJECTILE && FillExtraInfoLegacy(&DDRaceProjectile))
@@ -509,6 +511,8 @@ void CProjectile::Snap(int SnappingClient)
 		{
 			return;
 		}
+		if(m_Owner == SnappingClient)
+			DDRaceProjectile.m_StartTick = m_OrigStartTick;
 		mem_copy(pProj, &DDRaceProjectile, sizeof(DDRaceProjectile));
 	}
 	else
@@ -562,7 +566,7 @@ bool CProjectile::FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj)
 	pProj->m_Y = (int)(m_Pos.y * 100.0f);
 	pProj->m_Angle = (int)(Angle * 1000000.0f);
 	pProj->m_Data = Data;
-	pProj->m_StartTick = m_OrigStartTick;//m_StartTick;
+	pProj->m_StartTick = m_StartTick;
 	pProj->m_Type = m_Type;
 	return true;
 }
@@ -602,7 +606,7 @@ void CProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj)
 	pProj->m_X = round_to_int(m_Pos.x * 100.0f);
 	pProj->m_Y = round_to_int(m_Pos.y * 100.0f);
 	pProj->m_Type = m_Type;
-	pProj->m_StartTick = m_OrigStartTick;//m_StartTick;
+	pProj->m_StartTick = m_StartTick;
 	pProj->m_Owner = m_Owner;
 	pProj->m_Flags = Flags;
 	pProj->m_SwitchNumber = m_Number;
