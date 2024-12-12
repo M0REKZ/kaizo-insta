@@ -2431,7 +2431,7 @@ void CGameContext::ConRollback(IConsole::IResult *pResult, void *pUserData)
 			pPlayer->m_Rollback = true;
 			if(pPlayer->GetCharacter())
 				((CCharacterCore *)(pPlayer->GetCharacter()->Core()))->m_PlayerRollback = true;
-			pSelf->SendChatTarget(pPlayer->GetCid(), "Rollback enabled");
+			pSelf->SendChatTarget(pPlayer->GetCid(), "Rollback enabled, Antiping for Weapons and Grenade path is recommended");
 		}
 		else
 		{
@@ -2443,7 +2443,7 @@ void CGameContext::ConRollback(IConsole::IResult *pResult, void *pUserData)
 		}
 		else
 		{
-			pSelf->SendChatTarget(pPlayer->GetCid(), "Rollback is not enabled in this server");
+			pSelf->SendChatTarget(pPlayer->GetCid(), "Rollback is not allowed in this server");
 		}
 	}
 }

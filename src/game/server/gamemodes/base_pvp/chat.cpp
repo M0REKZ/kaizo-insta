@@ -155,7 +155,7 @@ bool CGameControllerPvp::OnBangCommand(int ClientId, const char *pCmd, int NumAr
 			pPlayer->m_Rollback = true;
 			if(pPlayer->GetCharacter())
 				((CCharacterCore *)(pPlayer->GetCharacter()->Core()))->m_PlayerRollback = true;
-			SendChatTarget(pPlayer->GetCid(), "Rollback enabled");
+			SendChatTarget(pPlayer->GetCid(), "Rollback enabled, Antiping for Weapons and Grenade path is recommended");
 			return true;
 		}
 		else
@@ -169,7 +169,7 @@ bool CGameControllerPvp::OnBangCommand(int ClientId, const char *pCmd, int NumAr
 		}
 		else
 		{
-			SendChatTarget(pPlayer->GetCid(), "Rollback is not enabled in this server");
+			SendChatTarget(pPlayer->GetCid(), "Rollback is not allowed in this server");
 			return false;
 		}
 	}

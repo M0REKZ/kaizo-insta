@@ -52,6 +52,7 @@ CVanillaProjectile::CVanillaProjectile(
 	GameWorld()->InsertEntity(this);
 
 	m_FirstTick = true;
+	m_OrigStartTick = m_StartTick;
 }
 
 void CVanillaProjectile::Reset()
@@ -114,7 +115,7 @@ vec2 CVanillaProjectile::GetPos(float Time)
 void CVanillaProjectile::Tick()
 {
 	int tick = m_StartTick; //JSAURUS rollback
-	int origstart = m_StartTick;
+	//int origstart = m_StartTick;
 	bool IsRollbackDamage = false;
 	int RollbackDamageTick = 0;
 
@@ -137,13 +138,13 @@ void CVanillaProjectile::Tick()
 	if(m_FirstTick && g_Config.m_SvRollback && m_Owner >= 0 && m_Owner < MAX_CLIENTS && GameServer()->m_apPlayers[m_Owner]->m_Rollback && GameServer()->m_apPlayers[m_Owner]->GetCharacter())
 	{
 		tick = GameServer()->m_apPlayers[m_Owner]->GetCharacter()->GetCore().m_LastAckedSnapshot;
-		m_StartTick = tick;
+		m_StartTick = tick + 1;
 
 	//int diff = origstart - tick;
 
 		//Collide with wall and tee
 		int CollideTick;
-		for(CollideTick = m_StartTick + 1; CollideTick <= origstart;CollideTick++)
+		for(CollideTick = m_StartTick; CollideTick <= m_OrigStartTick;CollideTick++)
 		{
 			Pt = (CollideTick - m_StartTick - 1) / (float)Server()->TickSpeed();
 			Ct = (CollideTick - m_StartTick) / (float)Server()->TickSpeed();
@@ -504,7 +505,7 @@ bool CVanillaProjectile::FillExtraInfoLegacy(CNetObj_DDRaceProjectile *pProj)
 	pProj->m_Y = (int)(m_Pos.y * 100.0f);
 	pProj->m_Angle = (int)(Angle * 1000000.0f);
 	pProj->m_Data = Data;
-	pProj->m_StartTick = m_StartTick;
+	pProj->m_StartTick = m_OrigStartTick;//m_StartTick;
 	pProj->m_Type = m_Type;
 	return true;
 }
@@ -544,7 +545,7 @@ void CVanillaProjectile::FillExtraInfo(CNetObj_DDNetProjectile *pProj)
 	pProj->m_X = round_to_int(m_Pos.x * 100.0f);
 	pProj->m_Y = round_to_int(m_Pos.y * 100.0f);
 	pProj->m_Type = m_Type;
-	pProj->m_StartTick = m_StartTick;
+	pProj->m_StartTick = m_OrigStartTick;//m_StartTick;
 	pProj->m_Owner = m_Owner;
 	pProj->m_Flags = Flags;
 	pProj->m_SwitchNumber = m_Number;

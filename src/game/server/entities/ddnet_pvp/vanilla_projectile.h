@@ -60,6 +60,7 @@ public:
 	
 	int GetStartTick() { return m_StartTick; }
 	bool m_FirstTick;
+	int m_OrigStartTick;
 };
 
 #endif
