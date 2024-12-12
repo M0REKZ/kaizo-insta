@@ -2343,6 +2343,12 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 		return;
 	}
 
+	if(m_apPlayers[ClientId]->m_ForceAFK)
+	{
+		SendChatTarget(ClientId, "You can not vote while AFK.");
+		return;
+	}
+
 	m_apPlayers[ClientId]->UpdatePlaytime();
 
 	m_VoteType = VOTE_TYPE_UNKNOWN;

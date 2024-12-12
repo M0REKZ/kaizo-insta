@@ -143,7 +143,7 @@ void CVanillaProjectile::Tick()
 
 		//Collide with wall and tee
 		int CollideTick;
-		for(CollideTick = m_StartTick; CollideTick <= origstart;CollideTick++)
+		for(CollideTick = m_StartTick + 1; CollideTick <= origstart;CollideTick++)
 		{
 			Pt = (CollideTick - m_StartTick - 1) / (float)Server()->TickSpeed();
 			Ct = (CollideTick - m_StartTick) / (float)Server()->TickSpeed();
