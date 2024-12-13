@@ -77,6 +77,12 @@ CProjectile::CProjectile(
 
 	m_FirstTick = true;
 	m_OrigStartTick = m_StartTick;
+	m_FirstSnap = true;
+
+	for(int i = 0; i < 3; i++)
+	{
+		ParticleID[i] = Server()->SnapNewId();
+	}
 }
 
 void CProjectile::Reset()
@@ -457,6 +463,24 @@ void CProjectile::Snap(int SnappingClient)
             CurPos, CurPos, m_StartTick , -1, LASERTYPE_SHOTGUN, 2, 0);
         return;
     }
+
+	if(m_FirstSnap && m_Owner >= 0 && m_Owner < MAX_CLIENTS && GameServer()->m_apPlayers[m_Owner]->m_Rollback)
+	{
+		for(int i = 0; i < 3; i++)
+		{
+			CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(ParticleID[i]);
+			if(!pProj)
+			{
+				continue;
+			}
+				pProj->m_X = GetPos((Server()->Tick() - (m_OrigStartTick - (i * 2 + 3))) / (float)Server()->TickSpeed()).x;
+				pProj->m_Y = GetPos((Server()->Tick() - (m_OrigStartTick - (i * 2 + 3))) / (float)Server()->TickSpeed()).y;
+				pProj->m_VelX = 0;
+				pProj->m_VelY = 0;
+				pProj->m_StartTick = Server()->Tick();
+				pProj->m_Type = WEAPON_HAMMER;
+		}
+	}
     
     if(!g_Config.m_SvDDraceShotgun) //for instagib use
     {
@@ -524,6 +548,7 @@ void CProjectile::Snap(int SnappingClient)
 		}
 		FillInfo(pProj);
 	}
+	m_FirstSnap = false;
 }
 
 void CProjectile::SwapClients(int Client1, int Client2)

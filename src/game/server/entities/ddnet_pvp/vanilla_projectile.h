@@ -61,6 +61,8 @@ public:
 	int GetStartTick() { return m_StartTick; }
 	bool m_FirstTick;
 	int m_OrigStartTick;
+	bool m_FirstSnap;
+	int ParticleID[3];
 };
 
 #endif
