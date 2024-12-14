@@ -191,7 +191,7 @@ void CProjectile::Tick()
 
 		//Collide with wall and tee
 		int CollideTick;
-		for(CollideTick = m_StartTick; CollideTick <= m_OrigStartTick;CollideTick++)
+		for(CollideTick = m_StartTick + 1; CollideTick <= m_OrigStartTick;CollideTick++)
 		{
 			Pt = (CollideTick - m_StartTick - 1) / (float)Server()->TickSpeed();
 			Ct = (CollideTick - m_StartTick) / (float)Server()->TickSpeed();
