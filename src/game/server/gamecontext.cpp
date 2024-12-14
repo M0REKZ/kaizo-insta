@@ -1765,7 +1765,7 @@ void CGameContext::OnClientConnected(int ClientId, void *pData)
 		for(auto &pPlayer : m_apPlayers)
 		{
 			// connecting clients with spoofed ips can clog slots without being ingame
-			if(pPlayer && Server()->ClientIngame(pPlayer->GetCid()))
+			if(pPlayer && Server()->ClientIngame(pPlayer->GetCid()) && !(((CServer*)Server())->m_aClients[ClientId].m_KZBot))
 			{
 				Empty = false;
 				break;
