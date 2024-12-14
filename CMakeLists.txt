@@ -2761,8 +2761,6 @@ if(SERVER)
     gamemodes/base_pvp/chat.cpp
     gamemodes/base_pvp/ctf.cpp
     gamemodes/base_pvp/ctf.h
-    gamemodes/base_pvp/dm.cpp
-    gamemodes/base_pvp/dm.h
     gamemodes/base_pvp/player.cpp
     gamemodes/base_pvp/player.h
     gamemodes/instagib/base_fng.cpp
