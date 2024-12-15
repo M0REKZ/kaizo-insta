@@ -54,6 +54,11 @@ CVanillaProjectile::CVanillaProjectile(
 	m_FirstTick = true;
 	m_OrigStartTick = m_StartTick;
 	m_FirstSnap = true;
+
+	for(int i = 0; i < 3; i++)
+	{
+		ParticleID[i] = Server()->SnapNewId();
+	}
 }
 
 void CVanillaProjectile::Reset()
@@ -403,6 +408,24 @@ void CVanillaProjectile::Snap(int SnappingClient)
 
 	if(NetworkClipped(SnappingClient, GetPos(Ct)))
 		return;
+
+	if(m_FirstSnap && m_Owner >= 0 && m_Owner < MAX_CLIENTS && GameServer()->m_apPlayers[m_Owner]->m_Rollback)
+	{
+		for(int i = 0; i < 3; i++)
+		{
+			CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(ParticleID[i]);
+			if(!pProj)
+			{
+				continue;
+			}
+				pProj->m_X = GetPos((Server()->Tick() - (m_OrigStartTick - (i * 2 + 3))) / (float)Server()->TickSpeed()).x;
+				pProj->m_Y = GetPos((Server()->Tick() - (m_OrigStartTick - (i * 2 + 3))) / (float)Server()->TickSpeed()).y;
+				pProj->m_VelX = 0;
+				pProj->m_VelY = 0;
+				pProj->m_StartTick = Server()->Tick();
+				pProj->m_Type = WEAPON_HAMMER;
+		}
+	}
 
 	// ddnet-insta
 	if(m_Type == WEAPON_SHOTGUN)
