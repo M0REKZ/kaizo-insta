@@ -9,7 +9,7 @@
 
 using std::swap;
 
-inline void tl_assert(bool statement)
+inline void tl_assert(bool statement) //infclass quads +KZ (entire file)
 {
 	dbg_assert(statement, "assert!");
 }

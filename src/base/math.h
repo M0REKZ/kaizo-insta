@@ -153,7 +153,7 @@ constexpr inline T in_range(T a, T upper)
 	return in_range(a, 0, upper);
 }
 
-constexpr inline float sign(float f)
+constexpr inline float sign(float f) //infclass quads +KZ
 {
 	return f < 0.0f ? -1.0f : 1.0f;
 }

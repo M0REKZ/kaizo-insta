@@ -4,7 +4,7 @@
 #define BASE_TL_ALLOCATOR_H
 
 template<class T>
-class allocator_default
+class allocator_default //infclass quads +KZ (entire file)
 {
 public:
 	static T *alloc() { return new T; }

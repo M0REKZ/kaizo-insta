@@ -89,7 +89,7 @@ IGameController::IGameController(class CGameContext *pGameServer) :
 	m_GameInfo.m_ScoreLimit = Config()->m_SvScorelimit;
 	m_GameInfo.m_TimeLimit = Config()->m_SvTimelimit;
 
-	//Get zones --> from infclass
+	//Get zones --> from infclass quads +KZ
 	m_ZoneHandle_KZQuads = GameServer()->Collision()->GetZoneHandle("KZQuads");
 	m_ZoneHandle_KZCusQuads = GameServer()->Collision()->GetZoneHandle("KZCusQuads");
 }

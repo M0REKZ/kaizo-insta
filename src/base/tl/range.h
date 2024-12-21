@@ -18,7 +18,7 @@
 			bool empty() const;
 		};
 */
-struct concept_empty
+struct concept_empty //infclass quads +KZ (entire file)
 {
 	template<typename T>
 	static void check(T &t)

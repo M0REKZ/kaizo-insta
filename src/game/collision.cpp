@@ -41,7 +41,7 @@ vec2 ClampVel(int MoveRestriction, vec2 Vel)
 CCollision::CCollision()
 {
 	m_pDoor = nullptr;
-	m_Time = 0.0;
+	m_Time = 0.0; //infclass quads +KZ
 	Unload();
 }
 
