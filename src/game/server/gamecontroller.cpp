@@ -88,6 +88,10 @@ IGameController::IGameController(class CGameContext *pGameServer) :
 	m_GameInfo.m_MatchNum = 0;
 	m_GameInfo.m_ScoreLimit = Config()->m_SvScorelimit;
 	m_GameInfo.m_TimeLimit = Config()->m_SvTimelimit;
+
+	//Get zones --> from infclass
+	m_ZoneHandle_KZQuads = GameServer()->Collision()->GetZoneHandle("KZQuads");
+	m_ZoneHandle_KZCusQuads = GameServer()->Collision()->GetZoneHandle("KZCusQuads");
 }
 
 IGameController::~IGameController() = default;
@@ -1144,4 +1148,24 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 	}
 
 	return false;
+}
+
+int IGameController::GetZoneValueAt(int ZoneHandle, const vec2 &Pos, ZoneData *pData) const
+{
+	return GameServer()->Collision()->GetZoneValueAt(ZoneHandle, Pos, pData);
+}
+
+int IGameController::GetKZQuadsZoneValueAt(const vec2 &Pos, ZoneData *pData) const
+{
+	return GetZoneValueAt(m_ZoneHandle_KZQuads, Pos, pData);
+}
+
+int IGameController::GetKZCusQuadsZoneValueAt(const vec2 &Pos, ZoneData *pData) const
+{
+	return GetZoneValueAt(m_ZoneHandle_KZCusQuads, Pos, pData);
+}
+
+double IGameController::GetTime()
+{
+	return static_cast<double>(Server()->Tick() - m_RoundStartTick)/Server()->TickSpeed();
 }

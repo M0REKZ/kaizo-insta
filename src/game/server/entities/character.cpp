@@ -2488,6 +2488,7 @@ void CCharacter::DDRacePostCoreTick()
 	}
 	
 	HandleKZTiles();
+	HandleKZQuads();
 
 	// teleport gun
 	if(m_TeleGunTeleport)
@@ -3959,4 +3960,124 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon, int tick)
 	}
 
 	return false;
+}
+
+void CCharacter::HandleKZQuads()
+{
+	ZoneData Data0;
+	//ZoneData Data1;
+
+	GameServer()->m_pController->GetKZQuadsZoneValueAt(m_Pos, &Data0);
+
+	int Index0 = Data0.Index;
+
+	switch(Index0)
+	{
+		case TILE_FREEZE:
+		{
+			Freeze();
+			break;
+		}
+		case TILE_UNFREEZE:
+		{
+			UnFreeze();
+			break;
+		}
+		case TILE_DFREEZE:
+		{
+			m_Core.m_DeepFrozen = true;
+			break;
+		}
+		case TILE_DUNFREEZE:
+		{
+			m_Core.m_DeepFrozen = false;
+			break;
+		}
+		case TILE_LFREEZE:
+		{
+			m_Core.m_LiveFrozen = true;
+			break;
+		}
+		case TILE_LUNFREEZE:
+		{
+			m_Core.m_LiveFrozen = false;
+			break;
+		}
+		case TILE_DEATH:
+		{
+			Die(m_pPlayer->GetCid(), WEAPON_SELF);
+			break;
+		}
+		case TILE_TELECHECKIN:
+		{
+			if(m_Core.m_Super || m_Core.m_Invincible)
+				break;
+			// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
+			for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
+			{
+				if(!Collision()->TeleCheckOuts(k).empty())
+				{
+					int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
+					m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
+
+					if(!g_Config.m_SvTeleportHoldHook)
+					{
+						ResetHook();
+					}
+
+					break;
+				}
+			}
+			// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
+			vec2 SpawnPos;
+			if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos, GameServer()->GetDDRaceTeam(GetPlayer()->GetCid())))
+			{
+				m_Core.m_Pos = SpawnPos;
+
+				if(!g_Config.m_SvTeleportHoldHook)
+				{
+					ResetHook();
+				}
+			}
+			
+			break;
+		}
+		case TILE_TELECHECKINEVIL:
+		{
+			if(m_Core.m_Super || m_Core.m_Invincible)
+				break;
+			// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
+			for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
+			{
+				if(!Collision()->TeleCheckOuts(k).empty())
+				{
+					int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
+					m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
+					m_Core.m_Vel = vec2(0, 0);
+
+					if(!g_Config.m_SvTeleportHoldHook)
+					{
+						ResetHook();
+						GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
+					}
+
+					break;
+				}
+			}
+			// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
+			vec2 SpawnPos;
+			if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos, GameServer()->GetDDRaceTeam(GetPlayer()->GetCid())))
+			{
+				m_Core.m_Pos = SpawnPos;
+				m_Core.m_Vel = vec2(0, 0);
+
+				if(!g_Config.m_SvTeleportHoldHook)
+				{
+					ResetHook();
+					GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
+				}
+			}
+			break;
+		}
+	}
 }

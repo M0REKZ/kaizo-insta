@@ -271,6 +271,7 @@ public:
 private:
 	//+KZ
 	void HandleKZTiles();
+	void HandleKZQuads();
 	void HandleFlagHookCatch();
 	int m_AirTicks;
 	int m_AirDamageTick;

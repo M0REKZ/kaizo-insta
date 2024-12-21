@@ -10,6 +10,7 @@
 #include <vector>
 
 #include <game/mapitems.h>
+#include <base/tl/array.h>
 
 class CTile;
 class CLayers;
@@ -32,6 +33,12 @@ vec2 ClampVel(int MoveRestriction, vec2 Vel);
 typedef bool (*CALLBACK_SWITCHACTIVE)(int Number, void *pUser);
 struct CAntibotMapData;
 
+struct ZoneData //+KZ
+{
+	int Index = -1;
+	int ExtraData = -1;
+}; //----
+
 class CCollision
 {
 public:
@@ -53,6 +60,24 @@ public:
 	int GetKZTileIndex(float x, float y) const { return GetKZTileIndex(GetKZIndex(x, y)); }
 	int UnIntersectLineKZ(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
 	int FastIntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
+
+	//This function return an Handle to access all zone layers with the name "pName"
+	int GetZoneHandle(const char* pName);
+	int GetZoneValueAt(int ZoneHandle, float x, float y, ZoneData *pData = nullptr);
+	int GetZoneValueAt(int ZoneHandle, vec2 Pos, ZoneData *pData = nullptr) { return GetZoneValueAt(ZoneHandle, Pos.x, Pos.y, pData); }
+	void GetAnimationTransform(float GlobalTime, int Env, class CLayers* pLayers, vec2& Position, float& Angle);
+	array< array<int> > m_Zones;
+	double m_Time;
+	void SetTime(double Time) { m_Time = Time; }
+
+	struct SAnimationTransformCache
+	{
+		vec2 Position = vec2(0.0f, 0.f);
+		float Angle = 0;
+		int PosEnv = -1;
+	};
+
+	//---------
 	
 	void Init(CLayers *pLayers);
 	void Unload();
