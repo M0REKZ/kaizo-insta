@@ -960,6 +960,26 @@ void CCharacter::Tick()
 			m_BallQueuedWeapon = -1;
 		}
 	}
+
+	if(m_Water) //+KZ
+	{
+		if(m_AirTicks > 0)
+		{
+			m_AirTicks--;
+		}
+		else
+		{
+			if(m_AirDamageTick > 0)
+			{
+				m_AirDamageTick--;
+			}
+			else
+			{
+				DoKZDamage(vec2(0,0), 1, m_pPlayer->GetCid(), WEAPON_WORLD);
+				m_AirDamageTick = Server()->TickSpeed();
+			}
+		}
+	}
 	
 	if(!m_PrevInput.m_Hook && m_Input.m_Hook && !(m_Core.m_TriggeredEvents & COREEVENT_HOOK_ATTACH_PLAYER))
 	{
@@ -2762,6 +2782,153 @@ void CCharacter::SwapClients(int Client1, int Client2)
 
 void CCharacter::HandleKZTiles()
 {
+
+//QUADS
+	ZoneData Data0;
+	ZoneData Data1;
+
+	GameServer()->m_pController->GetKZQuadsZoneValueAt(m_Pos, &Data0);
+	GameServer()->m_pController->GetKZCusQuadsZoneValueAt(m_Pos, &Data1);
+
+	int Index0 = Data0.Index;
+	int Index1 = Data1.Index;
+
+	switch(Index0)
+	{
+		case TILE_FREEZE:
+		{
+			Freeze();
+			break;
+		}
+		case TILE_UNFREEZE:
+		{
+			UnFreeze();
+			break;
+		}
+		case TILE_DFREEZE:
+		{
+			m_Core.m_DeepFrozen = true;
+			break;
+		}
+		case TILE_DUNFREEZE:
+		{
+			m_Core.m_DeepFrozen = false;
+			break;
+		}
+		case TILE_LFREEZE:
+		{
+			m_Core.m_LiveFrozen = true;
+			break;
+		}
+		case TILE_LUNFREEZE:
+		{
+			m_Core.m_LiveFrozen = false;
+			break;
+		}
+		case TILE_DEATH:
+		{
+			Die(m_pPlayer->GetCid(), WEAPON_SELF);
+			break;
+		}
+		case TILE_TELECHECKIN:
+		{
+			if(m_Core.m_Super || m_Core.m_Invincible)
+				break;
+			// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
+			for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
+			{
+				if(!Collision()->TeleCheckOuts(k).empty())
+				{
+					int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
+					m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
+
+					if(!g_Config.m_SvTeleportHoldHook)
+					{
+						ResetHook();
+					}
+
+					break;
+				}
+			}
+			// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
+			vec2 SpawnPos;
+			if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos, GameServer()->GetDDRaceTeam(GetPlayer()->GetCid())))
+			{
+				m_Core.m_Pos = SpawnPos;
+
+				if(!g_Config.m_SvTeleportHoldHook)
+				{
+					ResetHook();
+				}
+			}
+			
+			break;
+		}
+		case TILE_TELECHECKINEVIL:
+		{
+			if(m_Core.m_Super || m_Core.m_Invincible)
+				break;
+			// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
+			for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
+			{
+				if(!Collision()->TeleCheckOuts(k).empty())
+				{
+					int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
+					m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
+					m_Core.m_Vel = vec2(0, 0);
+
+					if(!g_Config.m_SvTeleportHoldHook)
+					{
+						ResetHook();
+						GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
+					}
+
+					break;
+				}
+			}
+			// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
+			vec2 SpawnPos;
+			if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos, GameServer()->GetDDRaceTeam(GetPlayer()->GetCid())))
+			{
+				m_Core.m_Pos = SpawnPos;
+				m_Core.m_Vel = vec2(0, 0);
+
+				if(!g_Config.m_SvTeleportHoldHook)
+				{
+					ResetHook();
+					GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
+				}
+			}
+			break;
+		}
+	}
+
+	//KZCusQuads
+
+	switch (Index1)
+	{
+		default:
+		{
+			if(Index1 == TILE_WATER)
+			{
+				m_Water = true;
+				m_QuadWater = true;
+				m_Core.m_JumpedTotal = 0;
+				m_Core.m_Jumped = 0;
+				break;
+			}
+			else
+			{
+				m_Water = false;
+				m_QuadWater = false;
+				break;
+			}
+		}
+	}
+
+//END QUADS but still spaghetti
+
+
 	if(!(Collision()->KZFound()))
 		return;
 	
@@ -2769,7 +2936,7 @@ void CCharacter::HandleKZTiles()
 	bool ApplyRest = false;
 	
 	
-	if(TileIndex == TILE_ADMIN)
+	if(TileIndex == TILE_ADMIN || Index1 == TILE_ADMIN)
 	{
 		if(Server()->GetAuthedState(m_pPlayer->GetCid()) == AUTHED_NO)
 		{
@@ -2777,7 +2944,7 @@ void CCharacter::HandleKZTiles()
 			GameServer()->SendChatTarget(m_pPlayer->GetCid(), "Only Admins allowed");
 		}
 	}
-	if(TileIndex == TILE_NOAIR || TileIndex == TILE_WATER)
+	if(TileIndex == TILE_NOAIR || Index1 == TILE_NOAIR)
 	{
 		if(m_AirTicks > 0)
 		{
@@ -2802,26 +2969,26 @@ void CCharacter::HandleKZTiles()
 		m_AirTicks = 5 * Server()->TickSpeed();
 	}
 	
-	if(TileIndex == TILE_WATER || TileIndex == TILE_FLY)
+	if(TileIndex == TILE_WATER || TileIndex == TILE_FLY || Index1 == TILE_FLY)
 	{
 		m_Core.m_JumpedTotal = 0;
 		m_Core.m_Jumped = 0;
 	}
 	
-	if(TileIndex == TILE_WATER && !m_Water)
+	if(m_QuadWater ? true : (TileIndex == TILE_WATER && !m_Water))
 	{
 		m_Water = true;
 	}
-	else if(TileIndex != TILE_WATER && m_Water)
+	else if(m_QuadWater ? true : (TileIndex != TILE_WATER && m_Water))
 	{
 		m_Water = false;
 	}
 	
-	if(TileIndex == TILE_INVISIBLE && !m_Invisible)
+	if((Index1 == TILE_INVISIBLE || TileIndex == TILE_INVISIBLE) && !m_Invisible)
 	{
 		m_Invisible = true;
 	}
-	else if(TileIndex != TILE_INVISIBLE && m_Invisible)
+	else if(Index1 != TILE_INVISIBLE && TileIndex != TILE_INVISIBLE && m_Invisible)
 	{
 		m_Invisible = false;
 	}
@@ -2861,6 +3028,10 @@ void CCharacter::HandleKZTiles()
 	{
 		found = true;
 	}
+	if(Index1 == TILE_SLOWDEATH)
+	{
+		found = true;
+	}
 	
 	if(found)
 	{
@@ -2887,6 +3058,10 @@ void CCharacter::HandleKZTiles()
 		found = true;
 	}
 	if(Collision()->GetKZTileIndex(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_HEALTHZONE)
+	{
+		found = true;
+	}
+	if(Index1 == TILE_HEALTHZONE)
 	{
 		found = true;
 	}
@@ -2924,6 +3099,10 @@ void CCharacter::HandleKZTiles()
 	{
 		found = true;
 	}
+	if(Index1 == TILE_ARMORZONE)
+	{
+		found = true;
+	}
 	
 	if(found)
 	{
@@ -2950,7 +3129,7 @@ void CCharacter::HandleKZTiles()
 		m_BallQueuedWeapon = -1;
 	}
 	
-	if(TileIndex == TILE_TEE_KILL)
+	if(TileIndex == TILE_TEE_KILL || Index1 == TILE_TEE_KILL)
 	{
 		if(m_HasBall)
 		{
@@ -3964,120 +4143,5 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon, int tick)
 
 void CCharacter::HandleKZQuads()
 {
-	ZoneData Data0;
-	//ZoneData Data1;
-
-	GameServer()->m_pController->GetKZQuadsZoneValueAt(m_Pos, &Data0);
-
-	int Index0 = Data0.Index;
-
-	switch(Index0)
-	{
-		case TILE_FREEZE:
-		{
-			Freeze();
-			break;
-		}
-		case TILE_UNFREEZE:
-		{
-			UnFreeze();
-			break;
-		}
-		case TILE_DFREEZE:
-		{
-			m_Core.m_DeepFrozen = true;
-			break;
-		}
-		case TILE_DUNFREEZE:
-		{
-			m_Core.m_DeepFrozen = false;
-			break;
-		}
-		case TILE_LFREEZE:
-		{
-			m_Core.m_LiveFrozen = true;
-			break;
-		}
-		case TILE_LUNFREEZE:
-		{
-			m_Core.m_LiveFrozen = false;
-			break;
-		}
-		case TILE_DEATH:
-		{
-			Die(m_pPlayer->GetCid(), WEAPON_SELF);
-			break;
-		}
-		case TILE_TELECHECKIN:
-		{
-			if(m_Core.m_Super || m_Core.m_Invincible)
-				break;
-			// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
-			for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
-			{
-				if(!Collision()->TeleCheckOuts(k).empty())
-				{
-					int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
-					m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
-
-					if(!g_Config.m_SvTeleportHoldHook)
-					{
-						ResetHook();
-					}
-
-					break;
-				}
-			}
-			// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
-			vec2 SpawnPos;
-			if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos, GameServer()->GetDDRaceTeam(GetPlayer()->GetCid())))
-			{
-				m_Core.m_Pos = SpawnPos;
-
-				if(!g_Config.m_SvTeleportHoldHook)
-				{
-					ResetHook();
-				}
-			}
-			
-			break;
-		}
-		case TILE_TELECHECKINEVIL:
-		{
-			if(m_Core.m_Super || m_Core.m_Invincible)
-				break;
-			// first check if there is a TeleCheckOut for the current recorded checkpoint, if not check previous checkpoints
-			for(int k = m_TeleCheckpoint - 1; k >= 0; k--)
-			{
-				if(!Collision()->TeleCheckOuts(k).empty())
-				{
-					int TeleOut = GameWorld()->m_Core.RandomOr0(Collision()->TeleCheckOuts(k).size());
-					m_Core.m_Pos = Collision()->TeleCheckOuts(k)[TeleOut];
-					m_Core.m_Vel = vec2(0, 0);
-
-					if(!g_Config.m_SvTeleportHoldHook)
-					{
-						ResetHook();
-						GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
-					}
-
-					break;
-				}
-			}
-			// if no checkpointout have been found (or if there no recorded checkpoint), teleport to start
-			vec2 SpawnPos;
-			if(GameServer()->m_pController->CanSpawn(m_pPlayer->GetTeam(), &SpawnPos, GameServer()->GetDDRaceTeam(GetPlayer()->GetCid())))
-			{
-				m_Core.m_Pos = SpawnPos;
-				m_Core.m_Vel = vec2(0, 0);
-
-				if(!g_Config.m_SvTeleportHoldHook)
-				{
-					ResetHook();
-					GameWorld()->ReleaseHooked(GetPlayer()->GetCid());
-				}
-			}
-			break;
-		}
-	}
+	
 }
