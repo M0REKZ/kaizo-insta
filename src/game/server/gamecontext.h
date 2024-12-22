@@ -153,6 +153,7 @@ class CGameContext : public IGameServer
     static void ConQuestion(IConsole::IResult *pResult, void *pUserData);
 	static void ConAfkKZ(IConsole::IResult *pResult, void *pUserData);
 	static void ConRollback(IConsole::IResult *pResult, void *pUserData);
+	static void ConMoveKZBot(IConsole::IResult *pResult, void *pUserData);
 
 	void Construct(int Resetting);
 	void Destruct(int Resetting);

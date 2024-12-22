@@ -3868,7 +3868,8 @@ void CGameContext::OnConsoleInit()
     Console()->Register("question", "?r[question]", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConQuestion, this, "Make a question");
 	Console()->Register("afk", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConAfkKZ, this, "Set afk");
 	Console()->Register("rollback", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConRollback, this, "Set Rollback");
-    
+    Console()->Register("move_kzbot", "s[blue/red]", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConMoveKZBot, this, "Move KZBot to blue or red team");
+
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 
 	Console()->Chain("sv_vote_kick", ConchainSettingUpdate, this);
@@ -5603,4 +5604,43 @@ void CGameContext::CreateExplosionTick(vec2 Pos, int Owner, int Weapon, bool NoD
 				pChr->TakeDamage(ForceDir * Dmg * 2, (int)Dmg, Owner, Weapon, Tick);
 		}
 	}
+}
+
+void CGameContext::ConMoveKZBot(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!(pResult->NumArguments()))
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "Please specify a team");
+		return;
+	}
+	else
+	{
+		int team;
+		if(pResult->GetString(0)[0] == 'r' || pResult->GetString(0)[0] == 'R')
+		{
+			team = TEAM_RED;
+		}
+		else if(pResult->GetString(0)[0] == 'b' || pResult->GetString(0)[0] == 'B')
+		{
+			team = TEAM_BLUE;
+		}
+		else
+		{
+			pSelf->SendChatTarget(pResult->m_ClientId, "Invalid team");
+			return;
+		}
+
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(((CServer*)(pSelf->Server()))->m_aClients[i].m_KZBot && pSelf->m_apPlayers[i] && pSelf->m_apPlayers[i]->GetTeam() != team)
+			{
+				pSelf->m_apPlayers[i]->SetTeam(team);
+				break;
+			}
+		}
+
+	}
+
+    return;
 }
