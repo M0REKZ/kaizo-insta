@@ -2796,10 +2796,10 @@ void CCharacter::HandleKZTiles()
 	GameServer()->m_pController->GetKZQuadsZoneValueAt(m_Pos, &Data0);
 	GameServer()->m_pController->GetKZCusQuadsZoneValueAt(m_Pos, &Data1);
 
-	int Index0 = Data0.Index;
-	int Index1 = Data1.Index;
+	//int Index0 = Data0.Index;
+	//int Index1 = Data1.Index;
 
-	switch(Index0)
+	switch(Data0.Index)
 	{
 		case TILE_FREEZE:
 		{
@@ -2917,18 +2917,18 @@ void CCharacter::HandleKZTiles()
 		}
 	}
 
-	if(Index0 != TILE_TUNE)
+	if(Data0.Index != TILE_TUNE)
 	{
 		m_QuadTuneZone = 0;
 	}
 
 	//KZCusQuads
 
-	switch (Index1)
+	switch (Data1.Index)
 	{
 		default:
 		{
-			if(Index1 == TILE_WATER)
+			if(Data1.Index == TILE_WATER)
 			{
 				m_Water = true;
 				m_QuadWater = true;
@@ -2956,7 +2956,7 @@ void CCharacter::HandleKZTiles()
 	bool ApplyRest = false;
 	
 	
-	if(TileIndex == TILE_ADMIN || Index1 == TILE_ADMIN)
+	if(TileIndex == TILE_ADMIN || Data1.Index == TILE_ADMIN)
 	{
 		if(Server()->GetAuthedState(m_pPlayer->GetCid()) == AUTHED_NO)
 		{
@@ -2964,7 +2964,7 @@ void CCharacter::HandleKZTiles()
 			GameServer()->SendChatTarget(m_pPlayer->GetCid(), "Only Admins allowed");
 		}
 	}
-	if(TileIndex == TILE_NOAIR || Index1 == TILE_NOAIR)
+	if(TileIndex == TILE_NOAIR || Data1.Index == TILE_NOAIR)
 	{
 		if(m_AirTicks > 0)
 		{
@@ -2989,7 +2989,7 @@ void CCharacter::HandleKZTiles()
 		m_AirTicks = 5 * Server()->TickSpeed();
 	}
 	
-	if(TileIndex == TILE_WATER || TileIndex == TILE_FLY || Index1 == TILE_FLY)
+	if(TileIndex == TILE_WATER || TileIndex == TILE_FLY || Data1.Index == TILE_FLY)
 	{
 		m_Core.m_JumpedTotal = 0;
 		m_Core.m_Jumped = 0;
@@ -3004,11 +3004,11 @@ void CCharacter::HandleKZTiles()
 		m_Water = false;
 	}
 	
-	if((Index1 == TILE_INVISIBLE || TileIndex == TILE_INVISIBLE) && !m_Invisible)
+	if((Data1.Index == TILE_INVISIBLE || TileIndex == TILE_INVISIBLE) && !m_Invisible)
 	{
 		m_Invisible = true;
 	}
-	else if(Index1 != TILE_INVISIBLE && TileIndex != TILE_INVISIBLE && m_Invisible)
+	else if(Data1.Index != TILE_INVISIBLE && TileIndex != TILE_INVISIBLE && m_Invisible)
 	{
 		m_Invisible = false;
 	}
@@ -3051,7 +3051,7 @@ void CCharacter::HandleKZTiles()
 		{
 			found = true;
 		}
-		if(Index1 == TILE_SLOWDEATH)
+		if(Data1.Index == TILE_SLOWDEATH)
 		{
 			found = true;
 		}
@@ -3084,7 +3084,7 @@ void CCharacter::HandleKZTiles()
 		{
 			found = true;
 		}
-		if(Index1 == TILE_HEALTHZONE)
+		if(Data1.Index == TILE_HEALTHZONE)
 		{
 			found = true;
 		}
@@ -3122,7 +3122,7 @@ void CCharacter::HandleKZTiles()
 		{
 			found = true;
 		}
-		if(Index1 == TILE_ARMORZONE)
+		if(Data1.Index == TILE_ARMORZONE)
 		{
 			found = true;
 		}
@@ -3153,7 +3153,7 @@ void CCharacter::HandleKZTiles()
 		m_BallQueuedWeapon = -1;
 	}
 	
-	if(TileIndex == TILE_TEE_KILL || Index1 == TILE_TEE_KILL)
+	if(TileIndex == TILE_TEE_KILL || Data1.Index == TILE_TEE_KILL)
 	{
 		if(m_HasBall)
 		{
