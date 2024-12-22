@@ -1653,7 +1653,9 @@ int CCollision::GetZoneValueAt(int ZoneHandle, float x, float y, ZoneData *pData
 		return 0;
 	
 	int Index = 0;
-	int ExtraData = 0;
+	int Red[4] = {0};
+	int Green[4] = {0};
+	int Blue[4] = {0};
 
 	SAnimationTransformCache AnimationCache;
 	
@@ -1719,7 +1721,12 @@ int CCollision::GetZoneValueAt(int ZoneHandle, float x, float y, ZoneData *pData
 				if(InsideQuad(p0, p1, p2, p3, vec2(x, y)))
 				{
 					Index = pQuads[q].m_ColorEnvOffset;
-					ExtraData = pQuads[q].m_aColors[0].g;
+					for(int j = 0; j < 4; j++)
+					{
+						Red[j] = pQuads[q].m_aColors[j].r;
+						Green[j] = pQuads[q].m_aColors[j].g;
+						Blue[j] = pQuads[q].m_aColors[j].b;
+					}
 				}
 			}
 		}
@@ -1728,7 +1735,12 @@ int CCollision::GetZoneValueAt(int ZoneHandle, float x, float y, ZoneData *pData
 	if(pData)
 	{
 		pData->Index = Index;
-		pData->ExtraData = ExtraData;
+		for(int j = 0; j < 4; j++)
+		{
+			pData->Red[j] = Red[j];
+			pData->Green[j] = Green[j];
+			pData->Blue[j] = Blue[j];
+		}
 	}
 	
 	return Index;
