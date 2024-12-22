@@ -302,6 +302,9 @@ public:
 	bool TakeDamage(vec2 Force, int Dmg, int From, int Weapon, int tick); //JSAURUS rollback
 	int m_RollbackAttacker, m_RollbackAttackerWeapon, m_RollbackDamageTick; //JSAURUS rollback
 	vec2 m_RollbackDamagePos; //JSAURUS rollback
+	int m_Dying = 0; //JSAURUS rollback
+	bool m_DieNow = false;
+	int m_RollbackHealth = 1;
 	
 	//for +KZ AI:
 	int m_TryingDirectionSmart = 0;

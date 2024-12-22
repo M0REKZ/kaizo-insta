@@ -120,6 +120,8 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 
 	GameServer()->m_pController->OnCharacterSpawn(this);
 
+	m_RollbackHealth = m_Health;
+
 	DDRaceInit();
 
 	m_TuneZone = Collision()->IsTune(Collision()->GetMapIndex(Pos));
@@ -923,6 +925,29 @@ void CCharacter::PreTick()
 
 void CCharacter::Tick()
 {
+
+	//m_Dying--;
+	if(m_pPlayer->m_Rollback)
+	{
+		if(m_Dying != -1 && m_Dying < Server()->Tick() && (m_RollbackAttacker >= 0 && m_RollbackAttacker < MAX_CLIENTS))
+		{
+			m_DieNow = true;
+		}
+		
+		if((m_RollbackAttacker >= 0 && m_RollbackAttacker < MAX_CLIENTS) && !(GameServer()->m_apPlayers[m_RollbackAttacker]->GetCharacter()))
+		{
+			m_DieNow = false;
+			m_Dying = -1;
+			m_Health = m_RollbackHealth;
+		}
+
+		if(m_DieNow && m_Dying != -1 && m_Dying < Server()->Tick() && m_Health <= 0 && m_RollbackAttacker != m_pPlayer->GetCid())
+		{
+			Die(m_RollbackAttacker, m_RollbackAttackerWeapon);
+			return;
+		}
+	}
+
 	if(m_DropFlagBallTicks > 0) //+KZ
 		m_DropFlagBallTicks--;
 
@@ -1182,6 +1207,13 @@ void CCharacter::StopRecording()
 
 void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 {
+	if(m_pPlayer->m_Rollback && Killer != m_pPlayer->GetCid() && Weapon == WEAPON_LASER && !m_DieNow)
+	{
+		m_Dying = Server()->Tick() + (m_pPlayer->m_Latency.m_Avg * Server()->TickSpeed())/1000;;
+		return;
+		
+	}
+
 	StopRecording();
 	m_pPlayer->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() / 2;
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, (Killer < 0) ? nullptr : GameServer()->m_apPlayers[Killer], Weapon);
@@ -1237,6 +1269,11 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 
 bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 {
+	m_RollbackHealth = m_Health;
+	m_RollbackAttacker = From;
+	m_RollbackAttackerWeapon = Weapon;
+	m_RollbackDamagePos = m_Pos;
+
 	if(From < 0 || From >= MAX_CLIENTS) //+KZ
 	{
 		m_TakingNoOwnerDamage = true;
@@ -1247,7 +1284,7 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 			DoKZDamage(Force,Dmg,From,Weapon);
 		}
 	}
-	
+
 	if(GameServer()->m_pController->OnCharacterTakeDamage(Force, Dmg, From, Weapon, *this))
 	{
 		m_TakingNoOwnerDamage = false;
@@ -1266,6 +1303,17 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 		SetWeapon(m_BallQueuedWeapon);
 		m_BallQueuedWeapon = -1;
 		GameServer()->GetPlayerChar(From)->CatchBall();
+	}
+
+	if(m_Dying != -1 && Weapon == WEAPON_LASER) //only cancel death for laser
+	{
+		//m_RollbackAttacker = From;
+		//m_RollbackAttackerWeapon = Weapon;
+		//m_RollbackDamagePos = m_Pos;
+	}
+	else
+	{
+		m_Dying = -1;
 	}
 
 	vec2 Temp = m_Core.m_Vel + Force;
