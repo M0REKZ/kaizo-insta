@@ -3868,7 +3868,7 @@ void CGameContext::OnConsoleInit()
     Console()->Register("question", "?r[question]", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConQuestion, this, "Make a question");
 	Console()->Register("afk", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConAfkKZ, this, "Set afk");
 	Console()->Register("rollback", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConRollback, this, "Set Rollback");
-    Console()->Register("move_kzbot", "s[blue/red]", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConMoveKZBot, this, "Move KZBot to blue or red team");
+    Console()->Register("move_kzbot", "s[blue/red]", CFGFLAG_SERVER, ConMoveKZBot, this, "Move KZBot to blue or red team");
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 
