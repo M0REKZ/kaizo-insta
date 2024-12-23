@@ -413,6 +413,7 @@ void CVanillaProjectile::Snap(int SnappingClient)
 	{
 		for(int i = 0; i < 3; i++)
 		{
+			{
 			CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(ParticleID[i]);
 			if(!pProj)
 			{
@@ -424,6 +425,7 @@ void CVanillaProjectile::Snap(int SnappingClient)
 				pProj->m_VelY = 0;
 				pProj->m_StartTick = Server()->Tick();
 				pProj->m_Type = WEAPON_HAMMER;
+			}
 		}
 	}
 
