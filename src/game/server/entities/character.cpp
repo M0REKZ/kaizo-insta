@@ -29,6 +29,8 @@
 
 #include <engine/server/server.h>
 
+#include <stdio.h>
+
 MACRO_ALLOC_POOL_ID_IMPL(CCharacter, MAX_CLIENTS)
 
 // Character, "physical" player's part
@@ -986,7 +988,8 @@ void CCharacter::Tick()
 		}
 	}
 
-	if(m_Water) //+KZ
+	//printf("%d\n",m_Water);
+	if(m_Water || m_NoAir) //+KZ
 	{
 		if(m_AirTicks > 0)
 		{
@@ -2978,7 +2981,7 @@ void CCharacter::HandleKZTiles()
 		{
 			if(Data1.Index == TILE_WATER)
 			{
-				m_Water = true;
+				//m_Water = true;
 				m_QuadWater = true;
 				m_Core.m_JumpedTotal = 0;
 				m_Core.m_Jumped = 0;
@@ -2986,7 +2989,7 @@ void CCharacter::HandleKZTiles()
 			}
 			else
 			{
-				m_Water = false;
+				//m_Water = false;
 				m_QuadWater = false;
 				break;
 			}
@@ -3014,27 +3017,11 @@ void CCharacter::HandleKZTiles()
 	}
 	if(TileIndex == TILE_NOAIR || Data1.Index == TILE_NOAIR)
 	{
-		if(m_AirTicks > 0)
-		{
-			m_AirTicks--;
-		}
-		else
-		{
-			if(m_AirDamageTick > 0)
-			{
-				m_AirDamageTick--;
-			}
-			else
-			{
-				DoKZDamage(vec2(0,0), 1, m_pPlayer->GetCid(), WEAPON_WORLD);
-				m_AirDamageTick = Server()->TickSpeed();
-			}
-		}
-		
+		m_NoAir = true;
 	}
-	else
+	else if(m_NoAir)
 	{
-		m_AirTicks = 5 * Server()->TickSpeed();
+		m_NoAir = false;
 	}
 	
 	if(TileIndex == TILE_WATER || TileIndex == TILE_FLY || Data1.Index == TILE_FLY)
@@ -3043,11 +3030,11 @@ void CCharacter::HandleKZTiles()
 		m_Core.m_Jumped = 0;
 	}
 	
-	if(m_QuadWater ? true : (TileIndex == TILE_WATER && !m_Water))
+	if(m_QuadWater || (TileIndex == TILE_WATER && !m_Water))
 	{
 		m_Water = true;
 	}
-	else if(m_QuadWater ? true : (TileIndex != TILE_WATER && m_Water))
+	else if(!m_QuadWater && (TileIndex != TILE_WATER && m_Water))
 	{
 		m_Water = false;
 	}

@@ -15,6 +15,8 @@
 
 #include <optional>
 
+#include "gamecontroller.h"
+
 bool CheckClientId(int ClientId);
 
 void CGameContext::ConCreditsGctf(IConsole::IResult *pResult, void *pUserData)
@@ -410,6 +412,16 @@ void ToggleSpecPauseVoted(IConsole::IResult *pResult, void *pUserData, int Pause
 
 void CGameContext::ConToggleSpec(IConsole::IResult *pResult, void *pUserData)
 {
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	if(pSelf->m_pController->m_IsInstagibKZ || pSelf->m_pController->IsVanillaGameType())
+	{
+		if(!CheckClientId(pResult->m_ClientId))
+			return;
+		pSelf->SendChatTarget(pResult->m_ClientId,"You can not use /spec in PvP gamemodes");
+			return;
+	}
+
 	ToggleSpecPause(pResult, pUserData, g_Config.m_SvPauseable ? CPlayer::PAUSE_SPEC : CPlayer::PAUSE_PAUSED);
 }
 

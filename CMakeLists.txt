@@ -2752,6 +2752,8 @@ if(SERVER)
     gamecontext.h
     gamecontroller.cpp
     gamecontroller.h
+    gamemodes/DDNetKZ.cpp
+    gamemodes/DDNetKZ.h
     gamemodes/DDRace.cpp
     gamemodes/DDRace.h
     gamemodes/base_pvp/base_pvp.cpp

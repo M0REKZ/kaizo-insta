@@ -26,7 +26,10 @@ void CGameContext::ConReadyChange(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer)
 		return;
 
+	if(pSelf->m_pController->m_IsInstagibKZ || pSelf->m_pController->IsVanillaGameType())
 	pSelf->m_pController->OnPlayerReadyChange(pPlayer);
+	else
+	pSelf->ConTogglePause(pResult,pUserData);
 }
 
 void CGameContext::ConInstaSwap(IConsole::IResult *pResult, void *pUserData)

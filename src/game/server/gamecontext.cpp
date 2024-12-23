@@ -31,6 +31,7 @@
 
 #include "entities/character.h"
 #include "gamemodes/DDRace.h"
+#include "gamemodes/DDNetKZ.h"
 #include "gamemodes/vanilla/BOMB/BOMB.h"
 #include "gamemodes/instagib/Foot.h"
 #include "gamemodes/instagib/gFoot/gFoot.h"
@@ -3967,7 +3968,7 @@ void CGameContext::RegisterChatCommands()
 	Console()->Register("c", "r[message]", CFGFLAG_CHAT | CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConConverse, this, "Converse with the last person you whispered to (private message)");
 	Console()->Register("converse", "r[message]", CFGFLAG_CHAT | CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConConverse, this, "Converse with the last person you whispered to (private message)");
 	// Console()->Register("pause", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTogglePause, this, "Toggles pause"); // ddnet-insta commented this out
-	// Console()->Register("spec", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConToggleSpec, this, "Toggles spec (if not available behaves as /pause)"); // ddnet-insta commented this out
+	Console()->Register("spec", "?r[player name]", CFGFLAG_CHAT | CFGFLAG_SERVER, ConToggleSpec, this, "Toggles spec (if not available behaves as /pause)"); // ddnet-insta commented this out //and +KZ uncommmented this
 	// Console()->Register("pausevoted", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConTogglePauseVoted, this, "Toggles pause on the currently voted player"); // ddnet-insta commented this out
 	// Console()->Register("specvoted", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConToggleSpecVoted, this, "Toggles spec on the currently voted player"); // ddnet-insta commented this out
 	Console()->Register("dnd", "?i['0'|'1']", CFGFLAG_CHAT | CFGFLAG_SERVER | CFGFLAG_NONTEEHISTORIC, ConDND, this, "Toggle Do Not Disturb (no chat and server messages)");
@@ -4241,7 +4242,7 @@ void CGameContext::OnInit(const void *pPersistentData)
 	{
 		if(str_comp_nocase(Config()->m_SvGametype, "ddnet"))
 			Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "gametype", "unknown gametype falling back to ddnet");
-		m_pController = new CGameControllerDDRace(this);
+		m_pController = new CGameControllerDDNetKZ(this); //DDNetKZ -> +KZ
 	}
 
 	ReadCensorList();
