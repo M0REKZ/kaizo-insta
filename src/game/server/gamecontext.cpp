@@ -4097,19 +4097,11 @@ void CGameContext::OnInit(const void *pPersistentData)
 	for(int i = 0; i < NUM_TUNEZONES; i++)
 	{
 		TuningList()[i] = TuningParams;
-        /* DDNET-INSTA
 		TuningList()[i].Set("gun_curvature", 0);
 		TuningList()[i].Set("gun_speed", 1400);
 		TuningList()[i].Set("shotgun_curvature", 0);
 		TuningList()[i].Set("shotgun_speed", 500);
 		TuningList()[i].Set("shotgun_speeddiff", 0);
-         */
-         //JSAURUS
-        TuningList()[i].Set("gun_speed", 2200);
-        TuningList()[i].Set("gun_curvature", 1.25f); //idk if really like this
-        TuningList()[i].Set("shotgun_speed", 2750);
-        TuningList()[i].Set("shotgun_speeddiff", 0.8f);
-        TuningList()[i].Set("shotgun_curvature", 1.25f);
         //+KZ for ddrace bullets fix
         TuningList()[i].Set("freezebullet_speed", 500);
         TuningList()[i].Set("freezebullet_curvature", 0.0f);
@@ -4128,19 +4120,11 @@ void CGameContext::OnInit(const void *pPersistentData)
 	}
 	else
 	{
-        /* DDNET-INSTA
 		Tuning()->Set("gun_speed", 1400);
 		Tuning()->Set("gun_curvature", 0);
 		Tuning()->Set("shotgun_speed", 500);
 		Tuning()->Set("shotgun_speeddiff", 0);
 		Tuning()->Set("shotgun_curvature", 0);
-         */
-        //JSAURUS
-        Tuning()->Set("gun_speed", 2200);
-        Tuning()->Set("gun_curvature", 1.25f);
-        Tuning()->Set("shotgun_speed", 2750);
-        Tuning()->Set("shotgun_speeddiff", 0.8f);
-        Tuning()->Set("shotgun_curvature", 1.25f);
         //+KZ for ddrace bullets fix
         Tuning()->Set("freezebullet_speed", 500);
         Tuning()->Set("freezebullet_curvature", 0.0f);
@@ -4876,18 +4860,11 @@ void CGameContext::ResetTuning()
 {
 	CTuningParams TuningParams;
 	m_Tuning = TuningParams;
-    /*  DDNET-INSTA
 	Tuning()->Set("gun_speed", 1400);
 	Tuning()->Set("gun_curvature", 0);
 	Tuning()->Set("shotgun_speed", 500);
 	Tuning()->Set("shotgun_speeddiff", 0);
 	Tuning()->Set("shotgun_curvature", 0);
-     */ //JSAURUS +KZ TODO: this breaks freeze bullets
-    Tuning()->Set("gun_speed", 2200);
-    Tuning()->Set("gun_curvature", 1.25f);
-    Tuning()->Set("shotgun_speed", 2750);
-    Tuning()->Set("shotgun_speeddiff", 0.8f);
-    Tuning()->Set("shotgun_curvature", 1.25f);
     //+KZ for ddrace bullets fix
     Tuning()->Set("freezebullet_speed", 500);
     Tuning()->Set("freezebullet_curvature", 0.0f);
