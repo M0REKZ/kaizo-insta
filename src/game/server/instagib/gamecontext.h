@@ -16,7 +16,7 @@ class CGameContext : public IGameServer
 #endif // IN_CLASS_IGAMECONTEXT
 
 public:
-	const char *ServerInfoPlayerScoreKind() override { return "points"; }
+	const char *ServerInfoPlayerScoreKind() override;// { return "points"; } commented out by +KZ
 
 	// bang commands
 	void BangCommandVote(int ClientId, const char *pCommand, const char *pDesc);

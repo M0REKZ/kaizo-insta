@@ -5625,3 +5625,15 @@ void CGameContext::ConMoveKZBot(IConsole::IResult *pResult, void *pUserData)
 
     return;
 }
+
+const char *CGameContext::ServerInfoPlayerScoreKind() //+KZ version
+{
+	if(m_pController && str_find_nocase(m_pController->m_pGameType,"DDNet"))
+	{
+		return "time";
+	}
+	else
+	{
+		return "points";
+	}
+}
