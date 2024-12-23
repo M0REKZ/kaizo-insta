@@ -33,6 +33,7 @@
 #include "gamemodes/DDRace.h"
 #include "gamemodes/DDNetKZ.h"
 #include "gamemodes/vanilla/BOMB/BOMB.h"
+#include "gamemodes/vanilla/Catch/Catch.h"
 #include "gamemodes/instagib/Foot.h"
 #include "gamemodes/instagib/gFoot/gFoot.h"
 #include "gamemodes/instagib/iFoot/iFoot.h"
@@ -4214,6 +4215,8 @@ void CGameContext::OnInit(const void *pPersistentData)
 		m_pController = new CGameControllerZcatch(this);
     else if(!str_comp_nocase(Config()->m_SvGametype, "bomb"))
         m_pController = new CGameControllerBOMB(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "catch"))
+        m_pController = new CGameControllerCatch(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "ifoot"))
 		m_pController = new CGameControllerIFoot(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "gfoot"))

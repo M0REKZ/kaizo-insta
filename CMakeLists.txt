@@ -2821,6 +2821,9 @@ if(SERVER)
     gamemodes/vanilla/BOMB/BOMB.cpp
     gamemodes/vanilla/BOMB/BOMB.h
     gamemodes/vanilla/BOMB/sql_columns.h
+    gamemodes/vanilla/Catch/Catch.cpp
+    gamemodes/vanilla/Catch/Catch.h
+    gamemodes/vanilla/Catch/sql_columns.h
     gamemodes/instagib/Foot.cpp
     gamemodes/instagib/Foot.h
     gamemodes/instagib/gFoot/gFoot.cpp

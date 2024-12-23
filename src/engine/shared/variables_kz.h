@@ -42,6 +42,10 @@ MACRO_CONFIG_INT(SvFreezeMeltRespawn, sv_freeze_melt_respawn, 1, 0, 1, CFGFLAG_S
 //For Ball
 MACRO_CONFIG_INT(SvBallRespawn, sv_ball_respawn, 10, 1, 1000, CFGFLAG_SERVER, "Seconds for ball to go back to ball spawn")
 
+//For Catch
+MACRO_CONFIG_INT(SvCatchDamage, sv_catch_damage, 0, 0, 1, CFGFLAG_SERVER, "Enable damage in Catch64")
+MACRO_CONFIG_INT(SvCatchWeapon, sv_catch_weapon, 0, -1, 5, CFGFLAG_SERVER, "Catch64 weapon")
+
 MACRO_CONFIG_INT(SvKZBots, sv_kzbots, 0, 0, MAX_CLIENTS, CFGFLAG_SERVER, "Add KZ Bots")
 MACRO_CONFIG_INT(SvKZBotsAI, sv_kzbots_ai, 0, 0, 99, CFGFLAG_SERVER, "KZ Bots AI (0 = +KZ AI, 1 = Pointer AI)")
 
