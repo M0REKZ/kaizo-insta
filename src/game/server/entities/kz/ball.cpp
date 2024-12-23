@@ -168,20 +168,22 @@ void CBall::Tick()
 		GameServer()->CreateSound(CurPosition, m_SoundImpact);
 	}
 	
-	if((Collision()->KZFound()) && GameServer()->m_pController->IsTeamplay())
+	if((Collision()->KZFound()))
 	{
 		
 		int TileIndex = Collision()->GetKZTileIndex(CurPosition);
 		
 		if(TileIndex == TILE_BALL_REDGOAL || TileIndex == TILE_BALL_REDSLAM)
 		{
-			GameServer()->m_pController->m_aTeamscore[TEAM_BLUE]+= 100;
+			if(GameServer()->m_pController->IsTeamplay())
+				GameServer()->m_pController->m_aTeamscore[TEAM_BLUE]+= 100;
 			GoToStartPos();
 			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 		}
 		else if(TileIndex == TILE_BALL_BLUEGOAL || TileIndex == TILE_BALL_BLUESLAM)
 		{
-			GameServer()->m_pController->m_aTeamscore[TEAM_RED]+= 100;
+			if(GameServer()->m_pController->IsTeamplay())
+				GameServer()->m_pController->m_aTeamscore[TEAM_RED]+= 100;
 			GoToStartPos();
 			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 		}
@@ -192,7 +194,8 @@ void CBall::Tick()
 		}
 		else if(m_Owner >=0 && (TileIndex == TILE_BALL_NOTEAMGOAL || TileIndex == TILE_BALL_NOTEAMSLAM))
 		{
-			GameServer()->m_pController->m_aTeamscore[m_Team]+= 100;
+			if(GameServer()->m_pController->IsTeamplay())
+				GameServer()->m_pController->m_aTeamscore[m_Team]+= 100;
 			GoToStartPos();
 			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 		}
