@@ -936,7 +936,7 @@ void CCharacter::Tick()
 			m_DieNow = true;
 		}
 		
-		if((m_RollbackAttacker >= 0 && m_RollbackAttacker < MAX_CLIENTS) && !(GameServer()->m_apPlayers[m_RollbackAttacker]->GetCharacter()))
+		if((m_RollbackAttacker >= 0 && m_RollbackAttacker < MAX_CLIENTS) && GameServer()->m_apPlayers[m_RollbackAttacker] && !(GameServer()->m_apPlayers[m_RollbackAttacker]->GetCharacter()))
 		{
 			m_DieNow = false;
 			m_Dying = -1;
