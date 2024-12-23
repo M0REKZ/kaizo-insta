@@ -11,6 +11,7 @@ public:
 	static const int ms_CollisionExtraSize = 6;
 
 	CVanillaPickup(CGameWorld *pGameWorld, int Type, int SubType = 0, int Layer = 0, int Number = 0);
+	virtual ~CVanillaPickup();
 
 	void Reset() override;
 	void Tick() override;

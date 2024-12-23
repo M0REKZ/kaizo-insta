@@ -40,6 +40,12 @@ CVanillaPickup::CVanillaPickup(CGameWorld *pGameWorld, int Type, int SubType, in
 	GameWorld()->InsertEntity(this);
 }
 
+CVanillaPickup::~CVanillaPickup()
+{
+	if(m_Id2 != -1)
+		Server()->SnapFreeId(m_Id2);
+}
+
 void CVanillaPickup::Reset()
 {
 	m_MarkedForDestroy = true;

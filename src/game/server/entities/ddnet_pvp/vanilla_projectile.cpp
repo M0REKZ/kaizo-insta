@@ -61,6 +61,15 @@ CVanillaProjectile::CVanillaProjectile(
 	}
 }
 
+CVanillaProjectile::~CVanillaProjectile()
+{
+	for(int i = 0; i < 3; i++)
+	{
+		Server()->SnapFreeId(ParticleID[i]);
+	}
+}
+
+
 void CVanillaProjectile::Reset()
 {
 	m_MarkedForDestroy = true;

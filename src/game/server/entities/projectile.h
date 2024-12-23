@@ -32,6 +32,7 @@ public:
 	virtual void SwapClients(int Client1, int Client2) override;
 
 	int HitFlag(vec2 From, vec2 To); //+KZ
+	virtual ~CProjectile();
 
 private:
 	vec2 m_Direction;

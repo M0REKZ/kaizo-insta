@@ -85,6 +85,14 @@ CProjectile::CProjectile(
 	}
 }
 
+CProjectile::~CProjectile()
+{
+	for(int i = 0; i < 3; i++)
+	{
+		Server()->SnapFreeId(ParticleID[i]);
+	}
+}
+
 void CProjectile::Reset()
 {
 	m_MarkedForDestroy = true;
