@@ -20,6 +20,7 @@ CGameControllerBaseFng::CGameControllerBaseFng(class CGameContext *pGameServer) 
 	CGameControllerInstagib(pGameServer)
 {
 	m_vFrozenQuitters.clear();
+	m_LaserDontUnfreeze = true;
 }
 
 CGameControllerBaseFng::~CGameControllerBaseFng() = default;

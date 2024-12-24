@@ -85,6 +85,7 @@ public:
 	//+KZ
 
     bool m_DontSelfKill = false; //+KZ for iFreeze
+	bool m_LaserDontUnfreeze = false; //+KZ for DDrace fix
 	bool m_IsInstagibKZ = false;
 	vec2 m_BallSpawnsKZ[10]; //+KZ for Foot
 	int m_BallSpawnNum = 0; // Foot
