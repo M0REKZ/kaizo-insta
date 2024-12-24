@@ -22,7 +22,7 @@ CGameControllerCatch::CGameControllerCatch(class CGameContext *pGameServer) :
     Colors[1] = 255;
     for(int i = 2; i < MAX_CLIENTS; i++)
     {
-        Colors[i] = 1507072 + 1233 * i;
+        Colors[i] = 65280 + 1233000 * i;
     }
 }
 
