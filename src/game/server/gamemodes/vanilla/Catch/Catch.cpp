@@ -32,6 +32,17 @@ void CGameControllerCatch::Tick()
 {
     CGameControllerDM::Tick();
 
+    if(m_RoundPauseTime > 0)
+    {
+        m_RoundPauseTime--;
+        return;
+    }
+    else if(GameServer()->m_World.m_Paused && m_RoundPauseTime == 0)
+    {
+        GameServer()->m_World.m_Paused = false;
+        m_RoundPauseTime = -1;
+    }
+
     if(m_EndingRound && !GameServer()->m_World.m_Paused)
     {
        ResetPlayerColors();
@@ -75,6 +86,12 @@ bool CGameControllerCatch::DoWincheckRound()
     if(GetPlayerAmount() <= 1)
         return false;
 
+    if(CGameControllerDM::DoWincheckRound())
+    {
+        m_EndingRound = true;
+        return true;
+    }
+
     int WinColor = -1;
 
     for(int i = 0; i < MAX_CLIENTS; i++)
@@ -102,7 +119,26 @@ bool CGameControllerCatch::DoWincheckRound()
             return false;
     }
 
-    EndRound();
+    //search winner
+
+    for(int i = 1; i < MAX_CLIENTS; i++)
+    {
+        if(!GameServer()->m_apPlayers[i])
+            continue;
+
+        if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
+            continue;
+
+        if(WinColor == GameServer()->m_apPlayers[i]->m_CatchOrigColor)
+        {
+            GameServer()->m_apPlayers[i]->IncrementScore();
+            FakeEndRound();
+            m_EndingRound = true;
+            return true;
+        }
+    }
+
+    FakeEndRound();
     m_EndingRound = true;
     return true;
 }
@@ -203,4 +239,31 @@ int CGameControllerCatch::GetPlayerAmount()
         amount++;
     }
     return amount;
+}
+
+void CGameControllerCatch::FakeEndRound()
+{
+    //m_GameOverTick = Server()->Tick();
+    GameServer()->m_World.m_Paused = true;
+    m_RoundPauseTime = 150;
+
+	GameServer()->SendBroadcast("Round Finish", -1);
+    KillEveryone();
+    //SetGameState(IGS_END_MATCH, TIMER_END);
+}
+
+void CGameControllerCatch::KillEveryone()
+{
+    for(int i = 0; i < MAX_CLIENTS; ++i)
+    {
+        if(GameServer()->m_apPlayers[i])
+        {
+            if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
+            {
+                GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF);
+                GameServer()->m_apPlayers[i]->Respawn();
+            }
+            
+        }
+    }
 }

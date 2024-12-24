@@ -98,6 +98,9 @@ public:
 	void UpdateSkins();
 	void ResetPlayerColors();
 	int GetPlayerAmount();
+	void FakeEndRound();
+	void KillEveryone();
     bool m_EndingRound = false;
+	int m_RoundPauseTime = -1;
 };
 #endif // GAME_SERVER_GAMEMODES_CATCH_H
