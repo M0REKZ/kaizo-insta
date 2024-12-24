@@ -1689,10 +1689,11 @@ int CCollision::GetZoneValueAt(int ZoneHandle, float x, float y, ZoneData *pData
 				float Angle = 0.0f;
 				if(pQuads[q].m_PosEnv >= 0)
 				{
-					if(pQuads[q].m_PosEnv != AnimationCache.PosEnv)
+					if(pQuads[q].m_PosEnv != AnimationCache.PosEnv || AnimationCache.PosEnvOffset != pQuads[q].m_PosEnvOffset)
 					{
 						AnimationCache.PosEnv = pQuads[q].m_PosEnv;
-						GetAnimationTransform(m_Time, AnimationCache.PosEnv, m_pLayers, AnimationCache.Position, AnimationCache.Angle);
+						AnimationCache.PosEnvOffset = pQuads[q].m_PosEnvOffset;
+						GetAnimationTransform(m_Time + (AnimationCache.PosEnvOffset / 1000.0), AnimationCache.PosEnv, m_pLayers, AnimationCache.Position, AnimationCache.Angle);
 					}
 
 					Position = AnimationCache.Position;

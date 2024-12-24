@@ -77,6 +77,7 @@ public:
 		vec2 Position = vec2(0.0f, 0.f);
 		float Angle = 0;
 		int PosEnv = -1;
+		int PosEnvOffset = 0;
 	};
 
 	//---------
