@@ -241,6 +241,9 @@ int CGameControllerCatch::GetPlayerAmount()
         if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
             continue;
         
+        if(!GameServer()->m_apPlayers[i]->GetCharacter())
+            continue;
+        
         amount++;
     }
     return amount;
