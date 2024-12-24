@@ -31,6 +31,12 @@ CGameControllerCatch::~CGameControllerCatch() = default;
 void CGameControllerCatch::Tick()
 {
     CGameControllerDM::Tick();
+
+    if(m_EndingRound && !GameServer()->m_World.m_Paused)
+    {
+       ResetPlayerColors();
+       m_EndingRound = false;
+    }
    
 }
 
@@ -97,7 +103,7 @@ bool CGameControllerCatch::DoWincheckRound()
     }
 
     EndRound();
-    ResetPlayerColors();
+    m_EndingRound = true;
     return true;
 }
 
@@ -107,6 +113,7 @@ void CGameControllerCatch::OnPlayerConnect(class CPlayer *pPlayer)
     pPlayer->m_CatchColor = Colors[pPlayer->GetCid()];
     pPlayer->m_CatchOrigColor = pPlayer->m_CatchColor;
     str_copy(pPlayer->m_CatchOrigSkin, pPlayer->m_TeeInfos.m_aSkinName, MAX_SKIN_LENGTH);
+    str_copy(pPlayer->m_CatchSkin, pPlayer->m_CatchOrigSkin, MAX_SKIN_LENGTH);
     return;
 }
 

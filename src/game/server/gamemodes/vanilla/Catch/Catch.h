@@ -98,6 +98,6 @@ public:
 	void UpdateSkins();
 	void ResetPlayerColors();
 	int GetPlayerAmount();
-    bool m_RoundActive = false;
+    bool m_EndingRound = false;
 };
 #endif // GAME_SERVER_GAMEMODES_CATCH_H
