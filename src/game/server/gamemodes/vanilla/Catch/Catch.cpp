@@ -96,7 +96,7 @@ bool CGameControllerCatch::DoWincheckRound()
 
     for(int i = 0; i < MAX_CLIENTS; i++)
     {
-        if(GameServer()->m_apPlayers[i])
+        if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
         {
             WinColor = GameServer()->m_apPlayers[i]->m_CatchColor;
             break;
@@ -220,6 +220,7 @@ void CGameControllerCatch::ResetPlayerColors()
         
         GameServer()->m_apPlayers[i]->m_CatchColor = Colors[i];
         GameServer()->m_apPlayers[i]->m_CatchOrigColor = Colors[i];
+        str_copy(GameServer()->m_apPlayers[i]->m_CatchSkin, GameServer()->m_apPlayers[i]->m_CatchOrigSkin, MAX_SKIN_LENGTH);
     }
 
     UpdateSkins();
