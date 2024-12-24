@@ -262,7 +262,7 @@ void CGameControllerCatch::KillEveryone()
     {
         if(GameServer()->m_apPlayers[i])
         {
-            if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
+            if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->GetCharacter())
             {
                 GameServer()->m_apPlayers[i]->GetCharacter()->Destroy();
                 GameServer()->m_apPlayers[i]->Respawn();
