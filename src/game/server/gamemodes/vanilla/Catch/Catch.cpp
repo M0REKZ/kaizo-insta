@@ -41,6 +41,7 @@ void CGameControllerCatch::Tick()
     {
         GameServer()->m_World.m_Paused = false;
         m_RoundPauseTime = -1;
+        KillEveryone();
     }
 
     if(m_EndingRound && !GameServer()->m_World.m_Paused)
@@ -252,7 +253,6 @@ void CGameControllerCatch::FakeEndRound()
     m_RoundPauseTime = 150;
 
 	GameServer()->SendBroadcast("Round Finish", -1);
-    KillEveryone();
     //SetGameState(IGS_END_MATCH, TIMER_END);
 }
 
@@ -264,7 +264,7 @@ void CGameControllerCatch::KillEveryone()
         {
             if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
             {
-                GameServer()->m_apPlayers[i]->KillCharacter(WEAPON_SELF);
+                GameServer()->m_apPlayers[i]->GetCharacter()->Destroy();
                 GameServer()->m_apPlayers[i]->Respawn();
             }
             
