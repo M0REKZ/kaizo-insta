@@ -86,6 +86,9 @@ bool CGameControllerCatch::DoWincheckRound()
     if(GetPlayerAmount() <= 1)
         return false;
 
+    if(m_RoundPauseTime >= 0)
+        return false;
+
     if(CGameControllerDM::DoWincheckRound())
     {
         m_EndingRound = true;
