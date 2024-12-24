@@ -100,7 +100,7 @@ bool CGameControllerCatch::DoWincheckRound()
 
     for(int i = 0; i < MAX_CLIENTS; i++)
     {
-        if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
+        if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->GetCharacter())
         {
             WinColor = GameServer()->m_apPlayers[i]->m_CatchColor;
             break;
@@ -118,6 +118,9 @@ bool CGameControllerCatch::DoWincheckRound()
 
         if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
             continue;
+        
+        if(!GameServer()->m_apPlayers[i]->GetCharacter())
+            continue;
 
         if(WinColor != GameServer()->m_apPlayers[i]->m_CatchColor)
             return false;
@@ -131,6 +134,9 @@ bool CGameControllerCatch::DoWincheckRound()
             continue;
 
         if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
+            continue;
+
+        if(!GameServer()->m_apPlayers[i]->GetCharacter())
             continue;
 
         if(WinColor == GameServer()->m_apPlayers[i]->m_CatchOrigColor)
