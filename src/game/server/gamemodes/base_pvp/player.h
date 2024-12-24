@@ -10,6 +10,8 @@
 #include <optional>
 #include <vector>
 
+#include <engine/shared/protocol.h>
+
 // player object
 class CPlayer
 {
@@ -61,6 +63,8 @@ public:
 
     int m_CatchColor = 0;
 	int m_CatchOrigColor = 0;
+	char m_CatchSkin[MAX_SKIN_LENGTH];
+	char m_CatchOrigSkin[MAX_SKIN_LENGTH];
 
 	/*******************************************************************
 	 * gCTF                                                            *

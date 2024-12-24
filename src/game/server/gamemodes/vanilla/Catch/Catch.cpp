@@ -53,6 +53,7 @@ bool CGameControllerCatch::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &Fro
     //if(Character.GetPlayer()->m_IsBomb)
      //   return false;
     Character.GetPlayer()->m_CatchColor = GameServer()->m_apPlayers[From]->m_CatchColor;
+    str_copy(Character.GetPlayer()->m_CatchSkin, GameServer()->m_apPlayers[From]->m_CatchSkin, MAX_SKIN_LENGTH);
     UpdateSkins();
 
     return false;
@@ -88,6 +89,9 @@ bool CGameControllerCatch::DoWincheckRound()
         if(!GameServer()->m_apPlayers[i])
             continue;
 
+        if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS)
+            continue;
+
         if(WinColor != GameServer()->m_apPlayers[i]->m_CatchColor)
             return false;
     }
@@ -102,6 +106,7 @@ void CGameControllerCatch::OnPlayerConnect(class CPlayer *pPlayer)
     CGameControllerDM::OnPlayerConnect(pPlayer);
     pPlayer->m_CatchColor = Colors[pPlayer->GetCid()];
     pPlayer->m_CatchOrigColor = pPlayer->m_CatchColor;
+    str_copy(pPlayer->m_CatchOrigSkin, pPlayer->m_TeeInfos.m_aSkinName, MAX_SKIN_LENGTH);
     return;
 }
 
@@ -133,6 +138,8 @@ void CGameControllerCatch::UpdateSkins()
         GameServer()->m_apPlayers[i]->m_TeeInfos.m_UseCustomColor = 1;
         GameServer()->m_apPlayers[i]->m_TeeInfos.m_ColorBody = GameServer()->m_apPlayers[i]->m_CatchColor;
         GameServer()->m_apPlayers[i]->m_TeeInfos.m_ColorFeet = GameServer()->m_apPlayers[i]->m_CatchColor;
+
+        str_copy(GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinName, GameServer()->m_apPlayers[i]->m_CatchSkin, MAX_SKIN_LENGTH);
 
         GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[0] = true;
         GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[1] = true;
