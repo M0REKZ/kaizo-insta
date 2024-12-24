@@ -3871,6 +3871,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("afk", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConAfkKZ, this, "Set afk");
 	Console()->Register("rollback", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConRollback, this, "Set Rollback");
     Console()->Register("move_kzbot", "s[blue/red]", CFGFLAG_SERVER, ConMoveKZBot, this, "Move KZBot to blue or red team");
+	Console()->Register("rejoin_shutdown", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConShutdownRejoin, this, "Shutdown and make players rejoin same server");
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 
@@ -5636,4 +5637,20 @@ const char *CGameContext::ServerInfoPlayerScoreKind() //+KZ version
 	{
 		return "points";
 	}
+}
+
+void CGameContext::ConShutdownRejoin(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!pSelf->m_apPlayers[i])
+			continue;
+
+		pSelf->Server()->RedirectClient(i,g_Config.m_SvPort,true);
+	}
+
+	pSelf->Console()->ExecuteLine("shutdown");
+    return;
 }
