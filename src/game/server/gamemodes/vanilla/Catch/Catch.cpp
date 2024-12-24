@@ -111,7 +111,7 @@ bool CGameControllerCatch::DoWincheckRound()
         return false;
     
 
-    for(int i = 1; i < MAX_CLIENTS; i++)
+    for(int i = 0; i < MAX_CLIENTS; i++)
     {
         if(!GameServer()->m_apPlayers[i])
             continue;
@@ -125,7 +125,7 @@ bool CGameControllerCatch::DoWincheckRound()
 
     //search winner
 
-    for(int i = 1; i < MAX_CLIENTS; i++)
+    for(int i = 0; i < MAX_CLIENTS; i++)
     {
         if(!GameServer()->m_apPlayers[i])
             continue;
