@@ -33,11 +33,13 @@ bool CGameControllerPvp::ParseChatCmd(char Prefix, int ClientId, const char *pCm
 		aCmd[i] = pCmdWithArgs[i];
 	}
 	aCmd[i] = '\0';
-	// int RestOffset = m_pClient->m_ChatHelper.ChatCommandGetROffset(aCmd);
-	int RestOffset = -1; // TODO: add params with typed args: s,r,i
 
 // max 16 args of 128 len each
 #define MAX_ARGS 16
+
+	// int RestOffset = m_pClient->m_ChatHelper.ChatCommandGetROffset(aCmd);
+	int RestOffset = MAX_ARGS + 2; // TODO: add params with typed args: s,r,i
+
 	char **ppArgs = new char *[MAX_ARGS];
 	for(int x = 0; x < MAX_ARGS; ++x)
 	{
