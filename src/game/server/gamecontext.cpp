@@ -2275,6 +2275,22 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 	if(pEnd != 0)
 		*(const_cast<char *>(pEnd)) = 0;
 
+
+	// anti adbot +KZ POINTER
+	if(m_apPlayers[ClientId]->m_MsgBotCount < g_Config.m_SvAntiAdbotPointer)
+	{
+		if (g_Config.m_SvAntiAdbotPointer && m_apPlayers[ClientId] && CheckBotPointer(ClientId, pMsg->m_pMessage) && !Server()->GetAuthedState(ClientId))
+		{
+			char aBuf[128];
+			str_format(aBuf, sizeof(aBuf), "ban %i 15 \"Bot Detected, Please use the ddnet client. https://ddnet.org/\"", ClientId);
+			Console()->Print(IConsole::OUTPUT_LEVEL_ADDINFO, "chat/blocked", pMsg->m_pMessage);
+			Console()->ExecuteLine(aBuf);
+			return;
+		}
+
+		m_apPlayers[ClientId]->m_MsgBotCount++;
+	}
+
 	// drop empty and autocreated spam messages (more than 32 characters per second)
 	if(Length == 0 || (pMsg->m_pMessage[0] != '/' && (g_Config.m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat + Server()->TickSpeed() * ((31 + Length) / 32) > Server()->Tick())))
 		return;
@@ -5646,4 +5662,38 @@ void CGameContext::ConShutdownRejoin(IConsole::IResult *pResult, void *pUserData
 
 	pSelf->Console()->ExecuteLine("shutdown Reserved, please wait or rejoin");
     return;
+}
+
+bool CGameContext::CheckBotPointer(int ClientID, const char* msg)
+{
+	int count = 0; // amount of flagged strings (some strings may count more than others)
+	// fancy alphabet detection
+	int fancy_count = 0;
+	const char* alphabet_fancy[] = {
+		"𝕢", "𝕨", "𝕖", "𝕣", "𝕥", "𝕪", "𝕦", "𝕚", "𝕠", "𝕡", "𝕒", "𝕤", "𝕕", "𝕗", "𝕘", "𝕙", "𝕛", "𝕜", "𝕝", "𝕫", "𝕩", "	", "𝕧", "𝕓", "𝕟", "𝕞",
+		"ｑ", "ｗ", "ｅ", "ｒ", "ｔ", "ｙ", "ｕ", "ｉ", "ｏ", "ｐ", "ａ", "ｓ", "ｄ", "ｆ", "ｇ", "ｈ", "ｊ", "ｋ", "ｌ", "ｚ", "ｘ", "ｃ", "ｖ", "ｂ", "ｎ", "ｍ",
+		"🆀", "🆆", "🅴", "🆁", "🆃", "🆈", "🆄", "🅸", "🅾", "🅿", "🅰", "🆂", "🅳", "🅵", "🅶", "🅷", "🅹", "🅺", "🅻", "🆉", "🆇", "🅲", "🆅", "🅱", "🅽", "🅼",
+		"🅀", "🅆", "🄴", "🅁", "🅃", "🅈", "🅄", "🄸", "🄾", "🄿", "🄰", "🅂", "🄳", "🄵", "🄶", "🄷", "🄹", "🄺", "🄻", "🅉", "🅇", "🄲", "🅅", "🄱", "🄽", "🄼",
+		"ⓠ", "ⓦ", "ⓔ", "ⓡ", "ⓣ", "ⓨ", "ⓤ", "ⓘ", "ⓞ", "ⓟ", "ⓐ", "ⓢ", "ⓓ", "ⓕ", "ⓖ", "ⓗ", "ⓙ", "ⓚ", "ⓛ", "ⓩ", "ⓧ", "ⓒ", "ⓥ", "ⓑ", "ⓝ", "ⓜ",
+	};
+	for (int i = 0; i < 130; i++) {
+		if (str_find_nocase(msg, alphabet_fancy[i]))
+			fancy_count++;
+	}
+	if (fancy_count > 3)
+		count += 2;
+	// general needles to disallow
+	const char* disallowedStrings[] = {"krx", "discord.gg", "http", "free", "bot client", "cheat client"};
+	for (int i = 0; i < 6; i++) {
+		if (str_find_nocase(msg, disallowedStrings[i]))
+			count++;
+	}
+	
+	// anti whisper ad bot
+	if ((str_find_nocase(msg, "/whisper") || str_find_nocase(msg, "/w")) && str_find_nocase(msg, "bro, check out this client"))
+		count += 2;
+	if (count >= 2) {
+		return true;
+	} else
+		return false;
 }
