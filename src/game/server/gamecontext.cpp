@@ -5479,7 +5479,7 @@ int CGameContext::CountPlayersKZ()
 	int count = 0;
 	for(int i=0;i<MAX_CLIENTS;i++)
 	{
-		if(!(((CServer*)Server())->m_aClients[i].m_KZBot) && m_apPlayers[i] && !(m_apPlayers[i]->IsAfk()) && m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)
+		if(!(((CServer*)Server())->m_aClients[i].m_KZBot) && m_apPlayers[i] && !(m_apPlayers[i]->IsAfk()) && (m_apPlayers[i]->m_IsDead ? true : (m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS)))
 			count++;
 	}
 	return count;
@@ -5644,6 +5644,6 @@ void CGameContext::ConShutdownRejoin(IConsole::IResult *pResult, void *pUserData
 		pSelf->Server()->RedirectClient(i,g_Config.m_SvPort,true);
 	}
 
-	pSelf->Console()->ExecuteLine("shutdown");
+	pSelf->Console()->ExecuteLine("shutdown Reserved, please wait or rejoin");
     return;
 }
