@@ -15,14 +15,30 @@ void CGameControllerPvp::OnCharacterConstruct(class CCharacter *pChr)
 
 bool CCharacter::IsTouchingTile(int Tile)
 {
-	if((Collision()->GetCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == Tile ||
-		   Collision()->GetCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == Tile ||
-		   Collision()->GetCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == Tile ||
-		   Collision()->GetCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == Tile ||
-		   Collision()->GetFrontCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == Tile ||
-		   Collision()->GetFrontCollisionAt(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == Tile ||
-		   Collision()->GetFrontCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == Tile ||
-		   Collision()->GetFrontCollisionAt(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == Tile))
+	if(!Collision()->GameLayer())
+		return false;
+
+	float Prox = GetProximityRadius() / 3.f;
+	int Left = (m_Pos.x - Prox) / 32;
+	int Right = (m_Pos.x + Prox) / 32;
+	int Up = (m_Pos.y - Prox) / 32;
+	int Down = (m_Pos.y + Prox) / 32;
+
+	if((Collision()->GetIndex(Right, Up) == Tile ||
+		   Collision()->GetIndex(Right, Down) == Tile ||
+		   Collision()->GetIndex(Left, Up) == Tile ||
+		   Collision()->GetIndex(Left, Down) == Tile))
+	{
+		return true;
+	}
+
+	if(!Collision()->FrontLayer())
+		return false;
+
+	if((Collision()->GetFrontIndex(Right, Up) == Tile ||
+		   Collision()->GetFrontIndex(Right, Down) == Tile ||
+		   Collision()->GetFrontIndex(Left, Up) == Tile ||
+		   Collision()->GetFrontIndex(Left, Down) == Tile))
 	{
 		return true;
 	}
