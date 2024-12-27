@@ -301,7 +301,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 	ZoneData HookData;
 	m_pCollision->GetZoneValueAt(m_pCollision->GetKZQuadsZoneHandle(),m_HookPos, &HookData);
 
-	printf("poscenter %f , %f quadhook %f , %f hookpos %f , %f\n",HookData.PosCenter.x,HookData.PosCenter.y,m_QuadHookPos.x,m_QuadHookPos.y,m_HookPos.x,m_HookPos.y);
+	//printf("poscenter %f , %f quadhook %f , %f hookpos %f , %f\n",HookData.PosCenter.x,HookData.PosCenter.y,m_QuadHookPos.x,m_QuadHookPos.y,m_HookPos.x,m_HookPos.y);
 
 	// do hook
 	if(m_HookState == HOOK_IDLE)
@@ -405,6 +405,8 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 				{
 					m_QuadHooked = true;
 					m_QuadHookPos = m_HookPos;
+					m_QuadPosWhenHooked = HookData.PosCenter;
+					m_HookedQuad = (CQuad*)HookData.pQuad;
 				}
 			}
 			else if(GoingToRetract)
@@ -449,9 +451,12 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		}
 
 		//+KZ
-		if(m_HookedPlayer == -1 && m_QuadHooked)
+		if(m_HookedPlayer == -1 && m_QuadHooked && m_HookedQuad)
 		{
-			m_HookPos = HookData.PosCenter + m_QuadHookPos;
+			vec2 temppos;
+			float tempangle;
+			m_pCollision->GetAnimationTransform(m_pCollision->m_Time + (m_HookedQuad->m_PosEnvOffset / 1000.0),m_HookedQuad->m_PosEnv,(CLayers *)m_pCollision->Layers(), temppos, tempangle);
+			m_HookPos = (temppos - m_QuadPosWhenHooked) + m_QuadHookPos;
 		}
 
 		// don't do this hook routine when we are already hooked to a player

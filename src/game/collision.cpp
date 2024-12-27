@@ -1650,6 +1650,7 @@ int CCollision::GetZoneValueAt(int ZoneHandle, float x, float y, ZoneData *pData
 	int Green[4] = {0};
 	int Blue[4] = {0};
 	vec2 Pos = vec2(0,0);
+	const CQuad* pQuad = nullptr;
 
 	SAnimationTransformCache AnimationCache;
 	
@@ -1722,6 +1723,7 @@ int CCollision::GetZoneValueAt(int ZoneHandle, float x, float y, ZoneData *pData
 						Green[j] = pQuads[q].m_aColors[j].g;
 						Blue[j] = pQuads[q].m_aColors[j].b;
 						Pos = Position;
+						pQuad = &pQuads[q];
 					}
 				}
 			}
@@ -1737,6 +1739,7 @@ int CCollision::GetZoneValueAt(int ZoneHandle, float x, float y, ZoneData *pData
 			pData->Green[j] = Green[j];
 			pData->Blue[j] = Blue[j];
 			pData->PosCenter = Pos;
+			pData->pQuad = pQuad;
 		}
 	}
 	

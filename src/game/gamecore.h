@@ -11,6 +11,7 @@
 
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
+#include <game/mapitems.h>
 
 #include "prng.h"
 
@@ -275,6 +276,8 @@ public:
 	bool m_PlayerRollback = false;
 	bool m_QuadHooked = false;
 	vec2 m_QuadHookPos = vec2(0,0);
+	vec2 m_QuadPosWhenHooked = vec2(0,0);
+	CQuad* m_HookedQuad = nullptr;
 private:
 	CTeamsCore *m_pTeams;
 	int m_MoveRestrictions;
