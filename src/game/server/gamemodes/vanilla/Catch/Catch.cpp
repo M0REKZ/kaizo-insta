@@ -66,6 +66,8 @@ bool CGameControllerCatch::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &Fro
 
     if(From < 0 || From > MAX_CLIENTS) //only valid CID
 		return false;
+    if(!GameServer()->m_apPlayers[From])
+        return false;
     if(GameServer()->m_apPlayers[From] == Character.GetPlayer())
         return false;
     //if(Character.GetPlayer()->m_IsBomb)
