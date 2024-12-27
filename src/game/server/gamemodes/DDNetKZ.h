@@ -15,5 +15,7 @@ public:
 	void Tick() override;
 	int SnapGameInfoExFlags2(int SnappingClient, int DDRaceFlags) override;
 	void SetArmorProgress(CCharacter *pCharacer, int Progress) override{};
+	void SetArmorProgressFull(CCharacter *pCharacer) override{};
+	void SetArmorProgressEmpty(CCharacter *pCharacer) override{};
 };
 #endif // GAME_SERVER_GAMEMODES_DDRACE_H
