@@ -395,12 +395,12 @@ public:
 
 	// See also ddnet's SetArmorProgress() and ddnet-insta's SetArmorProgressEmpty()
 	// used to keep armor progress bar in ddnet gametype
-	// but remove it in favor of correct amor in vanilla based gametypes
+	// but remove it in favor of correct arrmor in vanilla based gametypes
 	virtual void SetArmorProgressFull(CCharacter *pCharacer);
 
 	// See also ddnet's SetArmorProgress() and ddnet-insta's SetArmorProgressFull()
 	// used to keep armor progress bar in ddnet gametype
-	// but remove it in favor of correct amor in vanilla based gametypes
+	// but remove it in favor of correct armor in vanilla based gametypes
 	virtual void SetArmorProgressEmpty(CCharacter *pCharacer);
 
 	// ddnet has grenade
