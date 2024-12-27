@@ -185,8 +185,8 @@ public:
 	int GetZoneValueAt(int ZoneHandle, const vec2 &Pos, ZoneData *pData = nullptr) const;
 	int GetKZQuadsZoneValueAt(const vec2 &Pos, ZoneData *pData = nullptr) const;
 	int GetKZCusQuadsZoneValueAt(const vec2 &Pos, ZoneData *pData = nullptr) const;
-	int m_ZoneHandle_KZQuads;
-	int m_ZoneHandle_KZCusQuads;
+	//int m_ZoneHandle_KZQuads;
+	//int m_ZoneHandle_KZCusQuads;
 	double GetTime();
 };
 

@@ -59,7 +59,10 @@ void CCollision::Init(class CLayers *pLayers)
 	m_Height = m_pLayers->GameLayer()->m_Height;
 	m_pTiles = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->GameLayer()->m_Data));
 
+	//+KZ
 	FindKZLayer();
+	m_ZoneHandle_KZQuads = GetZoneHandle("KZQuads");
+	m_ZoneHandle_KZCusQuads = GetZoneHandle("KZCusQuads");
 	
 	if(m_pLayers->TeleLayer())
 	{
@@ -158,6 +161,9 @@ void CCollision::Unload()
 	m_pKZTiles = nullptr; //+KZ
 	m_KZWidth = 0;
 	m_KZHeight = 0;
+
+	m_ZoneHandle_KZQuads = -1;
+	m_ZoneHandle_KZCusQuads = -1;
 	
 	m_pTiles = nullptr;
 	m_Width = 0;
@@ -1643,6 +1649,7 @@ int CCollision::GetZoneValueAt(int ZoneHandle, float x, float y, ZoneData *pData
 	int Red[4] = {0};
 	int Green[4] = {0};
 	int Blue[4] = {0};
+	vec2 Pos = vec2(0,0);
 
 	SAnimationTransformCache AnimationCache;
 	
@@ -1714,6 +1721,7 @@ int CCollision::GetZoneValueAt(int ZoneHandle, float x, float y, ZoneData *pData
 						Red[j] = pQuads[q].m_aColors[j].r;
 						Green[j] = pQuads[q].m_aColors[j].g;
 						Blue[j] = pQuads[q].m_aColors[j].b;
+						Pos = Position;
 					}
 				}
 			}
@@ -1728,6 +1736,7 @@ int CCollision::GetZoneValueAt(int ZoneHandle, float x, float y, ZoneData *pData
 			pData->Red[j] = Red[j];
 			pData->Green[j] = Green[j];
 			pData->Blue[j] = Blue[j];
+			pData->PosCenter = Pos;
 		}
 	}
 	

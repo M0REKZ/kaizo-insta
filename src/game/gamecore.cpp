@@ -264,6 +264,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 			if(m_HookState == HOOK_IDLE)
 			{
 				m_HookState = HOOK_FLYING;
+				if(!m_QuadHooked)
 				m_HookPos = m_Pos + TargetDirection * PhysicalSize() * 1.5f;
 				m_HookDir = TargetDirection;
 				SetHookedPlayer(-1);
@@ -296,11 +297,18 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 	if(m_Direction == 0)
 		m_Vel.x *= Friction;
 
+	//+KZ
+	ZoneData HookData;
+	m_pCollision->GetZoneValueAt(m_pCollision->GetKZQuadsZoneHandle(),m_HookPos, &HookData);
+
+	printf("poscenter %f , %f quadhook %f , %f hookpos %f , %f\n",HookData.PosCenter.x,HookData.PosCenter.y,m_QuadHookPos.x,m_QuadHookPos.y,m_HookPos.x,m_HookPos.y);
+
 	// do hook
 	if(m_HookState == HOOK_IDLE)
 	{
 		SetHookedPlayer(-1);
 		m_HookPos = m_Pos;
+		m_QuadHooked = false;
 	}
 	else if(m_HookState >= HOOK_RETRACT_START && m_HookState < HOOK_RETRACT_END)
 	{
@@ -332,6 +340,12 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		bool GoingThroughTele = false;
 		int teleNr = 0;
 		int Hit = m_pCollision->IntersectLineTeleHook(m_HookPos, NewPos, &NewPos, 0, &teleNr);
+
+		//+KZ
+		if(!Hit)
+		{
+			Hit = HookData.Index;
+		}
 
 		if(Hit)
 		{
@@ -387,6 +401,11 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 			{
 				m_TriggeredEvents |= COREEVENT_HOOK_ATTACH_GROUND;
 				m_HookState = HOOK_GRABBED;
+				if(HookData.Index > 0 && !m_QuadHooked) //+KZ
+				{
+					m_QuadHooked = true;
+					m_QuadHookPos = m_HookPos;
+				}
 			}
 			else if(GoingToRetract)
 			{
@@ -407,6 +426,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 			}
 			else
 			{
+				if(!m_QuadHooked)
 				m_HookPos = NewPos;
 			}
 		}
@@ -426,6 +446,12 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 				m_HookState = HOOK_RETRACTED;
 				m_HookPos = m_Pos;
 			}
+		}
+
+		//+KZ
+		if(m_HookedPlayer == -1 && m_QuadHooked)
+		{
+			m_HookPos = HookData.PosCenter + m_QuadHookPos;
 		}
 
 		// don't do this hook routine when we are already hooked to a player

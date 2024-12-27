@@ -39,6 +39,8 @@ struct ZoneData //+KZ
 	int Red[4] = {0};
 	int Green[4] = {0};
 	int Blue[4] = {0};
+	
+	vec2 PosCenter = vec2(0,0);
 }; //----
 
 class CCollision
@@ -47,7 +49,7 @@ public:
 	CCollision();
 	~CCollision();
 	
-	//+KZ
+	//--------- +KZ
 	
 	CTile* GetKZTiles() { return m_pKZTiles; }
 	CMapItemLayerTilemap* GetKZTileLayer() { return m_pKZTileLayer; }
@@ -62,6 +64,9 @@ public:
 	int GetKZTileIndex(float x, float y) const { return GetKZTileIndex(GetKZIndex(x, y)); }
 	int UnIntersectLineKZ(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
 	int FastIntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
+
+	int GetKZQuadsZoneHandle() { return m_ZoneHandle_KZQuads; }
+	int GetKZCustomQuadsZoneHandle() { return m_ZoneHandle_KZCusQuads; }
 
 	//This function return an Handle to access all zone layers with the name "pName"
 	int GetZoneHandle(const char* pName);
@@ -202,6 +207,8 @@ private:
 	
 	CTile *m_pKZTiles;
 	CMapItemLayerTilemap *m_pKZTileLayer;
+	int m_ZoneHandle_KZQuads = -1;
+	int m_ZoneHandle_KZCusQuads = -1;
 	
 	CTile *m_pTiles;
 	CTeleTile *m_pTele;

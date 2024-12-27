@@ -273,6 +273,8 @@ public:
 	int m_LastAckedSnapshot; //JSAURUS rollback
 	vec2 m_Positions[POSITION_HISTORY];  //JSAURUS rollback
 	bool m_PlayerRollback = false;
+	bool m_QuadHooked = false;
+	vec2 m_QuadHookPos = vec2(0,0);
 private:
 	CTeamsCore *m_pTeams;
 	int m_MoveRestrictions;
