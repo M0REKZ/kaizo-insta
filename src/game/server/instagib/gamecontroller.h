@@ -393,6 +393,16 @@ public:
 	virtual void OnDDRaceTimeLoad(class CPlayer *pPlayer, float Time);
 	virtual void ResetPlayer(class CPlayer *pPlayer){};
 
+	// See also ddnet's SetArmorProgress() and ddnet-insta's SetArmorProgressEmpty()
+	// used to keep armor progress bar in ddnet gametype
+	// but remove it in favor of correct amor in vanilla based gametypes
+	virtual void SetArmorProgressFull(CCharacter *pCharacer);
+
+	// See also ddnet's SetArmorProgress() and ddnet-insta's SetArmorProgressFull()
+	// used to keep armor progress bar in ddnet gametype
+	// but remove it in favor of correct amor in vanilla based gametypes
+	virtual void SetArmorProgressEmpty(CCharacter *pCharacer);
+
 	// ddnet has grenade
 	// but the actual implementation is in CGameControllerPvp::IsGrenadeGameType()
 	virtual bool IsGrenadeGameType() const { return true; }

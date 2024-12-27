@@ -2,6 +2,7 @@
 #include <engine/shared/config.h>
 #include <game/generated/protocol.h>
 #include <game/server/entities/character.h>
+#include <game/server/gamecontroller.h>
 #include <game/server/instagib/strhelpers.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
@@ -289,10 +290,13 @@ bool CGameControllerPvp::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, i
 		}
 		else if(!str_comp_nocase(pMsg->m_pMessage, "start") || !str_comp_nocase(pMsg->m_pMessage, "go"))
 		{
-			char aBuf[512];
-			str_format(aBuf, sizeof(aBuf), "'%s' started the game", Server()->ClientName(ClientId));
-			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
-			SetGameState(IGS_GAME_PAUSED, 0);
+			if(GameState() == IGS_GAME_PAUSED)
+			{
+				char aBuf[512];
+				str_format(aBuf, sizeof(aBuf), "'%s' started the game", Server()->ClientName(ClientId));
+				GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+				SetGameState(IGS_GAME_PAUSED, 0);
+			}
 		}
 	}
 

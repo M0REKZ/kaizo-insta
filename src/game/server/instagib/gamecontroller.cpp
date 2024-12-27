@@ -520,3 +520,13 @@ int IGameController::GetCidByName(const char *pName)
 	}
 	return ClientId;
 }
+
+void IGameController::SetArmorProgressFull(CCharacter *pCharacer)
+{
+	pCharacer->SetArmor(10);
+}
+
+void IGameController::SetArmorProgressEmpty(CCharacter *pCharacer)
+{
+	pCharacer->SetArmor(0);
+}

@@ -80,6 +80,8 @@ public:
 	bool OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer) override;
 	bool OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos) override;
 	void SetArmorProgress(CCharacter *pCharacer, int Progress) override{};
+	void SetArmorProgressFull(CCharacter *pCharacer) override{};
+	void SetArmorProgressEmpty(CCharacter *pCharacer) override{};
 	bool OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId) override;
 	void OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
 	void OnShowRank(int Rank, int RankedScore, const char *pRankType, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
@@ -102,6 +104,16 @@ public:
 	void Anticamper();
 
 	// generic helpers
+
+	// plays the satisfying hit sound
+	// that is used in teeworlds when a projectile causes damage
+	// in ddnet-insta it is used the same way in CTF/DM
+	// but also for instagib weapons
+	//
+	// the sound name is SOUND_HIT
+	// and it is only audible to the player who caused the damage
+	// and to the spectators of that player
+	void DoDamageHitSound(int KillerId);
 
 	bool IsSpawnProtected(CPlayer *pVictim, CPlayer *pKiller) const;
 

@@ -1027,15 +1027,7 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 				// set attacker's face to happy (taunt!)
 				pChr->SetEmote(EMOTE_HAPPY, Server()->Tick() + Server()->TickSpeed());
 			}
-
-			// do damage Hit sound
-			CClientMask Mask = CClientMask().set(From);
-			for(int i = 0; i < MAX_CLIENTS; i++)
-			{
-				if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorId == From)
-					Mask.set(i);
-			}
-			GameServer()->CreateSound(pKiller->m_ViewPos, SOUND_HIT, Mask);
+			DoDamageHitSound(From);
 		}
 		return false;
 	}
@@ -1485,6 +1477,27 @@ bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &
 	}
 
 	return true;
+}
+
+void CGameControllerPvp::DoDamageHitSound(int KillerId)
+{
+	if(KillerId < 0 || KillerId >= MAX_CLIENTS)
+		return;
+	CPlayer *pKiller = GameServer()->m_apPlayers[KillerId];
+	if(!pKiller)
+		return;
+
+	// do damage Hit sound
+	CClientMask Mask = CClientMask().set(KillerId);
+	for(int i = 0; i < MAX_CLIENTS; i++)
+	{
+		if(!GameServer()->m_apPlayers[i])
+			continue;
+
+		if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorId == KillerId)
+			Mask.set(i);
+	}
+	GameServer()->CreateSound(pKiller->m_ViewPos, SOUND_HIT, Mask);
 }
 
 int CGameControllerPvp::NumConnectedIps()
