@@ -275,6 +275,7 @@ public:
 	vec2 m_Positions[POSITION_HISTORY];  //JSAURUS rollback
 	bool m_PlayerRollback = false;
 	bool m_QuadHooked = false;
+	bool m_HitTile = false;
 	vec2 m_QuadHookPos = vec2(0,0);
 	vec2 m_QuadPosWhenHooked = vec2(0,0);
 	CQuad* m_HookedQuad = nullptr;
