@@ -32,6 +32,17 @@ void CGameControllerCatch::Tick()
 {
     CGameControllerDM::Tick();
 
+    if(g_Config.m_SvCatchWeapon == WEAPON_NINJA && (Server()->Tick() % (Server()->TickSpeed() * 5) == 0))
+	{
+		for(int i = 0; i < MAX_CLIENTS; ++i)
+		{
+			if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetCharacter())
+			{
+				GameServer()->m_apPlayers[i]->GetCharacter()->SetNinjaActivationTick(Server()->Tick());
+			}
+		}
+	}
+
     if(m_RoundPauseTime > 0)
     {
         m_RoundPauseTime--;
