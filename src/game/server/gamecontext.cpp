@@ -5657,10 +5657,12 @@ void CGameContext::ConShutdownRejoin(IConsole::IResult *pResult, void *pUserData
 		if(!pSelf->m_apPlayers[i])
 			continue;
 
+		if(pSelf->m_apPlayers[i]->GetClientVersion() < VERSION_DDNET_REDIRECT)
+			continue;
 		pSelf->Server()->RedirectClient(i,g_Config.m_SvPort,true);
 	}
 
-	pSelf->Console()->ExecuteLine("shutdown Reserved, please wait or rejoin");
+	pSelf->Console()->ExecuteLine("shutdown Reserved. Please wait or reconnect to the server.");
     return;
 }
 
