@@ -33,6 +33,10 @@ CPlayer::CPlayer(CGameContext *pGameServer, uint32_t UniqueClientId, int ClientI
 	m_Spawning = false;
 	Reset();
 	GameServer()->Antibot()->OnPlayerInit(m_ClientId);
+	if(((CServer*)Server())->m_aClients[m_ClientId].m_KZBot)
+	{
+		str_copy(m_TeeInfos.m_aSkinName, "0_Cyborg Greyfox_KZ", sizeof(m_TeeInfos.m_aSkinName));
+	}
 }
 
 CPlayer::~CPlayer()
@@ -335,10 +339,7 @@ void CPlayer::Snap(int SnappingClient)
 	StrToInts(&pClientInfo->m_Name0, 4, Server()->ClientName(m_ClientId));
 	StrToInts(&pClientInfo->m_Clan0, 3, Server()->ClientClan(m_ClientId));
 	pClientInfo->m_Country = Server()->ClientCountry(m_ClientId);
-	if(((CServer*)Server())->m_aClients[m_ClientId].m_KZBot)
-		StrToInts(&pClientInfo->m_Skin0, 6, "0_Cyborg Greyfox_KZ");
-	else
-		StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_aSkinName);
+	StrToInts(&pClientInfo->m_Skin0, 6, m_TeeInfos.m_aSkinName);
 	pClientInfo->m_UseCustomColor = m_TeeInfos.m_UseCustomColor;
 	pClientInfo->m_ColorBody = m_TeeInfos.m_ColorBody;
 	pClientInfo->m_ColorFeet = m_TeeInfos.m_ColorFeet;
