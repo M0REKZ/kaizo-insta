@@ -22,7 +22,7 @@ CGameControllerCatch::CGameControllerCatch(class CGameContext *pGameServer) :
     Colors[1] = 255;
     for(int i = 2; i < MAX_CLIENTS; i++)
     {
-        Colors[i] = maximum(0, 160 - i * 10) * 0x010000 + 0xff00;
+        Colors[i] = maximum(0, 256 - i * 3) * 0x010000 + 0xff00;
     }
 }
 
