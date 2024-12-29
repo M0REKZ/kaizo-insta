@@ -1059,6 +1059,8 @@ void CPlayer::CCameraInfo::Reset()
 
 void CPlayer::HandleKZBot(CNetObj_PlayerInput &Input)
 {
+	if(!m_IsReadyToPlay)
+		m_IsReadyToPlay = true;
 	if(!GetCharacter())
 		return;
 	GetCharacter()->HandleKZBot(Input);
