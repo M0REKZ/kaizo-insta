@@ -132,7 +132,10 @@ void IGameController::GetRoundEndStatsStrCsvNoTeamPlay(char *pBuf, size_t Size)
 	char aBuf[512];
 
 	// csv header
-	str_append(pBuf, "score, name\n", Size);
+	str_append(pBuf, "score, name", Size);
+	if(WinType() == WIN_BY_SURVIVAL)
+		str_append(pBuf, ", alive", Size);
+	str_append(pBuf, "\n", Size);
 
 	CStatsPlayer aStatsPlayers[MAX_CLIENTS];
 
@@ -141,11 +144,12 @@ void IGameController::GetRoundEndStatsStrCsvNoTeamPlay(char *pBuf, size_t Size)
 		const CPlayer *pPlayer = GameServer()->m_apPlayers[i];
 		if(!pPlayer)
 			continue;
-		if(pPlayer->GetTeam() == TEAM_SPECTATORS)
+		if(!IsPlaying(pPlayer))
 			continue;
 
 		CStatsPlayer *pStatsPlayer = &aStatsPlayers[i];
 		pStatsPlayer->m_Active = true;
+		pStatsPlayer->m_IsDead = pPlayer->m_IsDead;
 		pStatsPlayer->m_Score = pPlayer->m_Score.value_or(0);
 		pStatsPlayer->m_pName = Server()->ClientName(pPlayer->GetCid());
 	}
@@ -166,9 +170,12 @@ void IGameController::GetRoundEndStatsStrCsvNoTeamPlay(char *pBuf, size_t Size)
 		str_format(
 			aBuf,
 			sizeof(aBuf),
-			"%d, %s\n",
+			"%d, %s",
 			Player.m_Score,
 			aEscapedName);
 		str_append(pBuf, aBuf, Size);
+		if(WinType() == WIN_BY_SURVIVAL)
+			str_append(pBuf, Player.m_IsDead ? ", no" : ", yes", Size);
+		str_append(pBuf, "\n", Size);
 	}
 }

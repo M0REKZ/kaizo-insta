@@ -21,6 +21,7 @@ CGameControllerZcatch::CGameControllerZcatch(class CGameContext *pGameServer) :
 	m_GameFlags = 0;
 	m_AllowSkinChange = false;
 	m_pGameType = "zCatchᵏᶻ";
+	m_WinType = WIN_BY_SURVIVAL;
 	m_DefaultWeapon = GetDefaultWeaponBasedOnSpawnWeapons();
 
 	for(auto &Color : m_aBodyColors)
@@ -131,6 +132,15 @@ bool CGameControllerZcatch::IsLoser(const CPlayer *pPlayer)
 	// rage quit as dead player is counted as a loss
 	// qutting mid game while being alive is not
 	return pPlayer->m_IsDead;
+}
+
+bool CGameControllerZcatch::IsPlaying(const CPlayer *pPlayer)
+{
+	// in zCatch in game players and spectators that are waiting to join
+	// are considered active players
+	//
+	// only spectators that are alive are considered pure spectators
+	return CGameControllerInstagib::IsPlaying(pPlayer) || pPlayer->m_IsDead;
 }
 
 int CGameControllerZcatch::PointsForWin(const CPlayer *pPlayer)

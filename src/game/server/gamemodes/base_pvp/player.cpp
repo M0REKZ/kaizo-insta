@@ -251,4 +251,5 @@ void CPlayer::UpdateLastToucher(int ClientId)
 	}
 
 	m_LastToucherId = ClientId;
+	m_TicksSinceLastTouch = 0;
 }

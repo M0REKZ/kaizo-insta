@@ -75,6 +75,11 @@ int IGameController::GetPlayerTeam(CPlayer *pPlayer, bool Sixup)
 	return pPlayer->GetTeam();
 }
 
+bool IGameController::IsPlaying(const CPlayer *pPlayer)
+{
+	return pPlayer->GetTeam() == TEAM_RED || pPlayer->GetTeam() == TEAM_BLUE;
+}
+
 void IGameController::ToggleGamePause()
 {
 	SetPlayersReadyState(false);

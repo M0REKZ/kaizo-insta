@@ -9,10 +9,7 @@ For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 A ddnet based pvp mod. With the focus on correct 0.6 and 0.7 support and staying close to and up to date with ddnet.
 While being highly configurable and feature rich.
 
-Implementing most of the relevant pvp gametypes: gctf, ictf, gdm, idm, gtdm, itdm, zCatch, bolofng, solofng, boomfng, fng
-
-
-Planned gametypes are: ctf, dm
+Implementing most of the relevant pvp gametypes: ctf, dm, gctf, ictf, gdm, idm, gtdm, itdm, zCatch, bolofng, solofng, boomfng, fng
 
 # Project name and scope
 
@@ -112,6 +109,30 @@ so they know what is going on:
 ## Gametype support
 
 Make sure to also `reload` or switch the map when changing the gametype.
+
+### CTF
+
+``sv_gametype ctf``
+
+Vanilla teeworlds capture the flag. Is a team based mode where players can collect shields/health and weapons.
+Capturing the enemy flag scores your team 100 points.
+
+
+ddnet-insta is based on [ddnet](https://github.com/ddnet/ddnet) but it aims to fully implement correct [teeworlds](https://github.com/teeworlds/teeworlds) gameplay for the vanilla modes.
+But there are vanilla gameplay features that require you to set some [configs](https://github.com/ddnet-insta/ddnet-insta?tab=readme-ov-file#configs).
+And the 0.5 wallhammer bug is intentionally not fixed like it is in the official teeworlds 0.6 and 0.7 versions.
+
+### DM
+
+``sv_gametype dm``
+
+Vanilla teeworlds deathmatch. Is a free for all mode where players can collect shields/health and weapons.
+First player to reach the scorelimit wins.
+
+
+ddnet-insta is based on [ddnet](https://github.com/ddnet/ddnet) but it aims to fully implement correct [teeworlds](https://github.com/teeworlds/teeworlds) gameplay for the vanilla modes.
+But there are vanilla gameplay features that require you to set some [configs](https://github.com/ddnet-insta/ddnet-insta?tab=readme-ov-file#configs).
+And the 0.5 wallhammer bug is intentionally not fixed like it is in the official teeworlds 0.6 and 0.7 versions.
 
 ### iCTF
 

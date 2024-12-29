@@ -2765,6 +2765,8 @@ if(SERVER)
     gamemodes/base_pvp/ctf.h
     gamemodes/base_pvp/player.cpp
     gamemodes/base_pvp/player.h
+    gamemodes/ddrace/block/block.cpp
+    gamemodes/ddrace/block/block.h
     gamemodes/instagib/base_fng.cpp
     gamemodes/instagib/base_fng.h
     gamemodes/instagib/base_instagib.cpp
@@ -2818,6 +2820,8 @@ if(SERVER)
     gamemodes/vanilla/dm/dm.cpp
     gamemodes/vanilla/dm/dm.h
     gamemodes/vanilla/dm/sql_columns.h
+    gamemodes/vanilla/fly/fly.cpp
+    gamemodes/vanilla/fly/fly.h
     gamemodes/vanilla/BOMB/BOMB.cpp
     gamemodes/vanilla/BOMB/BOMB.h
     gamemodes/vanilla/BOMB/sql_columns.h
@@ -2868,6 +2872,7 @@ if(SERVER)
     gamemodes/vanilla/lts/lts.cpp
     gamemodes/vanilla/lts/lts.h
     gamemodes/vanilla/lts/sql_columns.h
+
     gameworld.cpp
     gameworld.h
     instagib/chat_commands.cpp

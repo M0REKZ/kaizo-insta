@@ -13,3 +13,7 @@ jobs:
       run: |
         ./scripts/gendocs_instagib.sh
 
+    - name: Check sql columns
+      run: |
+        ./scripts/insta_check_sql_columns.sh
+

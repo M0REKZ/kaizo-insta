@@ -908,6 +908,21 @@ void CGameControllerPvp::OnPlayerTick(class CPlayer *pPlayer)
 			GameStateToStr(GameState()));
 		GameServer()->SendBroadcast(aBuf, pPlayer->GetCid());
 	}
+
+	// last toucher for fng and block
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(pChr && pChr->IsAlive())
+	{
+		int HookedId = pChr->Core()->HookedPlayer();
+		if(HookedId >= 0 && HookedId < MAX_CLIENTS)
+		{
+			CPlayer *pHooked = GameServer()->m_apPlayers[HookedId];
+			if(pHooked)
+			{
+				pHooked->UpdateLastToucher(pChr->GetPlayer()->GetCid());
+			}
+		}
+	}
 }
 
 bool CGameControllerPvp::OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim)
@@ -958,6 +973,15 @@ bool CGameControllerPvp::IsSpawnProtected(CPlayer *pVictim, CPlayer *pKiller) co
 
 bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
+	// only weapons that push the tee around are considerd a touch
+	// gun and laser do not push (as long as there is no explosive guns/lasers)
+	// and shotgun only pushes in ddrace gametypes
+	if(Weapon != WEAPON_GUN && Weapon != WEAPON_LASER)
+	{
+		if(!m_IsVanillaGameType || Weapon != WEAPON_SHOTGUN)
+			Character.GetPlayer()->UpdateLastToucher(From);
+	}
+
 	CPlayer *pPlayer = Character.GetPlayer();
 	if(Character.m_IsGodmode)
 		return true;
@@ -1082,6 +1106,8 @@ void CGameControllerPvp::OnCharacterSpawn(class CCharacter *pChr)
 
 	// default health
 	pChr->IncreaseHealth(10);
+
+	pChr->GetPlayer()->UpdateLastToucher(-1);
 }
 
 void CGameControllerPvp::AddSpree(class CPlayer *pPlayer)

@@ -226,6 +226,23 @@ public:
 	virtual int PointsForWin(const CPlayer *pPlayer) { return 1; }
 
 	/*
+		Function: IsPlaying
+			Should return true if the player is playing. But the player does not have to
+			be alive. And might be currently in team spectators (for example LMS/zCatch).
+
+			Should return false if the player is intentionally spectating
+			and not participating in the game at all.
+
+			This replaces the pPlayer->m_Team == TEAM_SPECTATORS check because it supports
+			also dead players and any other situtations where players that are technically not
+			just watching the game end up in the spectator team for a short period of time.
+
+		Arguments:
+			pPlayer - the player to check
+	*/
+	virtual bool IsPlaying(const CPlayer *pPlayer);
+
+	/*
 		Function: OnShowStatsAll
 			called from the main thread when a SQL worker finished querying stats from the database
 
@@ -458,6 +475,22 @@ public:
 	int IsGameRunning() const { return m_GameState == IGS_GAME_RUNNING; }
 	int IsGameCountdown() const { return m_GameState == IGS_START_COUNTDOWN_ROUND_START || m_GameState == IGS_START_COUNTDOWN_UNPAUSE; }
 	int m_GameStateTimer;
+
+	enum EWinType
+	{
+		// First player or team to reach sv_scorelimit wins.
+		WIN_BY_SCORE,
+
+		// Last player or team to stay alive wins.
+		WIN_BY_SURVIVAL,
+	};
+
+	EWinType m_WinType = WIN_BY_SCORE;
+
+	// What is the determining factor to win the game.
+	// Most game modes require reaching the sv_scorelimit.
+	// But some also just look at who stays alive until the end.
+	EWinType WinType() const { return m_WinType; }
 
 	// custom ddnet-insta timers
 	int m_UnpauseStartTick = 0;

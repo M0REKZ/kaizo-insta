@@ -50,6 +50,7 @@
 #include "gamemodes/vanilla/tdm/tdm.h"
 #include "gamemodes/vanilla/lms/lms.h"
 #include "gamemodes/vanilla/lts/lts.h"
+#include "gamemodes/ddrace/block/block.h"
 #include "gamemodes/instagib/bolofng/bolofng.h"
 #include "gamemodes/instagib/boomfng/boomfng.h"
 #include "gamemodes/instagib/fng/fng.h"
@@ -64,6 +65,7 @@
 #include "gamemodes/mod.h"
 #include "gamemodes/vanilla/ctf/ctf.h"
 #include "gamemodes/vanilla/dm/dm.h"
+#include "gamemodes/vanilla/fly/fly.h"
 #include "player.h"
 #include "score.h"
 
@@ -4235,6 +4237,10 @@ void CGameContext::OnInit(const void *pPersistentData)
 		m_pController = new CGameControllerDM(this);
 	else if(!str_comp_nocase(Config()->m_SvGametype, "ctf"))
 		m_pController = new CGameControllerCTF(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "fly"))
+		m_pController = new CGameControllerFly(this);
+	else if(!str_comp_nocase(Config()->m_SvGametype, "block"))
+		m_pController = new CGameControllerBlock(this);
 	else
 	{
 		if(str_comp_nocase(Config()->m_SvGametype, "ddnet"))

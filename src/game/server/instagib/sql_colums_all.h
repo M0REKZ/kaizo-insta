@@ -15,11 +15,16 @@
 #define MACRO_TOP_COLUMN(name, sql_name, display_name, order_by) ;
 #endif
 
+#include <game/server/gamemodes/instagib/bolofng/sql_columns.h>
+#include <game/server/gamemodes/instagib/boomfng/sql_columns.h>
 #include <game/server/gamemodes/instagib/fng/sql_columns.h>
 #include <game/server/gamemodes/instagib/gctf/sql_columns.h>
 #include <game/server/gamemodes/instagib/ictf/sql_columns.h>
+#include <game/server/gamemodes/instagib/idm/sql_columns.h>
 #include <game/server/gamemodes/instagib/solofng/sql_columns.h>
 #include <game/server/gamemodes/instagib/zcatch/sql_columns.h>
+#include <game/server/gamemodes/vanilla/ctf/sql_columns.h>
+#include <game/server/gamemodes/vanilla/dm/sql_columns.h>
 
 MACRO_RANK_COLUMN(Wins, wins, "Wins", "DESC")
 MACRO_RANK_COLUMN(BestSpree, spree, "killing spree", "DESC")

@@ -78,8 +78,7 @@ public:
 	/*******************************************************************
 	 * fng                                                             *
 	 *******************************************************************/
-	int m_LastToucherId = -1;
-	void UpdateLastToucher(int ClientId);
+	// see also m_LastToucherId
 	int m_OriginalFreezerId = -1;
 	// amount of seconds to freeze on next spawn
 	int m_FreezeOnSpawn = 0;
@@ -99,6 +98,14 @@ public:
 	
 	bool m_ForceAFK; //+KZ
 	bool m_MenuAFK;
+
+	// fng and block
+	int m_LastToucherId = -1;
+	void UpdateLastToucher(int ClientId);
+
+	// ticks since m_LastToucherId was set
+	// only used in block mode for now
+	int m_TicksSinceLastTouch = 0;
 
 	// Will also be set if spree chat messages are turned off
 	// this is the current spree

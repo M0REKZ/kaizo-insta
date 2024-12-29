@@ -48,16 +48,6 @@ void CGameControllerBaseFng::Tick()
 		if(!pChr || !pChr->IsAlive())
 			continue;
 
-		int HookedId = pChr->Core()->HookedPlayer();
-		if(HookedId >= 0 && HookedId < MAX_CLIENTS)
-		{
-			CPlayer *pHooked = GameServer()->m_apPlayers[HookedId];
-			if(pHooked)
-			{
-				pHooked->UpdateLastToucher(pChr->GetPlayer()->GetCid());
-			}
-		}
-
 		if(pChr->IsTouchingTile(TILE_FNG_SPIKE_RED))
 			OnSpike(pChr, TILE_FNG_SPIKE_RED);
 		if(pChr->IsTouchingTile(TILE_FNG_SPIKE_BLUE))
