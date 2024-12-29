@@ -10,7 +10,7 @@ CGameControllerLTS::CGameControllerLTS(class CGameContext *pGameServer) :
 	m_GameFlags = GAMEFLAG_TEAMS;
 	
 	m_pGameType = "LTSᵏᶻ";
-	
+	m_WinType = WIN_BY_SURVIVAL;
 	m_pStatsTable = "lts";
 	m_pExtraColumns = new CLtsColumns();
 	m_pSqlStats->SetExtraColumns(m_pExtraColumns);

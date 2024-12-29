@@ -10,7 +10,7 @@ CGameControllerLMS::CGameControllerLMS(class CGameContext *pGameServer) :
     m_GameFlags = 0;
 
     m_pGameType = "LMSᵏᶻ";
-	
+	m_WinType = WIN_BY_SURVIVAL;
 	m_pStatsTable = "lms";
 	m_pExtraColumns = new CLmsColumns();
 	m_pSqlStats->SetExtraColumns(m_pExtraColumns);

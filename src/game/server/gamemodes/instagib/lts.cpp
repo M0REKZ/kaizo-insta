@@ -7,6 +7,7 @@ CGameControllerInstaLTS::CGameControllerInstaLTS(class CGameContext *pGameServer
 	CGameControllerInstaLMS(pGameServer)
 {
     m_GameFlags = GAMEFLAG_TEAMS;
+    m_WinType = WIN_BY_SURVIVAL;
 }
 
 CGameControllerInstaLTS::~CGameControllerInstaLTS() = default;

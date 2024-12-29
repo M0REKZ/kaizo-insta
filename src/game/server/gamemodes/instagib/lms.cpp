@@ -8,6 +8,7 @@ CGameControllerInstaLMS::CGameControllerInstaLMS(class CGameContext *pGameServer
 {
     
     m_GameFlags = 0;
+    m_WinType = WIN_BY_SURVIVAL;
 
 }
 

@@ -11,7 +11,7 @@ CGameControllerBOMB::CGameControllerBOMB(class CGameContext *pGameServer) :
     m_pGameType = "BOMBᵏᶻ";
 	m_AllowSkinChange = false;
     m_BombTime = g_Config.m_SvBombTime * Server()->TickSpeed();
-	
+	m_WinType = WIN_BY_SURVIVAL;
 	m_pStatsTable = "bomb";
 	m_pExtraColumns = new CBOMBColumns();
 	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
