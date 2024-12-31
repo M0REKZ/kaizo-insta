@@ -20,13 +20,32 @@ CGameControllerCatch::CGameControllerCatch(class CGameContext *pGameServer) :
 
     Colors[0] = 0;
     Colors[1] = 255;
-    int lht = 0x69;
+    int Hue = 0x000000;
+    int Sat = 0x00FF00;
+    int Lht = 0x000000;
     for(int i = 2; i < MAX_CLIENTS; i++)
     {
-        Colors[i] = maximum(0, 256 - (i-2) * 4) * 0x010000 + 0xEE00 + lht;
-        lht += 0x0030;
-        if(lht > 0x00F0)
-            lht = 0;
+        
+        Colors[i] = Hue + Sat + Lht;
+        Hue += 0x1A0000;
+        if(Hue >= 0xEF0000)
+        {
+            if(Lht < 0x0000EF)
+                Lht += 0x000050;
+            Hue = 0x000000;
+        }
+        if(Lht >= 0x0000EF)
+        {
+            if(Sat > 0x000000)
+                Sat -= 0x005000;
+            Lht = 0x000000;
+        }
+        if(Sat <= 0x001F00)
+        {
+            Hue = 0x000000;
+            Sat = 0x00FF00;
+            Lht = 0x000000;
+        }
     }
 }
 
