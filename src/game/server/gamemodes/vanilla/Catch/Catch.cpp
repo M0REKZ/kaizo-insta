@@ -91,12 +91,15 @@ bool CGameControllerCatch::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &Fro
     str_copy(Character.GetPlayer()->m_CatchSkin, GameServer()->m_apPlayers[From]->m_CatchSkin, MAX_SKIN_LENGTH);
     UpdateSkins();
 
-    CNetMsg_Sv_KillMsg Msg;
-	Msg.m_Killer = From;
-	Msg.m_Victim = Character.GetPlayer()->GetCid();
-	Msg.m_Weapon = Weapon;
-	Msg.m_ModeSpecial = 0;
-	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+    if(Character.GetPlayer()->m_CatchColor != GameServer()->m_apPlayers[From]->m_CatchColor)
+    {
+        CNetMsg_Sv_KillMsg Msg;
+        Msg.m_Killer = From;
+        Msg.m_Victim = Character.GetPlayer()->GetCid();
+        Msg.m_Weapon = Weapon;
+        Msg.m_ModeSpecial = 0;
+        Server()->SendPackMsg(&Msg, MSGFLAG_VITAL, -1);
+    }
 
     return false;
 }
