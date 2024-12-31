@@ -3631,6 +3631,9 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 			
 			if(str_find_nocase(GameServer()->m_pController->m_pGameType, "freeze") && p->GetCore().m_DeepFrozen)
 				continue;
+
+			if(str_find_nocase(GameServer()->m_pController->m_pGameType, "catch64") && p->GetPlayer()->m_CatchColor == m_pPlayer->m_CatchColor)
+				continue;
 			
 			
 			float Len = distance(m_Pos, p->m_Pos);
