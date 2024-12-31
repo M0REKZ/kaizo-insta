@@ -88,6 +88,9 @@ void CGameControllerCatch::Tick()
 
 bool CGameControllerCatch::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
+    if(!(Dmg >= g_Config.m_SvDamageNeededForKill || Weapon == WEAPON_LASER || Weapon == WEAPON_HAMMER))
+        return false;
+
     if(g_Config.m_SvCatchDamage || Character.m_TakingNoOwnerDamage)
 	{
 		CGameControllerDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
@@ -103,8 +106,6 @@ bool CGameControllerCatch::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &Fro
     if(!GameServer()->m_apPlayers[From])
         return false;
     if(GameServer()->m_apPlayers[From] == Character.GetPlayer())
-        return false;
-    if(!(Dmg >= g_Config.m_SvDamageNeededForKill || Weapon == WEAPON_LASER || Weapon == WEAPON_HAMMER))
         return false;
     //if(Character.GetPlayer()->m_IsBomb)
      //   return false;
