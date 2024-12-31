@@ -85,6 +85,8 @@ bool CGameControllerCatch::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &Fro
         return false;
     if(GameServer()->m_apPlayers[From] == Character.GetPlayer())
         return false;
+    if(!(Dmg >= g_Config.m_SvDamageNeededForKill || Weapon == WEAPON_LASER || Weapon == WEAPON_HAMMER))
+        return false;
     //if(Character.GetPlayer()->m_IsBomb)
      //   return false;
     Character.GetPlayer()->m_CatchColor = GameServer()->m_apPlayers[From]->m_CatchColor;
