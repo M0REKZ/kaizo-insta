@@ -3883,6 +3883,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("rollback", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConRollback, this, "Set Rollback");
     Console()->Register("move_kzbot", "s[blue/red]", CFGFLAG_SERVER, ConMoveKZBot, this, "Move KZBot to blue or red team");
 	Console()->Register("rejoin_shutdown", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConShutdownRejoin, this, "Shutdown and make players rejoin same server");
+	Console()->Register("redirect_client", "i[id] i[port]", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConRedirectClient, this, "Redirect client to another server (Works for DDNet version 17.2 and above)");
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 
@@ -5704,4 +5705,33 @@ bool CGameContext::CheckBotPointer(int ClientID, const char* msg)
 		return true;
 	} else
 		return false;
+}
+
+void CGameContext::ConRedirectClient(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	
+	if(pResult->NumArguments() < 2)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "Insufficent arguments");
+		return;
+	}
+
+	int ClientID = pResult->GetInteger(0);
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+	    return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+	    return;
+	
+	if(pSelf->m_apPlayers[ClientID]->GetClientVersion() < VERSION_DDNET_REDIRECT)
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "Client version is too old to be redirected");
+		return;
+	}
+
+	int Port = pResult->GetInteger(1);
+
+	pSelf->Server()->RedirectClient(ClientID,Port,true);
 }
