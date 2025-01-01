@@ -88,7 +88,7 @@ void CGameControllerCatch::Tick()
 
 bool CGameControllerCatch::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
-    if(!(Dmg >= g_Config.m_SvDamageNeededForKill || Weapon == WEAPON_LASER || Weapon == WEAPON_HAMMER))
+    if(!(Dmg >= g_Config.m_SvDamageNeededForKill || Weapon == WEAPON_LASER || Weapon == WEAPON_HAMMER || Weapon == WEAPON_GUN || Weapon == WEAPON_SHOTGUN))
         return false;
 
     if(g_Config.m_SvCatchDamage || Character.m_TakingNoOwnerDamage)
