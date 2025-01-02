@@ -61,7 +61,6 @@ public:
      * Catch                                                           *
      *******************************************************************/
 
-	bool m_CatchOrigColorSet = false;
     int m_CatchColor = 0;
 	int m_CatchOrigColor = 0;
 	char m_CatchSkin[MAX_SKIN_LENGTH];
