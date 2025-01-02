@@ -206,6 +206,11 @@ void CGameControllerCatch::OnPlayerConnect(class CPlayer *pPlayer)
         str_copy(pPlayer->m_CatchOrigSkin, pPlayer->m_TeeInfos.m_aSkinName, MAX_SKIN_LENGTH);
         str_copy(pPlayer->m_CatchSkin, pPlayer->m_CatchOrigSkin, MAX_SKIN_LENGTH);
         pPlayer->m_CatchOrigColorSet = true;
+        for(int a = 0; a < 6; a++)
+        {
+            str_copy(pPlayer->m_CatchSkinPartNames[a], pPlayer->m_TeeInfos.m_apSkinPartNames[a], 24);
+            str_copy(pPlayer->m_CatchOrigSkinPartNames[a], pPlayer->m_TeeInfos.m_apSkinPartNames[a], 24);
+        }
     }
     return;
 }
@@ -230,6 +235,11 @@ void CGameControllerCatch::OnCharacterSpawn(class CCharacter *pChr)
         str_copy(pChr->GetPlayer()->m_CatchOrigSkin, pChr->GetPlayer()->m_TeeInfos.m_aSkinName, MAX_SKIN_LENGTH);
         str_copy(pChr->GetPlayer()->m_CatchSkin, pChr->GetPlayer()->m_CatchOrigSkin, MAX_SKIN_LENGTH);
         pChr->GetPlayer()->m_CatchOrigColorSet = true;
+        for(int a = 0; a < 6; a++)
+        {
+            str_copy(pChr->GetPlayer()->m_CatchSkinPartNames[a], pChr->GetPlayer()->m_TeeInfos.m_apSkinPartNames[a], 24);
+            str_copy(pChr->GetPlayer()->m_CatchOrigSkinPartNames[a], pChr->GetPlayer()->m_TeeInfos.m_apSkinPartNames[a], 24);
+        }
     }
    // SetSkins();
    UpdateSkins();
@@ -249,19 +259,12 @@ void CGameControllerCatch::UpdateSkins()
 
         str_copy(GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinName, GameServer()->m_apPlayers[i]->m_CatchSkin, MAX_SKIN_LENGTH);
 
-        GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[0] = true;
-        GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[1] = true;
-        GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[2] = true;
-        GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[3] = true;
-        GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[4] = true;
-        GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[5] = true;
-                    
-        GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[0] = GameServer()->m_apPlayers[i]->m_CatchColor;
-        GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[1] = GameServer()->m_apPlayers[i]->m_CatchColor;
-        GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[2] = GameServer()->m_apPlayers[i]->m_CatchColor;
-        GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[3] = GameServer()->m_apPlayers[i]->m_CatchColor;
-        GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[4] = GameServer()->m_apPlayers[i]->m_CatchColor;
-        GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[5] = GameServer()->m_apPlayers[i]->m_CatchColor;
+        for(int a = 0; a < 6; a++)
+        {
+            GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[a] = true;
+            GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[a] = ColorHSLA(GameServer()->m_apPlayers[i]->m_CatchColor).UnclampLighting(ColorHSLA::DARKEST_LGT).Pack(ColorHSLA::DARKEST_LGT7);
+            str_copy(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[a], GameServer()->m_apPlayers[i]->m_CatchSkinPartNames[a], 24);
+        }
 
         protocol7::CNetMsg_Sv_SkinChange Msg;
 		Msg.m_ClientId = i;
@@ -286,6 +289,13 @@ void CGameControllerCatch::ResetPlayerColors()
         GameServer()->m_apPlayers[i]->m_CatchColor = Colors[i];
         GameServer()->m_apPlayers[i]->m_CatchOrigColor = Colors[i];
         str_copy(GameServer()->m_apPlayers[i]->m_CatchSkin, GameServer()->m_apPlayers[i]->m_CatchOrigSkin, MAX_SKIN_LENGTH);
+        for(int a = 0; a < 6; a++)
+        {
+            GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[a] = true;
+            GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[a] = ColorHSLA(GameServer()->m_apPlayers[i]->m_CatchOrigColor).UnclampLighting(ColorHSLA::DARKEST_LGT).Pack(ColorHSLA::DARKEST_LGT7);
+            str_copy(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[a], GameServer()->m_apPlayers[i]->m_CatchOrigSkinPartNames[a], 24);
+        }
+
     }
 
     UpdateSkins();

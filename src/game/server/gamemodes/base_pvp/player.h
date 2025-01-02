@@ -66,6 +66,8 @@ public:
 	int m_CatchOrigColor = 0;
 	char m_CatchSkin[MAX_SKIN_LENGTH];
 	char m_CatchOrigSkin[MAX_SKIN_LENGTH];
+	char m_CatchSkinPartNames[6][24] = {"", "", "", "", "", ""};
+	char m_CatchOrigSkinPartNames[6][24] = {"", "", "", "", "", ""};
 
 	/*******************************************************************
 	 * gCTF                                                            *
