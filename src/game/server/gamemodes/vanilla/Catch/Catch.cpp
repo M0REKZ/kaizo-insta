@@ -199,10 +199,14 @@ bool CGameControllerCatch::DoWincheckRound()
 void CGameControllerCatch::OnPlayerConnect(class CPlayer *pPlayer)
 {
     CGameControllerDM::OnPlayerConnect(pPlayer);
-    pPlayer->m_CatchColor = Colors[pPlayer->GetCid()];
-    pPlayer->m_CatchOrigColor = pPlayer->m_CatchColor;
-    str_copy(pPlayer->m_CatchOrigSkin, pPlayer->m_TeeInfos.m_aSkinName, MAX_SKIN_LENGTH);
-    str_copy(pPlayer->m_CatchSkin, pPlayer->m_CatchOrigSkin, MAX_SKIN_LENGTH);
+    if(!pPlayer->m_CatchOrigColorSet && pPlayer->m_TeeInfos.m_aSkinName[0])
+    {
+        pPlayer->m_CatchColor = Colors[pPlayer->GetCid()];
+        pPlayer->m_CatchOrigColor = pPlayer->m_CatchColor;
+        str_copy(pPlayer->m_CatchOrigSkin, pPlayer->m_TeeInfos.m_aSkinName, MAX_SKIN_LENGTH);
+        str_copy(pPlayer->m_CatchSkin, pPlayer->m_CatchOrigSkin, MAX_SKIN_LENGTH);
+        pPlayer->m_CatchOrigColorSet = true;
+    }
     return;
 }
 
@@ -219,6 +223,14 @@ void CGameControllerCatch::OnCharacterSpawn(class CCharacter *pChr)
     pChr->GiveWeapon(g_Config.m_SvCatchWeapon);
     pChr->SetActiveWeapon(g_Config.m_SvCatchWeapon);
     
+    if(!pChr->GetPlayer()->m_CatchOrigColorSet && pChr->GetPlayer()->m_TeeInfos.m_aSkinName[0])
+    {
+        pChr->GetPlayer()->m_CatchColor = Colors[pChr->GetPlayer()->GetCid()];
+        pChr->GetPlayer()->m_CatchOrigColor = pChr->GetPlayer()->m_CatchColor;
+        str_copy(pChr->GetPlayer()->m_CatchOrigSkin, pChr->GetPlayer()->m_TeeInfos.m_aSkinName, MAX_SKIN_LENGTH);
+        str_copy(pChr->GetPlayer()->m_CatchSkin, pChr->GetPlayer()->m_CatchOrigSkin, MAX_SKIN_LENGTH);
+        pChr->GetPlayer()->m_CatchOrigColorSet = true;
+    }
    // SetSkins();
    UpdateSkins();
 
