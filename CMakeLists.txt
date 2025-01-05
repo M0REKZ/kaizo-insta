@@ -2883,6 +2883,8 @@ if(SERVER)
     instagib/gamecontroller.cpp
     instagib/gamecontroller.h
     instagib/gamelogic.cpp
+    instagib/laser_text.cpp
+    instagib/laser_text.h
     instagib/rcon_commands.cpp
     instagib/rcon_commands.h
     instagib/rcon_configs.cpp

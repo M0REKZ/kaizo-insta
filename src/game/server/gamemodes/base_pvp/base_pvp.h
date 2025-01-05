@@ -105,6 +105,9 @@ public:
 
 	// generic helpers
 
+	// displays fng styled laser text points in the world
+	void MakeLaserTextPoints(vec2 Pos, int Points, int Seconds);
+
 	// plays the satisfying hit sound
 	// that is used in teeworlds when a projectile causes damage
 	// in ddnet-insta it is used the same way in CTF/DM

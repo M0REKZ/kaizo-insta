@@ -235,6 +235,16 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_force_ready_all` minutes after which a game will be force unpaused (0=off) related to sv_player_ready_mode
 + `sv_stop_and_go_chat` pause then game when someone writes 'pause' or 'stop' and start with 'go' or 'start'
 + `sv_powerups` Allow powerups like ninja
++ `sv_team_score_normal` Points a team receives for grabbing into normal spikes
++ `sv_team_score_gold` Points a team receives for grabbing into golden spikes
++ `sv_team_score_green` Points a team receives for grabbing into green spikes(non 4-teams fng only)
++ `sv_team_score_purple` Points a team receives for grabbing into purple spikes(non 4-teams fng only)
++ `sv_team_score_team` Points a team receives for grabbing into team spikes
++ `sv_player_score_normal` Points a player receives for grabbing into normal spikes
++ `sv_player_score_gold` Points a player receives for grabbing into golden spikes
++ `sv_player_score_green` Points a player receives for grabbing into green spikes(non 4-teams fng only)
++ `sv_player_score_purple` Points a player receives for grabbing into purple spikes(non 4-teams fng only)
++ `sv_player_score_team` Points a player receives for grabbing into team spikes
 + `sv_grenade_ammo_regen` Activate or deactivate grenade ammo regeneration in general
 + `sv_grenade_ammo_regen_time` Grenade ammo regeneration time in miliseconds
 + `sv_grenade_ammo_regen_num` Maximum number of grenades if ammo regeneration on
@@ -266,6 +276,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_fng_spike_sound` (fng only) play flag capture sound when sacrificing an enemy into the spikes
 + `sv_punish_freeze_disconnect` (fng) 0=off otherwise bantime in minutes when leaving server while being frozen
 + `sv_save_server` display all time score in scoreboard based on the player name
++ `sv_laser_text_points` display laser text in the world on scoring (only fng for now)
 + `sv_chat_ratelimit_long_messages` Needs sv_spamprotection 0 (0=off, 1=only messages longer than 12 chars are limited)
 + `sv_chat_ratelimit_spectators` Needs sv_spamprotection 0 (0=off, 1=specs have slow chat)
 + `sv_chat_ratelimit_public_chat` Needs sv_spamprotection 0 (0=off, 1=non team chat is slow)

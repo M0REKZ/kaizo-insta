@@ -8,6 +8,7 @@
 #include <game/server/entities/ddnet_pvp/vanilla_projectile.h>
 #include <game/server/entities/flag.h>
 #include <game/server/gamecontroller.h>
+#include <game/server/instagib/laser_text.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/version.h>
 #include <game/server/player.h>
@@ -1086,10 +1087,8 @@ int CGameControllerPvp::GetDefaultWeaponBasedOnSpawnWeapons() const
 	{
 	case SPAWN_WEAPON_LASER:
 		return WEAPON_LASER;
-		break;
 	case SPAWN_WEAPON_GRENADE:
 		return WEAPON_GRENADE;
-		break;
 	default:
 		dbg_msg("zcatch", "invalid sv_spawn_weapons");
 		break;
@@ -1525,6 +1524,20 @@ void CGameControllerPvp::DoDamageHitSound(int KillerId)
 	}
 	GameServer()->CreateSound(pKiller->m_ViewPos, SOUND_HIT, Mask);
 }
+
+void CGameControllerPvp::MakeLaserTextPoints(vec2 Pos, int Points, int Seconds)
+{
+	if(!g_Config.m_SvLaserTextPoints)
+		return;
+
+	char aText[16];
+	if(Points >= 0)
+		str_format(aText, sizeof(aText), "+%d", Points);
+	else
+		str_format(aText, sizeof(aText), "%d", Points);
+	Pos.y -= 60.0f;
+	new CLaserText(&GameServer()->m_World, Pos, Server()->TickSpeed() * Seconds, aText);
+} // NOLINT(clang-analyzer-unix.Malloc)
 
 int CGameControllerPvp::NumConnectedIps()
 {
