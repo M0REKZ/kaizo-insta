@@ -280,15 +280,17 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 		pChr->Die(LastToucherId, WEAPON_NINJA);
 }
 
-inline void CGameControllerBaseFng::UpdateScoresAndDisplayPoints(CPlayer *pKiller, short playerScore, short TeamScore)
+inline void CGameControllerBaseFng::UpdateScoresAndDisplayPoints(CPlayer *pKiller, int PlayerScore, int TeamScore)
 {
 	if(!pKiller)
 		return;
-	pKiller->AddScore(playerScore - 1);
+	// The player already gets one score point
+	// in CGameControllerPvp::OnCharacterDeath()
+	pKiller->AddScore(PlayerScore - 1);
 	AddTeamscore(pKiller->GetTeam(), TeamScore);
-
+	int Score = IsTeamPlay() ? TeamScore : PlayerScore;
 	if(pKiller->IsPlaying()) // NOLINT(clang-analyzer-unix.Malloc)
-		MakeLaserTextPoints(pKiller->GetCharacter()->GetPos(), TeamScore, 3); // NOLINT(clang-analyzer-unix.Malloc)
+		MakeLaserTextPoints(pKiller->GetCharacter()->GetPos(), Score, 3); // NOLINT(clang-analyzer-unix.Malloc)
 }
 
 void CGameControllerBaseFng::SnapDDNetCharacter(int SnappingClient, CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter)

@@ -25,7 +25,6 @@ public:
 	bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
 	bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
 	bool OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos) override;
-	inline void UpdateScoresAndDisplayPoints(CPlayer *pKiller, short playerScore, short TeamScore);
 	int SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags) override;
 	void SnapDDNetCharacter(int SnappingClient, CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter) override;
 	CClientMask FreezeDamageIndicatorMask(class CCharacter *pChr) override;
@@ -33,6 +32,7 @@ public:
 	bool CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize) override;
 	bool OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim) override;
 
+	void UpdateScoresAndDisplayPoints(CPlayer *pKiller, int PlayerScore, int TeamScore);
 	void OnSpike(class CCharacter *pChr, int SpikeTile);
 	void OnWrongSpike(class CPlayer *pPlayer);
 };
