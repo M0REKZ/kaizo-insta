@@ -35,5 +35,7 @@ public:
 	void UpdateScoresAndDisplayPoints(CPlayer *pKiller, int PlayerScore, int TeamScore);
 	void OnSpike(class CCharacter *pChr, int SpikeTile);
 	void OnWrongSpike(class CPlayer *pPlayer);
+
+	bool IsFngGameType() const override { return true; }
 };
 #endif // GAME_SERVER_GAMEMODES_INSTAGIB_BASE_FNG_H

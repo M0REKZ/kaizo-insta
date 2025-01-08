@@ -423,6 +423,8 @@ public:
 	// ddnet has grenade
 	// but the actual implementation is in CGameControllerPvp::IsGrenadeGameType()
 	virtual bool IsGrenadeGameType() const { return true; }
+	virtual bool IsFngGameType() const { return false; }
+	virtual bool IsZcatchGameType() const { return false; }
 	bool IsVanillaGameType() const { return m_IsVanillaGameType; }
 	virtual bool IsDDRaceGameType() const { return true; }
 	bool m_IsVanillaGameType = false;

@@ -145,13 +145,37 @@ bool CGameControllerZcatch::IsPlaying(const CPlayer *pPlayer)
 
 int CGameControllerZcatch::PointsForWin(const CPlayer *pPlayer)
 {
-	int Points = pPlayer->m_vVictimIds.size() * 2;
+	int Kills = pPlayer->m_vVictimIds.size();
+	int Points = 0;
+	if(Kills < 5) // 1-4
+		Points = 0;
+	else if(Kills <= 6) // 5-6
+		Points = 1;
+	else if(Kills <= 8) // 7-8
+		Points = 2;
+	else if(Kills == 9) // 9
+		Points = 3;
+	else if(Kills == 10) // 10
+		Points = 5;
+	else if(Kills == 11) // 11
+		Points = 7;
+	else if(Kills == 12) // 12
+		Points = 9;
+	else if(Kills == 13) // 13
+		Points = 11;
+	else if(Kills == 14) // 14
+		Points = 12;
+	else if(Kills == 15) // 15
+		Points = 14;
+	else // 16+
+		Points = 16;
+
 	dbg_msg(
 		"zcatch",
 		"player '%s' earned %d points for winning with %d kills",
 		Server()->ClientName(pPlayer->GetCid()),
 		Points,
-		pPlayer->m_vVictimIds.size());
+		Kills);
 	return Points;
 }
 
@@ -569,8 +593,15 @@ bool CGameControllerZcatch::DoWincheckRound()
 					// if the win did not count because there were less than 10
 					// players we still give the winner points
 					int Points = PointsForWin(pPlayer);
-					pPlayer->m_Stats.m_Points += Points;
-					str_format(aBuf, sizeof(aBuf), "'%s' won the round and gained %d points.", Server()->ClientName(pPlayer->GetCid()), Points);
+					if(!Points)
+					{
+						str_format(aBuf, sizeof(aBuf), "'%s' won the round (not enough kills to gain points).", Server()->ClientName(pPlayer->GetCid()));
+					}
+					else
+					{
+						pPlayer->m_Stats.m_Points += Points;
+						str_format(aBuf, sizeof(aBuf), "'%s' won the round and gained %d points.", Server()->ClientName(pPlayer->GetCid()), Points);
+					}
 				}
 				SendChat(-1, TEAM_ALL, aBuf);
 			}

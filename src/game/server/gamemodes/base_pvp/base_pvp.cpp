@@ -768,6 +768,8 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 {
 	CGameControllerDDRace::OnCharacterDeath(pVictim, pKiller, Weapon);
 
+	const bool SuicideOrWorld = Weapon == WEAPON_SELF || Weapon == WEAPON_WORLD;
+
 	// do scoreing
 	if(!pKiller || Weapon == WEAPON_GAME)
 		return 0;
@@ -781,14 +783,22 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 	if(GameServer()->GetDDRaceTeam(pVictim->GetPlayer()->GetCid()))
 		return 0;
 
-	if(pKiller == pVictim->GetPlayer())
-		pVictim->GetPlayer()->DecrementScore(); // suicide or world
-	else
+	// zCatch score can never be decremented
+	// and only be incremented by wins
+	// https://github.com/ddnet-insta/ddnet-insta/issues/191
+	if(!IsZcatchGameType())
 	{
-		if(IsTeamplay() && pVictim->GetPlayer()->GetTeam() == pKiller->GetTeam())
-			pKiller->DecrementScore(); // teamkill
+		if(SuicideOrWorld)
+		{
+			pVictim->GetPlayer()->DecrementScore();
+		}
 		else
-			pKiller->IncrementScore(); // normal kill
+		{
+			if(IsTeamplay() && pVictim->GetPlayer()->GetTeam() == pKiller->GetTeam())
+				pKiller->DecrementScore(); // teamkill
+			else
+				pKiller->IncrementScore(); // normal kill
+		}
 	}
 
 	// update spectator modes for dead players in survival
@@ -815,7 +825,13 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 				pKiller->GetCharacter()->m_ReloadTimer = 10;
 			}
 		}
-		EndSpree(pVictim->GetPlayer(), pKiller);
+
+		bool IsSpreeEnd = true;
+		// only getting spiked can end sprees in fng
+		if(IsFngGameType() && SuicideOrWorld)
+			IsSpreeEnd = false;
+		if(IsSpreeEnd)
+			EndSpree(pVictim->GetPlayer(), pKiller);
 	}
 	return 0;
 }

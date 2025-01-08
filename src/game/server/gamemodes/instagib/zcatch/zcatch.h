@@ -96,6 +96,7 @@ public:
 	void OnCaught(class CPlayer *pVictim, class CPlayer *pKiller);
 	void ReleasePlayer(class CPlayer *pPlayer, const char *pMsg);
 
+	bool IsZcatchGameType() const override { return true; }
 	void Tick() override;
 	void Snap(int SnappingClient) override;
 	void OnPlayerConnect(CPlayer *pPlayer) override;

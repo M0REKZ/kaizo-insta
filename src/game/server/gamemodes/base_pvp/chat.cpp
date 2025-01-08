@@ -260,7 +260,7 @@ bool CGameControllerPvp::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, i
 		Team = TEAM_ALL;
 
 	// ddnet-insta warn on ping if cant respond
-	if(Team == TEAM_ALL && pPlayer->GetTeam() != TEAM_SPECTATORS)
+	if(Team == TEAM_ALL && pPlayer->GetTeam() != TEAM_SPECTATORS && pMsg->m_pMessage[0] != '/')
 	{
 		for(const CPlayer *pSpecPlayer : GameServer()->m_apPlayers)
 		{
