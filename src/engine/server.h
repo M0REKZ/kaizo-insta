@@ -33,6 +33,8 @@ public:
 	virtual void AddMapToRandomPool(const char *pMap) = 0;
 	virtual void ClearRandomMapPool() = 0;
 	virtual const char *GetRandomMapFromPool() = 0;
+	// ddnet-insta method that force stops the server
+	virtual void ShutdownServer() = 0;
 
 	MACRO_INTERFACE("server")
 protected:

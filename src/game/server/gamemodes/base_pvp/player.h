@@ -69,6 +69,13 @@ public:
 	char m_CatchSkinPartNames[6][24] = {"", "", "", "", "", ""};
 	char m_CatchOrigSkinPartNames[6][24] = {"", "", "", "", "", ""};
 
+	// kills made in zCatch that give reward points
+	// if the player wins
+	//
+	// it includes players that left the game so it might be more than m_vVictimIds.size()
+	// and it does not include players that were released so it is more than m_Spree
+	int m_KillsThatCount = 0;
+
 	/*******************************************************************
 	 * gCTF                                                            *
 	 *******************************************************************/

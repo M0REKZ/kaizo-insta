@@ -172,9 +172,9 @@ public: // TODO: Maybe make protected
 		Returns:
 			True if the entity doesn't have to be in the snapshot.
 	*/
-	bool NetworkClipped(int SnappingClient) const;
-	bool NetworkClipped(int SnappingClient, vec2 CheckPos) const;
-	bool NetworkClippedLine(int SnappingClient, vec2 StartPos, vec2 EndPos) const;
+	bool NetworkClipped(int SnappingClient);
+	bool NetworkClipped(int SnappingClient, vec2 CheckPos);
+	bool NetworkClippedLine(int SnappingClient, vec2 StartPos, vec2 EndPos);
 
 	bool GameLayerClipped(vec2 CheckPos);
 

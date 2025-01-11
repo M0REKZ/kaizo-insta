@@ -227,6 +227,8 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_gametype` Game type (gctf, ictf, gdm, idm, gtdm, itdm, zcatch, bolofng, solofng, boomfng, fng)
 + `sv_spectator_votes` Allow spectators to vote
 + `sv_spectator_votes_sixup` Allow 0.7 players to vote as spec if sv_spectator_vote is 1 (hacky dead spec)
++ `sv_bang_commands` chat cmds like !1vs1 0=off 1=read only no votes 2=all commands
++ `sv_redirect_and_shutdown_on_round_end` 0=off otherwise it is the port all players will be redirected to on round end
 + `sv_countdown_unpause` Number of seconds to freeze the game in a countdown before match continues after pause
 + `sv_countdown_round_start` Number of seconds to freeze the game in a countdown before match starts (0 enables only for survival gamemodes, -1 disables)
 + `sv_scorelimit` Score limit (0 disables)
@@ -258,12 +260,13 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_killingspree_kills` How many kills are needed to be on a killing-spree (0=off)
 + `sv_damage_needed_for_kill` Damage needed to kill
 + `sv_allow_zoom` allow ddnet clients to use the client side zoom feature
++ `sv_strict_snap_distance` only send players close by (helps against zoom cheats)
 + `sv_anticamper` Toggle to enable/disable Anticamper
 + `sv_anticamper_freeze` If a player should freeze on camping (and how long) or die
 + `sv_anticamper_time` How long to wait till the player dies/freezes
 + `sv_anticamper_range` Distance how far away the player must move to escape anticamper
-+ `sv_zcatch_min_players` How many active players (not spectators) are required to start a round
 + `sv_release_game` auto release on kill (only affects sv_gametype zCatch)
++ `sv_zcatch_require_multiple_ips_to_start` only start games if 5 or more different ips are connected
 + `sv_respawn_protection_ms` Delay in milliseconds a tee can not damage or get damaged after spawning
 + `sv_drop_flag_on_selfkill` drop flag on selfkill (activates chat cmd '/drop flag')
 + `sv_drop_flag_on_vote` drop flag on vote yes (activates chat cmd '/drop flag')

@@ -84,6 +84,9 @@ public:
 	}
 };
 
+#define MIN_ZCATCH_PLAYERS 5
+#define MIN_ZCATCH_KILLS 4
+
 class CGameControllerZcatch : public CGameControllerInstagib
 {
 public:
@@ -92,7 +95,7 @@ public:
 
 	int m_aBodyColors[MAX_CLIENTS] = {0};
 
-	void KillPlayer(class CPlayer *pVictim, class CPlayer *pKiller);
+	void KillPlayer(class CPlayer *pVictim, class CPlayer *pKiller, bool KillCounts);
 	void OnCaught(class CPlayer *pVictim, class CPlayer *pKiller);
 	void ReleasePlayer(class CPlayer *pPlayer, const char *pMsg);
 
@@ -123,16 +126,34 @@ public:
 
 	enum class ECatchGameState
 	{
+		// automatic warmup phase if there is less than 5 players
+		// will switch to RUNNING as soon as there are enough
 		WAITING_FOR_PLAYERS,
+
+		// manually voted release game can also be played with 16 or more players
+		// will only change its state to RUNNING if the users vote for it again
 		RELEASE_GAME,
+
+		// Regular round is running. Needs 5 or more players to start
+		// the amount of points for the win depends on the amount of kills
+		//
+		// as long as there is still a player that already made a kill
+		// and there are enough players in game to end the round the game will keep going
+		// otherwise it will revert back to WAITING_FOR_PLAYERS
 		RUNNING,
-		RUNNING_COMPETITIVE, // NEEDS 10 OR MORE TO START A REAL ROUND
 	};
 	ECatchGameState m_CatchGameState = ECatchGameState::WAITING_FOR_PLAYERS;
 	ECatchGameState CatchGameState() const;
 	void SetCatchGameState(ECatchGameState State);
+	void ReleaseAllPlayers();
 
-	void CheckGameState();
+	// sets up the gamestate of a fresh round
+	// can happen if the previous round ended
+	// or if we switch from a release game to
+	// a regular game
+	void StartZcatchRound();
+
+	bool CheckChangeGameState();
 	bool IsCatchGameRunning() const;
 
 	// colors
@@ -152,9 +173,10 @@ public:
 	int GetBodyColorSavander(int Kills);
 
 	void SetCatchColors(class CPlayer *pPlayer);
-
 	void SendSkinBodyColor7(int ClientId, int Color);
-
 	void OnUpdateZcatchColorConfig() override;
+
+	// returns nullptr if nobody made a kill yet that counts
+	CPlayer *PlayerWithMostKillsThatCount();
 };
 #endif // GAME_SERVER_GAMEMODES_ZCATCH_H

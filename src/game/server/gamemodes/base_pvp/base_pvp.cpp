@@ -76,12 +76,24 @@ void CGameControllerPvp::OnRoundStart()
 		SetGameState(IGS_START_COUNTDOWN_ROUND_START);
 	}
 
-	// for(CPlayer *pPlayer : GameServer()->m_apPlayers)
-	// {
-	// 	if(!pPlayer)
-	// 		continue;
+	// yes the config says round end and the code is round start
+	// that is because every round start means there was a round end before
+	// so it is correct
 	//
-	// }
+	// round end is too early because then players do not see the final scoreboard
+	if(g_Config.m_SvRedirectAndShutdownOnRoundEnd)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+			if(Server()->ClientIngame(i))
+				Server()->RedirectClient(i, g_Config.m_SvRedirectAndShutdownOnRoundEnd);
+
+		// add a 3 second delay to make sure the server can fully finish the round end
+		// everything is shutdown and saved correctly
+		//
+		// and also give the clients some time to receive the redirect message
+		// in case there is some network overload or hiccups
+		m_TicksUntilShutdown = Server()->TickSpeed() * 3;
+	}
 }
 
 CGameControllerPvp::~CGameControllerPvp()
@@ -247,6 +259,60 @@ void CGameControllerPvp::OnFlagCapture(class CFlag *pFlag, float Time, int TimeT
 	str_timestamp_format(aTimestamp, sizeof(aTimestamp), FORMAT_SPACE); // 2019-04-02 19:41:58
 
 	m_pSqlStats->SaveFastcap(ClientId, TimeTicks, aTimestamp, Grenade, IsStatTrack());
+}
+
+bool CGameControllerPvp::ForceNetworkClipping(const CEntity *pEntity, int SnappingClient, vec2 CheckPos)
+{
+	if(!g_Config.m_SvStrictSnapDistance)
+		return false;
+	if(SnappingClient < 0 || SnappingClient >= MAX_CLIENTS)
+		return false;
+
+	const bool ForceDefaultView = !g_Config.m_SvAllowZoom && GameServer()->m_apPlayers[SnappingClient]->GetTeam() != TEAM_SPECTATORS;
+
+	// ddnet-insta: snap default if player is ingame
+	vec2 &ShowDistance = GameServer()->m_apPlayers[SnappingClient]->m_ShowDistance;
+
+	// https://github.com/teeworlds/teeworlds/blob/93f5bf632a3859e97d527fc93a26b6dced767fbc/src/game/server/entity.cpp#L44
+	if(ForceDefaultView)
+		ShowDistance = vec2(1000, 800);
+
+	float dx = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos.x - CheckPos.x;
+	if(absolute(dx) > ShowDistance.x)
+		return true;
+
+	float dy = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos.y - CheckPos.y;
+	return absolute(dy) > ShowDistance.y;
+}
+
+bool CGameControllerPvp::ForceNetworkClippingLine(const CEntity *pEntity, int SnappingClient, vec2 StartPos, vec2 EndPos)
+{
+	if(!g_Config.m_SvStrictSnapDistance)
+		return false;
+	if(SnappingClient < 0 || SnappingClient >= MAX_CLIENTS)
+		return false;
+
+	const bool ForceDefaultView = !g_Config.m_SvAllowZoom && GameServer()->m_apPlayers[SnappingClient]->GetTeam() != TEAM_SPECTATORS;
+
+	vec2 &ViewPos = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos;
+	vec2 &ShowDistance = GameServer()->m_apPlayers[SnappingClient]->m_ShowDistance;
+
+	// https://github.com/teeworlds/teeworlds/blob/93f5bf632a3859e97d527fc93a26b6dced767fbc/src/game/server/entity.cpp#L44
+	if(ForceDefaultView)
+		ShowDistance = vec2(1000, 800);
+
+	vec2 DistanceToLine, ClosestPoint;
+	if(closest_point_on_line(StartPos, EndPos, ViewPos, ClosestPoint))
+	{
+		DistanceToLine = ViewPos - ClosestPoint;
+	}
+	else
+	{
+		// No line section was passed but two equal points
+		DistanceToLine = ViewPos - StartPos;
+	}
+	float ClippDistance = maximum(ShowDistance.x, ShowDistance.y);
+	return (absolute(DistanceToLine.x) > ClippDistance || absolute(DistanceToLine.y) > ClippDistance);
 }
 
 void CGameControllerPvp::OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName)
@@ -877,6 +943,15 @@ void CGameControllerPvp::CheckForceUnpauseGame()
 void CGameControllerPvp::Tick()
 {
 	CGameControllerDDRace::Tick();
+
+	if(m_TicksUntilShutdown)
+	{
+		m_TicksUntilShutdown--;
+		if(m_TicksUntilShutdown < 1)
+		{
+			Server()->ShutdownServer();
+		}
+	}
 
 	if(Config()->m_SvPlayerReadyMode && GameServer()->m_World.m_Paused)
 	{
@@ -1615,4 +1690,15 @@ int CGameControllerPvp::GetFirstAlivePlayerId()
 		if(pPlayer && pPlayer->GetCharacter())
 			return pPlayer->GetCid();
 	return -1;
+}
+
+void CGameControllerPvp::KillAllPlayers()
+{
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		pPlayer->KillCharacter();
+	}
 }

@@ -1,4 +1,5 @@
 #include <base/system.h>
+#include <engine/server/server.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/gamemodes/base_pvp/base_pvp.h>
@@ -8,6 +9,8 @@
 
 void CGameContext::RegisterInstagibCommands()
 {
+	Console()->Register("redirect", "v[victim] i[port]", CFGFLAG_SERVER, CServer::ConRedirect, Server(), "Redirect client to given port use victim -1 to redirect all");
+
 	// config chains
 	Console()->Chain("sv_scorelimit", ConchainGameinfoUpdate, this);
 	Console()->Chain("sv_timelimit", ConchainGameinfoUpdate, this);

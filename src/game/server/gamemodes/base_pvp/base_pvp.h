@@ -89,6 +89,8 @@ public:
 	bool IsGrenadeGameType() const override;
 	bool IsDDRaceGameType() const override { return false; }
 	void OnFlagCapture(class CFlag *pFlag, float Time, int TimeTicks) override;
+	bool ForceNetworkClipping(const CEntity *pEntity, int SnappingClient, vec2 CheckPos) override;
+	bool ForceNetworkClippingLine(const CEntity *pEntity, int SnappingClient, vec2 StartPos, vec2 EndPos) override;
 
 	bool HasWinningScore(const CPlayer *pPlayer) const;
 	bool IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage) override;
@@ -145,6 +147,9 @@ public:
 	// get the lowest client id that has a tee in the world
 	// returns -1 if no player is alive
 	int GetFirstAlivePlayerId();
+
+	// kills the tee of all connected players
+	void KillAllPlayers();
 
 	/*
 		m_pExtraColums

@@ -1,6 +1,9 @@
 /* (c) Magnus Auvinen. See licence.txt in the root of the distribution for more information. */
 /* If you are missing that file, acquire a complete release at teeworlds.com.                */
 
+// ddnet-insta
+#include <game/server/gamecontroller.h>
+
 #include "entity.h"
 #include "gamecontext.h"
 #include "player.h"
@@ -30,18 +33,27 @@ CEntity::~CEntity()
 	Server()->SnapFreeId(m_Id);
 }
 
-bool CEntity::NetworkClipped(int SnappingClient) const
+bool CEntity::NetworkClipped(int SnappingClient)
 {
+	if(GameServer()->m_pController->ForceNetworkClipping(this, SnappingClient, m_Pos))
+		return true;
+
 	return ::NetworkClipped(m_pGameWorld->GameServer(), SnappingClient, m_Pos);
 }
 
-bool CEntity::NetworkClipped(int SnappingClient, vec2 CheckPos) const
+bool CEntity::NetworkClipped(int SnappingClient, vec2 CheckPos)
 {
+	if(GameServer()->m_pController->ForceNetworkClipping(this, SnappingClient, CheckPos))
+		return true;
+
 	return ::NetworkClipped(m_pGameWorld->GameServer(), SnappingClient, CheckPos);
 }
 
-bool CEntity::NetworkClippedLine(int SnappingClient, vec2 StartPos, vec2 EndPos) const
+bool CEntity::NetworkClippedLine(int SnappingClient, vec2 StartPos, vec2 EndPos)
 {
+	if(GameServer()->m_pController->ForceNetworkClippingLine(this, SnappingClient, StartPos, EndPos))
+		return true;
+
 	return ::NetworkClippedLine(m_pGameWorld->GameServer(), SnappingClient, StartPos, EndPos);
 }
 

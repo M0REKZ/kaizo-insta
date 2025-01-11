@@ -341,17 +341,17 @@ bool CGameControllerBaseFng::OnSelfkill(int ClientId)
 bool CGameControllerBaseFng::CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize)
 {
 	CPlayer *pPlayer = GameServer()->m_apPlayers[NotThisId];
-	if(!pPlayer)
-		return false;
+	if(pPlayer)
+	{
+		CCharacter *pChr = pPlayer->GetCharacter();
+		if(pChr && pChr->m_FreezeTime)
+		{
+			str_copy(pErrorReason, "You can't join spectators while being frozen", ErrorReasonSize);
+			return false;
+		}
+	}
 
-	CCharacter *pChr = pPlayer->GetCharacter();
-	if(!pChr)
-		return true;
-	if(!pChr->m_FreezeTime)
-		return true;
-
-	str_copy(pErrorReason, "You can't join spectators while being frozen", ErrorReasonSize);
-	return false;
+	return CGameControllerInstagib::CanJoinTeam(Team, NotThisId, pErrorReason, ErrorReasonSize);
 }
 
 bool CGameControllerBaseFng::OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim)

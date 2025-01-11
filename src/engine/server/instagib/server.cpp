@@ -1,6 +1,5 @@
-// #include <base/system.h>
-// #include <engine/shared/protocol.h>
-//
+#include <engine/shared/protocol.h>
+
 #include "../server.h"
 
 void CServer::AddMapToRandomPool(const char *pMap)
@@ -28,4 +27,39 @@ const char *CServer::GetRandomMapFromPool()
 	str_format(aBuf, sizeof(aBuf), "Chose random map '%s' out of %d maps", pMap, m_vMapPool.size());
 	Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", aBuf);
 	return pMap;
+}
+
+void CServer::ConRedirect(IConsole::IResult *pResult, void *pUser)
+{
+	CServer *pThis = (CServer *)pUser;
+	char aBuf[512];
+
+	int VictimId = pResult->GetVictim();
+	int Port = pResult->GetInteger(1);
+
+	if(VictimId == -1)
+	{
+		for(int i = 0; i < MAX_CLIENTS; i++)
+		{
+			if(i == pResult->m_ClientId)
+				continue;
+
+			pThis->RedirectClient(i, Port);
+		}
+		return;
+	}
+
+	if(VictimId < 0 || VictimId >= MAX_CLIENTS)
+	{
+		str_format(aBuf, sizeof(aBuf), "Invalid ClientId %d", VictimId);
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", aBuf);
+		return;
+	}
+	if(!pThis->ClientIngame(VictimId))
+	{
+		str_format(aBuf, sizeof(aBuf), "No player with ClientId %d connected", VictimId);
+		pThis->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", aBuf);
+		return;
+	}
+	pThis->RedirectClient(VictimId, Port);
 }
