@@ -173,13 +173,13 @@ void CGameControllerInstaFB::Snap(int SnappingClient)
 			FlagCarrierBlue = FLAG_TAKEN;
 	}
 
-	if((FlagCarrierRed == SnappingClient && m_apFlagBalls[TEAM_RED]->m_Team != TEAM_RED) || (FlagCarrierBlue == SnappingClient && m_apFlagBalls[TEAM_BLUE]->m_Team != TEAM_BLUE))
+	if((m_apFlagBalls[TEAM_RED] && FlagCarrierRed == SnappingClient && m_apFlagBalls[TEAM_RED]->m_Team != TEAM_RED) || (m_apFlagBalls[TEAM_BLUE] && FlagCarrierBlue == SnappingClient && m_apFlagBalls[TEAM_BLUE]->m_Team != TEAM_BLUE))
 		invert = true;
 	
 	if((m_apFlagBalls[TEAM_BLUE] && m_apFlagBalls[TEAM_BLUE]->GetCarrier() && m_apFlagBalls[TEAM_BLUE]->GetCarrier()->GetPlayer()->GetTeam() == TEAM_RED) || (m_apFlagBalls[TEAM_RED] && m_apFlagBalls[TEAM_RED]->GetCarrier() && m_apFlagBalls[TEAM_RED]->GetCarrier()->GetPlayer()->GetTeam() == TEAM_BLUE))
 		invert = true;
 
-	if(m_apFlagBalls[TEAM_BLUE]->GetCarrier() && m_apFlagBalls[TEAM_RED]->GetCarrier() && m_apFlagBalls[TEAM_BLUE]->GetCarrier()->GetPlayer()->GetTeam() == m_apFlagBalls[TEAM_RED]->GetCarrier()->GetPlayer()->GetTeam())
+	if(m_apFlagBalls[TEAM_BLUE] && m_apFlagBalls[TEAM_BLUE]->GetCarrier() && m_apFlagBalls[TEAM_RED] && m_apFlagBalls[TEAM_RED]->GetCarrier() && m_apFlagBalls[TEAM_BLUE]->GetCarrier()->GetPlayer()->GetTeam() == m_apFlagBalls[TEAM_RED]->GetCarrier()->GetPlayer()->GetTeam())
 	{
 		if(m_apFlagBalls[TEAM_BLUE]->GetCarrier()->GetPlayer()->GetCid() == SnappingClient && m_apFlagBalls[TEAM_BLUE]->GetCarrier()->GetPlayer()->GetTeam() == TEAM_RED)
 			invert = true;
@@ -284,6 +284,9 @@ bool CGameControllerInstaFB::OnFireWeapon(CCharacter &Character, int &Weapon, ve
 
 	for(CFlagBall *pFlag : m_apFlagBalls)
 	{
+		if(!pFlag)
+			continue;
+
 		if(&Character == pFlag->m_pCarrier)
 		{
 			pFlag->Drop(Direction);
