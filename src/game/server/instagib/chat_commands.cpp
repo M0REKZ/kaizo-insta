@@ -45,7 +45,10 @@ void CGameContext::ConInstaSwap(IConsole::IResult *pResult, void *pUserData)
 	if(!pPlayer)
 		return;
 
+	if(pSelf->m_pController->m_IsInstagibKZ || pSelf->m_pController->IsVanillaGameType())
 	pSelf->ComCallSwapTeamsVote(pResult->m_ClientId);
+	else
+	pSelf->ConSwap(pResult,pUserData);
 }
 
 void CGameContext::ConInstaSwapRandom(IConsole::IResult *pResult, void *pUserData)
