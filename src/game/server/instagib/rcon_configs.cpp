@@ -9,8 +9,6 @@
 
 void CGameContext::RegisterInstagibCommands()
 {
-	Console()->Register("redirect", "v[victim] i[port]", CFGFLAG_SERVER, CServer::ConRedirect, Server(), "Redirect client to given port use victim -1 to redirect all");
-
 	// config chains
 	Console()->Chain("sv_scorelimit", ConchainGameinfoUpdate, this);
 	Console()->Chain("sv_timelimit", ConchainGameinfoUpdate, this);

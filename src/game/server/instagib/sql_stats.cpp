@@ -16,25 +16,26 @@ class IDbConnection;
 
 CInstaSqlResult::CInstaSqlResult()
 {
-	SetVariant(Variant::DIRECT);
+	SetVariant(EInstaSqlRequestType::DIRECT);
 	m_Stats.Reset();
 	m_Rank = 0;
 }
 
-void CInstaSqlResult::SetVariant(Variant v)
+void CInstaSqlResult::SetVariant(EInstaSqlRequestType RequestType)
 {
-	m_MessageKind = v;
-	switch(v)
+	m_MessageKind = RequestType;
+	switch(RequestType)
 	{
-	case RANK:
-	case STATS:
-	case PLAYER_DATA:
-	case DIRECT:
-	case ALL:
+	case EInstaSqlRequestType::CHAT_CMD_RANK:
+	case EInstaSqlRequestType::CHAT_CMD_STATSALL:
+	case EInstaSqlRequestType::CHAT_CMD_MULTIS:
+	case EInstaSqlRequestType::PLAYER_DATA:
+	case EInstaSqlRequestType::DIRECT:
+	case EInstaSqlRequestType::ALL:
 		for(auto &aMessage : m_aaMessages)
 			aMessage[0] = 0;
 		break;
-	case BROADCAST:
+	case EInstaSqlRequestType::BROADCAST:
 		m_aBroadcast[0] = 0;
 		break;
 		break;
@@ -68,7 +69,7 @@ void CSqlStats::ExecPlayerStatsThread(
 	int ClientId,
 	const char *pName,
 	const char *pTable,
-	bool IsLoadPlayerData)
+	EInstaSqlRequestType RequestType)
 {
 	auto pResult = NewInstaSqlResult(ClientId);
 	if(pResult == nullptr)
@@ -77,7 +78,7 @@ void CSqlStats::ExecPlayerStatsThread(
 	str_copy(Tmp->m_aName, pName, sizeof(Tmp->m_aName));
 	str_copy(Tmp->m_aRequestingPlayer, Server()->ClientName(ClientId), sizeof(Tmp->m_aRequestingPlayer));
 	str_copy(Tmp->m_aTable, pTable, sizeof(Tmp->m_aTable));
-	Tmp->m_IsLoadPlayerData = IsLoadPlayerData;
+	Tmp->m_RequestType = RequestType;
 
 	if(m_pExtraColumns)
 	{
@@ -180,14 +181,14 @@ CSqlInstaData::~CSqlInstaData()
 void CSqlStats::LoadInstaPlayerData(int ClientId, const char *pTable)
 {
 	const char *pName = Server()->ClientName(ClientId);
-	ExecPlayerStatsThread(ShowStatsWorker, "load insta player data", ClientId, pName, pTable, true);
+	ExecPlayerStatsThread(ShowStatsWorker, "load insta player data", ClientId, pName, pTable, EInstaSqlRequestType::PLAYER_DATA);
 }
 
-void CSqlStats::ShowStats(int ClientId, const char *pName, const char *pTable)
+void CSqlStats::ShowStats(int ClientId, const char *pName, const char *pTable, EInstaSqlRequestType RequestType)
 {
 	if(RateLimitPlayer(ClientId))
 		return;
-	ExecPlayerStatsThread(ShowStatsWorker, "show stats", ClientId, pName, pTable, false);
+	ExecPlayerStatsThread(ShowStatsWorker, "show stats", ClientId, pName, pTable, RequestType);
 }
 
 void CSqlStats::ShowRank(
@@ -324,9 +325,6 @@ bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGame
 	const auto *pData = dynamic_cast<const CSqlPlayerStatsRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CInstaSqlResult *>(pGameData->m_pResult.get());
 
-	if(pData->m_IsLoadPlayerData)
-		pResult->m_MessageKind = CInstaSqlResult::PLAYER_DATA;
-
 	char aBuf[4096];
 	str_format(
 		aBuf,
@@ -355,14 +353,14 @@ bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGame
 
 	if(End)
 	{
-		pResult->m_MessageKind = CInstaSqlResult::DIRECT;
 		str_format(pResult->m_aaMessages[0], sizeof(pResult->m_aaMessages[0]),
 			"'%s' is unranked",
 			pData->m_aName);
 	}
 	else
 	{
-		pResult->m_MessageKind = CInstaSqlResult::STATS;
+		// success
+		pResult->m_MessageKind = pData->m_RequestType;
 
 		str_copy(pResult->m_Info.m_aRequestedPlayer, pData->m_aName, sizeof(pResult->m_Info.m_aRequestedPlayer));
 
@@ -402,9 +400,6 @@ bool CSqlStats::ShowStatsWorker(IDbConnection *pSqlServer, const ISqlData *pGame
 			}
 		}
 	}
-
-	if(pData->m_IsLoadPlayerData)
-		pResult->m_MessageKind = CInstaSqlResult::PLAYER_DATA;
 	return false;
 }
 
@@ -442,14 +437,14 @@ bool CSqlStats::ShowRankWorker(IDbConnection *pSqlServer, const ISqlData *pGameD
 
 	if(End)
 	{
-		pResult->m_MessageKind = CInstaSqlResult::DIRECT;
 		str_format(pResult->m_aaMessages[0], sizeof(pResult->m_aaMessages[0]),
 			"'%s' is unranked",
 			pData->m_aName);
 	}
 	else
 	{
-		pResult->m_MessageKind = CInstaSqlResult::RANK;
+		// success
+		pResult->m_MessageKind = EInstaSqlRequestType::CHAT_CMD_RANK;
 
 		str_copy(pResult->m_Info.m_aRequestedPlayer, pData->m_aName, sizeof(pResult->m_Info.m_aRequestedPlayer));
 		str_copy(pResult->m_aRankColumnDisplay, pData->m_aRankColumnDisplay, sizeof(pResult->m_aRankColumnDisplay));
@@ -464,7 +459,6 @@ bool CSqlStats::ShowTopWorker(IDbConnection *pSqlServer, const ISqlData *pGameDa
 {
 	const auto *pData = dynamic_cast<const CSqlPlayerStatsRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CInstaSqlResult *>(pGameData->m_pResult.get());
-	pResult->m_MessageKind = CInstaSqlResult::DIRECT;
 
 	auto *paMessages = pResult->m_aaMessages;
 
@@ -519,7 +513,6 @@ bool CSqlStats::ShowFastcapTopWorker(IDbConnection *pSqlServer, const ISqlData *
 {
 	const auto *pData = dynamic_cast<const CSqlPlayerFastcapRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CInstaSqlResult *>(pGameData->m_pResult.get());
-	pResult->m_MessageKind = CInstaSqlResult::DIRECT;
 
 	int LimitStart = maximum(absolute(pData->m_Offset) - 1, 0);
 	const char *pOrder = pData->m_Offset >= 0 ? "ASC" : "DESC";
@@ -588,7 +581,6 @@ bool CSqlStats::ShowFastcapRankWorker(IDbConnection *pSqlServer, const ISqlData 
 {
 	const auto *pData = dynamic_cast<const CSqlPlayerFastcapRequest *>(pGameData);
 	auto *pResult = dynamic_cast<CInstaSqlResult *>(pGameData->m_pResult.get());
-	pResult->m_MessageKind = CInstaSqlResult::DIRECT;
 
 	if(pData->m_OnlyStatTrack)
 	{
@@ -627,12 +619,14 @@ bool CSqlStats::ShowFastcapRankWorker(IDbConnection *pSqlServer, const ISqlData 
 
 	if(!End)
 	{
+		// success
+		pResult->m_MessageKind = EInstaSqlRequestType::ALL;
+
 		int Rank = pSqlServer->GetInt(1);
 		float Time = pSqlServer->GetFloat(2);
 		// CEIL and FLOOR are not supported in SQLite
 		int BetterThanPercent = std::floor(100.0f - 100.0f * pSqlServer->GetFloat(3));
 		str_time_float(Time, TIME_HOURS_CENTISECS, aBuf, sizeof(aBuf));
-		pResult->m_MessageKind = CInstaSqlResult::ALL;
 
 		if(str_comp_nocase(pData->m_aRequestingPlayer, pData->m_aName) == 0)
 		{

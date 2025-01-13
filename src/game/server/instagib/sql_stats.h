@@ -12,6 +12,30 @@ class IDbConnection;
 class IServer;
 class CGameContext;
 
+enum class EInstaSqlRequestType
+{
+	// prints direct messages
+	DIRECT,
+
+	// prints chat all messages
+	ALL,
+
+	// prints broadcast
+	BROADCAST,
+
+	// /statsall chat command
+	CHAT_CMD_STATSALL,
+
+	// /rank_xxx chat command
+	CHAT_CMD_RANK,
+
+	// /multis chat command
+	CHAT_CMD_MULTIS,
+
+	// initial stats load on connect
+	PLAYER_DATA,
+};
+
 struct CInstaSqlResult : ISqlResult
 {
 	CInstaSqlResult();
@@ -21,18 +45,7 @@ struct CInstaSqlResult : ISqlResult
 		MAX_MESSAGES = 10,
 	};
 
-	enum Variant
-	{
-		DIRECT,
-		ALL,
-		BROADCAST,
-		// /statsall chat command
-		STATS,
-		// /rank_xxx chat command
-		RANK,
-		// initial stats load on connect
-		PLAYER_DATA,
-	} m_MessageKind;
+	EInstaSqlRequestType m_MessageKind;
 
 	char m_aaMessages[MAX_MESSAGES][512];
 	char m_aBroadcast[1024];
@@ -56,7 +69,7 @@ struct CInstaSqlResult : ISqlResult
 	// used as a sql table column
 	char m_aRankColumnSql[128];
 
-	void SetVariant(Variant v);
+	void SetVariant(EInstaSqlRequestType RequestType);
 };
 
 struct CSqlInstaData : ISqlData
@@ -80,10 +93,7 @@ struct CSqlPlayerStatsRequest : CSqlInstaData
 	{
 		m_DebugStats = DebugStats;
 	}
-
-	// set to true when this is not a /stats chat command query
-	// but the initial load of the players stats for save servers
-	bool m_IsLoadPlayerData = false;
+	EInstaSqlRequestType m_RequestType = EInstaSqlRequestType::DIRECT;
 
 	// object being requested, player (16 bytes)
 	char m_aName[MAX_NAME_LENGTH];
@@ -207,7 +217,7 @@ class CSqlStats
 		int ClientId,
 		const char *pName,
 		const char *pTable,
-		bool IsLoadPlayerData);
+		EInstaSqlRequestType RequestType);
 
 	void ExecPlayerRankOrTopThread(
 		bool (*pFuncPtr)(IDbConnection *, const ISqlData *, char *pError, int ErrorSize),
@@ -246,7 +256,7 @@ public:
 
 	void LoadInstaPlayerData(int ClientId, const char *pTable);
 
-	void ShowStats(int ClientId, const char *pName, const char *pTable);
+	void ShowStats(int ClientId, const char *pName, const char *pTable, EInstaSqlRequestType RequestType);
 	void ShowRank(int ClientId, const char *pName, const char *pRankColumnDisplay, const char *pRankColumnSql, const char *pTable, const char *pOrderBy);
 	void ShowTop(int ClientId, const char *pName, const char *pRankColumnDisplay, const char *pRankColumnSql, const char *pTable, const char *pOrderBy, int Offset);
 	void ShowFastcapRank(int ClientId, const char *pName, const char *pMap, const char *pGametype, bool Grenade, bool OnlyStatTrack);

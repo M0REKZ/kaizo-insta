@@ -95,7 +95,7 @@ void CPlayer::ProcessStatsResult(CInstaSqlResult &Result)
 	{
 		switch(Result.m_MessageKind)
 		{
-		case CInstaSqlResult::DIRECT:
+		case EInstaSqlRequestType::DIRECT:
 			for(auto &aMessage : Result.m_aaMessages)
 			{
 				if(aMessage[0] == 0)
@@ -103,7 +103,7 @@ void CPlayer::ProcessStatsResult(CInstaSqlResult &Result)
 				GameServer()->SendChatTarget(m_ClientId, aMessage);
 			}
 			break;
-		case CInstaSqlResult::ALL:
+		case EInstaSqlRequestType::ALL:
 		{
 			bool PrimaryMessage = true;
 			for(auto &aMessage : Result.m_aaMessages)
@@ -119,17 +119,20 @@ void CPlayer::ProcessStatsResult(CInstaSqlResult &Result)
 			}
 			break;
 		}
-		case CInstaSqlResult::BROADCAST:
-			// if(Result.m_aBroadcast[0] != 0)
-			// 	GameServer()->SendBroadcast(Result.m_aBroadcast, -1);
+		case EInstaSqlRequestType::BROADCAST:
+			if(Result.m_aBroadcast[0] != 0)
+				GameServer()->SendBroadcast(Result.m_aBroadcast, -1);
 			break;
-		case CInstaSqlResult::STATS:
+		case EInstaSqlRequestType::CHAT_CMD_STATSALL:
 			GameServer()->m_pController->OnShowStatsAll(&Result.m_Stats, this, Result.m_Info.m_aRequestedPlayer);
 			break;
-		case CInstaSqlResult::RANK:
+		case EInstaSqlRequestType::CHAT_CMD_RANK:
 			GameServer()->m_pController->OnShowRank(Result.m_Rank, Result.m_RankedScore, Result.m_aRankColumnDisplay, this, Result.m_Info.m_aRequestedPlayer);
 			break;
-		case CInstaSqlResult::PLAYER_DATA:
+		case EInstaSqlRequestType::CHAT_CMD_MULTIS:
+			GameServer()->m_pController->OnShowMultis(&Result.m_Stats, this, Result.m_Info.m_aRequestedPlayer);
+			break;
+		case EInstaSqlRequestType::PLAYER_DATA:
 			GameServer()->m_pController->OnLoadedNameStats(&Result.m_Stats, this);
 			break;
 		}

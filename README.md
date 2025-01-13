@@ -320,6 +320,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `add_map_to_pool` Can be picked by random_map_from_pool command (entries can be duplicated to increase chance)
 + `clear_map_pool` Clears pool used by random_map_from_pool command
 + `random_map_from_pool` Changes to random map from pool (see add_map_to_pool)
++ `redirect` Redirect client to given port use victim -1 to redirect all
 
 # Chat commands
 
@@ -343,6 +344,7 @@ ddnet-insta then added a bunch of own slash chat commands and also bang (!) chat
 + `/stats` Shows the current round stats of player name (your stats by default)
 + `/statsall` Shows the all time stats of player name (your stats by default)
 + `/stats_all` Shows the all time stats of player name (your stats by default)
++ `/multis` Shows the all time fng multi kill stats
 + `/points` Shows the all time points rank of player name (your stats by default)
 + `/rank_points` Shows the all time points rank of player name (your stats by default)
 + `/rank_kills` Shows the all time kills rank of player name (your stats by default)

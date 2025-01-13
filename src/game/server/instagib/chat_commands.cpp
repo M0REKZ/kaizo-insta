@@ -242,7 +242,26 @@ void CGameContext::ConStatsAllTime(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
-	pSelf->m_pController->m_pSqlStats->ShowStats(pResult->m_ClientId, pName, pSelf->m_pController->StatsTable());
+	pSelf->m_pController->m_pSqlStats->ShowStats(pResult->m_ClientId, pName, pSelf->m_pController->StatsTable(), EInstaSqlRequestType::CHAT_CMD_STATSALL);
+}
+
+void CGameContext::ConMultis(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	if(!pSelf->m_pController)
+		return;
+
+	if(!pSelf->m_pController->IsFngGameType())
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "This command only available in fng gametypes.");
+		return;
+	}
+
+	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
+	pSelf->m_pController->m_pSqlStats->ShowStats(pResult->m_ClientId, pName, pSelf->m_pController->StatsTable(), EInstaSqlRequestType::CHAT_CMD_MULTIS);
 }
 
 void CGameContext::ConRankKills(IConsole::IResult *pResult, void *pUserData)

@@ -10,6 +10,7 @@
 #include <game/server/gamecontext.h>
 #include <game/server/gamemodes/instagib/base_instagib.h>
 #include <game/server/instagib/laser_text.h>
+#include <game/server/instagib/sql_stats_player.h>
 #include <game/server/player.h>
 
 #include "base_fng.h"
@@ -64,6 +65,77 @@ void CGameControllerBaseFng::Tick()
 	{
 		dbg_msg("fng", "all freeze quitter punishments expired. cleaning up ...");
 		m_vFrozenQuitters.clear();
+	}
+}
+
+void CGameControllerBaseFng::OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName)
+{
+	CGameControllerInstagib::OnShowStatsAll(pStats, pRequestingPlayer, pRequestedName);
+
+	char aBuf[512];
+	str_format(
+		aBuf,
+		sizeof(aBuf),
+		"~~~ all time stats for '%s'",
+		pRequestedName, pStats->m_Kills, Server()->ClientName(pRequestingPlayer->GetCid()));
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "~ Points: %d, Wins: %d, Deaths: %d", pStats->m_Points, pStats->m_Wins, pStats->m_Deaths);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	char aAccuracy[512];
+	aAccuracy[0] = '\0';
+	if(pStats->m_ShotsFired)
+		str_format(aAccuracy, sizeof(aAccuracy), " (%.2f%% hit accuracy)", pStats->HitAccuracy());
+
+	str_format(aBuf, sizeof(aBuf), "~ Kills: %d%s", pStats->m_Kills, aAccuracy);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "~ Highest killing spree: %d", pStats->m_BestSpree);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "~ Green spikes: %d, Gold spikes: %d, Purple spikes: %d", pStats->m_GreenSpikes, pStats->m_GoldSpikes, pStats->m_PurpleSpikes);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "~ Highest multi: %d", pStats->m_BestMulti);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	// could use MAX_MU6TIS here but it is too many lines
+	// we need a dedicated show multis command for that
+	int MaxMultiLines = 6;
+	for(int i = 0; i < MaxMultiLines; i++)
+	{
+		if(!pStats->m_aMultis[i])
+			continue;
+
+		str_format(aBuf, sizeof(aBuf), "~  x%d multis %d", i + 2, pStats->m_aMultis[i]);
+		if(i + 1 == MaxMultiLines)
+			str_append(aBuf, ", see /multis for more");
+
+		SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+	}
+}
+
+void CGameControllerBaseFng::OnShowMultis(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName)
+{
+	char aBuf[512];
+	str_format(
+		aBuf,
+		sizeof(aBuf),
+		"~~~ all time multi stats for '%s'",
+		pRequestedName, pStats->m_Kills, Server()->ClientName(pRequestingPlayer->GetCid()));
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "~ Highest multi: %d", pStats->m_BestMulti);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	for(int i = 0; i < MAX_MULTIS; i++)
+	{
+		if(!pStats->m_aMultis[i])
+			continue;
+
+		str_format(aBuf, sizeof(aBuf), "~  x%d multis %d", i + 2, pStats->m_aMultis[i]);
+		SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
 	}
 }
 
