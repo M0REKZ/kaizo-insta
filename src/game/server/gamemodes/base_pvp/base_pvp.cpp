@@ -94,6 +94,45 @@ void CGameControllerPvp::OnRoundStart()
 		// in case there is some network overload or hiccups
 		m_TicksUntilShutdown = Server()->TickSpeed() * 3;
 	}
+
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		RoundInitPlayer(pPlayer);
+	}
+}
+
+void CGameControllerPvp::OnRoundEnd()
+{
+	dbg_msg("ddnet-insta", "match end");
+
+	if(g_Config.m_SvTournamentChatSmart)
+	{
+		g_Config.m_SvTournamentChat = 0;
+		GameServer()->SendChat(-1, TEAM_ALL, g_Config.m_SvTournamentChatSmart == 1 ? "Spectators can use public chat again" : "All can use public chat again");
+	}
+
+	PublishRoundEndStats();
+
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		if(g_Config.m_SvKillingspreeResetOnRoundEnd)
+		{
+			// TODO: it is a bit weird that it says:
+			//         x's spree was ended by x
+			//       it should instead say something like:
+			//         x's spree was ended by game/round
+			EndSpree(pPlayer, pPlayer);
+		}
+
+		if(m_pStatsTable[0] != '\0')
+			SaveStatsOnRoundEnd(pPlayer);
+	}
 }
 
 CGameControllerPvp::~CGameControllerPvp()
@@ -116,10 +155,17 @@ CGameControllerPvp::~CGameControllerPvp()
 	}
 }
 
-void CGameControllerPvp::ResetPlayer(class CPlayer *pPlayer)
+// called on round init and on join
+void CGameControllerPvp::RoundInitPlayer(CPlayer *pPlayer)
 {
 	pPlayer->m_IsDead = false;
 	pPlayer->m_KillerId = -1;
+}
+
+// this is only called once on connect
+// NOT ON ROUND END
+void CGameControllerPvp::InitPlayer(CPlayer *pPlayer)
+{
 	pPlayer->m_Spree = 0;
 	pPlayer->m_UntrackedSpree = 0;
 	pPlayer->ResetStats();
@@ -129,6 +175,8 @@ void CGameControllerPvp::ResetPlayer(class CPlayer *pPlayer)
 	pPlayer->m_DeadSpecMode = false;
 	pPlayer->m_GameStateBroadcast = false;
 	pPlayer->m_Score = 0; // ddnet-insta
+
+	RoundInitPlayer(pPlayer);
 }
 
 int CGameControllerPvp::SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags)
@@ -1241,7 +1289,7 @@ void CGameControllerPvp::EndSpree(class CPlayer *pPlayer, class CPlayer *pKiller
 			}
 
 			char aBuf[128];
-			str_format(aBuf, sizeof(aBuf), "'%s' %d-kills killing spree was ended by %s",
+			str_format(aBuf, sizeof(aBuf), "'%s' %d-kills killing spree was ended by '%s'",
 				Server()->ClientName(pPlayer->GetCid()), pPlayer->Spree(), Server()->ClientName(pKiller->GetCid()));
 			GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 		}

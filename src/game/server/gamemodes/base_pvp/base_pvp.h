@@ -44,7 +44,8 @@ public:
 	void OnUpdateSpectatorVotesConfig() override;
 	bool OnSetTeamNetMessage(const CNetMsg_Cl_SetTeam *pMsg, int ClientId) override;
 	void OnDDRaceTimeLoad(class CPlayer *pPlayer, float Time) override{};
-	void ResetPlayer(class CPlayer *pPlayer) override;
+	void RoundInitPlayer(class CPlayer *pPlayer) override;
+	void InitPlayer(class CPlayer *pPlayer) override;
 	bool LoadNewPlayerNameData(int ClientId) override;
 	void OnLoadedNameStats(const CSqlStatsPlayer *pStats, class CPlayer *pPlayer) override;
 
@@ -86,6 +87,7 @@ public:
 	void OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
 	void OnShowRank(int Rank, int RankedScore, const char *pRankType, class CPlayer *pRequestingPlayer, const char *pRequestedName) override;
 	void OnRoundStart() override;
+	void OnRoundEnd() override;
 	bool IsGrenadeGameType() const override;
 	bool IsDDRaceGameType() const override { return false; }
 	void OnFlagCapture(class CFlag *pFlag, float Time, int TimeTicks) override;

@@ -105,6 +105,14 @@ public:
 	virtual void OnRoundStart(){};
 
 	/*
+		Function: OnRoundEnd
+			Will be called at the beginning of the end of every round.
+			If you need to run code after the waiting time in the death screen
+			consider using `OnRoundStart()`
+	*/
+	virtual void OnRoundEnd(){};
+
+	/*
 		Function: OnLaserHit
 			Will be called before Character::TakeDamage() and CGameController::OnCharacterTakeDamage()
 
@@ -451,9 +459,31 @@ public:
 	virtual void SnapDDNetPlayer(int SnappingClient, CPlayer *pPlayer, CNetObj_DDNetPlayer *pDDNetPlayer){};
 	virtual int SnapRoundStartTick(int SnappingClient);
 	virtual int SnapTimeLimit(int SnappingClient);
+
+	/*
+		Function: InitPlayer
+			Called once for every new CPlayer object that is being constructed
+			is only called when a new player connects
+			not on round end.
+			See also `RoundInitPlayer()`
+
+		Arguments:
+			pPlayer - newly joined player
+	*/
+	virtual void InitPlayer(class CPlayer *pPlayer){};
+
+	/*
+		Function: RoundInitPlayer
+			Called for all players when a new round starts
+			And also for all players that join
+			See also `InitPlayer()`
+
+		Arguments:
+			pPlayer - player that was connected on round start
+	*/
+	virtual void RoundInitPlayer(class CPlayer *pPlayer){};
 	virtual CClientMask FreezeDamageIndicatorMask(CCharacter *pChr);
 	virtual void OnDDRaceTimeLoad(class CPlayer *pPlayer, float Time);
-	virtual void ResetPlayer(class CPlayer *pPlayer){};
 
 	// See also ddnet's SetArmorProgress() and ddnet-insta's SetArmorProgressEmpty()
 	// used to keep armor progress bar in ddnet gametype
@@ -598,7 +628,6 @@ public:
 
 	float CalcKillDeathRatio(int Kills, int Deaths) const;
 
-	void OnEndRoundInsta();
 	void GetRoundEndStatsStrCsv(char *pBuf, size_t Size);
 	void GetRoundEndStatsStrCsvTeamPlay(char *pBuf, size_t Size);
 	void GetRoundEndStatsStrCsvNoTeamPlay(char *pBuf, size_t Size);
