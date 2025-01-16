@@ -169,9 +169,9 @@ void CFlag::Snap(int SnappingClient)
 	CFlag *f = GetOtherFlag();
 	if(f)
 	{
-		if(m_pCarrier && f->m_pCarrier)
+		if(m_pCarrier && m_pCarrier->GetPlayer()->GetCid() != SnappingClient && f->m_pCarrier && f->m_pCarrier->GetPlayer()->GetCid() != SnappingClient)
 		{
-			SnapTeam = m_OrigTeam ^ 1;
+			SnapTeam = m_OrigTeam;
 		}
 		else
 		{
