@@ -20,6 +20,7 @@ CFlag::CFlag(CGameWorld *pGameWorld, int Team) :
 	m_FlagSnapOffset = GameServer()->m_pController->m_FlagSnapTeamOffset;
 	GameServer()->m_pController->m_FlagSnapTeamOffset++;
 	
+	m_OrigTeam = m_Team;
 	Reset();
 }
 
@@ -168,17 +169,24 @@ void CFlag::Snap(int SnappingClient)
 	CFlag *f = GetOtherFlag();
 	if(f)
 	{
-		if((f->m_pCarrier && f->m_Team == m_Team))
+		if(m_pCarrier && f->m_pCarrier)
 		{
-			SnapTeam = f->m_Team ^ 1;
+			SnapTeam = m_OrigTeam;
 		}
-
-		if(m_pCarrier && f->m_pCarrier && m_pCarrier->GetPlayer()->GetTeam() == f->m_pCarrier->GetPlayer()->GetTeam())
+		else
 		{
-			if(m_pCarrier->GetPlayer()->GetCid() == SnappingClient)
-				SnapTeam = m_pCarrier->GetPlayer()->GetTeam();
-			else
-				SnapTeam = m_pCarrier->GetPlayer()->GetTeam() ^ 1;
+			if((f->m_pCarrier && f->m_Team == m_Team))
+			{
+				SnapTeam = f->m_Team ^ 1;
+			}
+
+			if(m_pCarrier && f->m_pCarrier && m_pCarrier->GetPlayer()->GetTeam() == f->m_pCarrier->GetPlayer()->GetTeam())
+			{
+				if(m_pCarrier->GetPlayer()->GetCid() == SnappingClient)
+					SnapTeam = m_pCarrier->GetPlayer()->GetTeam();
+				else
+					SnapTeam = m_pCarrier->GetPlayer()->GetTeam() ^ 1;
+			}
 		}
 	}
 

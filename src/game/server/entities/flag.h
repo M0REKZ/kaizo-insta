@@ -49,6 +49,7 @@ public:
 	virtual void HandleKZTiles();
 	int m_FlagSnapOffset = 0;
 	virtual bool CanHookGrabKZ(CCharacter *pChr);
+	int m_OrigTeam;
 
 	CFlag *GetOtherFlag();
 };
