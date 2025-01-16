@@ -171,7 +171,7 @@ void CFlag::Snap(int SnappingClient)
 	{
 		if(m_pCarrier && f->m_pCarrier)
 		{
-			SnapTeam = m_OrigTeam;
+			SnapTeam = m_OrigTeam ^ 1;
 		}
 		else
 		{
