@@ -68,11 +68,12 @@ void CGameControllerDDNetKZ::Tick()
 				CCharacter *close_characters[MAX_CLIENTS];
 				int max_num = GameServer()->m_World.FindEntities(b->m_Pos, b->ms_PhysSize, (CEntity **)close_characters, MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
 				int curr_num = 0;
+				CFlag* f = m_apFlagBalls[bi]->GetOtherFlag();
 				for(int i = 0; i < max_num; ++i)
 				{
 					if(!close_characters[i]->IsAlive() || close_characters[i]->GetPlayer()->GetTeam() == -1 || GameServer()->Collision()->IntersectLine(b->m_Pos, close_characters[i]->m_Pos, NULL, NULL) ||
 						// don't take flag if already have one (might be useful with two flags)
-						m_apFlagBalls[bi ^ 1]->m_pCarrier == close_characters[i])
+						(f && f->m_pCarrier == close_characters[i]))
 						continue;
 					close_characters[curr_num++] = close_characters[i];
 				}

@@ -210,7 +210,9 @@ bool CFlagBall::CanHookGrabKZ(CCharacter *pChr)
 	if(m_pCarrier)
 		return false;
 
-	if(pChr == GetOtherFlag()->m_pCarrier)
+	CFlag* f = GetOtherFlag();
+
+	if(f && pChr == GetOtherFlag()->m_pCarrier)
 		return false;
 	return true;
 }

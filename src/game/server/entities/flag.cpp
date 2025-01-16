@@ -233,7 +233,9 @@ bool CFlag::CanHookGrabKZ(CCharacter *pChr)
 	if(m_pCarrier)
 		return false;
 
-	if(pChr && ((pChr->GetPlayer() && pChr->GetPlayer()->GetTeam() == m_Team) || pChr == GetOtherFlag()->m_pCarrier))
+	CFlag* f = GetOtherFlag();
+
+	if(pChr && ((pChr->GetPlayer() && pChr->GetPlayer()->GetTeam() == m_Team) || (f && pChr == GetOtherFlag()->m_pCarrier)))
 		return false;
 	
 	return true;
