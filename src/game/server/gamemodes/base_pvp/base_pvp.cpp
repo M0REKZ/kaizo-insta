@@ -1192,7 +1192,10 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 				// set attacker's face to happy (taunt!)
 				pChr->SetEmote(EMOTE_HAPPY, Server()->Tick() + Server()->TickSpeed());
 			}
-			DoDamageHitSound(From);
+			if(Character.GetPlayer()->m_Rollback && Character.m_Dying != -1)
+				Character.m_RollbackSendHitSound = true;
+			else
+				DoDamageHitSound(From);
 		}
 		return false;
 	}

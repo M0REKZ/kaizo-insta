@@ -945,6 +945,24 @@ void CCharacter::Tick()
 
 		if(m_DieNow && m_Dying != -1 && m_Dying < Server()->Tick() && m_Health <= 0 && m_RollbackAttacker != m_pPlayer->GetCid())
 		{
+			if(m_RollbackSendHitSound)
+			{
+				if(m_RollbackAttacker >= 0 && m_RollbackAttacker < MAX_CLIENTS)
+				{
+					// do damage Hit sound
+					CClientMask Mask = CClientMask().set(m_RollbackAttacker);
+					for(int i = 0; i < MAX_CLIENTS; i++)
+					{
+						if(!GameServer()->m_apPlayers[i])
+							continue;
+
+						if(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_SpectatorId == m_RollbackAttacker)
+							Mask.set(i);
+					}
+					GameServer()->CreateSound(GameServer()->m_apPlayers[m_RollbackAttacker]->m_ViewPos, SOUND_HIT, Mask);
+				}
+			}
+
 			Die(m_RollbackAttacker, m_RollbackAttackerWeapon);
 			return;
 		}
