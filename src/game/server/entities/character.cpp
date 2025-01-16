@@ -123,6 +123,7 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	GameServer()->m_pController->OnCharacterSpawn(this);
 
 	m_RollbackHealth = m_Health;
+	m_RollbackArmor = m_Armor;
 
 	DDRaceInit();
 
@@ -941,6 +942,7 @@ void CCharacter::Tick()
 			m_DieNow = false;
 			m_Dying = -1;
 			m_Health = m_RollbackHealth;
+			m_Armor = m_RollbackArmor;
 		}
 
 		if(m_DieNow && m_Dying != -1 && m_Dying < Server()->Tick() && m_Health <= 0 && m_RollbackAttacker != m_pPlayer->GetCid())
@@ -1294,6 +1296,7 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
 bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 {
 	m_RollbackHealth = m_Health;
+	m_RollbackArmor = m_Armor;
 	m_RollbackAttacker = From;
 	m_RollbackAttackerWeapon = Weapon;
 	m_RollbackDamagePos = m_Pos;
@@ -1337,6 +1340,8 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)
 	}
 	else
 	{
+		m_RollbackHealth = m_Health;
+		m_RollbackArmor = m_Armor;
 		m_Dying = -1;
 	}
 

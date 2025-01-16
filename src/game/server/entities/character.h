@@ -306,6 +306,7 @@ public:
 	int m_Dying = 0; //JSAURUS rollback
 	bool m_DieNow = false;
 	int m_RollbackHealth = 1;
+	int m_RollbackArmor = 1;
 	bool m_RollbackSendHitSound = false;
 	
 	//for +KZ AI:
