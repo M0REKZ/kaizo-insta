@@ -2366,6 +2366,7 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 		if(g_Config.m_SvUnstackChat)
 			InstagibUnstackChatMessage(aChatMessage, aCensoredMessage, sizeof(aChatMessage));
 		SendChat(ClientId, Team, aChatMessage, ClientId);
+		SendDiscordChatMessage(ClientId, pMsg->m_pMessage); //+KZ
 	}
 }
 
@@ -5734,4 +5735,27 @@ void CGameContext::ConRedirectClient(IConsole::IResult *pResult, void *pUserData
 	int Port = pResult->GetInteger(1);
 
 	pSelf->Server()->RedirectClient(ClientID,Port);
+}
+
+void CGameContext::SendDiscordChatMessage(int ClientID, const char* msg)
+{
+	char aPayload[4048];
+	char aStatsStr[4000];
+	char pStr[275];
+	pStr[0] = '\0';
+	str_format(pStr, sizeof(pStr),"%s: %s",Server()->ClientName(ClientID),msg);
+
+	str_format(
+		aPayload,
+		sizeof(aPayload),
+		"{\"allowed_mentions\": {\"parse\": []}, \"content\": \"%s\"}",
+		EscapeJson(aStatsStr, sizeof(aStatsStr), pStr));
+	const int PayloadSize = str_length(aPayload);
+	// TODO: use HttpPostJson()
+	std::shared_ptr<CHttpRequest> pDiscord = HttpPost(g_Config.m_SvChatDiscordWebhook, (const unsigned char *)aPayload, PayloadSize);
+	pDiscord->LogProgress(HTTPLOG::FAILURE);
+	pDiscord->IpResolve(IPRESOLVE::V4);
+	pDiscord->Timeout(CTimeout{4000, 15000, 500, 5});
+	pDiscord->HeaderString("Content-Type", "application/json");
+	m_pHttp->Run(pDiscord);
 }
