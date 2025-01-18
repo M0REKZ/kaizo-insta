@@ -17,7 +17,7 @@
 		- Use optimize() to reduce the needed space.
 */
 template<class T, class ALLOCATOR = allocator_default<T>>
-class array : private ALLOCATOR //infclass quads +KZ (entire file)
+class array : private ALLOCATOR
 {
 	void init()
 	{
