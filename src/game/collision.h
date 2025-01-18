@@ -41,7 +41,6 @@ struct ZoneData //+KZ
 	int Blue[4] = {0};
 	
 	vec2 PosCenter = vec2(0,0);
-	const CQuad * pQuad = nullptr;
 }; //----
 
 class CCollision
