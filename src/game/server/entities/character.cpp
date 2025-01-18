@@ -2912,7 +2912,7 @@ void CCharacter::HandleKZTiles()
 		}
 		case TILE_DEATH:
 		{
-			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
+			Die(m_pPlayer->GetCid(), WEAPON_SELF);
 			break;
 		}
 		case TILE_TELECHECKIN:
