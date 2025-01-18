@@ -596,6 +596,11 @@ void IGameController::HandleCharacterTiles(CCharacter *pChr, int MapIndex)
 	// Do nothing by default
 }
 
+void IGameController::HandleCharacterQuad(CCharacter *pChr, CQuad *pQuad)
+{
+	// Do nothing by default
+}
+
 void IGameController::DoWarmup(int Seconds)
 {
 	// gets overwritten by SetGameState
