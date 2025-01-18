@@ -36,9 +36,7 @@ struct CAntibotMapData;
 struct ZoneData //+KZ
 {
 	int Index = -1;
-	int Red[4] = {0};
-	int Green[4] = {0};
-	int Blue[4] = {0};
+	int ExtraData = -1;
 }; //----
 
 class CCollision
