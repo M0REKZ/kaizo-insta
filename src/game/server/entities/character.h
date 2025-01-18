@@ -271,11 +271,14 @@ public:
 private:
 	//+KZ
 	void HandleKZTiles();
+	void HandleKZQuads();
 	void HandleFlagHookCatch();
 	int m_AirTicks;
 	int m_AirDamageTick;
 	bool m_Invisible;
 	bool m_Water;
+	bool m_NoAir;
+	bool m_QuadWater;
 	int m_InvisibleShieldId;
 	int m_BallQueuedWeapon;
 	int m_BallReleaseTick;

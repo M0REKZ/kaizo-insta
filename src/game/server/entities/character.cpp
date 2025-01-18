@@ -1007,6 +1007,27 @@ void CCharacter::Tick()
 			m_BallQueuedWeapon = -1;
 		}
 	}
+
+	//printf("%d\n",m_Water);
+	if(m_Water || m_NoAir) //+KZ
+	{
+		if(m_AirTicks > 0)
+		{
+			m_AirTicks--;
+		}
+		else
+		{
+			if(m_AirDamageTick > 0)
+			{
+				m_AirDamageTick--;
+			}
+			else
+			{
+				DoKZDamage(vec2(0,0), 1, m_pPlayer->GetCid(), WEAPON_WORLD);
+				m_AirDamageTick = Server()->TickSpeed();
+			}
+		}
+	}
 	
 	if(!m_PrevInput.m_Hook && m_Input.m_Hook && !(m_Core.m_TriggeredEvents & COREEVENT_HOOK_ATTACH_PLAYER))
 	{
