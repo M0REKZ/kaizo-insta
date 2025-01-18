@@ -11,12 +11,17 @@
 #include <engine/http.h>
 #include <engine/server.h>
 
+#include <game/server/instagib/enums.h>
+
 class CGameContext : public IGameServer
 {
 #endif // IN_CLASS_IGAMECONTEXT
 
 public:
 	const char *ServerInfoPlayerScoreKind() override;// { return "points"; } commented out by +KZ
+
+	// set by the config sv_display_score
+	EDisplayScore m_DisplayScore = EDisplayScore::ROUND_POINTS;
 
 	// bang commands
 	void BangCommandVote(int ClientId, const char *pCommand, const char *pDesc);
@@ -54,6 +59,7 @@ public:
 	static void ConchainTournamentChat(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainZcatchColors(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 	static void ConchainSpectatorVotes(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
+	static void ConchainDisplayScore(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData);
 
 	// rcon
 	static void ConHammer(IConsole::IResult *pResult, void *pUserData);
@@ -82,6 +88,7 @@ public:
 	static void ConStatsRound(IConsole::IResult *pResult, void *pUserData);
 	static void ConStatsAllTime(IConsole::IResult *pResult, void *pUserData);
 	static void ConMultis(IConsole::IResult *pResult, void *pUserData);
+	static void ConScore(IConsole::IResult *pResult, void *pUserData);
 	static void ConRankKills(IConsole::IResult *pResult, void *pUserData);
 	static void ConInstaRankPoints(IConsole::IResult *pResult, void *pUserData);
 	static void ConTopKills(IConsole::IResult *pResult, void *pUserData);

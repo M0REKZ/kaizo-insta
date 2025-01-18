@@ -8,6 +8,7 @@
 #include <game/server/entities/ddnet_pvp/vanilla_projectile.h>
 #include <game/server/entities/flag.h>
 #include <game/server/gamecontroller.h>
+#include <game/server/instagib/enums.h>
 #include <game/server/instagib/laser_text.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/version.h>
@@ -175,6 +176,7 @@ void CGameControllerPvp::InitPlayer(CPlayer *pPlayer)
 	pPlayer->m_DeadSpecMode = false;
 	pPlayer->m_GameStateBroadcast = false;
 	pPlayer->m_Score = 0; // ddnet-insta
+	pPlayer->m_DisplayScore = GameServer()->m_DisplayScore;
 
 	RoundInitPlayer(pPlayer);
 }
@@ -259,23 +261,36 @@ void CGameControllerPvp::SnapDDNetPlayer(int SnappingClient, CPlayer *pPlayer, C
 
 int CGameControllerPvp::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer, int DDRaceScore)
 {
-	int Score = pPlayer->m_Score.value_or(0);
-	// display round score if the game ended
-	// otherwise you can not see who actually won
-	if(g_Config.m_SvSaveServer && GameState() != IGS_END_ROUND)
-	{
-		Score += pPlayer->m_SavedStats.m_Points;
+	CPlayer *pSnapReceiver = GameServer()->m_apPlayers[SnappingClient];
+	if(!pSnapReceiver)
+		return DDRaceScore;
 
-		// // yes this is cursed
-		// // but during the final scoreboard we already saved and reset the stats
-		// // so we manually merged the save stats
-		// // but the player still has his round score
-		// // so the round score is counted twice
-		// if(GameState() == IGS_END_ROUND)
-		// {
-		// 	Score -= pPlayer->m_Score.value_or(0);
-		// }
-	}
+	int Score = pPlayer->m_Score.value_or(0);
+
+	// alawys force display round score if the game ended
+	// otherwise you can not see who actually won
+	if(GameState() == IGS_END_ROUND)
+		return Score;
+
+	switch(pSnapReceiver->m_DisplayScore)
+	{
+	case EDisplayScore::NUM_SCORES:
+	case EDisplayScore::ROUND_POINTS:
+		return Score;
+	case EDisplayScore::POINTS:
+		return Score + pPlayer->m_SavedStats.m_Points;
+	case EDisplayScore::SPREE:
+		return pPlayer->m_SavedStats.m_BestSpree;
+	case EDisplayScore::CURRENT_SPREE:
+		return pPlayer->Spree();
+	case EDisplayScore::WINS:
+		return pPlayer->m_SavedStats.m_Wins;
+	case EDisplayScore::KILLS:
+		return pPlayer->Kills() + pPlayer->m_SavedStats.m_Kills;
+	case EDisplayScore::ROUND_KILLS:
+		return pPlayer->Kills();
+	};
+
 	return Score;
 }
 

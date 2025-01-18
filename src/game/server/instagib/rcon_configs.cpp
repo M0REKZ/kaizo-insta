@@ -1,8 +1,10 @@
 #include <base/system.h>
 #include <engine/server/server.h>
+#include <engine/shared/config.h>
 #include <game/server/entities/character.h>
 #include <game/server/gamecontroller.h>
 #include <game/server/gamemodes/base_pvp/base_pvp.h>
+#include <game/server/instagib/enums.h>
 #include <game/server/player.h>
 
 #include <game/server/gamecontext.h>
@@ -19,6 +21,7 @@ void CGameContext::RegisterInstagibCommands()
 	Console()->Chain("sv_zcatch_colors", ConchainZcatchColors, this);
 	Console()->Chain("sv_spectator_votes", ConchainSpectatorVotes, this);
 	Console()->Chain("sv_spectator_votes_sixup", ConchainSpectatorVotes, this);
+	Console()->Chain("sv_display_score", ConchainDisplayScore, this);
 
 	// generated undocumented chat commands
 #define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) ;
@@ -150,4 +153,33 @@ void CGameContext::ConchainSpectatorVotes(IConsole::IResult *pResult, void *pUse
 	CGameContext *pSelf = (CGameContext *)pUserData;
 	if(pSelf->m_pController)
 		pSelf->m_pController->OnUpdateSpectatorVotesConfig();
+}
+
+void CGameContext::ConchainDisplayScore(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	if(pResult->NumArguments() == 0)
+	{
+		pfnCallback(pResult, pCallbackUserData);
+		return;
+	}
+
+	if(!str_to_display_score(pResult->GetString(0), &pSelf->m_DisplayScore))
+	{
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "'%s' is not a valid display score pick one of those: " DISPLAY_SCORE_VALUES, pResult->GetString(0));
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "ddnet-insta", aBuf);
+		return;
+	}
+
+	pfnCallback(pResult, pCallbackUserData);
+
+	for(CPlayer *pPlayer : pSelf->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		pPlayer->m_DisplayScore = pSelf->m_DisplayScore;
+	}
 }

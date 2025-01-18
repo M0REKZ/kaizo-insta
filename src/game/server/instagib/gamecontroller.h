@@ -13,6 +13,7 @@
 #include <game/generated/protocol.h>
 #include <game/generated/protocol7.h>
 
+#include <game/server/instagib/enums.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
 
