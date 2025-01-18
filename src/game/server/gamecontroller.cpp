@@ -90,8 +90,8 @@ IGameController::IGameController(class CGameContext *pGameServer) :
 	m_GameInfo.m_TimeLimit = Config()->m_SvTimelimit;
 
 	//Get zones --> from infclass quads +KZ
-	//m_ZoneHandle_KZQuads = GameServer()->Collision()->GetZoneHandle("KZQuads");
-	//m_ZoneHandle_KZCusQuads = GameServer()->Collision()->GetZoneHandle("KZCusQuads");
+	m_ZoneHandle_KZQuads = GameServer()->Collision()->GetZoneHandle("KZQuads");
+	m_ZoneHandle_KZCusQuads = GameServer()->Collision()->GetZoneHandle("KZCusQuads");
 }
 
 IGameController::~IGameController() = default;
@@ -1157,12 +1157,12 @@ int IGameController::GetZoneValueAt(int ZoneHandle, const vec2 &Pos, ZoneData *p
 
 int IGameController::GetKZQuadsZoneValueAt(const vec2 &Pos, ZoneData *pData) const
 {
-	return GetZoneValueAt(GameServer()->Collision()->GetKZQuadsZoneHandle(), Pos, pData);
+	return GetZoneValueAt(m_ZoneHandle_KZQuads, Pos, pData);
 }
 
 int IGameController::GetKZCusQuadsZoneValueAt(const vec2 &Pos, ZoneData *pData) const
 {
-	return GetZoneValueAt(GameServer()->Collision()->GetKZCustomQuadsZoneHandle(), Pos, pData);
+	return GetZoneValueAt(m_ZoneHandle_KZCusQuads, Pos, pData);
 }
 
 double IGameController::GetTime()
