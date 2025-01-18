@@ -2867,7 +2867,6 @@ void CCharacter::SwapClients(int Client1, int Client2)
 
 void CCharacter::HandleKZTiles()
 {
-	bool ApplyRest = false;
 
 //QUADS
 	ZoneData Data0;
@@ -3002,162 +3001,6 @@ void CCharacter::HandleKZTiles()
 		m_QuadTuneZone = 0;
 	}
 
-	//Solid and stopper
-
-	ZoneData Solid0, Solid1, Solid2, Solid3;
-
-	GameServer()->m_pController->GetKZQuadsZoneValueAt(vec2(m_Pos.x - GetProximityRadius(),m_Pos.y), &Solid0);
-	GameServer()->m_pController->GetKZQuadsZoneValueAt(vec2(m_Pos.x,m_Pos.y - GetProximityRadius()), &Solid1);
-	GameServer()->m_pController->GetKZQuadsZoneValueAt(vec2(m_Pos.x + GetProximityRadius(),m_Pos.y), &Solid2);
-	GameServer()->m_pController->GetKZQuadsZoneValueAt(vec2(m_Pos.x,m_Pos.y + GetProximityRadius()), &Solid3);
-
-	if(Solid0.Index == TILE_SOLID || Solid0.Index == TILE_NOHOOK || Solid0.Index == TILE_STOPA)
-	{
-		m_MoveRestrictions |= CANTMOVE_LEFT;
-		if(m_Core.m_Vel.x < 0)
-			m_Core.m_Vel.x = 0;
-		ApplyRest = true;
-	}
-
-	if(Solid1.Index == TILE_SOLID || Solid1.Index == TILE_NOHOOK || Solid1.Index == TILE_STOPA)
-	{
-		m_MoveRestrictions |= CANTMOVE_UP;
-		if(m_Core.m_Vel.y < 0)
-			m_Core.m_Vel.y = 0;
-		ApplyRest = true;
-	}
-
-	if(Solid2.Index == TILE_SOLID || Solid2.Index == TILE_NOHOOK || Solid2.Index == TILE_STOPA)
-	{
-		m_MoveRestrictions |= CANTMOVE_RIGHT;
-		if(m_Core.m_Vel.x > 0)
-			m_Core.m_Vel.x = 0;
-		ApplyRest = true;
-	}
-
-	if(Solid3.Index == TILE_SOLID || Solid3.Index == TILE_NOHOOK || Solid3.Index == TILE_STOPA)
-	{
-		m_MoveRestrictions |= CANTMOVE_DOWN;
-		if(m_Core.m_Vel.y > 0)
-			m_Core.m_Vel.y = 0;
-		m_Core.m_Jumped = 0;
-		m_Core.m_JumpedTotal = 0;
-		ApplyRest = true;
-	}
-
-	ZoneData SolidMove0, SolidMove1, SolidMove2, SolidMove3;
-
-	bool exitloop = false;
-	int incr = 0;
-
-    while(!exitloop)
-	{
-		GameServer()->m_pController->GetKZQuadsZoneValueAt(vec2((m_Pos.x - GetProximityRadius())+1,m_Pos.y), &SolidMove0);
-
-		if(SolidMove0.Index == TILE_SOLID || SolidMove0.Index == TILE_NOHOOK || SolidMove0.Index == TILE_STOPA)
-		{
-			m_MoveRestrictions |= CANTMOVE_LEFT;
-			m_Pos.x += 5;
-			m_Core.m_Pos.x += 5;
-			incr++;
-			if(m_Core.m_Vel.x < 0)
-				m_Core.m_Vel.x = 0;
-			ApplyRest = true;
-		}
-		else
-		{
-			exitloop = true;
-		}
-
-		if(incr > 10)
-		{
-			exitloop = true;
-		}
-	}
-	exitloop = false;
-	incr = 0;
-
-	while(!exitloop)
-	{
-		GameServer()->m_pController->GetKZQuadsZoneValueAt(vec2(m_Pos.x,(m_Pos.y - GetProximityRadius())+1), &SolidMove1);
-
-		if(SolidMove1.Index == TILE_SOLID || SolidMove1.Index == TILE_NOHOOK || SolidMove1.Index == TILE_STOPA)
-		{
-			m_MoveRestrictions |= CANTMOVE_UP;
-			m_Pos.y += 5;
-			m_Core.m_Pos.y += 5;
-			incr++;
-			if(m_Core.m_Vel.y < 0)
-				m_Core.m_Vel.y = 0;
-			ApplyRest = true;
-		}
-		else
-		{
-			exitloop = true;
-		}
-
-		if(incr > 10)
-		{
-			exitloop = true;
-		}
-	}
-	exitloop = false;
-	incr = 0;
-
-	while (!exitloop)
-	{
-		GameServer()->m_pController->GetKZQuadsZoneValueAt(vec2((m_Pos.x + GetProximityRadius())-1,m_Pos.y), &SolidMove2);
-
-		if(SolidMove2.Index == TILE_SOLID || SolidMove2.Index == TILE_NOHOOK || SolidMove2.Index == TILE_STOPA)
-		{
-			m_MoveRestrictions |= CANTMOVE_RIGHT;
-			m_Pos.x -= 5;
-			m_Core.m_Pos.x -= 5;
-			incr++;
-			if(m_Core.m_Vel.x > 0)
-				m_Core.m_Vel.x = 0;
-			ApplyRest = true;
-		}
-		else
-		{
-			exitloop = true;
-		}
-
-		if(incr > 10)
-		{
-			exitloop = true;
-		}
-	}
-	exitloop = false;
-	incr = 0;
-
-	while(!exitloop)
-	{
-		GameServer()->m_pController->GetKZQuadsZoneValueAt(vec2(m_Pos.x,(m_Pos.y + GetProximityRadius())-1), &SolidMove3);
-
-		if(SolidMove3.Index == TILE_SOLID || SolidMove3.Index == TILE_NOHOOK || SolidMove3.Index == TILE_STOPA)
-		{
-			m_MoveRestrictions |= CANTMOVE_DOWN;
-			m_Pos.y -= 5;
-			m_Core.m_Pos.y -= 5;
-			incr++;
-			if(m_Core.m_Vel.y > 0)
-				m_Core.m_Vel.y = 0;
-			m_Core.m_Jumped = 0;
-			m_Core.m_JumpedTotal = 0;
-			ApplyRest = true;
-		}
-		else
-		{
-			exitloop = true;
-		}
-
-		if(incr > 10)
-		{
-			exitloop = true;
-		}
-	}
-
 	//KZCusQuads
 
 	switch (Data1.Index)
@@ -3188,6 +3031,8 @@ void CCharacter::HandleKZTiles()
 		TileIndex = 0;
 	else
 		TileIndex = Collision()->GetKZTileIndex(m_Pos);
+	
+	bool ApplyRest = false;
 	
 	
 	if(TileIndex == TILE_ADMIN || Data1.Index == TILE_ADMIN)
