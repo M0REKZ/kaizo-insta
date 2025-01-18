@@ -182,12 +182,6 @@ public:
 
 	//+KZ
 	virtual bool OnKZEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number = 0);
-	int GetZoneValueAt(int ZoneHandle, const vec2 &Pos, ZoneData *pData = nullptr) const;
-	int GetKZQuadsZoneValueAt(const vec2 &Pos, ZoneData *pData = nullptr) const;
-	int GetKZCusQuadsZoneValueAt(const vec2 &Pos, ZoneData *pData = nullptr) const;
-	int m_ZoneHandle_KZQuads;
-	int m_ZoneHandle_KZCusQuads;
-	double GetTime();
 };
 
 #endif
