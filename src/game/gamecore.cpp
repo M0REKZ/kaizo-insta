@@ -264,7 +264,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 			if(m_HookState == HOOK_IDLE)
 			{
 				m_HookState = HOOK_FLYING;
-				if(!m_QuadHooked || m_HitTile)
+				if(!m_QuadHooked)
 				m_HookPos = m_Pos + TargetDirection * PhysicalSize() * 1.5f;
 				m_HookDir = TargetDirection;
 				SetHookedPlayer(-1);
@@ -297,6 +297,9 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 	if(m_Direction == 0)
 		m_Vel.x *= Friction;
 
+	//+KZ
+	ZoneData HookData;
+	m_pCollision->GetZoneValueAt(m_pCollision->GetKZQuadsZoneHandle(),m_HookPos, &HookData);
 
 	//printf("poscenter %f , %f quadhook %f , %f hookpos %f , %f\n",HookData.PosCenter.x,HookData.PosCenter.y,m_QuadHookPos.x,m_QuadHookPos.y,m_HookPos.x,m_HookPos.y);
 
@@ -306,7 +309,6 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		SetHookedPlayer(-1);
 		m_HookPos = m_Pos;
 		m_QuadHooked = false;
-		m_HitTile = false;
 	}
 	else if(m_HookState >= HOOK_RETRACT_START && m_HookState < HOOK_RETRACT_END)
 	{
@@ -340,17 +342,9 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		int Hit = m_pCollision->IntersectLineTeleHook(m_HookPos, NewPos, &NewPos, 0, &teleNr);
 
 		//+KZ
-		ZoneData HookData;
-		m_pCollision->GetZoneValueAt(m_pCollision->GetKZQuadsZoneHandle(),NewPos, &HookData);
-
 		if(!Hit)
 		{
 			Hit = HookData.Index;
-			m_HitTile = false;
-		}
-		else
-		{
-			m_HitTile = true;
 		}
 
 		if(Hit)
@@ -407,7 +401,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 			{
 				m_TriggeredEvents |= COREEVENT_HOOK_ATTACH_GROUND;
 				m_HookState = HOOK_GRABBED;
-				if(HookData.Index > 0 && !m_QuadHooked && !m_HitTile) //+KZ
+				if(HookData.Index > 0 && !m_QuadHooked) //+KZ
 				{
 					m_QuadHooked = true;
 					m_QuadHookPos = m_HookPos;
@@ -434,7 +428,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 			}
 			else
 			{
-				if(!m_QuadHooked || m_HitTile)
+				if(!m_QuadHooked)
 				m_HookPos = NewPos;
 			}
 		}
@@ -457,7 +451,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		}
 
 		//+KZ
-		if(m_HookedPlayer == -1 && m_QuadHooked && m_HookedQuad && !m_HitTile)
+		if(m_HookedPlayer == -1 && m_QuadHooked && m_HookedQuad)
 		{
 			vec2 temppos;
 			float tempangle;
