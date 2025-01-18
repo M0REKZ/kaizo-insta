@@ -277,8 +277,6 @@ private:
 	int m_AirDamageTick;
 	bool m_Invisible;
 	bool m_Water;
-	bool m_NoAir;
-	bool m_QuadWater;
 	int m_InvisibleShieldId;
 	int m_BallQueuedWeapon;
 	int m_BallReleaseTick;
