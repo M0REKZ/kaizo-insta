@@ -1028,10 +1028,6 @@ void CCharacter::Tick()
 			}
 		}
 	}
-	else
-	{
-		m_AirTicks = 5 * Server()->TickSpeed();
-	}
 	
 	if(!m_PrevInput.m_Hook && m_Input.m_Hook && !(m_Core.m_TriggeredEvents & COREEVENT_HOOK_ATTACH_PLAYER))
 	{
