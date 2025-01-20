@@ -247,3 +247,30 @@ bool CGameControllerDDNetKZ::OnFireWeapon(CCharacter &Character, int &Weapon, ve
 	}
 	return CGameControllerDDRace::OnFireWeapon(Character, Weapon, Direction, MouseTarget, ProjStartPos);
 }
+
+int CGameControllerDDNetKZ::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
+{
+	CGameControllerDDRace::OnCharacterDeath(pVictim, pKiller, WeaponId);
+	int HadFlag = 0;
+
+	// drop flags
+	for(CFlagBall *pFlag : m_apFlagBalls)
+	{
+		if(pFlag && pKiller && pKiller->GetCharacter() && pFlag->GetCarrier() == pKiller->GetCharacter())
+			HadFlag |= 2;
+		if(pFlag && pFlag->GetCarrier() == pVictim)
+		{
+			GameServer()->CreateSoundGlobal(SOUND_CTF_DROP);
+			GameServer()->SendGameMsg(protocol7::GAMEMSG_CTF_DROP, -1);
+			pFlag->Drop();
+			// https://github.com/ddnet-insta/ddnet-insta/issues/156
+			pFlag->m_pLastCarrier = nullptr;
+			
+			HadFlag |= 1;
+		}
+		if(pFlag && pFlag->GetCarrier() == pVictim)
+			pFlag->SetCarrier(0);
+	}
+
+	return HadFlag;
+}

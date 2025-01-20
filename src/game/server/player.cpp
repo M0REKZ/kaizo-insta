@@ -227,7 +227,7 @@ void CPlayer::Tick()
 		}
 	}
 
-	if(Server()->GetNetErrorString(m_ClientId)[0])
+	if(Server()->GetNetErrorString(m_ClientId)[0] && !(((CServer*)Server())->m_aClients[m_ClientId].m_KZBot))
 	{
 		SetInitialAfk(true);
 
