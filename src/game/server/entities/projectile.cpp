@@ -421,12 +421,23 @@ void CProjectile::Tick()
 		return;
 	}
 
-	int x = GameServer()->Collision()->GetIndex(PrevPos, CurPos);
+
 	int z;
+	CQuad *pQuad = nullptr;
+	GameServer()->Collision()->GetQuadAt(CurPos,&pQuad);
+	if(pQuad && (g_Config.m_SvOldTeleportWeapons ? pQuad->m_ColorEnvOffset == TILE_TELEIN : pQuad->m_ColorEnvOffset == TILE_TELEINWEAPON))
+	{
+		z = pQuad->m_aColors[0].r;
+	}
+	else
+	{
+	int x = GameServer()->Collision()->GetIndex(PrevPos, CurPos);
+
 	if(g_Config.m_SvOldTeleportWeapons)
 		z = GameServer()->Collision()->IsTeleport(x);
 	else
 		z = GameServer()->Collision()->IsTeleportWeapon(x);
+	}
 	if(z && !GameServer()->Collision()->TeleOuts(z - 1).empty())
 	{
 		int TeleOut = GameServer()->m_World.m_Core.RandomOr0(GameServer()->Collision()->TeleOuts(z - 1).size());

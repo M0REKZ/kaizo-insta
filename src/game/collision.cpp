@@ -483,13 +483,23 @@ int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollisio
 		int ix = round_to_int(Pos.x);
 		int iy = round_to_int(Pos.y);
 
+		if(pOutQuad)
+			GetQuadAt(ix,iy,pOutQuad);
+
 		int Index = GetPureMapIndex(Pos);
 		if(pTeleNr)
 		{
+			if(pOutQuad && pOutQuad->m_pQuad && (g_Config.m_SvOldTeleportWeapons ? pOutQuad->m_pQuad->m_ColorEnvOffset == TILE_TELEIN : pOutQuad->m_pQuad->m_ColorEnvOffset == TILE_TELEINWEAPON))
+			{
+				*pTeleNr = pOutQuad->m_pQuad->m_aColors[0].r;
+			}
+			else
+			{
 			if(g_Config.m_SvOldTeleportWeapons)
 				*pTeleNr = IsTeleport(Index);
 			else
 				*pTeleNr = IsTeleportWeapon(Index);
+			}
 		}
 		if(pTeleNr && *pTeleNr)
 		{
@@ -500,7 +510,7 @@ int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollisio
 			return TILE_TELEINWEAPON;
 		}
 
-		if(CheckPoint(ix, iy, pOutQuad))
+		if(CheckPoint(ix, iy) || (pOutQuad && pOutQuad->m_pQuad && (pOutQuad->m_pQuad->m_ColorEnvOffset == TILE_SOLID || pOutQuad->m_pQuad->m_ColorEnvOffset == TILE_NOHOOK)))
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
