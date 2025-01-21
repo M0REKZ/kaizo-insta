@@ -143,7 +143,7 @@ void CLaser::DoBounce()
 
 	vec2 To = m_Pos + m_Dir * m_Energy;
 
-	QuadData QData;
+	QuadData QData = {nullptr, vec2(0, 0), 0.0f};
 
 	Res = GameServer()->Collision()->IntersectLineTeleWeapon(m_Pos, To, &Coltile, &To, &z, &QData);
 
