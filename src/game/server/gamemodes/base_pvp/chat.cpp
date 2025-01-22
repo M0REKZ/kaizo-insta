@@ -262,9 +262,58 @@ bool CGameControllerPvp::OnBangCommand(int ClientId, const char *pCmd, int NumAr
 	return true;
 }
 
+bool CGameControllerPvp::IsChatBlocked(const CNetMsg_Cl_Say *pMsg, int Length, int Team, CPlayer *pPlayer) const
+{
+	int ClientId = pPlayer->GetCid();
+
+	if(!g_Config.m_SvRequireChatFlagToChat)
+		return false;
+
+	// always allow sending chat commands
+	// yes this enables /me spam but nobody knows
+	if(pMsg->m_pMessage[0] == '/')
+		return false;
+
+	// spammers do not get pinged
+	// but if real players get greeted they
+	// should be able to respond instantly
+	if(pPlayer->m_GotPingedInChat)
+		return false;
+
+	// spectators can not send the playerflag chatting
+	// legit chat binds also do not send the playerflag chatting
+	// so after 20 seconds we allow everyone to use the chat
+	// to cover those cases.
+	// It should still filter out the reconnecting spam bots.
+	int SecondsConnected = (Server()->Tick() - pPlayer->m_JoinTick) / Server()->TickSpeed();
+	int SecondsUntilAllowed = maximum(0, 20 - SecondsConnected);
+	if(SecondsUntilAllowed == 0)
+		return false;
+
+	// writing "hi" in less than 2 ticks is sus
+	int ChatTicksNeeded = 2;
+
+	// writing "hello world" in less than 20 ticks is sus
+	if(Length > 10)
+		ChatTicksNeeded = 20;
+
+	if(pPlayer->m_TicksSpentChatting < ChatTicksNeeded)
+	{
+		char aBuf[512];
+		str_format(aBuf, sizeof(aBuf), "You are not allowed to use the chat yet. Please wait %d seconds.", SecondsUntilAllowed);
+		SendChatTarget(ClientId, aBuf);
+		return true;
+	}
+
+	return false;
+}
+
 bool CGameControllerPvp::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer)
 {
 	int ClientId = pPlayer->GetCid();
+
+	if(IsChatBlocked(pMsg, Length, Team, pPlayer))
+		return true;
 
 	if(pMsg->m_Team || !AllowPublicChat(pPlayer))
 		Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? TEAM_SPECTATORS : pPlayer->GetTeam()); // ddnet-insta
@@ -272,24 +321,28 @@ bool CGameControllerPvp::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, i
 		Team = TEAM_ALL;
 
 	// ddnet-insta warn on ping if cant respond
-	if(Team == TEAM_ALL && pPlayer->GetTeam() != TEAM_SPECTATORS && pMsg->m_pMessage[0] != '/')
+	if(pMsg->m_pMessage[0] != '/')
 	{
-		for(const CPlayer *pSpecPlayer : GameServer()->m_apPlayers)
+		for(CPlayer *pPingedPlayer : GameServer()->m_apPlayers)
 		{
-			if(!pSpecPlayer)
+			if(!pPingedPlayer)
 				continue;
-			if(pSpecPlayer->GetTeam() != TEAM_SPECTATORS)
-				continue;
-			if(AllowPublicChat(pSpecPlayer))
-				continue;
-			if(!str_find_nocase(pMsg->m_pMessage, Server()->ClientName(pSpecPlayer->GetCid())))
+			if(!str_find_nocase(pMsg->m_pMessage, Server()->ClientName(pPingedPlayer->GetCid())))
 				continue;
 
-			char aChatText[256];
-			str_format(aChatText, sizeof(aChatText), "Warning: '%s' got pinged in chat but can not respond", Server()->ClientName(pSpecPlayer->GetCid()));
-			GameServer()->SendChat(-1, TEAM_ALL, aChatText);
-			GameServer()->SendChat(-1, TEAM_ALL, "turn off tournament chat or make sure there are enough in game slots");
-			break;
+			if(
+				Team == TEAM_ALL &&
+				pPingedPlayer->GetTeam() == TEAM_SPECTATORS &&
+				pPlayer->GetTeam() != TEAM_SPECTATORS &&
+				!AllowPublicChat(pPingedPlayer))
+			{
+				char aChatText[256];
+				str_format(aChatText, sizeof(aChatText), "Warning: '%s' got pinged in chat but can not respond", Server()->ClientName(pPingedPlayer->GetCid()));
+				GameServer()->SendChat(-1, TEAM_ALL, aChatText);
+				GameServer()->SendChat(-1, TEAM_ALL, "turn off tournament chat or make sure there are enough in game slots");
+			}
+
+			pPingedPlayer->m_GotPingedInChat = true;
 		}
 	}
 

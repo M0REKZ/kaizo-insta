@@ -213,6 +213,22 @@ int CGameControllerPvp::SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags)
 	if(g_Config.m_SvOldLaser)
 		Flags &= ~(GAMEINFOFLAG_PREDICT_DDRACE);
 
+	// if the grenade spam protection is on
+	// and we have "cl_antiping 1"
+	// the grenade starts glitching when we hold
+	// fire without having any bullets left
+	// https://github.com/ddnet-insta/ddnet-insta/issues/234
+	if(g_Config.m_SvGrenadeAmmoRegen && IsGrenadeGameType())
+	{
+		Flags &= ~(GAMEINFOFLAG_UNLIMITED_AMMO);
+
+		// unsetting unlimited ammo alone does not work
+		// sadly ddnet prediction is a bit generic
+		// so predict ddrace overwrites a missing unlimited ammo
+		// https://github.com/ddnet/ddnet/issues/8923
+		Flags &= ~(GAMEINFOFLAG_PREDICT_DDRACE);
+	}
+
 	return Flags;
 }
 
@@ -269,7 +285,17 @@ int CGameControllerPvp::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer, in
 
 	// alawys force display round score if the game ended
 	// otherwise you can not see who actually won
-	if(GameState() == IGS_END_ROUND)
+	//
+	// in zCatch you do win by score
+	// and you also do make any points during round
+	// so we just keep display whatever we displayed during the round
+	// https://github.com/ddnet-insta/ddnet-insta/issues/233
+	// TODO: once there are other non points winning gametypes
+	//       we should introduce something like IsLmsGameType()
+	//       and use that here
+	//       but that really depends on how these gametypes
+	//       do scoring and give points
+	if(GameState() == IGS_END_ROUND && !IsZcatchGameType())
 		return Score;
 
 	switch(pSnapReceiver->m_DisplayScore)
@@ -1038,6 +1064,11 @@ void CGameControllerPvp::Tick()
 			continue;
 
 		OnPlayerTick(pPlayer);
+
+		if(!pPlayer->GetCharacter())
+			continue;
+
+		OnCharacterTick(pPlayer->GetCharacter());
 	}
 	// call anticamper
 	if(g_Config.m_SvAnticamper && !GameServer()->m_World.m_Paused)
@@ -1079,6 +1110,12 @@ void CGameControllerPvp::OnPlayerTick(class CPlayer *pPlayer)
 			}
 		}
 	}
+}
+
+void CGameControllerPvp::OnCharacterTick(CCharacter *pChr)
+{
+	if(pChr->GetPlayer()->m_PlayerFlags & PLAYERFLAG_CHATTING)
+		pChr->GetPlayer()->m_TicksSpentChatting++;
 }
 
 bool CGameControllerPvp::OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim)
