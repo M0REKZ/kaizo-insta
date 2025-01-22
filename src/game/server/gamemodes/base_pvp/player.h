@@ -76,6 +76,12 @@ public:
 	char m_CatchSkinPartNames[6][24] = {"", "", "", "", "", ""};
 	char m_CatchOrigSkinPartNames[6][24] = {"", "", "", "", "", ""};
 
+	/*******************************************************************
+     * Hide and Seek                                                   *
+     *******************************************************************/
+
+	bool m_IsSeeker = false;
+
 	// kills made in zCatch that give reward points
 	// if the player wins
 	//

@@ -48,6 +48,11 @@ MACRO_CONFIG_INT(SvBallRespawn, sv_ball_respawn, 10, 1, 1000, CFGFLAG_SERVER, "S
 MACRO_CONFIG_INT(SvCatchDamage, sv_catch_damage, 0, 0, 1, CFGFLAG_SERVER, "Enable damage in Catch64")
 MACRO_CONFIG_INT(SvCatchWeapon, sv_catch_weapon, 0, -1, 5, CFGFLAG_SERVER, "Catch64 weapon")
 
+//For Hide and Seek
+MACRO_CONFIG_INT(SvHnSSeekerWeapon, sv_hns_seeker_weapon, 0, -1, 5, CFGFLAG_SERVER, "HidNSek Seeker weapon")
+MACRO_CONFIG_INT(SvHnSHiderWeapon, sv_hns_hider_weapon, -1, -1, 5, CFGFLAG_SERVER, "HidNSek Hider weapon")
+MACRO_CONFIG_INT(SvHnSSeekerAmount, sv_hns_seeker_amount, 6, 0, 64, CFGFLAG_SERVER, "1 seeker for each specified amount of players (spawns at least 1 if there is less players)")
+
 MACRO_CONFIG_INT(SvKZBots, sv_kzbots, 0, 0, MAX_CLIENTS, CFGFLAG_SERVER, "Add KZ Bots")
 MACRO_CONFIG_INT(SvKZBotsAI, sv_kzbots_ai, 0, 0, 99, CFGFLAG_SERVER, "KZ Bots AI (0 = +KZ AI, 1 = Pointer AI)")
 
