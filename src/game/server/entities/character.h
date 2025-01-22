@@ -295,6 +295,7 @@ public:
 	
 	void DoKZDamage(vec2 Force, int Dmg, int From, int Weapon);
 	bool InWater() { return m_Water; }
+	bool Invisible() { return m_Invisible; }
 	void CatchBall();
 	bool m_HasBall = false;
 	bool m_HasFlagBall = false;
