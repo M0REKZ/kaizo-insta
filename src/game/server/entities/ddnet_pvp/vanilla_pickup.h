@@ -11,18 +11,17 @@ public:
 	static const int ms_CollisionExtraSize = 6;
 
 	CVanillaPickup(CGameWorld *pGameWorld, int Type, int SubType = 0, int Layer = 0, int Number = 0);
-	virtual ~CVanillaPickup();
 
-	void Reset() override;
-	void Tick() override;
-	void TickPaused() override;
-	void Snap(int SnappingClient) override;
+	virtual void Reset() override;
+	virtual void Tick() override;
+	virtual void TickPaused() override;
+	virtual void Snap(int SnappingClient) override;
 
 	int Type() const { return m_Type; }
 	int Subtype() const { return m_Subtype; }
 
 	int GetSpawnTick() { return m_SpawnTick; } //+KZ
-	
+
 protected:
 	int m_Type;
 	int m_Subtype;
@@ -32,8 +31,6 @@ protected:
 
 	void Move();
 	vec2 m_Core;
-	
-	int m_Id2; //+KZ from Pointer tw+
 };
 
 #endif

@@ -9,34 +9,33 @@
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
 
-#include "vanilla_pickup.h"
+#include "kz_pickup.h"
 
-static constexpr int gs_PickupPhysSize = 14;
-
-CVanillaPickup::CVanillaPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number) :
-	CEntity(pGameWorld, CGameWorld::ENTTYPE_PICKUP, vec2(0, 0), gs_PickupPhysSize)
+CKZPickup::CKZPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number) :
+	CVanillaPickup(pGameWorld, Type, SubType, Layer, Number)
 {
-	m_Type = Type;
-	m_Subtype = SubType;
-
-	m_Layer = Layer;
-	m_Number = Number;
-
-	int SpawnDelay = m_Type == POWERUP_NINJA ? 90 : 0;
-	if(SpawnDelay > 0)
-		m_SpawnTick = Server()->Tick() + Server()->TickSpeed() * SpawnDelay;
-	else
-		m_SpawnTick = -1;
-
-	GameWorld()->InsertEntity(this);
+	//if(m_Subtype && (m_Type == POWERUP_HEALTH || m_Type == POWERUP_ARMOR))
+	//{
+		m_Id2 = Server()->SnapNewId();
+	//}
+	//else
+	//{
+	//	m_Id2 = -1;
+	//}
 }
 
-void CVanillaPickup::Reset()
+CKZPickup::~CKZPickup()
+{
+	if(m_Id2 != -1)
+		Server()->SnapFreeId(m_Id2);
+}
+
+void CKZPickup::Reset()
 {
 	m_MarkedForDestroy = true;
 }
 
-void CVanillaPickup::Tick()
+void CKZPickup::Tick()
 {
 	Move();
 
@@ -67,7 +66,7 @@ void CVanillaPickup::Tick()
 		switch(m_Type)
 		{
 		case POWERUP_HEALTH:
-			if(pChr->IncreaseHealth(1))
+			if(m_Subtype == 1 ? pChr->IncreaseHealth(5) : pChr->IncreaseHealth(1))
 			{
 				Picked = true;
 				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_HEALTH, pChr->TeamMask());
@@ -75,7 +74,7 @@ void CVanillaPickup::Tick()
 			break;
 
 		case POWERUP_ARMOR:
-			if(pChr->IncreaseArmor(1))
+			if(m_Subtype == 1 ? pChr->IncreaseArmor(5) : pChr->IncreaseArmor(1))
 			{
 				Picked = true;
 				GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
@@ -139,13 +138,13 @@ void CVanillaPickup::Tick()
 	}
 }
 
-void CVanillaPickup::TickPaused()
+void CKZPickup::TickPaused()
 {
 	if(m_SpawnTick != -1)
 		++m_SpawnTick;
 }
 
-void CVanillaPickup::Snap(int SnappingClient)
+void CKZPickup::Snap(int SnappingClient)
 {
 	if(m_SpawnTick != -1 || NetworkClipped(SnappingClient))
 		return;
@@ -165,14 +164,37 @@ void CVanillaPickup::Snap(int SnappingClient)
 			return;
 	}
 
-	GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, m_Subtype, m_Number);
-}
-
-void CVanillaPickup::Move()
-{
-	if(Server()->Tick() % (int)(Server()->TickSpeed() * 0.15f) == 0)
+	if ((m_Type == POWERUP_HEALTH || m_Type == POWERUP_ARMOR) && m_Subtype == 1 && m_Id2 != -1)
 	{
-		Collision()->MoverSpeed(m_Pos.x, m_Pos.y, &m_Core);
-		m_Pos += m_Core;
+		vec2 pos1, pos2;
+		
+		pos1.x = (int)m_Pos.x + 16*sin((float)Server()->Tick() / 25.0);
+		pos1.y = (int)m_Pos.y + 16*sin((float)Server()->Tick() / 25.0);
+		
+		pos2.x = (int)m_Pos.x + 16*cos((float)Server()->Tick() / 25.0);
+		pos2.y = (int)m_Pos.y + -16*cos((float)Server()->Tick() / 25.0);
+		
+		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), pos1, m_Type, 0, m_Number);
+		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), m_Id2, pos2, m_Type, 0, m_Number);
+	}
+	else
+	{
+		vec2 postemp;
+				
+		postemp.x = m_Pos.x + 32*sin((float)Server()->Tick() / 25.0);
+		postemp.y = m_Pos.y + 32*cos((float)Server()->Tick() / 25.0);
+
+		CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(m_Id2);
+		if(!pProj)
+		{
+			return;
+		}
+		pProj->m_X = postemp.x;
+		pProj->m_Y = postemp.y;
+		pProj->m_VelX = 0;
+		pProj->m_VelY = 0;
+		pProj->m_StartTick = Server()->Tick();
+		pProj->m_Type = WEAPON_HAMMER;
+		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, 0, m_Number);
 	}
 }

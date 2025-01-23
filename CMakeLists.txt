@@ -2744,6 +2744,8 @@ if(SERVER)
     entities/kz/flagball.h
     entities/kz/grenade_launcher.cpp
     entities/kz/grenade_launcher.h
+    entities/kz/kz_pickup.cpp
+    entities/kz/kz_pickup.h
     entities/kz/mine.cpp
     entities/kz/mine.h
     entities/kz/random_weapon.cpp

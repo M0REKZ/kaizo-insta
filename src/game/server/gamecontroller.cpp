@@ -23,6 +23,7 @@
 #include "entities/kz/random_weapon.h"
 #include "entities/kz/mine.h"
 #include "entities/kz/grenade_launcher.h"
+#include "entities/kz/kz_pickup.h"
 #include "entities/projectile.h"
 
 IGameController::IGameController(class CGameContext *pGameServer) :
@@ -1065,6 +1066,14 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 			SubType = rand() % NUM_WEAPONS;
 		}
 	}
+	else if(Index == TILE_VANILLA_HEART)
+	{
+		Type = POWERUP_HEALTH;
+	}
+	else if(Index == TILE_VANILLA_ARMOR)
+	{
+		Type = POWERUP_ARMOR;
+	}
 
 	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 	
@@ -1072,12 +1081,12 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 	{
 		if(Index == TILE_RANDOMWEAPON)
 		{
-			CVanillaPickup *pPickup = new CRandomWeapon(&GameServer()->m_World, Type, SubType, Layer, Number);
+			CRandomWeapon *pPickup = new CRandomWeapon(&GameServer()->m_World, Type, SubType, Layer, Number);
 			pPickup->m_Pos = Pos;
 		}
 		else
 		{
-			CVanillaPickup *pPickup = new CVanillaPickup(&GameServer()->m_World, Type, SubType, Layer, Number);
+			CKZPickup *pPickup = new CKZPickup(&GameServer()->m_World, Type, SubType, Layer, Number);
 			pPickup->m_Pos = Pos;
 		}
 		return true;

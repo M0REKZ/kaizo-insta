@@ -3292,6 +3292,17 @@ void CCharacter::HandleKZTiles()
 	{
 		m_Invisible = false;
 	}
+
+	if(TileIndex == TILE_INVINCIBLE && !m_Core.m_Invincible)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You are invincible");
+		SetInvincible(true);
+	}
+	else if(TileIndex == TILE_NO_INVINCIBLE && m_Core.m_Invincible)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "Now you are not invincible, sad...");
+		SetInvincible(false);
+	}
 	
 	if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == TILE_5_DAMAGE)
 	{
@@ -3308,6 +3319,23 @@ void CCharacter::HandleKZTiles()
 	if(Collision()->GetKZTileIndex(m_Pos.x, m_Pos.y + 15 ) == TILE_5_DAMAGE)
 	{
 		DoKZDamage(vec2(0,-15), 5, m_pPlayer->GetCid(), WEAPON_WORLD);
+	}
+
+	if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == TILE_1_DAMAGE)
+	{
+		DoKZDamage(vec2(15,0), 1, m_pPlayer->GetCid(), WEAPON_WORLD);
+	}
+	if(Collision()->GetKZTileIndex(m_Pos.x + 15 , m_Pos.y) == TILE_1_DAMAGE)
+	{
+		DoKZDamage(vec2(-15,0), 1, m_pPlayer->GetCid(), WEAPON_WORLD);
+	}
+	if(Collision()->GetKZTileIndex(m_Pos.x , m_Pos.y - 15) == TILE_1_DAMAGE)
+	{
+		DoKZDamage(vec2(0,15), 1, m_pPlayer->GetCid(), WEAPON_WORLD);
+	}
+	if(Collision()->GetKZTileIndex(m_Pos.x, m_Pos.y + 15 ) == TILE_1_DAMAGE)
+	{
+		DoKZDamage(vec2(0,-15), 1, m_pPlayer->GetCid(), WEAPON_WORLD);
 	}
 	
 	

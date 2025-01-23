@@ -27,6 +27,11 @@ CFlagBall::CFlagBall(CGameWorld *pGameWorld, int Team)
 
 void CFlagBall::Reset()
 {
+	if(m_pCarrier)
+	{
+		m_pCarrier->m_HasFlagBall = false;
+	}
+
 	CFlag::Reset();
 //	m_LastCarrier = -1;
 	m_DropTick = 0;

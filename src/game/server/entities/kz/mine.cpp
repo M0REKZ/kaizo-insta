@@ -160,7 +160,7 @@ void CMine::Tick()
 					GameServer()->CreateExplosion(m_Pos, m_Owner, WEAPON_GRENADE, true, pChr->Team(), pChr->TeamMask());
 				
 				//normal explosion does not make damage on instagib so i need to do this, also people cant put mines on instagib
-				if(GameServer()->m_pController->m_IsInstagibKZ || str_comp(GameServer()->m_pController->m_pGameType, "BOMBᵏᶻ") == 0)
+				if(GameServer()->m_pController->m_IsInstagibKZ || (!GameServer()->m_pController->m_IsInstagibKZ && !GameServer()->m_pController->IsVanillaGameType()) || str_comp(GameServer()->m_pController->m_pGameType, "BOMBᵏᶻ") == 0)
 					pChr->DoKZDamage(vec2(0,0), 3, pChr->GetPlayer()->GetCid(), WEAPON_GRENADE);
 			}
 			else if(Proj)
