@@ -37,7 +37,7 @@ void CGameControllerHidNSek::Tick()
 	
 	if(m_RoundActive && !(GameServer()->m_World.m_Paused))
 	{
-		//DoWincheckRound();
+		DoWincheckRound();
 	}
     //todo: m_World paused when endmatch-- DONE.. i guess
     if(m_RoundPauseTime > 0)
@@ -173,7 +173,7 @@ bool CGameControllerHidNSek::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 
 int CGameControllerHidNSek::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
-    CGameControllerPvp::OnCharacterDeath(pVictim,pKiller,WeaponId);
+    //CGameControllerPvp::OnCharacterDeath(pVictim,pKiller,WeaponId);
 	if(WeaponId == WEAPON_GAME)
 		return false;
 	
@@ -261,8 +261,8 @@ void CGameControllerHidNSek::KillEveryone()
         {
             if(GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->GetCharacter())
             {
-                //if(GameServer()->m_apPlayers[i]->GetCharacter()->IsAlive())
-                    //GameServer()->m_apPlayers[i]->GetCharacter()->Destroy();
+                if(GameServer()->m_apPlayers[i]->GetCharacter()->IsAlive())
+                    GameServer()->m_apPlayers[i]->GetCharacter()->Destroy();
                 //GameServer()->m_apPlayers[i]->Respawn();
             }
             
