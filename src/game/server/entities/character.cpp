@@ -1409,8 +1409,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 	{
 		Health = m_Health;
 		Armor = m_Armor;
-		if(m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo > 0)
-			AmmoCount = (m_FreezeTime == 0) ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : 0;
+		AmmoCount = (m_FreezeTime == 0) ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : 0;
 	}
     if(!(((CServer*)Server())->m_aClients[m_pPlayer->GetCid()].m_KZBot))
 	if(GetPlayer()->IsAfk() || GetPlayer()->IsPaused() || GetPlayer()->m_MenuAFK)
