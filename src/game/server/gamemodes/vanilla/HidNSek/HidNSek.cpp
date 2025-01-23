@@ -49,7 +49,10 @@ void CGameControllerHidNSek::Tick()
     {
         GameServer()->m_World.m_Paused = false;
         m_RoundPauseTime = -1;
-        //m_GameStartTick = Server()->Tick();
+        m_EndingRound = false;
+        m_RoundStartTick = Server()->Tick();
+        m_GameStartTick = Server()->Tick();
+       //RespawnAll();
     }
 
     if(!GameServer()->m_World.m_Paused)
@@ -189,6 +192,9 @@ bool CGameControllerHidNSek::DoWincheckRound()
 {
     //if(GetPlayerAmount() <= 1)
     //    return false;
+    if(m_EndingRound)
+        return false;
+
     if(m_RoundPauseTime >= 0)
         return false;
 
@@ -223,6 +229,8 @@ bool CGameControllerHidNSek::DoWincheckRound()
                     GameServer()->m_apPlayers[i]->IncrementScore();
                 }
             }
+            m_RoundStartTick = Server()->Tick();
+            m_GameStartTick = Server()->Tick();
             FakeEndRound();
             KillEveryone();
             SetAllUndead();
@@ -243,6 +251,8 @@ bool CGameControllerHidNSek::DoWincheckRound()
                     GameServer()->m_apPlayers[i]->IncrementScore();
                 }
             }
+            m_RoundStartTick = Server()->Tick();
+            m_GameStartTick = Server()->Tick();
             FakeEndRound();
             KillEveryone();
             SetAllUndead();
