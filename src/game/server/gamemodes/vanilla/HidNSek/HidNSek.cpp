@@ -37,7 +37,7 @@ void CGameControllerHidNSek::Tick()
 	
 	if(m_RoundActive && !(GameServer()->m_World.m_Paused))
 	{
-		DoWincheckRound();
+		//DoWincheckRound();
 	}
     //todo: m_World paused when endmatch-- DONE.. i guess
     if(m_RoundPauseTime > 0)
@@ -56,7 +56,7 @@ void CGameControllerHidNSek::Tick()
     {
         m_RoundPauseTime = -1;
     }
-    CGameControllerDM::Tick();
+    //CGameControllerDM::Tick();
     //kinda ugly loop
     int PlayerAmount=0;
     for(int i = 0; i < MAX_CLIENTS; ++i)
@@ -173,6 +173,7 @@ bool CGameControllerHidNSek::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 
 int CGameControllerHidNSek::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
+    CGameControllerPvp::OnCharacterDeath(pVictim,pKiller,WeaponId);
 	if(WeaponId == WEAPON_GAME)
 		return false;
 	
@@ -258,10 +259,11 @@ void CGameControllerHidNSek::KillEveryone()
     {
         if(GameServer()->m_apPlayers[i])
         {
-            if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->GetCharacter())
+            if(GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->GetCharacter())
             {
-                GameServer()->m_apPlayers[i]->GetCharacter()->Destroy();
-                GameServer()->m_apPlayers[i]->Respawn();
+                //if(GameServer()->m_apPlayers[i]->GetCharacter()->IsAlive())
+                    //GameServer()->m_apPlayers[i]->GetCharacter()->Destroy();
+                //GameServer()->m_apPlayers[i]->Respawn();
             }
             
         }
@@ -308,7 +310,7 @@ void CGameControllerHidNSek::SetAllUndead()
             {
 				GameServer()->m_apPlayers[i]->m_IsDead = false;
                 GameServer()->m_apPlayers[i]->SetTeamRaw(TEAM_BLUE);
-                GameServer()->m_apPlayers[i]->Respawn();
+                //GameServer()->m_apPlayers[i]->Respawn();
             }
 			else
 			{
@@ -353,7 +355,7 @@ void CGameControllerHidNSek::SetSeekers()
             {
                 GameServer()->m_apPlayers[rnd]->m_IsSeeker = true;
                 GameServer()->m_apPlayers[rnd]->SetTeamRaw(TEAM_RED);
-                GameServer()->m_apPlayers[rnd]->Respawn();
+                //GameServer()->m_apPlayers[rnd]->Respawn();
                 if(GameServer()->m_apPlayers[rnd]->GetCharacter())
                 {
                     GameServer()->m_apPlayers[rnd]->GetCharacter()->GiveWeapon(g_Config.m_SvHnSSeekerWeapon);
