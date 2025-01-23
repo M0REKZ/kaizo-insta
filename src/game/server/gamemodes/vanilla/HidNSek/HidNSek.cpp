@@ -176,7 +176,7 @@ bool CGameControllerHidNSek::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 
 int CGameControllerHidNSek::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int WeaponId)
 {
-    //CGameControllerPvp::OnCharacterDeath(pVictim,pKiller,WeaponId);
+	CGameControllerDDRace::OnCharacterDeath(pVictim, pKiller, WeaponId);
 	if(WeaponId == WEAPON_GAME)
 		return false;
 	
@@ -232,7 +232,7 @@ bool CGameControllerHidNSek::DoWincheckRound()
             m_RoundStartTick = Server()->Tick();
             m_GameStartTick = Server()->Tick();
             FakeEndRound();
-            KillEveryone();
+            //KillEveryone();
             SetAllUndead();
             m_EndingRound = true;
             return true;
@@ -254,7 +254,7 @@ bool CGameControllerHidNSek::DoWincheckRound()
             m_RoundStartTick = Server()->Tick();
             m_GameStartTick = Server()->Tick();
             FakeEndRound();
-            KillEveryone();
+            //KillEveryone();
             SetAllUndead();
             m_EndingRound = true;
             return true;
