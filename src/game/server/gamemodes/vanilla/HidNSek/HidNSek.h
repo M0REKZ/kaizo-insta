@@ -90,6 +90,7 @@ protected:
     virtual void SetAllUndead();
     virtual void FakeEndRound();
     virtual void KillEveryone();
+	void UnSetSeekers();
 	int GetPlayerAmount();
     bool m_EndingRound = false;
 	int m_RoundPauseTime = -1;
@@ -104,6 +105,8 @@ public:
 	void OnCharacterSpawn(class CCharacter *pChr) override;
     bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override;
     bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
+	virtual bool OnCharacterSnap(int SnappingClient, int Id) override;
+	virtual bool CanSpecPlayer(int ClientID) override;
 	void Tick() override;
     bool m_RoundActive = false;
 };

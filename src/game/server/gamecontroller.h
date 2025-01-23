@@ -186,6 +186,8 @@ public:
 	double GetTime() { return static_cast<double>(Server()->Tick() - m_RoundStartTick) / Server()->TickSpeed(); }
 	//+KZ
 	virtual bool OnKZEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number = 0);
+	virtual bool OnCharacterSnap(int SnappingClient, int Id) {return false;}
+	virtual bool CanSpecPlayer(int ClientID) {return true;}
 };
 
 #endif

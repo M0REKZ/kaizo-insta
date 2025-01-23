@@ -1427,6 +1427,10 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 			Emote = EMOTE_BLINK;
 	}
 
+	//+KZ
+	if(GameServer()->m_pController->OnCharacterSnap(SnappingClient, Id))
+		return;
+
 	if(!Server()->IsSixup(SnappingClient))
 	{
 		CNetObj_Character *pCharacter = Server()->SnapNewItem<CNetObj_Character>(Id);

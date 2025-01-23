@@ -6,7 +6,7 @@
 CGameControllerHidNSek::CGameControllerHidNSek(class CGameContext *pGameServer) :
 	CGameControllerDM(pGameServer)
 {
-    m_GameFlags = GAMEFLAG_TEAMS;
+    m_GameFlags = 0;
 
     m_pGameType = "HidNSekᵏᶻ";
 	//m_AllowSkinChange = false;
@@ -49,7 +49,12 @@ void CGameControllerHidNSek::Tick()
     {
         GameServer()->m_World.m_Paused = false;
         m_RoundPauseTime = -1;
-        m_GameStartTick = Server()->Tick();
+        //m_GameStartTick = Server()->Tick();
+    }
+
+    if(!GameServer()->m_World.m_Paused)
+    {
+        m_RoundPauseTime = -1;
     }
     CGameControllerDM::Tick();
     //kinda ugly loop
@@ -183,16 +188,19 @@ bool CGameControllerHidNSek::DoWincheckRound()
 {
     //if(GetPlayerAmount() <= 1)
     //    return false;
-
     if(m_RoundPauseTime >= 0)
         return false;
 
-    if(CGameControllerDM::DoWincheckRound())
+    if((m_GameInfo.m_ScoreLimit > 0 && (m_aTeamscore[TEAM_RED] >= m_GameInfo.m_ScoreLimit || m_aTeamscore[TEAM_BLUE] >= m_GameInfo.m_ScoreLimit)))
     {
+        EndRound();
+        UnSetSeekers();
         SetAllUndead();
         m_EndingRound = true;
         return true;
     }
+
+    //printf("DoWincheckRound\n");
 
     bool HiderFound = false;;
 
@@ -215,6 +223,7 @@ bool CGameControllerHidNSek::DoWincheckRound()
                 }
             }
             FakeEndRound();
+            KillEveryone();
             SetAllUndead();
             m_EndingRound = true;
             return true;
@@ -234,6 +243,7 @@ bool CGameControllerHidNSek::DoWincheckRound()
                 }
             }
             FakeEndRound();
+            KillEveryone();
             SetAllUndead();
             m_EndingRound = true;
             return true;
@@ -371,4 +381,34 @@ int CGameControllerHidNSek::SeekersAmount()
         }
     }
     return amount;
+}
+
+void CGameControllerHidNSek::UnSetSeekers()
+{
+    for(int i = 0; i < MAX_CLIENTS; ++i)
+    {
+        if(GameServer()->m_apPlayers[i])
+        {
+            if(GameServer()->m_apPlayers[i]->m_IsSeeker)
+            {
+                GameServer()->m_apPlayers[i]->m_IsSeeker = false;
+            }
+        }
+    }
+}
+
+bool CGameControllerHidNSek::OnCharacterSnap(int SnappingClient, int Id)
+{
+    if(GameServer()->m_apPlayers[SnappingClient] && GameServer()->m_apPlayers[Id] && !GameServer()->m_apPlayers[Id]->m_IsSeeker && GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS)
+        return true;
+    else
+        return CGameControllerDM::OnCharacterSnap(SnappingClient, Id);
+}
+
+bool CGameControllerHidNSek::CanSpecPlayer(int ClientID)
+{
+    if(GameServer()->m_apPlayers[ClientID] && !GameServer()->m_apPlayers[ClientID]->m_IsSeeker)
+        return false;
+    else
+        return CGameControllerDM::CanSpecPlayer(ClientID);
 }
