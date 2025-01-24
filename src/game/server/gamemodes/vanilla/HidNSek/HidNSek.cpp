@@ -232,7 +232,7 @@ bool CGameControllerHidNSek::DoWincheckRound()
             m_RoundStartTick = Server()->Tick();
             m_GameStartTick = Server()->Tick();
             FakeEndRound();
-            //KillEveryone();
+            KillEveryone();
             SetAllUndead();
             m_EndingRound = true;
             return true;
@@ -254,7 +254,7 @@ bool CGameControllerHidNSek::DoWincheckRound()
             m_RoundStartTick = Server()->Tick();
             m_GameStartTick = Server()->Tick();
             FakeEndRound();
-            //KillEveryone();
+            KillEveryone();
             SetAllUndead();
             m_EndingRound = true;
             return true;
@@ -272,7 +272,7 @@ void CGameControllerHidNSek::KillEveryone()
             if(GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->GetCharacter())
             {
                 if(GameServer()->m_apPlayers[i]->GetCharacter()->IsAlive())
-                    GameServer()->m_apPlayers[i]->GetCharacter()->Destroy();
+                    GameServer()->m_apPlayers[i]->KillCharacter();
                 //GameServer()->m_apPlayers[i]->Respawn();
             }
             
