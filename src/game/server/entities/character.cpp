@@ -3338,6 +3338,23 @@ void CCharacter::HandleKZTiles()
 		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "Now you are not invincible, sad...");
 		SetInvincible(false);
 	}
+
+	if(TileIndex == TILE_GODMODE && !m_IsGodmode)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "'%s' got godmode!", Server()->ClientName(m_pPlayer->GetCid()));
+		GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+
+		m_IsGodmode = true;
+	}
+	else if(TileIndex == TILE_NO_GODMODE && m_IsGodmode)
+	{
+		char aBuf[128];
+		str_format(aBuf, sizeof(aBuf), "'%s' lost godmode...", Server()->ClientName(m_pPlayer->GetCid()));
+		GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+
+		m_IsGodmode = false;
+	}
 	
 	if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == TILE_5_DAMAGE)
 	{
@@ -3606,35 +3623,40 @@ void CCharacter::DoKZDamage(vec2 Force, int Dmg, int From, int Weapon)
 	
 	if(From < 0 || From >= MAX_CLIENTS) //+KZ
 		From = m_pPlayer->GetCid();
-	
-	if(m_Armor > 0)
+	if(!m_IsGodmode)
 	{
-		int temp = m_Armor;
-		m_Armor -= Dmg;
-		Dmg -= temp;
-		if(Dmg < 0)
-			Dmg = 0;
-		m_Health -= Dmg;
-	}
-	else
-	{
-		m_Health -= Dmg;
-	}
-	
-	GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_SHORT);
-	
-	if(Dmg)
-	{
-		SetEmote(EMOTE_PAIN, Server()->Tick() + 500 * Server()->TickSpeed() / 1000);
+		if(m_Armor > 0)
+		{
+			int temp = m_Armor;
+			m_Armor -= Dmg;
+			Dmg -= temp;
+			if(Dmg < 0)
+				Dmg = 0;
+			m_Health -= Dmg;
+		}
+		else
+		{
+			m_Health -= Dmg;
+		}
+		
+		GameServer()->CreateSound(m_Pos, SOUND_PLAYER_PAIN_SHORT);
+		
+		if(Dmg)
+		{
+			SetEmote(EMOTE_PAIN, Server()->Tick() + 500 * Server()->TickSpeed() / 1000);
+		}
 	}
 
 	vec2 Temp = m_Core.m_Vel + Force;
 	m_Core.m_Vel = ClampVel(m_MoveRestrictions, Temp);
 	GameServer()->CreateDamageInd(m_Pos, 0, Dmg);
 	
-	if(m_Health <= 0)
+	if(!m_IsGodmode)
 	{
-		Die(From, Weapon);
+		if(m_Health <= 0)
+		{
+			Die(From, Weapon);
+		}
 	}
 }
 
