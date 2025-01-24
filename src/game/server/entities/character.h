@@ -34,6 +34,7 @@ class CCharacter : public CEntity
 
 public:
 	CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput);
+	~CCharacter(); //+KZ
 
 	void Reset() override;
 	void Destroy() override;
@@ -282,7 +283,8 @@ private:
 	bool m_Water;
 	bool m_NoAir;
 	bool m_QuadWater;
-	int m_InvisibleShieldId;
+	int m_InvisibleShieldId = -1;
+	int m_HasBallSnapId = -1;
 	int m_BallQueuedWeapon;
 	int m_BallReleaseTick;
 	int m_slowDeathTick = 0; //from pointer

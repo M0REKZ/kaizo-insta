@@ -42,8 +42,9 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	m_TriggeredEvents7 = 0;
 	m_StrongWeakId = 0;
 
-	//+KZ kinda ugly
+	//+KZ
 	m_InvisibleShieldId = Server()->SnapNewId();
+	m_HasBallSnapId = Server()->SnapNewId();
 		
 	m_Input = LastInput;
 	// never initialize both to zero
@@ -66,6 +67,19 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	if(m_pPlayer)
 		m_Core.m_PlayerRollback = m_pPlayer->m_Rollback; //JSAURUS rollback
 
+}
+
+CCharacter::~CCharacter()
+{
+	if(m_InvisibleShieldId != -1)
+	{
+		Server()->SnapFreeId(m_InvisibleShieldId);
+	}
+
+	if(m_HasBallSnapId != -1)
+	{
+		Server()->SnapFreeId(m_HasBallSnapId);
+	}
 }
 
 void CCharacter::Reset()
@@ -1562,6 +1576,27 @@ void CCharacter::Snap(int SnappingClient)
 		//+KZ: indicator idea taken from catch16
 		GameServer()->SnapPickup(CSnapContext(GameServer()->GetClientVersion(SnappingClient), Server()->IsSixup(SnappingClient)), m_InvisibleShieldId, postemp, POWERUP_ARMOR, 0, 0);
 		
+	}
+
+	while(m_HasBall)
+	{
+		vec2 postemp;
+				
+		postemp.x = m_Pos.x + 32*sin((float)(Server()->Tick() / 25.0) *2);
+		postemp.y = m_Pos.y + 32*cos((float)(Server()->Tick() / 25.0) *2);
+
+		CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(m_HasBallSnapId);
+		if(!pProj)
+		{
+			break;
+		}
+		pProj->m_X = postemp.x;
+		pProj->m_Y = postemp.y;
+		pProj->m_VelX = 0;
+		pProj->m_VelY = 0;
+		pProj->m_StartTick = Server()->Tick();
+		pProj->m_Type = WEAPON_HAMMER;
+		break;
 	}
 	
 	if(!Server()->Translate(Id, SnappingClient))
