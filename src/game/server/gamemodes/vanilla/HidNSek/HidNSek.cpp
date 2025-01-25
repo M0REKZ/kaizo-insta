@@ -6,7 +6,7 @@
 CGameControllerHidNSek::CGameControllerHidNSek(class CGameContext *pGameServer) :
 	CGameControllerDM(pGameServer)
 {
-    m_GameFlags = 0;
+    m_GameFlags = GAMEFLAG_TEAMS;
 
     m_pGameType = "HidNSekᵏᶻ";
 	//m_AllowSkinChange = false;
@@ -35,6 +35,9 @@ void CGameControllerHidNSek::Tick()
 		}
 	}*/
 	
+    if(m_GameState == IGS_END_ROUND)
+        return;
+
 	if(m_RoundActive && !(GameServer()->m_World.m_Paused))
 	{
 		DoWincheckRound();
@@ -52,7 +55,13 @@ void CGameControllerHidNSek::Tick()
         m_EndingRound = false;
         m_RoundStartTick = Server()->Tick();
         m_GameStartTick = Server()->Tick();
-       //RespawnAll();
+        //RespawnAll();
+        if(m_RealEndRound)
+        {
+            UnSetSeekers();
+            m_RealEndRound = false;
+        }
+        SetAllUndead();
     }
 
     if(!GameServer()->m_World.m_Paused)
@@ -104,6 +113,30 @@ void CGameControllerHidNSek::Tick()
 void CGameControllerHidNSek::Snap(int SnappingClient)
 {
     CGameControllerVanilla::Snap(SnappingClient);
+
+    if(Server()->IsSixup(SnappingClient))
+	{
+        protocol7::CNetObj_GameDataTeam *pGameDataObj = (protocol7::CNetObj_GameDataTeam *)Server()->SnapNewItem(protocol7::NETOBJTYPE_GAMEDATATEAM, 0, sizeof(protocol7::CNetObj_GameDataTeam));
+    
+        if(!pGameDataObj)
+            return;
+        
+        pGameDataObj->m_TeamscoreRed = m_aTeamscore[TEAM_RED];
+        pGameDataObj->m_TeamscoreBlue = m_aTeamscore[TEAM_BLUE];
+    
+    }
+    else
+    {
+        CNetObj_GameData *pGameDataObj = (CNetObj_GameData *)Server()->SnapNewItem(NETOBJTYPE_GAMEDATA, 0, sizeof(CNetObj_GameData));
+        if(!pGameDataObj)
+            return;
+
+        pGameDataObj->m_TeamscoreRed = m_aTeamscore[TEAM_RED];
+        pGameDataObj->m_TeamscoreBlue = m_aTeamscore[TEAM_BLUE];
+
+        pGameDataObj->m_FlagCarrierRed = 0;
+        pGameDataObj->m_FlagCarrierBlue = 0;
+    }
 }
 
 void CGameControllerHidNSek::OnPlayerConnect(class CPlayer *pPlayer)
@@ -205,9 +238,10 @@ bool CGameControllerHidNSek::DoWincheckRound()
     if((m_GameInfo.m_ScoreLimit > 0 && (m_aTeamscore[TEAM_RED] >= m_GameInfo.m_ScoreLimit || m_aTeamscore[TEAM_BLUE] >= m_GameInfo.m_ScoreLimit)))
     {
         EndRound();
-        UnSetSeekers();
-        SetAllUndead();
+        //UnSetSeekers();
+        //SetAllUndead();
         m_EndingRound = true;
+        m_RealEndRound = true;
         return true;
     }
 
@@ -226,18 +260,19 @@ bool CGameControllerHidNSek::DoWincheckRound()
     if(m_GameInfo.m_TimeLimit > 0 && (Server()->Tick()-m_GameStartTick) >= m_GameInfo.m_TimeLimit*Server()->TickSpeed()*60)
     {
         {
-            for(int i = 0; i < MAX_CLIENTS; i++)
+            /*for(int i = 0; i < MAX_CLIENTS; i++)
             {
                 if(GameServer()->m_apPlayers[i] && !GameServer()->m_apPlayers[i]->m_IsSeeker)
                 {
                     GameServer()->m_apPlayers[i]->IncrementScore();
                 }
-            }
+            }*/
+            m_aTeamscore[TEAM_BLUE]++;
             m_RoundStartTick = Server()->Tick();
             m_GameStartTick = Server()->Tick();
             FakeEndRound();
             KillEveryone();
-            SetAllUndead();
+           // SetAllUndead();
             m_EndingRound = true;
             return true;
         }
@@ -248,18 +283,19 @@ bool CGameControllerHidNSek::DoWincheckRound()
             return false;
         else
         {
-            for(int i = 0; i < MAX_CLIENTS; i++)
+            /*for(int i = 0; i < MAX_CLIENTS; i++)
             {
                 if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_IsSeeker)
                 {
                     GameServer()->m_apPlayers[i]->IncrementScore();
                 }
-            }
+            }*/
+            m_aTeamscore[TEAM_RED]++;
             m_RoundStartTick = Server()->Tick();
             m_GameStartTick = Server()->Tick();
             FakeEndRound();
             KillEveryone();
-            SetAllUndead();
+            //SetAllUndead();
             m_EndingRound = true;
             return true;
         }
@@ -323,7 +359,10 @@ void CGameControllerHidNSek::SetAllUndead()
             if((GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_IsDead ) || GameServer()->m_apPlayers[i]->m_IsDead)
             {
 				GameServer()->m_apPlayers[i]->m_IsDead = false;
-                GameServer()->m_apPlayers[i]->SetTeamRaw(TEAM_BLUE);
+                if(GameServer()->m_apPlayers[i]->m_IsSeeker)
+                    GameServer()->m_apPlayers[i]->SetTeamRaw(TEAM_RED);
+                else
+                    GameServer()->m_apPlayers[i]->SetTeamRaw(TEAM_BLUE);
                 //GameServer()->m_apPlayers[i]->Respawn();
             }
 			else
@@ -408,6 +447,7 @@ void CGameControllerHidNSek::UnSetSeekers()
             if(GameServer()->m_apPlayers[i]->m_IsSeeker)
             {
                 GameServer()->m_apPlayers[i]->m_IsSeeker = false;
+                GameServer()->m_apPlayers[i]->SetTeamRaw(TEAM_BLUE);
             }
         }
     }

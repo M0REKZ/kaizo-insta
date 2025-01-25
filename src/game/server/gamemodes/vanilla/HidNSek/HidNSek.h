@@ -93,6 +93,7 @@ protected:
 	void UnSetSeekers();
 	int GetPlayerAmount();
     bool m_EndingRound = false;
+	bool m_RealEndRound = false;
 	int m_RoundPauseTime = -1;
 public:
 	CGameControllerHidNSek(class CGameContext *pGameServer);
