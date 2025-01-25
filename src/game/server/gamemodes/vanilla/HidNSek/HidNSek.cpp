@@ -42,13 +42,12 @@ void CGameControllerHidNSek::Tick()
 	{
 		DoWincheckRound();
 	}
-    //todo: m_World paused when endmatch-- DONE.. i guess
     if(m_RoundPauseTime > 0)
     {
         m_RoundPauseTime--;
         return;
     }
-    else if(GameServer()->m_World.m_Paused && m_RoundPauseTime == 0)
+    else if((GameServer()->m_World.m_Paused && m_RoundPauseTime == 0) || m_EndingRound)
     {
         GameServer()->m_World.m_Paused = false;
         m_RoundPauseTime = -1;
@@ -235,23 +234,13 @@ bool CGameControllerHidNSek::DoWincheckRound()
     if(m_RoundPauseTime >= 0)
         return false;
 
-    if((m_GameInfo.m_ScoreLimit > 0 && (m_aTeamscore[TEAM_RED] >= m_GameInfo.m_ScoreLimit || m_aTeamscore[TEAM_BLUE] >= m_GameInfo.m_ScoreLimit)))
-    {
-        EndRound();
-        //UnSetSeekers();
-        //SetAllUndead();
-        m_EndingRound = true;
-        m_RealEndRound = true;
-        return true;
-    }
-
     //printf("DoWincheckRound\n");
 
     bool HiderFound = false;;
 
     for(int i = 0; i < MAX_CLIENTS; i++)
     {
-        if(GameServer()->m_apPlayers[i] && !GameServer()->m_apPlayers[i]->m_IsDead && !GameServer()->m_apPlayers[i]->m_IsSeeker)
+        if(GameServer()->m_apPlayers[i] && !GameServer()->m_apPlayers[i]->m_IsDead && !GameServer()->m_apPlayers[i]->m_IsSeeker && !(GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && !GameServer()->m_apPlayers[i]->m_IsDead))
         {
             HiderFound = true;
             break;
@@ -268,13 +257,13 @@ bool CGameControllerHidNSek::DoWincheckRound()
                 }
             }*/
             m_aTeamscore[TEAM_BLUE]++;
-            m_RoundStartTick = Server()->Tick();
-            m_GameStartTick = Server()->Tick();
-            FakeEndRound();
-            KillEveryone();
+            //m_RoundStartTick = Server()->Tick();
+            //m_GameStartTick = Server()->Tick();
+            //FakeEndRound();
+            //KillEveryone();
            // SetAllUndead();
             m_EndingRound = true;
-            return true;
+            //return true;
         }
     }
     else
@@ -291,15 +280,45 @@ bool CGameControllerHidNSek::DoWincheckRound()
                 }
             }*/
             m_aTeamscore[TEAM_RED]++;
-            m_RoundStartTick = Server()->Tick();
-            m_GameStartTick = Server()->Tick();
-            FakeEndRound();
-            KillEveryone();
+           // m_RoundStartTick = Server()->Tick();
+            //m_GameStartTick = Server()->Tick();
+            //FakeEndRound();
+           // KillEveryone();
             //SetAllUndead();
             m_EndingRound = true;
-            return true;
+            //return true;
         }
     }
+
+    if((m_GameInfo.m_ScoreLimit > 0 && (m_aTeamscore[TEAM_RED] >= m_GameInfo.m_ScoreLimit || m_aTeamscore[TEAM_BLUE] >= m_GameInfo.m_ScoreLimit)))
+    {
+        //EndRound();
+        //UnSetSeekers();
+        //SetAllUndead();
+        m_EndingRound = true;
+        m_RealEndRound = true;
+        //return true;
+    }
+
+    if(m_EndingRound)
+    {
+        m_RoundStartTick = Server()->Tick();
+        m_GameStartTick = Server()->Tick();
+        if(m_RealEndRound)
+        {
+            MarkPlayersForRespawn();
+            EndRound();
+            m_RoundPauseTime = 2;
+        }
+        else
+        {
+            FakeEndRound();
+            KillEveryone();
+        }
+        return true;
+    }
+
+
     return false;
 }
 
@@ -356,19 +375,16 @@ void CGameControllerHidNSek::SetAllUndead()
     {
         if(GameServer()->m_apPlayers[i])
         {
-            if((GameServer()->m_apPlayers[i]->GetTeam() == TEAM_SPECTATORS && GameServer()->m_apPlayers[i]->m_IsDead ) || GameServer()->m_apPlayers[i]->m_IsDead)
+            if(GameServer()->m_apPlayers[i]->m_IsDead || GameServer()->m_apPlayers[i]->m_MarkedForRespawn)
             {
 				GameServer()->m_apPlayers[i]->m_IsDead = false;
+                GameServer()->m_apPlayers[i]->m_MarkedForRespawn = false;
                 if(GameServer()->m_apPlayers[i]->m_IsSeeker)
                     GameServer()->m_apPlayers[i]->SetTeamRaw(TEAM_RED);
                 else
                     GameServer()->m_apPlayers[i]->SetTeamRaw(TEAM_BLUE);
-                //GameServer()->m_apPlayers[i]->Respawn();
+                GameServer()->m_apPlayers[i]->Respawn();
             }
-			else
-			{
-				GameServer()->m_apPlayers[i]->m_IsDead = false;
-			}
         }
     }
 }
@@ -467,4 +483,15 @@ bool CGameControllerHidNSek::CanSpecPlayer(int ClientID)
         return false;
     else
         return CGameControllerDM::CanSpecPlayer(ClientID);
+}
+
+void CGameControllerHidNSek::MarkPlayersForRespawn()
+{
+    for(int i = 0; i < MAX_CLIENTS; ++i)
+    {
+        if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_IsDead)
+        {
+            GameServer()->m_apPlayers[i]->m_MarkedForRespawn = true;
+        }
+    }
 }

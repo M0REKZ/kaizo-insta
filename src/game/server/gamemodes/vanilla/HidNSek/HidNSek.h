@@ -92,6 +92,7 @@ protected:
     virtual void KillEveryone();
 	void UnSetSeekers();
 	int GetPlayerAmount();
+	void MarkPlayersForRespawn();
     bool m_EndingRound = false;
 	bool m_RealEndRound = false;
 	int m_RoundPauseTime = -1;
