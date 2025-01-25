@@ -125,14 +125,14 @@ void CGameControllerHidNSek::Snap(int SnappingClient)
 
     if(Server()->IsSixup(SnappingClient))
 	{
-        protocol7::CNetObj_GameDataTeam *pGameDataObj = (protocol7::CNetObj_GameDataTeam *)Server()->SnapNewItem(protocol7::NETOBJTYPE_GAMEDATATEAM, 0, sizeof(protocol7::CNetObj_GameDataTeam));
+       /* protocol7::CNetObj_GameDataTeam *pGameDataObj = (protocol7::CNetObj_GameDataTeam *)Server()->SnapNewItem(protocol7::NETOBJTYPE_GAMEDATATEAM, 0, sizeof(protocol7::CNetObj_GameDataTeam));
     
         if(!pGameDataObj)
             return;
         
         pGameDataObj->m_TeamscoreRed = m_aTeamscore[TEAM_RED];
         pGameDataObj->m_TeamscoreBlue = m_aTeamscore[TEAM_BLUE];
-    
+    */
     }
     else
     {

@@ -36,6 +36,14 @@ CPlayer::CPlayer(CGameContext *pGameServer, uint32_t UniqueClientId, int ClientI
 	if(((CServer*)Server())->m_aClients[m_ClientId].m_KZBot)
 	{
 		str_copy(m_TeeInfos.m_aSkinName, "0_Cyborg Greyfox_KZ", sizeof(m_TeeInfos.m_aSkinName));
+		for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+		{
+			if(p==1 || p==2) //those must be ""
+				continue;
+
+			str_copy(m_TeeInfos.m_apSkinPartNames[p], "standard", sizeof(m_TeeInfos.m_apSkinPartNames[p]));
+        }
+
 	}
 }
 

@@ -111,6 +111,10 @@ bool CGameControllerCatch::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &Fro
      //   return false;
     Character.GetPlayer()->m_CatchColor = GameServer()->m_apPlayers[From]->m_CatchColor;
     str_copy(Character.GetPlayer()->m_CatchSkin, GameServer()->m_apPlayers[From]->m_CatchSkin, MAX_SKIN_LENGTH);
+    for(int a = 0; a < 6; a++)
+    {
+        str_copy(Character.GetPlayer()->m_CatchSkinPartNames[a], GameServer()->m_apPlayers[From]->m_CatchSkinPartNames[a], 24);
+    }
     UpdateSkins();
 
     if(Character.GetPlayer()->m_CatchColor != GameServer()->m_apPlayers[From]->m_CatchColor)
@@ -253,6 +257,11 @@ void CGameControllerCatch::UpdateSkins()
         if(!GameServer()->m_apPlayers[i])
             continue;
 
+        for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+		{
+        printf("%s\n",GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[p]);
+        }
+
         GameServer()->m_apPlayers[i]->m_TeeInfos.m_UseCustomColor = 1;
         GameServer()->m_apPlayers[i]->m_TeeInfos.m_ColorBody = GameServer()->m_apPlayers[i]->m_CatchColor;
         GameServer()->m_apPlayers[i]->m_TeeInfos.m_ColorFeet = GameServer()->m_apPlayers[i]->m_CatchColor;
@@ -291,9 +300,7 @@ void CGameControllerCatch::ResetPlayerColors()
         str_copy(GameServer()->m_apPlayers[i]->m_CatchSkin, GameServer()->m_apPlayers[i]->m_CatchOrigSkin, MAX_SKIN_LENGTH);
         for(int a = 0; a < 6; a++)
         {
-            GameServer()->m_apPlayers[i]->m_TeeInfos.m_aUseCustomColors[a] = true;
-            GameServer()->m_apPlayers[i]->m_TeeInfos.m_aSkinPartColors[a] = ColorHSLA(GameServer()->m_apPlayers[i]->m_CatchOrigColor).UnclampLighting(ColorHSLA::DARKEST_LGT).Pack(ColorHSLA::DARKEST_LGT7);
-            str_copy(GameServer()->m_apPlayers[i]->m_TeeInfos.m_apSkinPartNames[a], GameServer()->m_apPlayers[i]->m_CatchOrigSkinPartNames[a], 24);
+            str_copy(GameServer()->m_apPlayers[i]->m_CatchSkinPartNames[a], GameServer()->m_apPlayers[i]->m_CatchOrigSkinPartNames[a], 24);
         }
 
     }
