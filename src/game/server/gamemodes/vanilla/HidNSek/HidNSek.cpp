@@ -74,7 +74,11 @@ void CGameControllerHidNSek::Tick()
     if(PlayerAmount == 1 && !m_RoundActive)
     {
 		if(Server()->Tick() % Server()->TickSpeed() == 0)
+        {
         	GameServer()->SendBroadcast("Waiting for players...", -1);
+            m_RoundStartTick = Server()->Tick();
+            m_GameStartTick = Server()->Tick();
+        }
     }
     if(PlayerAmount == 1 && m_RoundActive)
     {
