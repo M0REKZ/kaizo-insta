@@ -304,8 +304,8 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `sv_zcatch_colors` Color scheme for zCatch options: teetime, savander
 + `sv_display_score` values: points, round_points, spree, current_spree, wins, kills, round_kills
 + `sv_tournament_welcome_chat` Chat message shown in chat on join when sv_tournament is 1
-+ `sv_round_stats_discord_webhook` If set will post score stats there on round end
-+ `sv_round_stats_http_endpoint` If set will post score stats there on round end
++ `sv_round_stats_discord_webhooks` If set will post score stats there on round end. Can be a comma separated list.
++ `sv_round_stats_http_endpoints` If set will post score stats there on round end. Can be a comma separated list.
 + `sv_round_stats_output_file` If set will write score stats there on round end
 
 # Rcon commands
@@ -322,7 +322,7 @@ Below is a list of all the settings that were added in ddnet-insta.
 + `add_map_to_pool` Can be picked by random_map_from_pool command (entries can be duplicated to increase chance)
 + `clear_map_pool` Clears pool used by random_map_from_pool command
 + `random_map_from_pool` Changes to random map from pool (see add_map_to_pool)
-+ `redirect` Redirect client to given port use victim -1 to redirect all
++ `redirect` Redirect client to given port use victim \"all\" to redirect all but your self
 
 # Chat commands
 
