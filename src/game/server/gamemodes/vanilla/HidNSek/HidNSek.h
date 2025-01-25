@@ -109,6 +109,7 @@ public:
     bool OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number) override;
 	virtual bool OnCharacterSnap(int SnappingClient, int Id) override;
 	virtual bool CanSpecPlayer(int ClientID) override;
+	virtual void OnPlayerReadyChange(class CPlayer *pPlayer) override;
 	void Tick() override;
     bool m_RoundActive = false;
 };

@@ -16,6 +16,7 @@ CGameControllerHidNSek::CGameControllerHidNSek(class CGameContext *pGameServer) 
 	m_pExtraColumns = new CHidNSekColumns();
 	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
 	m_pSqlStats->CreateTable(m_pStatsTable);
+    m_RoundPauseTime = 2;
 }
 
 CGameControllerHidNSek::~CGameControllerHidNSek() = default;
@@ -96,6 +97,7 @@ void CGameControllerHidNSek::Tick()
     {  
         if(!SeekersAmount())
         {
+            UnSetSeekers();
             SetSeekers();
         }
 
@@ -107,6 +109,14 @@ void CGameControllerHidNSek::Tick()
         m_RoundActive = true;
         m_RoundPauseTime = 2;
     }
+}
+
+void CGameControllerHidNSek::OnPlayerReadyChange(CPlayer *pPlayer)
+{
+    if(!pPlayer)
+        return;
+    
+    SendChatTarget(pPlayer->GetCid(),"You can't /pause in this gamemode");
 }
 
 void CGameControllerHidNSek::Snap(int SnappingClient)
@@ -141,7 +151,7 @@ void CGameControllerHidNSek::Snap(int SnappingClient)
 void CGameControllerHidNSek::OnPlayerConnect(class CPlayer *pPlayer)
 {
     CGameControllerDM::OnPlayerConnect(pPlayer);
-    /*if(m_RoundActive)
+    if(m_RoundActive)
     {
         pPlayer->SetTeamRaw(TEAM_SPECTATORS);
         pPlayer->m_IsDead = true;
@@ -149,9 +159,10 @@ void CGameControllerHidNSek::OnPlayerConnect(class CPlayer *pPlayer)
     else
     {
         pPlayer->m_IsDead = false;
-    }*/ //For now dont, this casues the 0.7 spec bug
+        pPlayer->SetTeamRaw(TEAM_BLUE);
+    } //For now dont, this casues the 0.7 spec bug //for now enable it ill discover a solution later
+
     pPlayer->m_IsSeeker = false;
-    pPlayer->SetTeamRaw(TEAM_BLUE);
 }
 
 void CGameControllerHidNSek::OnCharacterSpawn(class CCharacter *pChr)
@@ -185,7 +196,7 @@ bool CGameControllerHidNSek::OnEntity(int Index, int x, int y, int Layer, int Fl
 
 bool CGameControllerHidNSek::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
-	if(Character.m_TakingNoOwnerDamage || (From >= 0 && From < MAX_CLIENTS && GameServer()->m_apPlayers[From] && !GameServer()->m_apPlayers[From]->m_IsSeeker))
+	if(Character.m_TakingNoOwnerDamage || (From >= 0 && From < MAX_CLIENTS && GameServer()->m_apPlayers[From] && !GameServer()->m_apPlayers[From]->m_IsSeeker && !(Character.GetPlayer()->GetTeam() == GameServer()->m_apPlayers[From]->GetTeam())))
 	{
 		CGameControllerDM::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
 	}
@@ -400,7 +411,18 @@ bool CGameControllerHidNSek::CanJoinTeam(int Team, int NotThisId, char *pErrorRe
         str_copy(pErrorReason, "Wait until round end", ErrorReasonSize);
         return false;
     }
-    return true;
+    else if(pPlayer->GetTeam() == TEAM_SPECTATORS && Team == TEAM_BLUE)
+    {
+        pPlayer->m_IsSeeker = false;
+        return true;
+    }
+    else if(Team == TEAM_SPECTATORS)
+    {
+        pPlayer->m_IsSeeker = false;
+        return true;
+    }
+
+    return false;
 }
 
 void CGameControllerHidNSek::SetSeekers()
