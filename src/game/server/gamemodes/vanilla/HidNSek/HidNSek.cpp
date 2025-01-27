@@ -449,6 +449,7 @@ void CGameControllerHidNSek::SetSeekers()
     }
     
     int rnd = 0;
+    char msg[64] = "You are the seeker now!!!";
     while(bombneed)
     {
         if(SeekersAmount() >= GetPlayerAmount()-1) //prevent infinite loops
@@ -468,6 +469,7 @@ void CGameControllerHidNSek::SetSeekers()
                     GameServer()->m_apPlayers[rnd]->GetCharacter()->GiveWeapon(g_Config.m_SvHnSSeekerWeapon);
                     GameServer()->m_apPlayers[rnd]->GetCharacter()->SetActiveWeapon(g_Config.m_SvHnSSeekerWeapon);
                 }
+                GameServer()->KZWhisper(rnd,msg);
                 bombneed--;
             }
         }

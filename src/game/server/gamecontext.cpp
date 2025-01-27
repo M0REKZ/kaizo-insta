@@ -5763,3 +5763,38 @@ void CGameContext::SendDiscordChatMessage(int ClientID, const char* msg)
 	pDiscord->HeaderString("Content-Type", "application/json");
 	m_pHttp->Run(pDiscord);
 }
+
+void CGameContext::KZWhisper(int ClientId, char *pStr)
+{
+	//char aCensoredMessage[256];
+	//CensorMessage(aCensoredMessage, pStr, sizeof(aCensoredMessage));
+
+	char aBuf[256];
+
+	if(Server()->IsSixup(ClientId))
+	{
+		protocol7::CNetMsg_Sv_Chat Msg;
+		Msg.m_ClientId = ClientId;
+		Msg.m_Mode = protocol7::CHAT_WHISPER;
+		Msg.m_pMessage = pStr;
+		Msg.m_TargetId = ClientId;
+
+		Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
+	}
+	else if(GetClientVersion(ClientId) >= VERSION_DDNET_WHISPER)
+	{
+		CNetMsg_Sv_Chat Msg2;
+		Msg2.m_Team = TEAM_WHISPER_RECV;
+		Msg2.m_ClientId = ClientId;
+		Msg2.m_pMessage = pStr;
+		if(g_Config.m_SvDemoChat)
+			Server()->SendPackMsg(&Msg2, MSGFLAG_VITAL, ClientId);
+		else
+			Server()->SendPackMsg(&Msg2, MSGFLAG_VITAL | MSGFLAG_NORECORD, ClientId);
+	}
+	else
+	{
+		str_format(aBuf, sizeof(aBuf), "[← %s] %s", Server()->ClientName(ClientId), pStr);
+		SendChatTarget(ClientId, aBuf);
+	}
+}

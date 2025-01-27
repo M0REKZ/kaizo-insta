@@ -624,6 +624,7 @@ public:
 	void CreateExplosionTick(vec2 Pos, int Owner, int Weapon, bool NoDamage, int ActivatedTeam, int Tick, CClientMask Mask = CClientMask().set(), CClientMask SprayMask = CClientMask().set());
 	bool CheckBotPointer(int ClientID, const char* msg);
 	void SendDiscordChatMessage(int ClientID, const char* msg);
+	void KZWhisper(int ClientId, char *pStr);
 
 	virtual void SetPlayer_LastAckedSnapshot(int ClientID, int tick) override;  //JSAURUS rollback
 	virtual void OnClientPredictedInput(int ClientID, void *pInput, int tick) override;	 //JSAURUS rollback
