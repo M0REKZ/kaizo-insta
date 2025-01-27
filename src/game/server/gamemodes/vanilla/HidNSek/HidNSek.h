@@ -87,6 +87,7 @@ protected:
     virtual bool DoWincheckRound() override;
 	void SetSeekers();
 	int SeekersAmount();
+	int WasSeekerAmount();
     virtual void SetAllUndead();
     virtual void FakeEndRound();
     virtual void KillEveryone();

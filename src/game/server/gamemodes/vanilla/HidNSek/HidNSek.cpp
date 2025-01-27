@@ -429,20 +429,32 @@ void CGameControllerHidNSek::SetSeekers()
 {
     int bombneed = g_Config.m_SvHnSSeekerAmount;
     
-    if(!bombneed && GetPlayerAmount() <= 1)
+    if(!bombneed || GetPlayerAmount() <= 1)
         return;
-    else
-        bombneed = 1;
     
-    if(bombneed > g_Config.m_SvMaxClients)
+    if(bombneed >= g_Config.m_SvMaxClients || bombneed >= GetPlayerAmount()) //prevent infinite loops
     {
-        bombneed = g_Config.m_SvMaxClients;
+        bombneed = GetPlayerAmount() -1;
     }
     
+    if(WasSeekerAmount() >= GetPlayerAmount()/2)
+    {
+        for(int i = 0; i < MAX_CLIENTS; i++)
+        {
+            if(GameServer()->m_apPlayers[i])
+            {
+                GameServer()->m_apPlayers[i]->m_WasSeeker = false;
+            }
+        }
+    }
     
     int rnd = 0;
     while(bombneed)
     {
+        printf("loooooop\n");
+        if(SeekersAmount() >= GetPlayerAmount()-1) //prevent infinite loops
+            break;
+
         rnd = rand() % MAX_CLIENTS;
         if(GameServer()->m_apPlayers[rnd])
         {
@@ -466,7 +478,7 @@ void CGameControllerHidNSek::SetSeekers()
     {
         if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[rnd]->m_WasSeeker && !GameServer()->m_apPlayers[rnd]->m_IsSeeker)
         {
-            GameServer()->m_apPlayers[rnd]->m_WasSeeker = false;
+            GameServer()->m_apPlayers[i]->m_WasSeeker = false;
         }
     }
     
@@ -481,6 +493,22 @@ int CGameControllerHidNSek::SeekersAmount()
         if(GameServer()->m_apPlayers[i])
         {
             if(GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && (!GameServer()->m_apPlayers[i]->m_IsDead || (GameServer()->m_apPlayers[i]->GetCharacter() && GameServer()->m_apPlayers[i]->GetCharacter()->IsAlive())) && GameServer()->m_apPlayers[i]->m_IsSeeker)
+            {
+                amount++;
+            }
+        }
+    }
+    return amount;
+}
+
+int CGameControllerHidNSek::WasSeekerAmount()
+{
+    int amount = 0;
+    for(int i = 0; i < MAX_CLIENTS; ++i)
+    {
+        if(GameServer()->m_apPlayers[i])
+        {
+            if(GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && (!GameServer()->m_apPlayers[i]->m_IsDead || (GameServer()->m_apPlayers[i]->GetCharacter() && GameServer()->m_apPlayers[i]->GetCharacter()->IsAlive())) && GameServer()->m_apPlayers[i]->m_WasSeeker)
             {
                 amount++;
             }
@@ -508,7 +536,7 @@ bool CGameControllerHidNSek::OnCharacterSnap(int SnappingClient, int Id)
 {
     if(GameServer()->m_apPlayers[SnappingClient] && GameServer()->m_apPlayers[Id] && !GameServer()->m_apPlayers[Id]->m_IsSeeker && GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS)
         return true;
-    else if(SnappingClient >= 0 && SnappingClient < MAX_CLIENTS && GameServer()->m_apPlayers[SnappingClient] && GameServer()->m_apPlayers[Id]->GetCharacter())
+    else if(SnappingClient >= 0 && SnappingClient < MAX_CLIENTS && GameServer()->m_apPlayers[SnappingClient] && GameServer()->m_apPlayers[Id] && GameServer()->m_apPlayers[Id]->GetCharacter())
     {
         vec2 pos = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos;
         vec2 target = GameServer()->m_apPlayers[Id]->GetCharacter()->m_Pos;
