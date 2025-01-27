@@ -427,13 +427,17 @@ bool CGameControllerHidNSek::CanJoinTeam(int Team, int NotThisId, char *pErrorRe
 
 void CGameControllerHidNSek::SetSeekers()
 {
-    int bombneed = GetPlayerAmount() / g_Config.m_SvHnSSeekerAmount;
+    int bombneed = g_Config.m_SvHnSSeekerAmount;
     
     if(!bombneed && GetPlayerAmount() <= 1)
         return;
     else
         bombneed = 1;
     
+    if(bombneed > g_Config.m_SvMaxClients)
+    {
+        bombneed = g_Config.m_SvMaxClients;
+    }
     
     
     int rnd = 0;
@@ -442,9 +446,10 @@ void CGameControllerHidNSek::SetSeekers()
         rnd = rand() % MAX_CLIENTS;
         if(GameServer()->m_apPlayers[rnd])
         {
-            if(GameServer()->m_apPlayers[rnd]->GetTeam() != TEAM_SPECTATORS && (!GameServer()->m_apPlayers[rnd]->m_IsDead || (GameServer()->m_apPlayers[rnd]->GetCharacter() && GameServer()->m_apPlayers[rnd]->GetCharacter()->IsAlive())))
+            if(!GameServer()->m_apPlayers[rnd]->m_IsSeeker && !GameServer()->m_apPlayers[rnd]->m_WasSeeker && GameServer()->m_apPlayers[rnd]->GetTeam() != TEAM_SPECTATORS && (!GameServer()->m_apPlayers[rnd]->m_IsDead || (GameServer()->m_apPlayers[rnd]->GetCharacter() && GameServer()->m_apPlayers[rnd]->GetCharacter()->IsAlive())))
             {
                 GameServer()->m_apPlayers[rnd]->m_IsSeeker = true;
+                GameServer()->m_apPlayers[rnd]->m_WasSeeker = true;
                 GameServer()->m_apPlayers[rnd]->SetTeamRaw(TEAM_RED);
                 //GameServer()->m_apPlayers[rnd]->Respawn();
                 if(GameServer()->m_apPlayers[rnd]->GetCharacter())
@@ -454,6 +459,14 @@ void CGameControllerHidNSek::SetSeekers()
                 }
                 bombneed--;
             }
+        }
+    }
+
+    for(int i = 0; i < MAX_CLIENTS; i++)
+    {
+        if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[rnd]->m_WasSeeker && !GameServer()->m_apPlayers[rnd]->m_IsSeeker)
+        {
+            GameServer()->m_apPlayers[rnd]->m_WasSeeker = false;
         }
     }
     

@@ -81,6 +81,7 @@ public:
      *******************************************************************/
 
 	bool m_IsSeeker = false;
+	bool m_WasSeeker = false;
 	bool m_MarkedForRespawn = false;
 
 	// kills made in zCatch that give reward points
