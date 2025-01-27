@@ -747,11 +747,14 @@ int CServer::DistinctClientCount() const
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
 		// connecting clients with spoofed ips can clog slots without being ingame
-		if(ClientIngame(i))
+		if(ClientIngame(i) && !m_aClients[i].m_KZBot) //+KZ tempfix
 		{
 			ClientCount++;
 			for(int j = 0; j < i; j++)
 			{
+				if(m_aClients[i].m_KZBot) //+KZ tempfix
+					continue;
+
 				if(!net_addr_comp_noport(apAddresses[i], apAddresses[j]))
 				{
 					ClientCount--;
