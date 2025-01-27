@@ -180,10 +180,6 @@ public:
 		std::array<char, NETADDR_MAXSTRSIZE> m_aDebugDummyAddrString;
 		std::array<char, NETADDR_MAXSTRSIZE> m_aDebugDummyAddrStringNoPort;
 
-		NETADDR m_KZBotAddr;
-		std::array<char, NETADDR_MAXSTRSIZE> m_aKZBotAddrString;
-		std::array<char, NETADDR_MAXSTRSIZE> m_aKZBotAddrStringNoPort;
-
 		const IConsole::CCommandInfo *m_pRconCmdToSend;
 		enum
 		{

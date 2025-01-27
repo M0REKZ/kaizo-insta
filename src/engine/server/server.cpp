@@ -644,10 +644,6 @@ const NETADDR *CServer::ClientAddr(int ClientId) const
 		return &m_aClients[ClientId].m_DebugDummyAddr;
 	}
 #endif
-	if(m_aClients[ClientId].m_KZBot)
-	{
-		return &m_aClients[ClientId].m_KZBotAddr;
-	}
 	return m_NetServer.ClientAddr(ClientId);
 }
 
@@ -661,10 +657,6 @@ const std::array<char, NETADDR_MAXSTRSIZE> &CServer::ClientAddrStringImpl(int Cl
 		return IncludePort ? m_aClients[ClientId].m_aDebugDummyAddrString : m_aClients[ClientId].m_aDebugDummyAddrStringNoPort;
 	}
 #endif
-	if(m_aClients[ClientId].m_KZBot)
-	{
-		return IncludePort ? m_aClients[ClientId].m_aKZBotAddrString : m_aClients[ClientId].m_aKZBotAddrStringNoPort;
-	}
 	return m_NetServer.ClientAddrString(ClientId, IncludePort);
 }
 
@@ -4328,26 +4320,6 @@ void CServer::UpdateKZBots(bool ForceDisconnect)
 			{
 				NewClientCallback(ClientId, this, false);
 				m_aClients[ClientId].m_KZBot = true;
-
-				// See https://en.wikipedia.org/wiki/Unique_local_address
-				m_aClients[ClientId].m_KZBotAddr.type = NETTYPE_IPV6;
-				m_aClients[ClientId].m_KZBotAddr.ip[0] = 0xfd;
-				// Global ID (40 bits): random
-				secure_random_fill(&m_aClients[ClientId].m_KZBotAddr.ip[1], 5);
-				// Subnet ID (16 bits): constant
-				m_aClients[ClientId].m_KZBotAddr.ip[6] = 0xc0;
-				m_aClients[ClientId].m_KZBotAddr.ip[7] = 0xde;
-				// Interface ID (64 bits): set to client ID
-				m_aClients[ClientId].m_KZBotAddr.ip[8] = 0x00;
-				m_aClients[ClientId].m_KZBotAddr.ip[9] = 0x00;
-				m_aClients[ClientId].m_KZBotAddr.ip[10] = 0x00;
-				m_aClients[ClientId].m_KZBotAddr.ip[11] = 0x00;
-				uint_to_bytes_be(&m_aClients[ClientId].m_KZBotAddr.ip[12], ClientId);
-				// Port: random like normal clients
-				m_aClients[ClientId].m_KZBotAddr.port = (secure_rand() % (65535 - 1024)) + 1024;
-				net_addr_str(&m_aClients[ClientId].m_KZBotAddr, m_aClients[ClientId].m_aKZBotAddrString.data(), m_aClients[ClientId].m_aKZBotAddrString.size(), true);
-				net_addr_str(&m_aClients[ClientId].m_KZBotAddr, m_aClients[ClientId].m_aKZBotAddrStringNoPort.data(), m_aClients[ClientId].m_aKZBotAddrStringNoPort.size(), false);
-
 				GameServer()->OnClientConnected(ClientId, nullptr);
 				m_aClients[ClientId].m_State = CClient::STATE_INGAME;
 				str_format(m_aClients[ClientId].m_aName, sizeof(m_aClients[ClientId].m_aName), "Aimbot %d", DummyIndex + 1);
