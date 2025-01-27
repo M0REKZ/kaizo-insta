@@ -51,7 +51,7 @@ MACRO_CONFIG_INT(SvCatchWeapon, sv_catch_weapon, 0, -1, 5, CFGFLAG_SERVER, "Catc
 //For Hide and Seek
 MACRO_CONFIG_INT(SvHnSSeekerWeapon, sv_hns_seeker_weapon, 0, -1, 5, CFGFLAG_SERVER, "HidNSek Seeker weapon")
 MACRO_CONFIG_INT(SvHnSHiderWeapon, sv_hns_hider_weapon, -1, -1, 5, CFGFLAG_SERVER, "HidNSek Hider weapon")
-MACRO_CONFIG_INT(SvHnSSeekerAmount, sv_hns_seeker_amount, 6, 0, 63, CFGFLAG_SERVER, "Amount of Seekers")
+MACRO_CONFIG_INT(SvHnSSeekerAmount, sv_hns_seeker_amount, 1, 0, 63, CFGFLAG_SERVER, "Amount of Seekers")
 
 MACRO_CONFIG_INT(SvKZBots, sv_kzbots, 0, 0, MAX_CLIENTS, CFGFLAG_SERVER, "Add KZ Bots")
 MACRO_CONFIG_INT(SvKZBotsAI, sv_kzbots_ai, 0, 0, 99, CFGFLAG_SERVER, "KZ Bots AI (0 = +KZ AI, 1 = Pointer AI)")
