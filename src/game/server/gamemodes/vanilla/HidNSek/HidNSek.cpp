@@ -451,7 +451,6 @@ void CGameControllerHidNSek::SetSeekers()
     int rnd = 0;
     while(bombneed)
     {
-        printf("loooooop\n");
         if(SeekersAmount() >= GetPlayerAmount()-1) //prevent infinite loops
             break;
 
