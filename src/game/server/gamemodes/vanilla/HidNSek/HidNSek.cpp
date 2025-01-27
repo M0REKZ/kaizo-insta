@@ -101,6 +101,10 @@ void CGameControllerHidNSek::Tick()
             SetSeekers();
         }
 
+        if(m_GameStartTick != Server()->Tick() && ((Server()->Tick() - m_GameStartTick) % (Server()->TickSpeed()*15) == 0))
+        {
+            HidersHintSound();
+        }
     }
     if(!m_RoundActive && PlayerAmount > 1 && !m_Warmup)
     {
@@ -565,6 +569,17 @@ void CGameControllerHidNSek::MarkPlayersForRespawn()
         if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_IsDead)
         {
             GameServer()->m_apPlayers[i]->m_MarkedForRespawn = true;
+        }
+    }
+}
+
+void CGameControllerHidNSek::HidersHintSound()
+{
+    for(int i = 0; i < MAX_CLIENTS; ++i)
+    {
+        if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetCharacter() && GameServer()->m_apPlayers[i]->GetTeam() != TEAM_SPECTATORS && !GameServer()->m_apPlayers[i]->m_IsSeeker)
+        {
+            GameServer()->CreateSound(GameServer()->m_apPlayers[i]->GetCharacter()->m_Pos,SOUND_PLAYER_PAIN_LONG,GameServer()->m_apPlayers[i]->GetCharacter()->TeamMask());
         }
     }
 }

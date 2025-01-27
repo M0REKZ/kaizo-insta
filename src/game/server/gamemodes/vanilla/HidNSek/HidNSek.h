@@ -88,6 +88,7 @@ protected:
 	void SetSeekers();
 	int SeekersAmount();
 	int WasSeekerAmount();
+	void HidersHintSound();
     virtual void SetAllUndead();
     virtual void FakeEndRound();
     virtual void KillEveryone();
