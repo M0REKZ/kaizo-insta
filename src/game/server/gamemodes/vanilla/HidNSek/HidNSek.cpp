@@ -216,7 +216,7 @@ bool CGameControllerHidNSek::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
     {
         Character.GetPlayer()->m_IsDead = true;
         Character.GetPlayer()->SetTeamRaw(TEAM_SPECTATORS);
-        Character.Die(From, Weapon, true);
+        Character.Die(From, Weapon, true, false);
     }
     return false;
 }
@@ -495,8 +495,17 @@ bool CGameControllerHidNSek::OnCharacterSnap(int SnappingClient, int Id)
 {
     if(GameServer()->m_apPlayers[SnappingClient] && GameServer()->m_apPlayers[Id] && !GameServer()->m_apPlayers[Id]->m_IsSeeker && GameServer()->m_apPlayers[SnappingClient]->GetTeam() == TEAM_SPECTATORS)
         return true;
-    else
-        return CGameControllerDM::OnCharacterSnap(SnappingClient, Id);
+    else if(SnappingClient >= 0 && SnappingClient < MAX_CLIENTS && GameServer()->m_apPlayers[SnappingClient] && GameServer()->m_apPlayers[Id]->GetCharacter())
+    {
+        vec2 pos = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos;
+        vec2 target = GameServer()->m_apPlayers[Id]->GetCharacter()->m_Pos;
+
+        int Res = GameServer()->Collision()->IntersectLine(pos, target, 0, 0, 0);
+
+        if(Res) //Res is 0 when it hits nothing
+            return true;
+    }
+    return CGameControllerDM::OnCharacterSnap(SnappingClient, Id);
 }
 
 bool CGameControllerHidNSek::CanSpecPlayer(int ClientID)

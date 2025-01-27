@@ -1233,9 +1233,9 @@ void CCharacter::StopRecording()
 	}
 }
 
-void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg)
+void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg, bool rollBack)
 {
-	if(m_pPlayer->m_Rollback && Killer != m_pPlayer->GetCid() && Weapon == WEAPON_LASER && !m_DieNow)
+	if(rollBack && m_pPlayer->m_Rollback && Killer != m_pPlayer->GetCid() && Weapon == WEAPON_LASER && !m_DieNow)
 	{
 		m_Dying = Server()->Tick() + (m_pPlayer->m_Latency.m_Avg * Server()->TickSpeed())/1000;;
 		return;
