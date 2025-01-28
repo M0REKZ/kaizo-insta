@@ -114,5 +114,6 @@ public:
 	virtual void OnPlayerReadyChange(class CPlayer *pPlayer) override;
 	void Tick() override;
     bool m_RoundActive = false;
+	bool m_GoindToStart = false;
 };
 #endif // GAME_SERVER_GAMEMODES_HIDNSEK_H

@@ -35,7 +35,16 @@ void CGameControllerHidNSek::Tick()
 			}
 		}
 	}*/
+
+    if(m_Warmup)
+        return;
 	
+    if(m_GoindToStart)
+    {
+        m_RoundActive = true;
+        m_GoindToStart = false;
+    }
+
     if(m_GameState == IGS_END_ROUND)
         return;
 
@@ -106,7 +115,8 @@ void CGameControllerHidNSek::Tick()
     {
         KillEveryone();
         GameServer()->SendBroadcast("Game started", -1);
-        m_RoundActive = true;
+        m_GoindToStart = true;
+        m_Warmup = Server()->TickSpeed() * 5;
         m_RoundPauseTime = 2;
     }
 }
