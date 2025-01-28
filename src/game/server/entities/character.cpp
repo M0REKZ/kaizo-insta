@@ -1304,6 +1304,9 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg, bool rollBack)
 			pPlayer->m_SwapTargetsClientId = -1;
 	}
 	GetPlayer()->m_SwapTargetsClientId = -1;
+	
+	if(Weapon != WEAPON_GAME)
+		GetPlayer()->m_RageQuitTick = Server()->Tick(); // For rage quit
 }
 
 bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon)

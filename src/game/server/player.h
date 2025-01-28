@@ -247,6 +247,7 @@ public:
 	void HandleKZBot(CNetObj_PlayerInput &Input);
 	bool m_Rollback = false;
 	int m_MsgBotCount = 0;
+	int m_RageQuitTick = 0;
 };
 
 #endif

@@ -1445,10 +1445,20 @@ void CGameControllerPvp::OnPlayerDisconnect(class CPlayer *pPlayer, const char *
 	if(Server()->ClientIngame(ClientId))
 	{
 		char aBuf[512];
+		if(pPlayer->m_RageQuitTick + Server()->TickSpeed() * 5 > Server()->Tick())
+		{
+			if(pReason && *pReason)
+				str_format(aBuf, sizeof(aBuf), "'%s' rage quitted (%s)", Server()->ClientName(ClientId), pReason);
+			else
+				str_format(aBuf, sizeof(aBuf), "'%s' rage quitted", Server()->ClientName(ClientId));
+		}
+		else
+		{
 		if(pReason && *pReason)
 			str_format(aBuf, sizeof(aBuf), "'%s' has left the game (%s)", Server()->ClientName(ClientId), pReason);
 		else
 			str_format(aBuf, sizeof(aBuf), "'%s' has left the game", Server()->ClientName(ClientId));
+		}
 		if(!g_Config.m_SvTournamentJoinMsgs || pPlayer->GetTeam() != TEAM_SPECTATORS)
 			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::FLAG_SIX);
 		else if(g_Config.m_SvTournamentJoinMsgs == 2)
