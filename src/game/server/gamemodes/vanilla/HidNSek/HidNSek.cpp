@@ -39,10 +39,6 @@ void CGameControllerHidNSek::Tick()
     if(m_GameState == IGS_END_ROUND)
         return;
 
-	if(m_RoundActive && !(GameServer()->m_World.m_Paused))
-	{
-		DoWincheckRound();
-	}
     if(m_RoundPauseTime > 0)
     {
         m_RoundPauseTime--;
@@ -127,18 +123,7 @@ void CGameControllerHidNSek::Snap(int SnappingClient)
 {
     CGameControllerVanilla::Snap(SnappingClient);
 
-    if(Server()->IsSixup(SnappingClient))
-	{
-       /* protocol7::CNetObj_GameDataTeam *pGameDataObj = (protocol7::CNetObj_GameDataTeam *)Server()->SnapNewItem(protocol7::NETOBJTYPE_GAMEDATATEAM, 0, sizeof(protocol7::CNetObj_GameDataTeam));
-    
-        if(!pGameDataObj)
-            return;
-        
-        pGameDataObj->m_TeamscoreRed = m_aTeamscore[TEAM_RED];
-        pGameDataObj->m_TeamscoreBlue = m_aTeamscore[TEAM_BLUE];
-    */
-    }
-    else
+    if(!Server()->IsSixup(SnappingClient))
     {
         CNetObj_GameData *pGameDataObj = (CNetObj_GameData *)Server()->SnapNewItem(NETOBJTYPE_GAMEDATA, 0, sizeof(CNetObj_GameData));
         if(!pGameDataObj)
@@ -241,15 +226,15 @@ int CGameControllerHidNSek::OnCharacterDeath(class CCharacter *pVictim, class CP
 
 bool CGameControllerHidNSek::DoWincheckRound()
 {
-    //if(GetPlayerAmount() <= 1)
-    //    return false;
+
+    if(!(m_RoundActive && !(GameServer()->m_World.m_Paused)))
+        return false;
+
     if(m_EndingRound)
         return false;
 
     if(m_RoundPauseTime >= 0)
         return false;
-
-    //printf("DoWincheckRound\n");
 
     bool HiderFound = false;;
 
@@ -263,23 +248,8 @@ bool CGameControllerHidNSek::DoWincheckRound()
     }
     if(m_GameInfo.m_TimeLimit > 0 && (Server()->Tick()-m_GameStartTick) >= m_GameInfo.m_TimeLimit*Server()->TickSpeed()*60)
     {
-        {
-            /*for(int i = 0; i < MAX_CLIENTS; i++)
-            {
-                if(GameServer()->m_apPlayers[i] && !GameServer()->m_apPlayers[i]->m_IsSeeker)
-                {
-                    GameServer()->m_apPlayers[i]->IncrementScore();
-                }
-            }*/
             m_aTeamscore[TEAM_BLUE]++;
-            //m_RoundStartTick = Server()->Tick();
-            //m_GameStartTick = Server()->Tick();
-            //FakeEndRound();
-            //KillEveryone();
-           // SetAllUndead();
             m_EndingRound = true;
-            //return true;
-        }
     }
     else
     {
@@ -287,32 +257,15 @@ bool CGameControllerHidNSek::DoWincheckRound()
             return false;
         else
         {
-            /*for(int i = 0; i < MAX_CLIENTS; i++)
-            {
-                if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->m_IsSeeker)
-                {
-                    GameServer()->m_apPlayers[i]->IncrementScore();
-                }
-            }*/
             m_aTeamscore[TEAM_RED]++;
-           // m_RoundStartTick = Server()->Tick();
-            //m_GameStartTick = Server()->Tick();
-            //FakeEndRound();
-           // KillEveryone();
-            //SetAllUndead();
             m_EndingRound = true;
-            //return true;
         }
     }
 
     if((m_GameInfo.m_ScoreLimit > 0 && (m_aTeamscore[TEAM_RED] >= m_GameInfo.m_ScoreLimit || m_aTeamscore[TEAM_BLUE] >= m_GameInfo.m_ScoreLimit)))
     {
-        //EndRound();
-        //UnSetSeekers();
-        //SetAllUndead();
         m_EndingRound = true;
         m_RealEndRound = true;
-        //return true;
     }
 
     if(m_EndingRound)
@@ -347,7 +300,6 @@ void CGameControllerHidNSek::KillEveryone()
             {
                 if(GameServer()->m_apPlayers[i]->GetCharacter()->IsAlive())
                     GameServer()->m_apPlayers[i]->KillCharacter();
-                //GameServer()->m_apPlayers[i]->Respawn();
             }
             
         }
@@ -356,13 +308,11 @@ void CGameControllerHidNSek::KillEveryone()
 
 void CGameControllerHidNSek::FakeEndRound()
 {
-    //m_GameOverTick = Server()->Tick();
     GameServer()->m_World.m_Paused = true;
     m_RoundPauseTime = 150;
 
 	GameServer()->SendBroadcast("Round Finish", -1);
     m_GameStartTick = Server()->Tick();
-    //SetGameState(IGS_END_MATCH, TIMER_END);
 }
 
 int CGameControllerHidNSek::GetPlayerAmount()
@@ -467,7 +417,6 @@ void CGameControllerHidNSek::SetSeekers()
                 GameServer()->m_apPlayers[rnd]->m_IsSeeker = true;
                 GameServer()->m_apPlayers[rnd]->m_WasSeeker = true;
                 GameServer()->m_apPlayers[rnd]->SetTeamRaw(TEAM_RED);
-                //GameServer()->m_apPlayers[rnd]->Respawn();
                 if(GameServer()->m_apPlayers[rnd]->GetCharacter())
                 {
                     GameServer()->m_apPlayers[rnd]->GetCharacter()->GiveWeapon(g_Config.m_SvHnSSeekerWeapon);
@@ -486,8 +435,6 @@ void CGameControllerHidNSek::SetSeekers()
             GameServer()->m_apPlayers[i]->m_WasSeeker = false;
         }
     }
-    
-    //SetSkins();
 }
 
 int CGameControllerHidNSek::SeekersAmount()
