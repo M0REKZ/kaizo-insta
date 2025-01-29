@@ -202,6 +202,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 				Item.m_Front = -1;
 				Item.m_Switch = -1;
 				Item.m_Tune = -1;
+				Item.m_KZCustom = -1;
 
 				if(Item.m_Flags && !(pLayerTiles->m_Game))
 				{
@@ -220,6 +221,8 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 						Item.m_Switch = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CSwitchTile), std::static_pointer_cast<CLayerSwitch>(pLayerTiles)->m_pSwitchTile);
 					else if(pLayerTiles->m_Tune)
 						Item.m_Tune = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTuneTile), std::static_pointer_cast<CLayerTune>(pLayerTiles)->m_pTuneTile);
+					else if(pLayerTiles->m_KZCustom)
+						Item.m_KZCustom = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CKZCustomTile), std::static_pointer_cast<CLayerKZCustom>(pLayerTiles)->m_pKZCustomTile);
 				}
 				else
 					Item.m_Data = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pLayerTiles->m_pTiles);
@@ -681,6 +684,10 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				{
 					CMapItemLayerTilemap *pTilemapItem = (CMapItemLayerTilemap *)pLayerItem;
 
+					char aBuf[30] = {0};
+
+					IntsToStr(pTilemapItem->m_aName, std::size(pTilemapItem->m_aName), aBuf, std::size(aBuf));
+
 					std::shared_ptr<CLayerTiles> pTiles;
 					if(pTilemapItem->m_Flags & TILESLAYERFLAG_GAME)
 					{
@@ -727,6 +734,11 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 						pTiles = std::make_shared<CLayerTune>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
 						MakeTuneLayer(pTiles);
+					}
+					else if(!str_comp_nocase("KZCustom", aBuf))
+					{
+						pTiles = std::make_shared<CLayerKZCustom>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
+						MakeKZCustomLayer(pTiles);
 					}
 					else
 					{

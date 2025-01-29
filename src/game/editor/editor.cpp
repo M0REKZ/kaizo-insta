@@ -8615,6 +8615,13 @@ IGraphics::CTextureHandle CEditor::GetEntitiesTexture()
 	return m_EntitiesTexture;
 }
 
+IGraphics::CTextureHandle CEditor::GetKZCustomTexture()
+{
+	if(!m_KZCustomTexture.IsValid())
+		m_KZCustomTexture = Graphics()->LoadTexture("editor/KZCustom-Entities.png", IStorage::TYPE_ALL, GetTextureUsageFlag());
+	return m_KZCustomTexture;
+}
+
 void CEditor::Init()
 {
 	m_pInput = Kernel()->RequestInterface<IInput>();

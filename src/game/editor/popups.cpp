@@ -580,6 +580,18 @@ CUi::EPopupMenuFunctionResult CEditor::PopupGroup(void *pContext, CUIRect View, 
 		}
 	}
 
+	if(pEditor->GetSelectedGroup()->m_GameGroup && !pEditor->m_Map.m_pKZCustomLayer)
+	{
+		// new kzcustom layer
+		View.HSplitBottom(5.0f, &View, nullptr);
+		View.HSplitBottom(12.0f, &View, &Button);
+		if(pEditor->DoButton_Editor(&pEditor->m_QuickActionAddKZCustomLayer, pEditor->m_QuickActionAddKZCustomLayer.Label(), 0, &Button, 0, pEditor->m_QuickActionAddKZCustomLayer.Description()))
+		{
+			pEditor->m_QuickActionAddKZCustomLayer.Call();
+			return CUi::POPUP_CLOSE_CURRENT;
+		}
+	}
+
 	// new quad layer
 	View.HSplitBottom(5.0f, &View, nullptr);
 	View.HSplitBottom(12.0f, &View, &Button);

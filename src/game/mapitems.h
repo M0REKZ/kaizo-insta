@@ -348,6 +348,7 @@ struct CMapItemLayerTilemap
 	int m_Front;
 	int m_Switch;
 	int m_Tune;
+	int m_KZCustom;
 };
 
 struct CMapItemLayerQuads
@@ -584,5 +585,14 @@ bool IsValidEntity(int Index);
 bool IsRotatableTile(int Index);
 bool IsCreditsTile(int TileIndex);
 int PackColor(CColor Color);
+
+class CKZCustomTile
+{
+public:
+	unsigned char m_Val1;
+	unsigned char m_Val2;
+	unsigned char m_Index;
+	unsigned char m_Flags;
+};
 
 #endif

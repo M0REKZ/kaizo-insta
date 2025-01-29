@@ -210,6 +210,14 @@ REGISTER_QUICK_ACTION(
 	DEFAULT_BTN,
 	"Create a new item layer.")
 REGISTER_QUICK_ACTION(
+	AddKZCustomLayer,
+	"Add KZCustom layer",
+	[&]() { AddKZCustomLayer(); },
+	[&]() -> bool { return !GetSelectedGroup()->m_GameGroup || m_Map.m_pKZCustomLayer; },
+	ALWAYS_FALSE,
+	DEFAULT_BTN,
+	"Create a new item layer.")
+REGISTER_QUICK_ACTION(
 	AddQuadsLayer, "Add quads layer", [&]() { AddQuadsLayer(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "Create a new quads layer.")
 REGISTER_QUICK_ACTION(
 	AddSoundLayer, "Add sound layer", [&]() { AddSoundLayer(); }, ALWAYS_FALSE, ALWAYS_FALSE, DEFAULT_BTN, "Create a new sound layer.")

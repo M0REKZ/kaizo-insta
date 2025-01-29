@@ -24,6 +24,7 @@
 #include <game/editor/mapitems/layer_tele.h>
 #include <game/editor/mapitems/layer_tiles.h>
 #include <game/editor/mapitems/layer_tune.h>
+#include <game/editor/mapitems/layer_kzcustom.h>
 
 #include <engine/console.h>
 #include <engine/editor.h>
@@ -217,6 +218,10 @@ public:
 	void MakeFrontLayer(const std::shared_ptr<CLayer> &pLayer);
 	void MakeSwitchLayer(const std::shared_ptr<CLayer> &pLayer);
 	void MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer);
+
+	//+KZ
+	std::shared_ptr<class CLayerKZCustom> m_pKZCustomLayer;
+	void MakeKZCustomLayer(const std::shared_ptr<CLayer> &pLayer);
 };
 
 class CProperty
@@ -301,6 +306,7 @@ class CEditor : public IEditor
 	IGraphics::CTextureHandle m_SpeedupTexture;
 	IGraphics::CTextureHandle m_SwitchTexture;
 	IGraphics::CTextureHandle m_TuneTexture;
+	IGraphics::CTextureHandle m_KZCustomTexture;
 
 	int GetTextureUsageFlag() const;
 
@@ -347,6 +353,7 @@ public:
 	void AddTuneLayer();
 	void AddSpeedupLayer();
 	void AddTeleLayer();
+	void AddKZCustomLayer();
 	void DeleteSelectedLayer();
 	void LayerSelectImage();
 	bool IsNonGameTileLayerSelected() const;
@@ -463,6 +470,11 @@ public:
 		m_PreventUnusedTilesWasWarned = false;
 		m_AllowPlaceUnusedTiles = 0;
 		m_BrushDrawDestructive = true;
+
+		//+KZ
+		m_KZCustomVal1 = 0;
+		m_KZCustomVal2 = 0;
+		//m_KZCustomVal3 = 0;
 	}
 
 	class CHoverTile
@@ -1156,6 +1168,7 @@ public:
 	IGraphics::CTextureHandle GetSpeedupTexture();
 	IGraphics::CTextureHandle GetSwitchTexture();
 	IGraphics::CTextureHandle GetTuneTexture();
+	IGraphics::CTextureHandle GetKZCustomTexture();
 
 	unsigned char m_TeleNumber;
 	unsigned char m_TeleCheckpointNumber;
@@ -1166,6 +1179,11 @@ public:
 	unsigned char m_SpeedupForce;
 	unsigned char m_SpeedupMaxSpeed;
 	short m_SpeedupAngle;
+
+	//+KZ
+	unsigned char m_KZCustomVal1;
+	unsigned char m_KZCustomVal2;
+	//short m_KZCustomVal3;
 
 	unsigned char m_SwitchNum;
 	unsigned char m_SwitchDelay;
