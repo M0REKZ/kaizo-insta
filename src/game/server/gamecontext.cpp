@@ -4455,7 +4455,7 @@ void CGameContext::CreateAllEntities(bool Initial)
 	if(Collision()->KZFound())
 	{
 		int KZIndex;
-		const CTile *pKZTiles = static_cast<CTile *>(Kernel()->RequestInterface<IMap>()->GetData(Collision()->GetKZTileLayer()->m_Data));
+		const CTile *pKZTiles = static_cast<CTile *>(Kernel()->RequestInterface<IMap>()->GetData(m_Layers.KZCustomLayer()->m_Data));
 		
 		for(int y = 0; y < Collision()->GetKZHeight(); y++)
 		{

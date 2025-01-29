@@ -107,6 +107,18 @@ void CLayers::Init(IMap *pMap, bool GameOnly)
 						m_pTuneLayer = pTilemap;
 						IsEntities = true;
 					}
+
+					{ //+KZ
+						char aBuf[30] = {0};
+
+						IntsToStr(pTilemap->m_aName, std::size(pTilemap->m_aName), aBuf, std::size(aBuf));
+						//bool IsEntities = false;
+						if(!str_comp_nocase("KZCustom", aBuf))
+						{
+							m_pKZCustomLayer = pTilemap;
+							//IsEntities = true;
+						}
+					} //+KZ
 				}
 
 				if(IsEntities)
@@ -151,6 +163,8 @@ void CLayers::Unload()
 	m_pSwitchLayer = nullptr;
 	m_pTuneLayer = nullptr;
 	m_pQuadLayer = nullptr;
+
+	m_pKZCustomLayer = nullptr; //+KZ
 }
 
 void CLayers::InitTilemapSkip()

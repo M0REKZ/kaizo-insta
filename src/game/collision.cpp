@@ -1852,36 +1852,11 @@ int CCollision::GetKZTileIndex(int Index) const
 void CCollision::FindKZLayer()
 {
 	//+KZ
-	
-	CMapItemLayer *pKZLayer;
-	CMapItemLayerTilemap *pKZTileLayer;
-	
-	char aBufKZ[12];
-	
-	for(int i = 0; i < m_pLayers->NumLayers(); i++)
+	if(m_pLayers->KZCustomLayer())
 	{
-		pKZLayer = m_pLayers->GetLayer(i);
-		
-		if(!pKZLayer)
-			continue;
-		
-		if(!(pKZLayer->m_Type == LAYERTYPE_TILES)) //!(pKZLayer->m_Version >= 3)
-			continue;
-		
-		pKZTileLayer = reinterpret_cast<CMapItemLayerTilemap *>(pKZLayer);
-		
-		IntsToStr(pKZTileLayer->m_aName, std::size(pKZTileLayer->m_aName), aBufKZ, std::size(aBufKZ));
-		
-		//printf("loop\n");
-		if(!str_comp_nocase("KZCustom", aBufKZ))
-		{
-			//printf("KZCUSTOM FOUND\n");
-			m_pKZTileLayer = pKZTileLayer;
-			m_pKZTiles = static_cast<CTile *>(m_pLayers->Map()->GetData(pKZTileLayer->m_Data));
-			m_KZWidth = pKZTileLayer->m_Width;
-			m_KZHeight = pKZTileLayer->m_Height;
-			break;
-		}
+		m_pKZTiles = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->KZCustomLayer()->m_Data));
+		m_KZWidth = m_pLayers->KZCustomLayer()->m_Width;
+		m_KZHeight = m_pLayers->KZCustomLayer()->m_Height;
 	}
 }
 

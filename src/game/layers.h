@@ -34,6 +34,8 @@ public:
 	CMapItemLayerTilemap *TuneLayer() const { return m_pTuneLayer; }
 	CMapItemLayerQuads *QuadLayer() const { return m_pQuadLayer; }
 
+	CMapItemLayerTilemap *KZCustomLayer() const { return m_pKZCustomLayer; } //+KZ
+
 private:
 	int m_GroupsNum;
 	int m_GroupsStart;
@@ -50,6 +52,8 @@ private:
 	CMapItemLayerTilemap *m_pSwitchLayer;
 	CMapItemLayerTilemap *m_pTuneLayer;
 	CMapItemLayerQuads *m_pQuadLayer;
+
+	CMapItemLayerTilemap *m_pKZCustomLayer; //+KZ
 
 	void InitTilemapSkip();
 };
