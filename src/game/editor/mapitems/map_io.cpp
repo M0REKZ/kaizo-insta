@@ -854,6 +854,29 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 						}
 						DataFile.UnloadData(pTilemapItem->m_Tune);
 					}
+					else if(!str_comp_nocase("KZCustom", aBuf))
+					{
+						void *pData = DataFile.GetData(pTilemapItem->m_Data);
+						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Data);
+						const size_t DestSize = (size_t)pTiles->m_Width * pTiles->m_Height;
+						CKZCustomTile *pKZCustomTiles = std::static_pointer_cast<CLayerKZCustom>(pTiles)->m_pKZCustomTile;
+						if(DestSize * sizeof(CKZCustomTile) >= DestSize)
+						{
+							mem_copy(pKZCustomTiles, pData, DestSize * sizeof(CKZCustomTile));
+
+							for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
+							{
+
+									pTiles->m_pTiles[i].m_Index = pKZCustomTiles[i].m_Index;
+									pTiles->m_pTiles[i].m_Flags = pKZCustomTiles[i].m_Flags;
+									pTiles->m_pTiles[i].m_Reserved = pKZCustomTiles[i].m_Val1;
+									pTiles->m_pTiles[i].m_Skip = pKZCustomTiles[i].m_Val2;
+
+							}
+						}
+
+						DataFile.UnloadData(pTilemapItem->m_Data);
+					}
 					else // regular tile layer or game layer
 					{
 						void *pData = DataFile.GetData(pTilemapItem->m_Data);

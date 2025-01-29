@@ -6,7 +6,7 @@ CLayerKZCustom::CLayerKZCustom(CEditor *pEditor, int w, int h) :
 	CLayerTiles(pEditor, w, h)
 {
 	str_copy(m_aName, "KZCustom");
-	m_Speedup = 1;
+	m_KZCustom = 1;
 
 	m_pKZCustomTile = new CKZCustomTile[w * h];
 	mem_zero(m_pKZCustomTile, (size_t)w * h * sizeof(CKZCustomTile));
@@ -16,7 +16,7 @@ CLayerKZCustom::CLayerKZCustom(const CLayerKZCustom &Other) :
 	CLayerTiles(Other)
 {
 	str_copy(m_aName, "KZCustom copy");
-	m_Speedup = 1;
+	m_KZCustom = 1;
 
 	m_pKZCustomTile = new CKZCustomTile[m_Width * m_Height];
 	mem_copy(m_pKZCustomTile, Other.m_pKZCustomTile, (size_t)m_Width * m_Height * sizeof(CKZCustomTile));
@@ -127,10 +127,10 @@ void CLayerKZCustom::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 				}
 				else
 				{
-					m_pKZCustomTile[Index].m_Val1 = 0;
-					m_pKZCustomTile[Index].m_Val2 = 0;
-					m_pKZCustomTile[Index].m_Index = 0;
-					m_pTiles[Index].m_Index = 0;
+					m_pKZCustomTile[Index].m_Val1 = m_pEditor->m_KZCustomVal1;
+					m_pKZCustomTile[Index].m_Val2 = m_pEditor->m_KZCustomVal2;
+					m_pKZCustomTile[Index].m_Index = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
+					m_pTiles[Index].m_Index = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
 				}
 			}
 			else
@@ -140,8 +140,8 @@ void CLayerKZCustom::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 				m_pKZCustomTile[Index].m_Index = 0;
 				m_pTiles[Index].m_Index = 0;
 
-				if(pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index != TILE_AIR)
-					ShowPreventUnusedTilesWarning();
+				//if(pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index != TILE_AIR)
+				//	ShowPreventUnusedTilesWarning();
 			}
 
 			SKZCustomTileStateChange::SData Current{
@@ -251,7 +251,7 @@ void CLayerKZCustom::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, C
 				m_pKZCustomTile[TgtIndex].m_Index,
 				m_pTiles[TgtIndex].m_Index};
 
-			if(Empty || (!m_pEditor->m_AllowPlaceUnusedTiles)) // no speed up tile chosen: reset
+			if(Empty || false) // no speed up tile chosen: reset
 			{
 				m_pTiles[TgtIndex].m_Index = 0;
 				m_pKZCustomTile[TgtIndex].m_Val1 = 0;
@@ -263,7 +263,7 @@ void CLayerKZCustom::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, C
 			else
 			{
 				m_pTiles[TgtIndex] = pLt->m_pTiles[SrcIndex];
-				if(pLt->m_Speedup && m_pTiles[TgtIndex].m_Index > 0)
+				if(pLt->m_KZCustom && m_pTiles[TgtIndex].m_Index > 0)
 				{
 					m_pKZCustomTile[TgtIndex].m_Index = m_pTiles[TgtIndex].m_Index;
 

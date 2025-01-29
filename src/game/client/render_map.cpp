@@ -1274,7 +1274,60 @@ void CRenderTools::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, Co
 
 void CRenderTools::RenderKZCustomOverlay(CKZCustomTile *pSpeedup, int w, int h, float Scale, float Alpha) const
 {
-	return; //no text for now
+		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
+	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
+
+	int StartY = (int)(ScreenY0 / Scale) - 1;
+	int StartX = (int)(ScreenX0 / Scale) - 1;
+	int EndY = (int)(ScreenY1 / Scale) + 1;
+	int EndX = (int)(ScreenX1 / Scale) + 1;
+
+	if(EndX - StartX > Graphics()->ScreenWidth() / g_Config.m_GfxTextOverlay || EndY - StartY > Graphics()->ScreenHeight() / g_Config.m_GfxTextOverlay)
+		return; // its useless to render text at this distance
+
+	float Size = g_Config.m_ClTextEntitiesSize / 100.f;
+	float ToCenterOffset = (1 - Size) / 2.f;
+	char aBuf[16];
+
+	TextRender()->TextColor(1.0f, 1.0f, 1.0f, Alpha);
+	for(int y = StartY; y < EndY; y++)
+	{
+		for(int x = StartX; x < EndX; x++)
+		{
+			int mx = x;
+			int my = y;
+
+			if(mx < 0)
+				continue; // mx = 0;
+			if(mx >= w)
+				continue; // mx = w-1;
+			if(my < 0)
+				continue; // my = 0;
+			if(my >= h)
+				continue; // my = h-1;
+
+			int c = mx + my * w;
+
+			int Force = (int)pSpeedup[c].m_Val1;
+			int MaxSpeed = (int)pSpeedup[c].m_Val2;
+
+				if(g_Config.m_ClTextEntities)
+				{
+					if(Force)
+					{
+					str_format(aBuf, sizeof(aBuf), "%d", Force);
+					TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
+					}
+					if(MaxSpeed)
+					{
+						str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
+						TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
+					}
+				}
+		}
+	}
+	TextRender()->TextColor(TextRender()->DefaultTextColor());
+	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
 void CRenderTools::RenderKZCustommap(CKZCustomTile *pKZCustomTile, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const

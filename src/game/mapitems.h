@@ -589,9 +589,9 @@ int PackColor(CColor Color);
 class CKZCustomTile
 {
 public:
+	unsigned char m_Index;
 	unsigned char m_Val1;
 	unsigned char m_Val2;
-	unsigned char m_Index;
 	unsigned char m_Flags;
 };
 

@@ -589,7 +589,7 @@ void CLayerTiles::BrushFlipX()
 	if(m_Tele || m_Speedup || m_Tune)
 		return;
 
-	bool Rotate = !(m_Game || m_Front || m_Switch) || m_pEditor->m_AllowPlaceUnusedTiles;
+	bool Rotate = !(m_Game || m_Front || m_Switch || m_KZCustom) || m_pEditor->m_AllowPlaceUnusedTiles;
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width; x++)
 			if(!Rotate && !IsRotatableTile(m_pTiles[y * m_Width + x].m_Index))

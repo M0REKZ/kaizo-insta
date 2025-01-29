@@ -2998,3 +2998,36 @@ CUi::EPopupMenuFunctionResult CEditor::PopupEnvelopeCurvetype(void *pContext, CU
 
 	return CUi::POPUP_KEEP_OPEN;
 }
+
+CUi::EPopupMenuFunctionResult CEditor::PopupKZCustom(void *pContext, CUIRect View, bool Active)
+{
+	CEditor *pEditor = static_cast<CEditor *>(pContext);
+
+	enum
+	{
+		PROP_FORCE = 0,
+		PROP_MAXSPEED,
+		NUM_PROPS
+	};
+
+	CProperty aProps[] = {
+		{"Val1", pEditor->m_KZCustomVal1, PROPTYPE_INT, 1, 255},
+		{"Val2", pEditor->m_KZCustomVal2, PROPTYPE_INT, 0, 255},
+		{nullptr},
+	};
+
+	static int s_aIds[NUM_PROPS] = {0};
+	int NewVal = 0;
+	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
+
+	if(Prop == PROP_FORCE)
+	{
+		pEditor->m_KZCustomVal1 = clamp(NewVal, 1, 255);
+	}
+	else if(Prop == PROP_MAXSPEED)
+	{
+		pEditor->m_KZCustomVal2 = clamp(NewVal, 0, 255);
+	}
+
+	return CUi::POPUP_KEEP_OPEN;
+}
