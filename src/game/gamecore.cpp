@@ -194,7 +194,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 {
 	m_QuadCollided = false;
 
-	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : 0, this, m_Pos);
+	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : nullptr, this, m_Pos);
 	m_QuadRestrictions = 0;
 	m_QuadCollided = m_pCollision->PushBoxOutsideQuads(&m_Pos, PhysicalSizeVec2(), &m_QuadRestrictions);
 	m_MoveRestrictions |= m_QuadRestrictions;
@@ -359,7 +359,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 		bool GoingToRetract = false;
 		bool GoingThroughTele = false;
 		int teleNr = 0;
-		int Hit = m_pCollision->IntersectLineTeleHook(m_HookPos, NewPos, &NewPos, 0, &teleNr, &m_HookedQuad);
+		int Hit = m_pCollision->IntersectLineTeleHook(m_HookPos, NewPos, &NewPos, nullptr, &teleNr, &m_HookedQuad);
 
 		if(Hit && !m_HookedQuad.m_pQuad)
 		{

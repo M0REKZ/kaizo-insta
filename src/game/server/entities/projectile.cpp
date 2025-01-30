@@ -174,7 +174,7 @@ void CProjectile::Tick()
 	int RollbackDamageTick = 0;
 
 	int Collide = 0;
-	CCharacter *pTargetChr = 0;
+	CCharacter *pTargetChr = nullptr;
 	float Pt;
 	float Ct;
 	vec2 PrevPos;
@@ -182,7 +182,8 @@ void CProjectile::Tick()
 	vec2 ColPos;
 	vec2 NewPos;
 
-	CCharacter *pOwnerChar = 0;
+	CCharacter *pOwnerChar = nullptr;
+
 
 	bool IsWeaponCollide = false;
 
@@ -193,6 +194,7 @@ void CProjectile::Tick()
 	{
 		tick = GameServer()->m_apPlayers[m_Owner]->GetCharacter()->GetCore().m_LastAckedSnapshot;
 		m_StartTick = tick + 1;
+
 
 
 		//int diff = origstart - tick;
@@ -523,7 +525,7 @@ void CProjectile::Snap(int SnappingClient)
 			return;
 	}
 
-	CCharacter *pOwnerChar = 0;
+	CCharacter *pOwnerChar = nullptr;
 	CClientMask TeamMask = CClientMask().set();
 
 	if(m_Owner >= 0)
