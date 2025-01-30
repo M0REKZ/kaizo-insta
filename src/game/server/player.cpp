@@ -475,7 +475,7 @@ void CPlayer::Snap(int SnappingClient)
 
 	pDDNetPlayer->m_AuthLevel = Server()->GetAuthedState(m_ClientId);
 	pDDNetPlayer->m_Flags = 0;
-	if(((CServer*)Server())->m_aClients[m_ClientId].m_KZBot ? false : (m_Afk || m_MenuAFK))
+	if(((CServer*)Server())->m_aClients[m_ClientId].m_KZBot ? false : (m_Afk || m_MenuAFK || (GetCharacter() && GetCharacter()->Sitting())))
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_AFK;
 	if(m_Paused == PAUSE_SPEC)
 		pDDNetPlayer->m_Flags |= EXPLAYERFLAG_SPEC;

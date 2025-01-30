@@ -280,6 +280,8 @@ private:
 	int m_AirTicks;
 	int m_AirDamageTick;
 	bool m_Invisible;
+	bool m_Sparkles = false;
+	bool m_Sit = false;
 	bool m_Water;
 	bool m_NoAir;
 	bool m_QuadWater;
@@ -298,6 +300,7 @@ public:
 	void DoKZDamage(vec2 Force, int Dmg, int From, int Weapon);
 	bool InWater() { return m_Water; }
 	bool Invisible() { return m_Invisible; }
+	bool Sitting() { return m_Sit; }
 	void CatchBall();
 	bool m_HasBall = false;
 	bool m_HasFlagBall = false;

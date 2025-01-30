@@ -1439,7 +1439,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 		AmmoCount = (m_FreezeTime == 0) ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : 0;
 	}
     if(!(((CServer*)Server())->m_aClients[m_pPlayer->GetCid()].m_KZBot))
-	if(GetPlayer()->IsAfk() || GetPlayer()->IsPaused() || GetPlayer()->m_MenuAFK)
+	if(GetPlayer()->IsAfk() || GetPlayer()->IsPaused() || GetPlayer()->m_MenuAFK || Sitting())
 	{
 		if(m_FreezeTime > 0 || m_Core.m_DeepFrozen || m_Core.m_LiveFrozen)
 			Emote = EMOTE_NORMAL;
@@ -1634,7 +1634,7 @@ void CCharacter::Snap(int SnappingClient)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SOLO;
 	if(m_Core.m_Super)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_SUPER;
-	if(m_Core.m_Invincible)
+	if(m_Core.m_Invincible || m_Sparkles)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_INVINCIBLE;
 	if(m_Core.m_EndlessHook)
 		pDDNetCharacter->m_Flags |= CHARACTERFLAG_ENDLESS_HOOK;
@@ -3367,6 +3367,26 @@ void CCharacter::HandleKZTiles()
 		GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 
 		m_IsGodmode = false;
+	}
+
+	if(TileIndex == TILE_SPARKLES_ON && !m_Sparkles)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You got sparkles");
+		m_Sparkles = true;
+	}
+	else if(TileIndex == TILE_SPARKLES_OFF && m_Sparkles)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You lost sparkles");
+		m_Sparkles = false;
+	}
+
+	if(TileIndex == TILE_SIT && !m_Sit)
+	{
+		m_Sit = true;
+	}
+	else if(TileIndex != TILE_SIT && m_Sit)
+	{
+		m_Sit = false;
 	}
 	
 	if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == TILE_5_DAMAGE)
