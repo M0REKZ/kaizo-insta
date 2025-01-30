@@ -74,7 +74,7 @@ void CKZPickup::Tick()
 			if(distance(m_Pos,pChr->m_Pos) > (GetProximityRadius() + ms_CollisionExtraSize))
 				continue;
 
-			if(m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_aStatus[pChr->Team()])
+			if(m_Number > 0 && !Switchers()[m_Number].m_aStatus[pChr->Team()])
 				continue;
 
 			bool Picked = false;
@@ -184,7 +184,7 @@ void CKZPickup::Snap(int SnappingClient)
 			pChar = GameServer()->GetPlayerChar(GameServer()->m_apPlayers[SnappingClient]->m_SpectatorId);
 
 		int Tick = (Server()->Tick() % Server()->TickSpeed()) % 11;
-		if(pChar && pChar->IsAlive() && m_Layer == LAYER_SWITCH && m_Number > 0 && !Switchers()[m_Number].m_aStatus[pChar->Team()] && !Tick)
+		if(pChar && pChar->IsAlive() && m_Number > 0 && !Switchers()[m_Number].m_aStatus[pChar->Team()] && !Tick)
 			return;
 	}
 
