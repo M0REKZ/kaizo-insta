@@ -1854,7 +1854,7 @@ void CCollision::FindKZLayer()
 	//+KZ
 	if(m_pLayers->KZCustomLayer())
 	{
-		m_pKZTiles = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->KZCustomLayer()->m_Data));
+		m_pKZTiles = static_cast<CKZCustomTile *>(m_pLayers->Map()->GetData(m_pLayers->KZCustomLayer()->m_KZCustom));
 		m_KZWidth = m_pLayers->KZCustomLayer()->m_Width;
 		m_KZHeight = m_pLayers->KZCustomLayer()->m_Height;
 	}

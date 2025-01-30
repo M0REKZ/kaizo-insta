@@ -1043,7 +1043,7 @@ int IGameController::MakeLosersCry()
     return loserteam;
 }
 
-bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
+bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Val1, int Val2)
 {
 
 
@@ -1095,12 +1095,12 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 	{
 		if(Index == TILE_RANDOMWEAPON)
 		{
-			CRandomWeapon *pPickup = new CRandomWeapon(&GameServer()->m_World, Type, SubType, Layer, Number);
+			CRandomWeapon *pPickup = new CRandomWeapon(&GameServer()->m_World, Type, SubType, Layer, Val1);
 			pPickup->m_Pos = Pos;
 		}
 		else
 		{
-			CKZPickup *pPickup = new CKZPickup(&GameServer()->m_World, Type, SubType, Layer, Number);
+			CKZPickup *pPickup = new CKZPickup(&GameServer()->m_World, Type, SubType, Layer, Val1);
 			pPickup->m_Pos = Pos;
 		}
 		return true;
