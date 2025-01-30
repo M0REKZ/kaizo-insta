@@ -34,7 +34,7 @@ public:
 	void BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos) override;
 	void BrushFlipX() override;
 	void BrushFlipY() override;
-	void BrushRotate(float Amount) override;
+	//void BrushRotate(float Amount) override;
 	void FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect) override;
 
 	EditorTileStateChangeHistory<SKZCustomTileStateChange> m_History;

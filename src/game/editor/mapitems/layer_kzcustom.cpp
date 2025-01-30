@@ -261,36 +261,3 @@ void CLayerKZCustom::BrushFlipY()
 	BrushFlipYImpl(m_pKZCustomTile);
 }
 
-void CLayerKZCustom::BrushRotate(float Amount)
-{
-	int Rotation = (round_to_int(360.0f * Amount / (pi * 2)) / 90) % 4; // 0=0°, 1=90°, 2=180°, 3=270°
-	if(Rotation < 0)
-		Rotation += 4;
-
-	if(Rotation == 1 || Rotation == 3)
-	{
-		// 90° rotation
-		CKZCustomTile *pTempData = new CKZCustomTile[m_Width * m_Height];
-		mem_copy(pTempData, m_pKZCustomTile, (size_t)m_Width * m_Height * sizeof(CKZCustomTile));
-		CKZCustomTile *pDst = m_pKZCustomTile;
-		//bool Rotate = !(m_Game || m_Front) || true;
-		for(int x = 0; x < m_Width; ++x)
-			for(int y = m_Height - 1; y >= 0; --y, ++pDst)
-			{
-				*pDst = pTempData[y * m_Width + x];
-
-				if(pDst->m_Flags & TILEFLAG_ROTATE)
-					pDst->m_Flags ^= (TILEFLAG_YFLIP | TILEFLAG_XFLIP);
-				pDst->m_Flags ^= TILEFLAG_ROTATE;
-			}
-
-		std::swap(m_Width, m_Height);
-		delete[] pTempData;
-	}
-
-	if(Rotation == 2 || Rotation == 3)
-	{
-		BrushFlipX();
-		BrushFlipY();
-	}
-}
