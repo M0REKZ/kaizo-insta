@@ -1346,6 +1346,13 @@ void CEditor::DoToolbarLayers(CUIRect ToolBar)
 						Rows = 3;
 						ExtraWidth = 50;
 					}
+					else if(pS == m_Map.m_pKZCustomLayer)
+					{
+						pButtonName = "KZCustom";
+						pfnPopupFunc = PopupKZCustom;
+						Rows = 2;
+						ExtraWidth = 50;
+					}
 
 					if(pButtonName != nullptr)
 					{
@@ -3110,6 +3117,7 @@ void CEditor::DoMapEditor(CUIRect View)
 			m_pTilesetPicker->m_Front = pTileLayer->m_Front;
 			m_pTilesetPicker->m_Switch = pTileLayer->m_Switch;
 			m_pTilesetPicker->m_Tune = pTileLayer->m_Tune;
+			m_pTilesetPicker->m_KZCustom = pTileLayer->m_KZCustom;
 
 			m_pTilesetPicker->Render(true);
 
@@ -3307,7 +3315,7 @@ void CEditor::DoMapEditor(CUIRect View)
 									std::shared_ptr<CLayerTiles> pLayer = std::static_pointer_cast<CLayerTiles>(apEditLayers[k].second);
 									std::shared_ptr<CLayerTiles> pBrushLayer = std::static_pointer_cast<CLayerTiles>(m_pBrush->m_vpLayers[BrushIndex]);
 
-									if(pLayer->m_Tele <= pBrushLayer->m_Tele && pLayer->m_Speedup <= pBrushLayer->m_Speedup && pLayer->m_Front <= pBrushLayer->m_Front && pLayer->m_Game <= pBrushLayer->m_Game && pLayer->m_Switch <= pBrushLayer->m_Switch && pLayer->m_Tune <= pBrushLayer->m_Tune)
+									if(pLayer->m_Tele <= pBrushLayer->m_Tele && pLayer->m_Speedup <= pBrushLayer->m_Speedup && pLayer->m_Front <= pBrushLayer->m_Front && pLayer->m_Game <= pBrushLayer->m_Game && pLayer->m_Switch <= pBrushLayer->m_Switch && pLayer->m_Tune <= pBrushLayer->m_Tune && pLayer->m_KZCustom <= pBrushLayer->m_KZCustom)
 										pLayer->BrushDraw(pBrushLayer, vec2(wx, wy));
 								}
 								else
@@ -8613,6 +8621,13 @@ IGraphics::CTextureHandle CEditor::GetEntitiesTexture()
 	if(!m_EntitiesTexture.IsValid())
 		m_EntitiesTexture = Graphics()->LoadTexture("editor/entities/DDNet.png", IStorage::TYPE_ALL, GetTextureUsageFlag());
 	return m_EntitiesTexture;
+}
+
+IGraphics::CTextureHandle CEditor::GetKZCustomTexture()
+{
+	if(!m_KZCustomTexture.IsValid())
+		m_KZCustomTexture = Graphics()->LoadTexture("editor/KZCustom-Entities.png", IStorage::TYPE_ALL, GetTextureUsageFlag());
+	return m_KZCustomTexture;
 }
 
 void CEditor::Init()

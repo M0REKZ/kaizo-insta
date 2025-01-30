@@ -20,6 +20,7 @@ class CSwitchTile;
 class CTeleTile;
 class CTile;
 class CTuneTile;
+class CKZCustomTile;
 namespace client_data7 {
 struct CDataSprite;
 }
@@ -233,6 +234,8 @@ public:
 	void RenderSpeedupmap(CSpeedupTile *pSpeedup, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const;
 	void RenderSwitchmap(CSwitchTile *pSwitch, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const;
 	void RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const;
+	void RenderKZCustomOverlay(CKZCustomTile *pSpeedup, int w, int h, float Scale, float Alpha = 1.0f) const;
+	void RenderKZCustommap(CKZCustomTile *pKZCustomTile, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const;
 };
 
 #endif

@@ -117,6 +117,8 @@ void CEditorMap::Clean()
 	m_pFrontLayer = nullptr;
 	m_pSwitchLayer = nullptr;
 	m_pTuneLayer = nullptr;
+
+	m_pKZCustomLayer = nullptr; //+KZ
 }
 
 void CEditorMap::CreateDefault(IGraphics::CTextureHandle EntitiesTexture)
@@ -145,6 +147,8 @@ void CEditorMap::CreateDefault(IGraphics::CTextureHandle EntitiesTexture)
 	m_pSpeedupLayer = nullptr;
 	m_pSwitchLayer = nullptr;
 	m_pTuneLayer = nullptr;
+
+	m_pKZCustomLayer = nullptr; //+KZ
 }
 
 void CEditorMap::MakeTeleLayer(const std::shared_ptr<CLayer> &pLayer)
@@ -175,4 +179,10 @@ void CEditorMap::MakeTuneLayer(const std::shared_ptr<CLayer> &pLayer)
 {
 	m_pTuneLayer = std::static_pointer_cast<CLayerTune>(pLayer);
 	m_pTuneLayer->m_pEditor = m_pEditor;
+}
+
+void CEditorMap::MakeKZCustomLayer(const std::shared_ptr<CLayer> &pLayer)
+{
+	m_pKZCustomLayer = std::static_pointer_cast<CLayerKZCustom>(pLayer);
+	m_pKZCustomLayer->m_pEditor = m_pEditor;
 }

@@ -202,8 +202,9 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 				Item.m_Front = -1;
 				Item.m_Switch = -1;
 				Item.m_Tune = -1;
+				Item.m_KZCustom = -1;
 
-				if(Item.m_Flags && !(pLayerTiles->m_Game))
+				if((Item.m_Flags && !(pLayerTiles->m_Game)) || pLayerTiles->m_KZCustom)
 				{
 					CTile *pEmptyTiles = (CTile *)calloc((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height, sizeof(CTile));
 					mem_zero(pEmptyTiles, (size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile));
@@ -220,6 +221,11 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 						Item.m_Switch = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CSwitchTile), std::static_pointer_cast<CLayerSwitch>(pLayerTiles)->m_pSwitchTile);
 					else if(pLayerTiles->m_Tune)
 						Item.m_Tune = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTuneTile), std::static_pointer_cast<CLayerTune>(pLayerTiles)->m_pTuneTile);
+					else if(pLayerTiles->m_KZCustom)
+					{
+						Item.m_KZCustom = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CKZCustomTile), std::static_pointer_cast<CLayerKZCustom>(pLayerTiles)->m_pKZCustomTile);
+						Item.m_Layer.m_Version = 1; //+KZ KZCustom new version
+					}
 				}
 				else
 					Item.m_Data = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile), pLayerTiles->m_pTiles);
@@ -681,6 +687,10 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 				{
 					CMapItemLayerTilemap *pTilemapItem = (CMapItemLayerTilemap *)pLayerItem;
 
+					char aBuf[30] = {0};
+
+					IntsToStr(pTilemapItem->m_aName, std::size(pTilemapItem->m_aName), aBuf, std::size(aBuf));
+
 					std::shared_ptr<CLayerTiles> pTiles;
 					if(pTilemapItem->m_Flags & TILESLAYERFLAG_GAME)
 					{
@@ -727,6 +737,11 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 
 						pTiles = std::make_shared<CLayerTune>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
 						MakeTuneLayer(pTiles);
+					}
+					else if(!str_comp_nocase("KZCustom", aBuf))
+					{
+						pTiles = std::make_shared<CLayerKZCustom>(m_pEditor, pTilemapItem->m_Width, pTilemapItem->m_Height);
+						MakeKZCustomLayer(pTiles);
 					}
 					else
 					{
@@ -841,6 +856,40 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 							}
 						}
 						DataFile.UnloadData(pTilemapItem->m_Tune);
+					}
+					else if(!str_comp_nocase("KZCustom", aBuf))
+					{
+						if(pTilemapItem->m_Layer.m_Version == 1)
+						{
+							void *pSwitchData = DataFile.GetData(pTilemapItem->m_KZCustom);
+							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_KZCustom);
+							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CKZCustomTile))
+							{
+									CKZCustomTile *pLayerSwitchTiles = std::static_pointer_cast<CLayerKZCustom>(pTiles)->m_pKZCustomTile;
+									mem_copy(pLayerSwitchTiles, pSwitchData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CKZCustomTile));
+
+									for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
+									{
+											pTiles->m_pTiles[i].m_Index = pLayerSwitchTiles[i].m_Index;
+											pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
+									}
+								
+							}
+							DataFile.UnloadData(pTilemapItem->m_KZCustom);
+						}
+						else
+						{
+							void *pSwitchData = DataFile.GetData(pTilemapItem->m_Data);
+							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Data);
+							CTile *pLayerSwitchTiles = std::static_pointer_cast<CLayerTiles>(pTiles)->m_pTiles;
+							mem_copy(pLayerSwitchTiles, pSwitchData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CTile));
+							for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
+							{
+								pTiles->m_pTiles[i].m_Index = pLayerSwitchTiles[i].m_Index;
+								pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
+							}
+							DataFile.UnloadData(pTilemapItem->m_Data);
+						}
 					}
 					else // regular tile layer or game layer
 					{

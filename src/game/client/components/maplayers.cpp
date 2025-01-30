@@ -1401,6 +1401,7 @@ void CMapLayers::OnRender()
 			bool IsSpeedupLayer = false;
 			bool IsTuneLayer = false;
 			bool IsEntityLayer = false;
+			bool IsKZCustomLayer = false;
 
 			if(pLayer == (CMapItemLayer *)m_pLayers->GameLayer())
 			{
@@ -1422,6 +1423,9 @@ void CMapLayers::OnRender()
 
 			if(pLayer == (CMapItemLayer *)m_pLayers->TuneLayer())
 				IsEntityLayer = IsTuneLayer = true;
+
+			if(pLayer == (CMapItemLayer *)m_pLayers->KZCustomLayer())
+				IsKZCustomLayer = IsEntityLayer = true;
 
 			if(m_Type == -1)
 				Render = true;
@@ -1521,6 +1525,25 @@ void CMapLayers::OnRender()
 			else if(Render && pLayer->m_Type == LAYERTYPE_QUADS)
 			{
 				++QuadLayerCounter;
+			}
+
+			if((Render || IsKZCustomLayer) && pLayer->m_Type == LAYERTYPE_TILES)
+			{
+				CMapItemLayerTilemap *pTMap = (CMapItemLayerTilemap *)pLayer;
+				int DataIndex = 0;
+				unsigned int TileSize = 0;
+				int TileLayerAndOverlayCount = 0;
+				{
+					DataIndex = pTMap->m_KZCustom;
+					TileSize = sizeof(CKZCustomTile);
+					TileLayerAndOverlayCount = 1;
+				}
+
+				unsigned int Size = m_pLayers->Map()->GetDataSize(DataIndex);
+				if(Size >= pTMap->m_Width * pTMap->m_Height * TileSize)
+				{
+					TileLayerCounter += TileLayerAndOverlayCount;
+				}
 			}
 
 			// skip rendering if detail layers if not wanted, or is entity layer and we are a background map

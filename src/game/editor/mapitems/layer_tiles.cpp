@@ -38,6 +38,8 @@ CLayerTiles::CLayerTiles(CEditor *pEditor, int w, int h) :
 	m_Seed = 0;
 	m_AutoAutoMap = false;
 
+	m_KZCustom = false;
+
 	m_pTiles = new CTile[m_Width * m_Height];
 	mem_zero(m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
 }
@@ -64,6 +66,8 @@ CLayerTiles::CLayerTiles(const CLayerTiles &Other) :
 	m_Front = Other.m_Front;
 	m_Switch = Other.m_Switch;
 	m_Tune = Other.m_Tune;
+
+	m_KZCustom = Other.m_KZCustom;
 
 	str_copy(m_aFileName, Other.m_aFileName);
 }
@@ -145,6 +149,8 @@ void CLayerTiles::Render(bool Tileset)
 		Texture = m_pEditor->GetSwitchTexture();
 	else if(m_Tune)
 		Texture = m_pEditor->GetTuneTexture();
+	else if(m_KZCustom)
+		Texture = m_pEditor->GetKZCustomTexture();
 	Graphics()->TextureSet(Texture);
 
 	ColorRGBA ColorEnv = ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f);
@@ -167,6 +173,8 @@ void CLayerTiles::Render(bool Tileset)
 			m_pEditor->RenderTools()->RenderSwitchOverlay(static_cast<CLayerSwitch *>(this)->m_pSwitchTile, m_Width, m_Height, 32.0f);
 		if(m_Tune)
 			m_pEditor->RenderTools()->RenderTuneOverlay(static_cast<CLayerTune *>(this)->m_pTuneTile, m_Width, m_Height, 32.0f);
+		if(m_KZCustom)
+			m_pEditor->RenderTools()->RenderKZCustomOverlay(static_cast<CLayerKZCustom *>(this)->m_pKZCustomTile, m_Width, m_Height, 32.0f);
 	}
 }
 
@@ -219,7 +227,7 @@ void CLayerTiles::Clamp(RECTi *pRect) const
 
 bool CLayerTiles::IsEntitiesLayer() const
 {
-	return m_pEditor->m_Map.m_pGameLayer.get() == this || m_pEditor->m_Map.m_pTeleLayer.get() == this || m_pEditor->m_Map.m_pSpeedupLayer.get() == this || m_pEditor->m_Map.m_pFrontLayer.get() == this || m_pEditor->m_Map.m_pSwitchLayer.get() == this || m_pEditor->m_Map.m_pTuneLayer.get() == this;
+	return m_pEditor->m_Map.m_pGameLayer.get() == this || m_pEditor->m_Map.m_pTeleLayer.get() == this || m_pEditor->m_Map.m_pSpeedupLayer.get() == this || m_pEditor->m_Map.m_pFrontLayer.get() == this || m_pEditor->m_Map.m_pSwitchLayer.get() == this || m_pEditor->m_Map.m_pTuneLayer.get() == this || m_pEditor->m_Map.m_pKZCustomLayer.get() == this;
 }
 
 bool CLayerTiles::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
@@ -275,6 +283,9 @@ static void InitGrabbedLayer(std::shared_ptr<T> pLayer, CLayerTiles *pThisLayer)
 	pLayer->m_Speedup = pThisLayer->m_Speedup;
 	pLayer->m_Switch = pThisLayer->m_Switch;
 	pLayer->m_Tune = pThisLayer->m_Tune;
+
+	pLayer->m_KZCustom = pThisLayer->m_KZCustom;
+
 	if(pThisLayer->m_pEditor->m_BrushColorEnabled)
 	{
 		pLayer->m_Color = pThisLayer->m_Color;
@@ -363,6 +374,36 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 		pGrabbed->m_SpeedupForce = m_pEditor->m_SpeedupForce;
 		pGrabbed->m_SpeedupMaxSpeed = m_pEditor->m_SpeedupMaxSpeed;
 		pGrabbed->m_SpeedupAngle = m_pEditor->m_SpeedupAngle;
+		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
+	}
+	else if(this->m_KZCustom)
+	{
+		std::shared_ptr<CLayerKZCustom> pGrabbed = std::make_shared<CLayerKZCustom>(m_pEditor, r.w, r.h);
+		InitGrabbedLayer(pGrabbed, this);
+
+		pBrush->AddLayer(pGrabbed);
+
+		// copy the tiles
+		for(int y = 0; y < r.h; y++)
+			for(int x = 0; x < r.w; x++)
+				pGrabbed->m_pTiles[y * pGrabbed->m_Width + x] = GetTile(r.x + x, r.y + y);
+
+		// copy the speedup data
+		if(!m_pEditor->Input()->KeyIsPressed(KEY_SPACE))
+			for(int y = 0; y < r.h; y++)
+				for(int x = 0; x < r.w; x++)
+				{
+					pGrabbed->m_pKZCustomTile[y * pGrabbed->m_Width + x] = static_cast<CLayerKZCustom *>(this)->m_pKZCustomTile[(r.y + y) * m_Width + (r.x + x)];
+					//if(IsValidSpeedupTile(pGrabbed->m_pKZCustomTile[y * pGrabbed->m_Width + x].m_Index))
+					//{
+						//m_pEditor->m_KZCustomVal3 = pGrabbed->m_pKZCustomTile[y * pGrabbed->m_Width + x].m_Val3;
+						m_pEditor->m_KZCustomVal1 = pGrabbed->m_pKZCustomTile[y * pGrabbed->m_Width + x].m_Val1;
+						m_pEditor->m_KZCustomVal2 = pGrabbed->m_pKZCustomTile[y * pGrabbed->m_Width + x].m_Val2;
+					//}
+				}
+		pGrabbed->m_KZCustomVal1 = m_pEditor->m_KZCustomVal1;
+		pGrabbed->m_KZCustomVal2 = m_pEditor->m_KZCustomVal2;
+		//pGrabbed->m_KZCustomVal3 = m_pEditor->m_KZCustomVal3;
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}
 	else if(this->m_Switch)
@@ -548,7 +589,7 @@ void CLayerTiles::BrushFlipX()
 	if(m_Tele || m_Speedup || m_Tune)
 		return;
 
-	bool Rotate = !(m_Game || m_Front || m_Switch) || m_pEditor->m_AllowPlaceUnusedTiles;
+	bool Rotate = !(m_Game || m_Front || m_Switch || m_KZCustom) || m_pEditor->m_AllowPlaceUnusedTiles;
 	for(int y = 0; y < m_Height; y++)
 		for(int x = 0; x < m_Width; x++)
 			if(!Rotate && !IsRotatableTile(m_pTiles[y * m_Width + x].m_Index))
