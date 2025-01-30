@@ -1862,16 +1862,19 @@ void CCollision::FindKZLayer()
 		}
 		else //Old layer version which used just simple CTiles, translate into CKZCustomTile...
 		{
+			CKZCustomTile TempTile;
 			CTile* pTempTiles = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->KZCustomLayer()->m_Data));
 			m_pKZTiles = static_cast<CKZCustomTile *>(m_pLayers->Map()->GetData(m_pLayers->KZCustomLayer()->m_Data));
 			m_KZWidth = m_pLayers->KZCustomLayer()->m_Width;
 			m_KZHeight = m_pLayers->KZCustomLayer()->m_Height;
 			for(int i = 0; i < m_KZWidth * m_KZHeight; i++)
 			{
-				m_pKZTiles[i].m_Index = pTempTiles[i].m_Index;
-				m_pKZTiles[i].m_Flags = pTempTiles[i].m_Flags;
-				m_pKZTiles[i].m_Val1 = 0;
-				m_pKZTiles[i].m_Val2 = 0;
+				TempTile.m_Index = pTempTiles[i].m_Index;
+				TempTile.m_Flags = pTempTiles[i].m_Flags;
+				TempTile.m_Val1 = 0;
+				TempTile.m_Val2 = 0;
+
+				m_pKZTiles[i] = TempTile;
 			}
 		}
 	}
