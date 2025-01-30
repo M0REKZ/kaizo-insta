@@ -495,7 +495,7 @@ void IGameController::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pRe
 {
 	pPlayer->OnDisconnect();
 	int ClientId = pPlayer->GetCid();
-	if(Server()->ClientIngame(ClientId))
+	if(Server()->ClientIngame(ClientId) || Server()->ClientRedirected(ClientId))
 	{
 		char aBuf[512];
 		if(pPlayer->m_RageQuitTick + Server()->TickSpeed() * 5 > Server()->Tick())
