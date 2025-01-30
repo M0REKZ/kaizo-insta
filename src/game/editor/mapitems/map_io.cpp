@@ -204,7 +204,7 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 				Item.m_Tune = -1;
 				Item.m_KZCustom = -1;
 
-				if(Item.m_Flags && !(pLayerTiles->m_Game))
+				if((Item.m_Flags && !(pLayerTiles->m_Game)) || pLayerTiles->m_KZCustom)
 				{
 					CTile *pEmptyTiles = (CTile *)calloc((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height, sizeof(CTile));
 					mem_zero(pEmptyTiles, (size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTile));
@@ -856,26 +856,20 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					}
 					else if(!str_comp_nocase("KZCustom", aBuf))
 					{
-						void *pData = DataFile.GetData(pTilemapItem->m_Data);
-						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_Data);
-						const size_t DestSize = (size_t)pTiles->m_Width * pTiles->m_Height;
-						CKZCustomTile *pKZCustomTiles = std::static_pointer_cast<CLayerKZCustom>(pTiles)->m_pKZCustomTile;
-						if(DestSize * sizeof(CKZCustomTile) >= DestSize)
+						void *pSwitchData = DataFile.GetData(pTilemapItem->m_KZCustom);
+						unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_KZCustom);
+						if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CKZCustomTile))
 						{
-							mem_copy(pKZCustomTiles, pData, DestSize * sizeof(CKZCustomTile));
+							CKZCustomTile *pLayerSwitchTiles = std::static_pointer_cast<CLayerKZCustom>(pTiles)->m_pKZCustomTile;
+							mem_copy(pLayerSwitchTiles, pSwitchData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CKZCustomTile));
 
 							for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 							{
-
-									pTiles->m_pTiles[i].m_Index = pKZCustomTiles[i].m_Index;
-									pTiles->m_pTiles[i].m_Flags = pKZCustomTiles[i].m_Flags;
-									pTiles->m_pTiles[i].m_Reserved = pKZCustomTiles[i].m_Val1;
-									pTiles->m_pTiles[i].m_Skip = pKZCustomTiles[i].m_Val2;
-
+									pTiles->m_pTiles[i].m_Index = pLayerSwitchTiles[i].m_Index;
+									pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
 							}
 						}
-
-						DataFile.UnloadData(pTilemapItem->m_Data);
+						DataFile.UnloadData(pTilemapItem->m_KZCustom);
 					}
 					else // regular tile layer or game layer
 					{

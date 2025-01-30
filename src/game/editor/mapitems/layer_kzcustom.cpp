@@ -67,23 +67,22 @@ bool CLayerKZCustom::IsEmpty(const std::shared_ptr<CLayerTiles> &pLayer)
 
 void CLayerKZCustom::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 {
-	if(m_Readonly)
+		if(m_Readonly)
 		return;
 
-	std::shared_ptr<CLayerKZCustom> pSpeedupLayer = std::static_pointer_cast<CLayerKZCustom>(pBrush);
+	std::shared_ptr<CLayerKZCustom> pKZCustomLayer = std::static_pointer_cast<CLayerKZCustom>(pBrush);
 	int sx = ConvertX(WorldPos.x);
 	int sy = ConvertY(WorldPos.y);
-	if(str_comp(pSpeedupLayer->m_aFileName, m_pEditor->m_aFileName))
+	if(str_comp(pKZCustomLayer->m_aFileName, m_pEditor->m_aFileName))
 	{
-		//m_pEditor->m_KZCustomVal3 = pSpeedupLayer->m_KZCustomVal3;
-		m_pEditor->m_KZCustomVal1 = pSpeedupLayer->m_KZCustomVal1;
-		m_pEditor->m_KZCustomVal2 = pSpeedupLayer->m_KZCustomVal2;
+		m_pEditor->m_KZCustomVal1 = pKZCustomLayer->m_KZCustomVal1;
+		m_pEditor->m_KZCustomVal2 = pKZCustomLayer->m_KZCustomVal2;
 	}
 
-	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(pSpeedupLayer);
+	bool Destructive = m_pEditor->m_BrushDrawDestructive || IsEmpty(pKZCustomLayer);
 
-	for(int y = 0; y < pSpeedupLayer->m_Height; y++)
-		for(int x = 0; x < pSpeedupLayer->m_Width; x++)
+	for(int y = 0; y < pKZCustomLayer->m_Height; y++)
+		for(int x = 0; x < pKZCustomLayer->m_Width; x++)
 		{
 			int fx = x + sx;
 			int fy = y + sy;
@@ -97,63 +96,56 @@ void CLayerKZCustom::BrushDraw(std::shared_ptr<CLayer> pBrush, vec2 WorldPos)
 			int Index = fy * m_Width + fx;
 			SKZCustomTileStateChange::SData Previous{
 				m_pKZCustomTile[Index].m_Val1,
-				m_pKZCustomTile[Index].m_Val2,
-				m_pKZCustomTile[Index].m_Flags,
 				m_pKZCustomTile[Index].m_Index,
+				m_pKZCustomTile[Index].m_Flags,
+				m_pKZCustomTile[Index].m_Val2,
 				m_pTiles[Index].m_Index};
 
-			if((m_pEditor->m_AllowPlaceUnusedTiles) && pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index != TILE_AIR)
+			if((true) && pKZCustomLayer->m_pTiles[y * pKZCustomLayer->m_Width + x].m_Index != TILE_AIR)
 			{
-				if(m_pEditor->m_KZCustomVal1 != pSpeedupLayer->m_KZCustomVal1 || m_pEditor->m_KZCustomVal2 != pSpeedupLayer->m_KZCustomVal2)
+				if(m_pEditor->m_KZCustomVal1 != pKZCustomLayer->m_KZCustomVal1 || m_pEditor->m_KZCustomVal2 != pKZCustomLayer->m_KZCustomVal2)
 				{
 					m_pKZCustomTile[Index].m_Val1 = m_pEditor->m_KZCustomVal1;
 					m_pKZCustomTile[Index].m_Val2 = m_pEditor->m_KZCustomVal2;
-					m_pKZCustomTile[Index].m_Index = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
-					m_pTiles[Index].m_Index = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
 				}
-				else if(pSpeedupLayer->m_pKZCustomTile[y * pSpeedupLayer->m_Width + x].m_Val1)
+				else if(pKZCustomLayer->m_pKZCustomTile[y * pKZCustomLayer->m_Width + x].m_Val1)
 				{
-					m_pKZCustomTile[Index].m_Val1 = pSpeedupLayer->m_pKZCustomTile[y * pSpeedupLayer->m_Width + x].m_Val1;
-					m_pKZCustomTile[Index].m_Val2 = pSpeedupLayer->m_pKZCustomTile[y * pSpeedupLayer->m_Width + x].m_Val2;
-					m_pKZCustomTile[Index].m_Index = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
-					m_pTiles[Index].m_Index = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
-				}
-				else if(m_pEditor->m_KZCustomVal1)
-				{
-					m_pKZCustomTile[Index].m_Val1 = m_pEditor->m_KZCustomVal1;
-					m_pKZCustomTile[Index].m_Val2 = m_pEditor->m_KZCustomVal2;
-					m_pKZCustomTile[Index].m_Index = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
-					m_pTiles[Index].m_Index = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
+					m_pKZCustomTile[Index].m_Val1 = pKZCustomLayer->m_pKZCustomTile[y * pKZCustomLayer->m_Width + x].m_Val1;
+					m_pKZCustomTile[Index].m_Val2 = pKZCustomLayer->m_pKZCustomTile[y * pKZCustomLayer->m_Width + x].m_Val2;
 				}
 				else
 				{
 					m_pKZCustomTile[Index].m_Val1 = m_pEditor->m_KZCustomVal1;
 					m_pKZCustomTile[Index].m_Val2 = m_pEditor->m_KZCustomVal2;
-					m_pKZCustomTile[Index].m_Index = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
-					m_pTiles[Index].m_Index = pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index;
 				}
+
+				m_pKZCustomTile[Index].m_Index = pKZCustomLayer->m_pTiles[y * pKZCustomLayer->m_Width + x].m_Index;
+				m_pKZCustomTile[Index].m_Flags = pKZCustomLayer->m_pTiles[y * pKZCustomLayer->m_Width + x].m_Flags;
+				m_pTiles[Index].m_Index = pKZCustomLayer->m_pTiles[y * pKZCustomLayer->m_Width + x].m_Index;
+				m_pTiles[Index].m_Flags = pKZCustomLayer->m_pTiles[y * pKZCustomLayer->m_Width + x].m_Flags;
 			}
 			else
 			{
 				m_pKZCustomTile[Index].m_Val1 = 0;
-				m_pKZCustomTile[Index].m_Val2 = 0;
 				m_pKZCustomTile[Index].m_Index = 0;
+				m_pKZCustomTile[Index].m_Flags = 0;
+				m_pKZCustomTile[Index].m_Val2 = 0;
 				m_pTiles[Index].m_Index = 0;
 
-				//if(pSpeedupLayer->m_pTiles[y * pSpeedupLayer->m_Width + x].m_Index != TILE_AIR)
-				//	ShowPreventUnusedTilesWarning();
+				if(pKZCustomLayer->m_pTiles[y * pKZCustomLayer->m_Width + x].m_Index != TILE_AIR)
+					ShowPreventUnusedTilesWarning();
 			}
 
 			SKZCustomTileStateChange::SData Current{
 				m_pKZCustomTile[Index].m_Val1,
-				m_pKZCustomTile[Index].m_Val2,
-				m_pKZCustomTile[Index].m_Flags,
 				m_pKZCustomTile[Index].m_Index,
+				m_pKZCustomTile[Index].m_Flags,
+				m_pKZCustomTile[Index].m_Val2,
 				m_pTiles[Index].m_Index};
 
 			RecordStateChange(fx, fy, Previous, Current);
 		}
-	FlagModified(sx, sy, pSpeedupLayer->m_Width, pSpeedupLayer->m_Height);
+	FlagModified(sx, sy, pKZCustomLayer->m_Width, pKZCustomLayer->m_Height);
 }
 
 void CLayerKZCustom::RecordStateChange(int x, int y, SKZCustomTileStateChange::SData Previous, SKZCustomTileStateChange::SData Current)
@@ -162,52 +154,6 @@ void CLayerKZCustom::RecordStateChange(int x, int y, SKZCustomTileStateChange::S
 		m_History[y][x] = SKZCustomTileStateChange{true, Previous, Current};
 	else
 		m_History[y][x].m_Current = Current;
-}
-
-void CLayerKZCustom::BrushFlipX()
-{
-	CLayerTiles::BrushFlipX();
-	BrushFlipXImpl(m_pKZCustomTile);
-}
-
-void CLayerKZCustom::BrushFlipY()
-{
-	CLayerTiles::BrushFlipY();
-	BrushFlipYImpl(m_pKZCustomTile);
-}
-
-void CLayerKZCustom::BrushRotate(float Amount)
-{
-	int Rotation = (round_to_int(360.0f * Amount / (pi * 2)) / 90) % 4; // 0=0°, 1=90°, 2=180°, 3=270°
-	if(Rotation < 0)
-		Rotation += 4;
-
-	if(Rotation == 1 || Rotation == 3)
-	{
-		// 90° rotation
-		CKZCustomTile *pTempData1 = new CKZCustomTile[m_Width * m_Height];
-		CTile *pTempData2 = new CTile[m_Width * m_Height];
-		mem_copy(pTempData1, m_pKZCustomTile, (size_t)m_Width * m_Height * sizeof(CKZCustomTile));
-		mem_copy(pTempData2, m_pTiles, (size_t)m_Width * m_Height * sizeof(CTile));
-		CKZCustomTile *pDst1 = m_pKZCustomTile;
-		CTile *pDst2 = m_pTiles;
-		for(int x = 0; x < m_Width; ++x)
-			for(int y = m_Height - 1; y >= 0; --y, ++pDst1, ++pDst2)
-			{
-				*pDst1 = pTempData1[y * m_Width + x];
-				*pDst2 = pTempData2[y * m_Width + x];
-			}
-
-		std::swap(m_Width, m_Height);
-		delete[] pTempData1;
-		delete[] pTempData2;
-	}
-
-	if(Rotation == 2 || Rotation == 3)
-	{
-		BrushFlipX();
-		BrushFlipY();
-	}
 }
 
 void CLayerKZCustom::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, CUIRect Rect)
@@ -266,6 +212,7 @@ void CLayerKZCustom::FillSelection(bool Empty, std::shared_ptr<CLayer> pBrush, C
 				if(pLt->m_KZCustom && m_pTiles[TgtIndex].m_Index > 0)
 				{
 					m_pKZCustomTile[TgtIndex].m_Index = m_pTiles[TgtIndex].m_Index;
+					m_pKZCustomTile[TgtIndex].m_Flags = m_pTiles[TgtIndex].m_Flags;
 
 					if((pLt->m_pKZCustomTile[SrcIndex].m_Val1 == 0 && m_pEditor->m_KZCustomVal1) || m_pEditor->m_KZCustomVal1 != pLt->m_KZCustomVal1)
 						m_pKZCustomTile[TgtIndex].m_Val1 = m_pEditor->m_KZCustomVal1;
@@ -300,4 +247,50 @@ std::shared_ptr<CLayer> CLayerKZCustom::Duplicate() const
 const char *CLayerKZCustom::TypeName() const
 {
 	return "kzcustom";
+}
+
+void CLayerKZCustom::BrushFlipX()
+{
+	CLayerTiles::BrushFlipX();
+	BrushFlipXImpl(m_pKZCustomTile);
+}
+
+void CLayerKZCustom::BrushFlipY()
+{
+	CLayerTiles::BrushFlipY();
+	BrushFlipYImpl(m_pKZCustomTile);
+}
+
+void CLayerKZCustom::BrushRotate(float Amount)
+{
+	int Rotation = (round_to_int(360.0f * Amount / (pi * 2)) / 90) % 4; // 0=0°, 1=90°, 2=180°, 3=270°
+	if(Rotation < 0)
+		Rotation += 4;
+
+	if(Rotation == 1 || Rotation == 3)
+	{
+		// 90° rotation
+		CKZCustomTile *pTempData = new CKZCustomTile[m_Width * m_Height];
+		mem_copy(pTempData, m_pKZCustomTile, (size_t)m_Width * m_Height * sizeof(CKZCustomTile));
+		CKZCustomTile *pDst = m_pKZCustomTile;
+		//bool Rotate = !(m_Game || m_Front) || true;
+		for(int x = 0; x < m_Width; ++x)
+			for(int y = m_Height - 1; y >= 0; --y, ++pDst)
+			{
+				*pDst = pTempData[y * m_Width + x];
+
+				if(pDst->m_Flags & TILEFLAG_ROTATE)
+					pDst->m_Flags ^= (TILEFLAG_YFLIP | TILEFLAG_XFLIP);
+				pDst->m_Flags ^= TILEFLAG_ROTATE;
+			}
+
+		std::swap(m_Width, m_Height);
+		delete[] pTempData;
+	}
+
+	if(Rotation == 2 || Rotation == 3)
+	{
+		BrushFlipX();
+		BrushFlipY();
+	}
 }
