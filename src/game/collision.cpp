@@ -489,7 +489,6 @@ int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollisio
 		int Index = GetPureMapIndex(Pos);
 		if(pTeleNr)
 		{
-			printf("%p\n", pOutQuad->m_pQuad);
 			if(pOutQuad && pOutQuad->m_pQuad && (g_Config.m_SvOldTeleportWeapons ? pOutQuad->m_pQuad->m_ColorEnvOffset == TILE_TELEIN : pOutQuad->m_pQuad->m_ColorEnvOffset == TILE_TELEINWEAPON))
 			{
 				*pTeleNr = pOutQuad->m_pQuad->m_aColors[0].r;
