@@ -580,7 +580,7 @@ void CCharacter::FireWeapon()
     
 	if(m_Core.m_ActiveWeapon >=0 && m_Core.m_ActiveWeapon < NUM_WEAPONS && !m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
 		return;
-	else if(m_Core.m_ActiveWeapon < NUM_CUSTOM_WEAPONS && !m_aCustomWeaponAmmo[m_Core.m_ActiveWeapon-CUSTOM_WEAPON_START])
+	else if(m_Core.m_ActiveWeapon >= CUSTOM_WEAPON_START && m_Core.m_ActiveWeapon < NUM_CUSTOM_WEAPONS && !m_aCustomWeaponAmmo[m_Core.m_ActiveWeapon-CUSTOM_WEAPON_START])
 		return;
 
 	vec2 ProjStartPos = m_Pos + Direction * GetProximityRadius() * 0.75f;
