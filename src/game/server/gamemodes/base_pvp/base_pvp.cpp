@@ -1617,10 +1617,18 @@ bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &
 	if(IsStatTrack() && Weapon != WEAPON_HAMMER)
 		Character.GetPlayer()->m_Stats.m_ShotsFired++;
 
+	if(Character.m_Core.m_ActiveWeapon < NUM_WEAPONS)
+	{
 	if(g_Config.m_SvGrenadeAmmoRegenResetOnFire)
 		Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
 	if(Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_Ammo > 0) // -1 == unlimited
 		Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_Ammo--;
+	}
+	else if(Character.m_Core.m_ActiveWeapon < NUM_CUSTOM_WEAPONS)
+	{
+		if(Character.m_aCustomWeaponAmmo[Character.m_Core.m_ActiveWeapon - CUSTOM_WEAPON_START] > 0)
+			Character.m_aCustomWeaponAmmo[Character.m_Core.m_ActiveWeapon - CUSTOM_WEAPON_START]--;
+	}
 
 	if(Weapon == WEAPON_GUN)
 	{
@@ -1694,11 +1702,18 @@ bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &
 
 	Character.m_AttackTick = Server()->Tick();
 
-	if(!Character.m_ReloadTimer)
+	if(!Character.m_ReloadTimer && Character.m_Core.m_ActiveWeapon < NUM_WEAPONS)
 	{
 		float FireDelay;
 		Character.GetTuning(Character.m_TuneZone)->Get(38 + Character.m_Core.m_ActiveWeapon, &FireDelay);
 		Character.m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
+	}
+	else if(Character.m_Core.m_ActiveWeapon < NUM_CUSTOM_WEAPONS)
+	{
+		if(Character.m_Core.m_ActiveWeapon == WEAPON_TASER)
+		{
+			Character.m_ReloadTimer = Character.GetTuning(Character.m_TuneZone)->m_LaserFireDelay * Server()->TickSpeed() / 1000;
+		}
 	}
 
 	return true;

@@ -204,6 +204,16 @@ void CCharacter::SetWeapon(int W)
 
 	if(m_Core.m_ActiveWeapon < 0 || m_Core.m_ActiveWeapon >= NUM_CUSTOM_WEAPONS)
 		m_Core.m_ActiveWeapon = 0;
+
+	//+KZ
+	
+	if(m_Core.m_ActiveWeapon == WEAPON_TASER)
+	{
+		GameServer()->SendBroadcast("Weapon: Taser",m_pPlayer->GetCid());
+	}
+	
+	
+	//-----
 }
 
 void CCharacter::SetJetpack(bool Active)
@@ -569,6 +579,8 @@ void CCharacter::FireWeapon()
 	// check for ammo
     
 	if(m_Core.m_ActiveWeapon >=0 && m_Core.m_ActiveWeapon < NUM_WEAPONS && !m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
+		return;
+	else if(m_Core.m_ActiveWeapon < NUM_CUSTOM_WEAPONS && !m_aCustomWeaponAmmo[m_Core.m_ActiveWeapon-CUSTOM_WEAPON_START])
 		return;
 
 	vec2 ProjStartPos = m_Pos + Direction * GetProximityRadius() * 0.75f;
@@ -1477,7 +1489,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 	{
 		Health = m_Health;
 		Armor = m_Armor;
-		AmmoCount = (m_FreezeTime == 0) ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : 0;
+		AmmoCount = (m_FreezeTime == 0) ? (m_Core.m_ActiveWeapon < NUM_WEAPONS ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : m_aCustomWeaponAmmo[m_Core.m_ActiveWeapon - CUSTOM_WEAPON_START]) : 0;
 	}
     if(!(((CServer*)Server())->m_aClients[m_pPlayer->GetCid()].m_KZBot))
 	if(GetPlayer()->IsAfk() || GetPlayer()->IsPaused() || GetPlayer()->m_MenuAFK || Sitting())

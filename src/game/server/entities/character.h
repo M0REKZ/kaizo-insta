@@ -250,10 +250,10 @@ public:
 	CCharacterCore GetCore() { return m_Core; }
 	void SetCore(CCharacterCore Core) { m_Core = Core; }
 	const CCharacterCore *Core() const { return &m_Core; }
-	bool GetWeaponGot(int Type) { return m_Core.m_aWeapons[Type].m_Got; }
-	void SetWeaponGot(int Type, bool Value) { m_Core.m_aWeapons[Type].m_Got = Value; }
+	bool GetWeaponGot(int Type) { return (Type >= NUM_WEAPONS ? m_aCustomWeaponGot[Type-CUSTOM_WEAPON_START] : m_Core.m_aWeapons[Type].m_Got); }
+	void SetWeaponGot(int Type, bool Value) { (Type >= NUM_WEAPONS ? m_aCustomWeaponGot[Type-CUSTOM_WEAPON_START] = Value : m_Core.m_aWeapons[Type].m_Got = Value); }
 	int GetWeaponAmmo(int Type) { return (Type >= NUM_WEAPONS ? m_aCustomWeaponAmmo[Type-CUSTOM_WEAPON_START] : m_Core.m_aWeapons[Type].m_Ammo); } //modified for custom weapons +KZ
-	void SetWeaponAmmo(int Type, int Value) { m_Core.m_aWeapons[Type].m_Ammo = Value; }
+	void SetWeaponAmmo(int Type, int Value) { (Type >= NUM_WEAPONS ? m_aCustomWeaponAmmo[Type-CUSTOM_WEAPON_START] = Value : m_Core.m_aWeapons[Type].m_Ammo = Value); }
 	void SetNinjaActivationDir(vec2 ActivationDir) { m_Core.m_Ninja.m_ActivationDir = ActivationDir; }
 	void SetNinjaActivationTick(int ActivationTick) { m_Core.m_Ninja.m_ActivationTick = ActivationTick; }
 	void SetNinjaCurrentMoveTime(int CurrentMoveTime) { m_Core.m_Ninja.m_CurrentMoveTime = CurrentMoveTime; }
@@ -305,6 +305,8 @@ public:
 	bool Invisible() { return m_Invisible; }
 	bool Sitting() { return m_Sit; }
 	void CatchBall();
+	void SetSparkles(bool v) { m_Sparkles = v; }
+	bool GetSparkles() { return m_Sparkles; }
 	bool m_HasBall = false;
 	bool m_HasFlagBall = false;
 	int m_DropFlagBallTicks = 0;

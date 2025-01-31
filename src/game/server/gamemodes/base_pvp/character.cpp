@@ -100,11 +100,18 @@ bool CCharacter::OnFngFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direc
 
 	m_AttackTick = Server()->Tick();
 
-	if(!m_ReloadTimer)
+	if(!m_ReloadTimer && m_Core.m_ActiveWeapon < NUM_WEAPONS)
 	{
 		float FireDelay;
 		GetTuning(m_TuneZone)->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
 		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
+	}
+	else if(m_Core.m_ActiveWeapon < NUM_CUSTOM_WEAPONS)
+	{
+		if(m_Core.m_ActiveWeapon == WEAPON_TASER)
+		{
+			m_ReloadTimer = GetTuning(m_TuneZone)->m_LaserFireDelay * Server()->TickSpeed() / 1000;
+		}
 	}
 
 	return true;
@@ -179,6 +186,7 @@ void CCharacter::ResetInstaSettings()
 	if(GameServer()->m_pController->GetDefaultWeapon(GetPlayer()) == WEAPON_GRENADE)
 	{
 		Ammo = g_Config.m_SvGrenadeAmmoRegen ? g_Config.m_SvGrenadeAmmoRegenNum : -1;
+		if(m_Core.m_ActiveWeapon < NUM_WEAPONS)
 		m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_AmmoRegenStart = -1;
 	}
 	GiveWeapon(GameServer()->m_pController->GetDefaultWeapon(GetPlayer()), false, Ammo);

@@ -3887,6 +3887,12 @@ void CGameContext::OnConsoleInit()
     Console()->Register("move_kzbot", "s[blue/red]", CFGFLAG_SERVER, ConMoveKZBot, this, "Move KZBot to blue or red team");
 	Console()->Register("rejoin_shutdown", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConShutdownRejoin, this, "Shutdown and make players rejoin same server");
 	Console()->Register("redirect_client", "i[id] i[port]", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConRedirectClient, this, "Redirect client to another server (Works for DDNet version 17.2 and above)");
+	Console()->Register("sparkles", "?i[id]", CFGFLAG_SERVER, ConSparkles, this, "Get Sparkles");
+
+	//+KZ Custom Weapons
+	Console()->Register("taser", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConTaser, this, "Set Taser as active weapon (if have it)");
+	Console()->Register("untaser", "?i[id]", CFGFLAG_SERVER, ConUnTaser, this, "Remove Taser");
+	Console()->Register("gettaser", "?i[id]", CFGFLAG_SERVER, ConGetTaser, this, "Get Taser");
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 
@@ -5737,6 +5743,127 @@ void CGameContext::ConRedirectClient(IConsole::IResult *pResult, void *pUserData
 	int Port = pResult->GetInteger(1);
 
 	pSelf->Server()->RedirectClient(ClientID,Port);
+}
+
+void CGameContext::ConSparkles(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID;
+
+	if(pResult->NumArguments())
+	{
+		ClientID = pResult->GetInteger(0);
+	}
+	else
+	{
+		ClientID = pResult->m_ClientId;
+	}
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+	
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter()->GetSparkles())
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetSparkles(true);
+	else
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetSparkles(false);
+}
+
+void CGameContext::ConTaser(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID = pResult->m_ClientId;
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_TASER);
+
+	if(got)
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_TASER);
+}
+
+void CGameContext::ConUnTaser(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID;
+
+	if(pResult->NumArguments())
+	{
+		ClientID = pResult->GetInteger(0);
+	}
+	else
+	{
+		ClientID = pResult->m_ClientId;
+	}
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_TASER);
+
+	if(got)
+	{
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_TASER, false);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_TASER, 0);
+	}
+
+	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_GUN);
+}
+
+void CGameContext::ConGetTaser(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID;
+
+	if(pResult->NumArguments())
+	{
+		ClientID = pResult->GetInteger(0);
+	}
+	else
+	{
+		ClientID = pResult->m_ClientId;
+	}
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_TASER);
+
+	if(!got)
+	{
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_TASER, true);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_TASER, 10);
+	}
+
+	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_TASER);
 }
 
 void CGameContext::SendDiscordChatMessage(int ClientID, const char* msg)

@@ -153,6 +153,12 @@ class CGameContext : public IGameServer
 	static void ConMoveKZBot(IConsole::IResult *pResult, void *pUserData);
 	static void ConShutdownRejoin(IConsole::IResult *pResult, void *pUserData);
 	static void ConRedirectClient(IConsole::IResult *pResult, void *pUserData);
+	static void ConSparkles(IConsole::IResult *pResult, void *pUserData);
+
+	//+KZ Custom Weapons
+	static void ConTaser(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnTaser(IConsole::IResult *pResult, void *pUserData);
+	static void ConGetTaser(IConsole::IResult *pResult, void *pUserData);
 
 	void Construct(int Resetting);
 	void Destruct(int Resetting);
