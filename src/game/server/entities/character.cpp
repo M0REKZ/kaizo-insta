@@ -518,6 +518,8 @@ void CCharacter::FireWeapon()
 		FullAuto = true;
 	if(m_Core.m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
 		FullAuto = true;
+	if(m_Core.m_ActiveWeapon == WEAPON_TASER) //+KZ
+		FullAuto = true;
 	// allow firing directly after coming out of freeze or being unfrozen
 	// by something
 	if(m_FrozenLastTick)
@@ -532,7 +534,7 @@ void CCharacter::FireWeapon()
 	if(CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
 		WillFire = true;
 
-	if(FullAuto && (m_LatestInput.m_Fire & 1) && m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
+	if(FullAuto && (m_LatestInput.m_Fire & 1) && (m_Core.m_ActiveWeapon < NUM_WEAPONS ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : m_aCustomWeaponAmmo[m_Core.m_ActiveWeapon - CUSTOM_WEAPON_START]))
 		WillFire = true;
 
 	if(!WillFire)
@@ -773,8 +775,7 @@ void CCharacter::FireWeapon()
 	{
 		float LaserReach = GetTuning(m_TuneZone)->m_LaserReach;
 
-		CLaser* laser = new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_LASER);
-		laser->m_FreezeKZ = true;
+		new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_TASER);
 		GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
@@ -783,11 +784,18 @@ void CCharacter::FireWeapon()
 
 	m_AttackTick = Server()->Tick();
 
-	if(!m_ReloadTimer)
+	if(!m_ReloadTimer && m_Core.m_ActiveWeapon < NUM_WEAPONS)
 	{
 		float FireDelay;
 		GetTuning(m_TuneZone)->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
 		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
+	}
+	else if(m_Core.m_ActiveWeapon < NUM_CUSTOM_WEAPONS)
+	{
+		if(m_Core.m_ActiveWeapon == WEAPON_TASER)
+		{
+			m_ReloadTimer = GetTuning(m_TuneZone)->m_LaserFireDelay * Server()->TickSpeed() / 1000;
+		}
 	}
 }
 

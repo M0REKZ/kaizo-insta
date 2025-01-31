@@ -47,9 +47,6 @@ private:
 	bool m_IsBlueTeleport;
 	bool m_BelongsToPracticeTeam;
 
-public:
-	//+KZ
-	bool m_FreezeKZ = false;
 };
 
 #endif
