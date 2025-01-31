@@ -67,6 +67,8 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	if(m_pPlayer)
 		m_Core.m_PlayerRollback = m_pPlayer->m_Rollback; //JSAURUS rollback
 
+	m_aCustomWeaponSnaps[WEAPON_TASER - CUSTOM_WEAPON_START] = WEAPON_LASER;
+
 }
 
 CCharacter::~CCharacter()
@@ -200,7 +202,7 @@ void CCharacter::SetWeapon(int W)
 	m_Core.m_ActiveWeapon = W;
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SWITCH, TeamMask());
 
-	if(m_Core.m_ActiveWeapon < 0 || m_Core.m_ActiveWeapon >= NUM_WEAPONS)
+	if(m_Core.m_ActiveWeapon < 0 || m_Core.m_ActiveWeapon >= NUM_CUSTOM_WEAPONS)
 		m_Core.m_ActiveWeapon = 0;
 }
 
@@ -421,7 +423,7 @@ void CCharacter::HandleNinja()
 void CCharacter::DoWeaponSwitch()
 {
 	// make sure we can switch
-	if(m_ReloadTimer != 0 || m_QueuedWeapon == -1 || m_Core.m_aWeapons[WEAPON_NINJA].m_Got || !m_Core.m_aWeapons[m_QueuedWeapon].m_Got)
+	if(m_ReloadTimer != 0 || m_QueuedWeapon == -1 || m_Core.m_aWeapons[WEAPON_NINJA].m_Got || (m_QueuedWeapon >= 0 && m_QueuedWeapon < NUM_WEAPONS ? !m_Core.m_aWeapons[m_QueuedWeapon].m_Got : ( m_QueuedWeapon >= CUSTOM_WEAPON_START && m_QueuedWeapon < NUM_CUSTOM_WEAPONS ? !m_aCustomWeaponGot[m_QueuedWeapon - CUSTOM_WEAPON_START] : false)))
 		return;
 	
 	if(m_HasBall) //+KZ Ball
@@ -451,9 +453,15 @@ void CCharacter::HandleWeaponSwitch()
 	{
 		while(Next) // Next Weapon selection
 		{
-			WantedWeapon = (WantedWeapon + 1) % NUM_WEAPONS;
-			if(m_Core.m_aWeapons[WantedWeapon].m_Got)
-				Next--;
+			WantedWeapon = (WantedWeapon + 1) % NUM_CUSTOM_WEAPONS;
+			if(WantedWeapon >= 0 && WantedWeapon < NUM_WEAPONS && m_Core.m_aWeapons[WantedWeapon].m_Got)
+			{
+					Next--;
+			}
+			else if(WantedWeapon >= CUSTOM_WEAPON_START && WantedWeapon < NUM_CUSTOM_WEAPONS && m_aCustomWeaponGot[WantedWeapon - CUSTOM_WEAPON_START])
+			{
+					Next--;
+			}
 		}
 	}
 
@@ -461,9 +469,15 @@ void CCharacter::HandleWeaponSwitch()
 	{
 		while(Prev) // Prev Weapon selection
 		{
-			WantedWeapon = (WantedWeapon - 1) < 0 ? NUM_WEAPONS - 1 : WantedWeapon - 1;
-			if(m_Core.m_aWeapons[WantedWeapon].m_Got)
-				Prev--;
+			WantedWeapon = (WantedWeapon - 1) < 0 ? NUM_CUSTOM_WEAPONS - 1 : WantedWeapon - 1;
+			if(WantedWeapon >= 0 && WantedWeapon < NUM_WEAPONS && m_Core.m_aWeapons[WantedWeapon].m_Got)
+			{
+					Prev--;
+			}
+			else if(WantedWeapon >= CUSTOM_WEAPON_START && WantedWeapon < NUM_CUSTOM_WEAPONS && m_aCustomWeaponGot[WantedWeapon - CUSTOM_WEAPON_START])
+			{
+					Prev--;
+			}
 		}
 	}
 
@@ -473,7 +487,13 @@ void CCharacter::HandleWeaponSwitch()
 
 	// check for insane values
 	if(WantedWeapon >= 0 && WantedWeapon < NUM_WEAPONS && WantedWeapon != m_Core.m_ActiveWeapon && m_Core.m_aWeapons[WantedWeapon].m_Got)
+	{
 		m_QueuedWeapon = WantedWeapon;
+	}
+	else if(WantedWeapon >= CUSTOM_WEAPON_START && WantedWeapon < NUM_CUSTOM_WEAPONS && WantedWeapon != m_Core.m_ActiveWeapon && m_aCustomWeaponGot[WantedWeapon - CUSTOM_WEAPON_START])
+	{
+		m_QueuedWeapon = WantedWeapon;
+	}
 
 	DoWeaponSwitch();
 }
@@ -546,13 +566,13 @@ void CCharacter::FireWeapon()
 	
 	// check for ammo
     
-	if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
+	if(m_Core.m_ActiveWeapon >=0 && m_Core.m_ActiveWeapon < NUM_WEAPONS && !m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
 		return;
 
 	vec2 ProjStartPos = m_Pos + Direction * GetProximityRadius() * 0.75f;
 
 	// ddnet-insta
-	if(GameServer()->m_pController->OnFireWeapon(*this, m_Core.m_ActiveWeapon, Direction, MouseTarget, ProjStartPos))
+	if(GameServer()->m_pController->OnFireWeapon(*this, m_Core.m_ActiveWeapon, Direction, MouseTarget, ProjStartPos) && m_Core.m_ActiveWeapon >=0 && m_Core.m_ActiveWeapon < NUM_WEAPONS)
 		return;
 
 	switch(m_Core.m_ActiveWeapon)
@@ -746,6 +766,19 @@ void CCharacter::FireWeapon()
 		GameServer()->CreateSound(m_Pos, SOUND_NINJA_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
+
+	//+KZ
+
+	case WEAPON_TASER:
+	{
+		float LaserReach = GetTuning(m_TuneZone)->m_LaserReach;
+
+		CLaser* laser = new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_LASER);
+		laser->m_FreezeKZ = true;
+		GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+	}
+	break;
+	//---------------
 	}
 
 	m_AttackTick = Server()->Tick();
@@ -1456,6 +1489,11 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 	//+KZ
 	if(GameServer()->m_pController->OnCharacterSnap(SnappingClient, Id))
 		return;
+	
+	if(Weapon >= CUSTOM_WEAPON_START)
+		m_SnapCustomWeapon = true;
+	else
+		m_SnapCustomWeapon = false;
 
 	if(!Server()->IsSixup(SnappingClient))
 	{
@@ -1478,6 +1516,8 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 		pCharacter->m_Direction = m_Input.m_Direction;
 		if(m_HasFlagBall || m_DropFlagBallTicks > 0)
 			pCharacter->m_Weapon = -1;
+		else if(m_SnapCustomWeapon)
+			pCharacter->m_Weapon = m_aCustomWeaponSnaps[m_Core.m_ActiveWeapon - CUSTOM_WEAPON_START];
 		else
 			pCharacter->m_Weapon = Weapon;
 		pCharacter->m_AmmoCount = AmmoCount;
@@ -1507,6 +1547,8 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 		pCharacter->m_Direction = m_Input.m_Direction;
 		if(m_HasFlagBall || m_DropFlagBallTicks > 0)
 			pCharacter->m_Weapon = -1;
+		else if(m_SnapCustomWeapon)
+			pCharacter->m_Weapon = m_aCustomWeaponSnaps[m_Core.m_ActiveWeapon - CUSTOM_WEAPON_START];
 		else
 			pCharacter->m_Weapon = Weapon;
 		pCharacter->m_AmmoCount = AmmoCount;
@@ -3061,7 +3103,7 @@ bool CCharacter::UnFreeze()
 	{
 		// m_Armor = 10; // ddnet-insta do not set m_Armor use SetArmorProgress instead
 		GameServer()->m_pController->SetArmorProgressFull(this); // ddnet-insta
-		if(!m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Got)
+		if(m_Core.m_ActiveWeapon < NUM_WEAPONS ? !m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Got : !m_aCustomWeaponGot[m_Core.m_ActiveWeapon - CUSTOM_WEAPON_START])
 			m_Core.m_ActiveWeapon = WEAPON_GUN;
 		m_FreezeTime = 0;
 		m_Core.m_FreezeStart = 0;
@@ -3079,26 +3121,43 @@ void CCharacter::ResetJumps()
 
 void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 {
-	if(Weapon == WEAPON_NINJA)
+	if(Weapon >= 0 && Weapon < NUM_WEAPONS)
 	{
+		if(Weapon == WEAPON_NINJA)
+		{
+			if(Remove)
+				RemoveNinja();
+			else
+				GiveNinja();
+			return;
+		}
+
 		if(Remove)
-			RemoveNinja();
+		{
+			if(GetActiveWeapon() == Weapon)
+				SetActiveWeapon(WEAPON_GUN);
+		}
 		else
-			GiveNinja();
-		return;
-	}
+		{
+			m_Core.m_aWeapons[Weapon].m_Ammo = Ammo;
+		}
 
-	if(Remove)
-	{
-		if(GetActiveWeapon() == Weapon)
-			SetActiveWeapon(WEAPON_GUN);
+		m_Core.m_aWeapons[Weapon].m_Got = !Remove;
 	}
-	else
+	else if(Weapon >= CUSTOM_WEAPON_START && Weapon < NUM_CUSTOM_WEAPONS)
 	{
-		m_Core.m_aWeapons[Weapon].m_Ammo = Ammo;
-	}
+		m_aCustomWeaponGot[Weapon-CUSTOM_WEAPON_START] = !Remove;
 
-	m_Core.m_aWeapons[Weapon].m_Got = !Remove;
+		if(Remove)
+		{
+			if(GetActiveWeapon() == Weapon)
+				SetActiveWeapon(WEAPON_GUN);
+		}
+		else
+		{
+			m_aCustomWeaponAmmo[Weapon-CUSTOM_WEAPON_START] = Ammo;
+		}
+	}
 }
 
 void CCharacter::GiveAllWeapons()

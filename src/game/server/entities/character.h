@@ -5,6 +5,7 @@
 
 #include <game/server/entity.h>
 #include <game/server/save.h>
+#include <game/kztiles.h>
 
 class CGameTeams;
 class CGameWorld;
@@ -251,7 +252,7 @@ public:
 	const CCharacterCore *Core() const { return &m_Core; }
 	bool GetWeaponGot(int Type) { return m_Core.m_aWeapons[Type].m_Got; }
 	void SetWeaponGot(int Type, bool Value) { m_Core.m_aWeapons[Type].m_Got = Value; }
-	int GetWeaponAmmo(int Type) { return m_Core.m_aWeapons[Type].m_Ammo; }
+	int GetWeaponAmmo(int Type) { return (Type >= NUM_WEAPONS ? m_aCustomWeaponAmmo[Type-CUSTOM_WEAPON_START] : m_Core.m_aWeapons[Type].m_Ammo); } //modified for custom weapons +KZ
 	void SetWeaponAmmo(int Type, int Value) { m_Core.m_aWeapons[Type].m_Ammo = Value; }
 	void SetNinjaActivationDir(vec2 ActivationDir) { m_Core.m_Ninja.m_ActivationDir = ActivationDir; }
 	void SetNinjaActivationTick(int ActivationTick) { m_Core.m_Ninja.m_ActivationTick = ActivationTick; }
@@ -291,6 +292,8 @@ private:
 	int m_BallReleaseTick;
 	int m_slowDeathTick = 0; //from pointer
 	int m_healthArmorZoneTick = 0; // from pointer
+	bool m_SnapCustomWeapon = false;
+	int m_CustomWeapon = 0;
 	
 public:
 	void HandleKZBot(CNetObj_PlayerInput &Input);
@@ -316,6 +319,9 @@ public:
 	int m_RollbackHealth = 1;
 	int m_RollbackArmor = 1;
 	bool m_RollbackSendHitSound = false;
+	bool m_aCustomWeaponGot[NUM_CUSTOM_WEAPONS - CUSTOM_WEAPON_START];
+	int m_aCustomWeaponSnaps[NUM_CUSTOM_WEAPONS - CUSTOM_WEAPON_START];
+	int m_aCustomWeaponAmmo[NUM_CUSTOM_WEAPONS - CUSTOM_WEAPON_START];
 	
 	//for +KZ AI:
 	int m_TryingDirectionSmart = 0;

@@ -3,6 +3,8 @@
 #ifndef KZTILES_H
 #define KZTILES_H
 
+#include <game/mapitems.h>
+
 enum
 {
 	//Tiles
@@ -49,7 +51,16 @@ enum
 	TILE_NO_GODMODE,
 	TILE_SPARKLES_ON,
 	TILE_SPARKLES_OFF,
-	TILE_SIT
+	TILE_SIT,
+	TILE_WEAPON_TASER,
+};
+
+enum
+{
+	//Weapons
+	CUSTOM_WEAPON_START = NUM_WEAPONS,
+	WEAPON_TASER = NUM_WEAPONS,
+	NUM_CUSTOM_WEAPONS
 };
 
 #endif

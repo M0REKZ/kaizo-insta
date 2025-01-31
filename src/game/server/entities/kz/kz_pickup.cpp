@@ -11,6 +11,7 @@
 #include <game/server/gamecontroller.h>
 
 #include "kz_pickup.h"
+#include <game/kztiles.h>
 
 CKZPickup::CKZPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number) :
 	CVanillaPickup(pGameWorld, Type, SubType, Layer, Number)
@@ -99,7 +100,7 @@ void CKZPickup::Tick()
 
 			case POWERUP_WEAPON:
 
-				if(m_Subtype >= 0 && m_Subtype < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
+				if(m_Subtype >= 0 && m_Subtype < NUM_CUSTOM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
 				{
 					if(pChr->GetWeaponAmmo(m_Subtype) < 10)
 					{
@@ -110,6 +111,8 @@ void CKZPickup::Tick()
 						else if(m_Subtype == WEAPON_SHOTGUN)
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
 						else if(m_Subtype == WEAPON_LASER)
+							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
+						else if(m_Subtype == WEAPON_TASER)
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
 
 						if(pChr->GetPlayer())
@@ -201,7 +204,7 @@ void CKZPickup::Snap(int SnappingClient)
 		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), pos1, m_Type, 0, m_Number);
 		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), m_Id2, pos2, m_Type, 0, m_Number);
 	}
-	else
+	else if(m_Subtype >=0 && m_Subtype < NUM_WEAPONS)
 	{
 		vec2 postemp;
 				
@@ -220,5 +223,28 @@ void CKZPickup::Snap(int SnappingClient)
 		pProj->m_StartTick = Server()->Tick();
 		pProj->m_Type = WEAPON_HAMMER;
 		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, 0, m_Number);
+	}
+	else
+	{
+		if(m_Subtype == WEAPON_TASER)
+		{
+			vec2 postemp;
+					
+			postemp.x = m_Pos.x + 32*sin((float)Server()->Tick() / 25.0);
+			postemp.y = m_Pos.y + 32*cos((float)Server()->Tick() / 25.0);
+
+			CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(m_Id2);
+			if(!pProj)
+			{
+				return;
+			}
+			pProj->m_X = postemp.x;
+			pProj->m_Y = postemp.y;
+			pProj->m_VelX = 0;
+			pProj->m_VelY = 0;
+			pProj->m_StartTick = Server()->Tick();
+			pProj->m_Type = WEAPON_LASER;
+			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_LASER, m_Number);
+		}
 	}
 }

@@ -1088,6 +1088,11 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 	{
 		Type = POWERUP_ARMOR;
 	}
+	else if(Index == TILE_WEAPON_TASER)
+	{
+		Type = POWERUP_WEAPON;
+		SubType = WEAPON_TASER;
+	}
 
 	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 	
