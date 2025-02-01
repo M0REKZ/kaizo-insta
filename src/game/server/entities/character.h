@@ -329,6 +329,7 @@ public:
 	bool m_aCustomWeaponGot[NUM_CUSTOM_WEAPONS - CUSTOM_WEAPON_START];
 	int m_aCustomWeaponSnaps[NUM_CUSTOM_WEAPONS - CUSTOM_WEAPON_START];
 	int m_aCustomWeaponAmmo[NUM_CUSTOM_WEAPONS - CUSTOM_WEAPON_START];
+	int m_aCustomWeaponMaxAmmo[NUM_CUSTOM_WEAPONS - CUSTOM_WEAPON_START];
 	
 	//for +KZ AI:
 	int m_TryingDirectionSmart = 0;

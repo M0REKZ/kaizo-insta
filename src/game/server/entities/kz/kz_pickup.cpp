@@ -116,7 +116,7 @@ void CKZPickup::Tick()
 
 				if(m_Subtype >= 0 && m_Subtype < NUM_CUSTOM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
 				{
-					if(pChr->GetWeaponAmmo(m_Subtype) < 10)
+					if((m_Subtype >= 0 && m_Subtype < NUM_WEAPONS) ? pChr->GetWeaponAmmo(m_Subtype) < 10 : pChr->GetWeaponAmmo(m_Subtype) < pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START])
 					{
 						pChr->GiveWeapon(m_Subtype, false, 10);
 
@@ -131,7 +131,10 @@ void CKZPickup::Tick()
 						else if(m_Subtype == WEAPON_PORTAL_GUN)
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
 						else if(m_Subtype == WEAPON_MINIGUN)
+						{
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
+							pChr->SetWeaponAmmo(WEAPON_MINIGUN,1000);
+						}
 
 						if(pChr->GetPlayer())
 							GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCid(), m_Subtype);

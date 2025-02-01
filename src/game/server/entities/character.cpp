@@ -74,6 +74,10 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	m_aCustomWeaponSnaps[WEAPON_PORTAL_GUN - CUSTOM_WEAPON_START] = WEAPON_LASER;
 	m_aCustomWeaponSnaps[WEAPON_MINIGUN - CUSTOM_WEAPON_START] = WEAPON_GRENADE;
 
+	m_aCustomWeaponMaxAmmo[WEAPON_TASER - CUSTOM_WEAPON_START] = 10;
+	m_aCustomWeaponMaxAmmo[WEAPON_PORTAL_GUN - CUSTOM_WEAPON_START] = 10;
+	m_aCustomWeaponMaxAmmo[WEAPON_MINIGUN - CUSTOM_WEAPON_START] = 1000;
+
 }
 
 CCharacter::~CCharacter()
