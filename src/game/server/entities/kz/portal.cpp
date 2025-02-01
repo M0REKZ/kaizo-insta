@@ -133,6 +133,8 @@ void CPortalKZ::Tick()
 
 			if(dotele)
 			{
+				pTarget->m_Pos = OutPos;
+				pTarget->m_PrevPos = OutPos;
 				((CCharacterCore*)pTarget->Core())->m_Pos = OutPos;
 				((CCharacterCore*)pTarget->Core())->m_Vel = OutVel;
 			}
