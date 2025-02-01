@@ -297,6 +297,7 @@ private:
 	int m_CustomWeapon = 0;
 	bool m_AimPressed = false;
 	bool m_Waitingforreleaseaim = false;
+	bool m_insidetilejump = false;
 	
 public:
 	void HandleKZBot(CNetObj_PlayerInput &Input);

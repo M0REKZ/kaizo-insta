@@ -3534,6 +3534,38 @@ void CCharacter::HandleKZTiles()
 	{
 		m_Sit = false;
 	}
+
+	int NewJumps = m_Core.m_Jumps;
+
+	if(TileIndex == TILE_PLUS_JUMP && !m_insidetilejump)
+	{
+		NewJumps++;
+		m_insidetilejump = true;
+	}
+	else if(TileIndex == TILE_MINUS_JUMP && !m_insidetilejump)
+	{
+		if(NewJumps > 0)
+			NewJumps--;
+		m_insidetilejump = true;
+	}
+	else if(m_insidetilejump && TileIndex != TILE_PLUS_JUMP && TileIndex != TILE_MINUS_JUMP)
+	{
+		m_insidetilejump = false;
+	}
+
+	if(NewJumps != m_Core.m_Jumps)
+	{
+		char aBuf[256];
+		if(NewJumps == 0)
+			str_copy(aBuf, "Now you can't jump");
+		else if(NewJumps == 1)
+			str_format(aBuf, sizeof(aBuf), "You can jump %d time", NewJumps);
+		else
+			str_format(aBuf, sizeof(aBuf), "You can jump %d times", NewJumps);
+		GameServer()->SendChatTarget(GetPlayer()->GetCid(), aBuf);
+		m_Core.m_Jumps = NewJumps;
+	}
+	
 	
 	if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == TILE_5_DAMAGE)
 	{
