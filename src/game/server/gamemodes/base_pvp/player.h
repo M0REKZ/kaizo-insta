@@ -5,6 +5,7 @@
 #ifndef IN_CLASS_PLAYER
 
 #include <base/vmath.h>
+#include <cstdint>
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
@@ -225,6 +226,33 @@ public:
 	// because automated spam bots are usually not greeted
 	// and greeted players want to respond instantly
 	bool m_GotPingedInChat = false;
+
+	// if there is a anti chat spam filter active such as
+	// sv_require_chat_flag_to_chat
+	// then this boolean tracks players that got verified
+	// to be able to use the chat
+	//
+	// players can also chat if the `m_GotPingedInChat` is set
+	// or `m_TicksSpentChatting` is high enough
+	//
+	// and this boolean is for all remaining edge cases where players
+	// got whitelisted because of some action they did
+	// for now this is used to make sure
+	// players who joined after the server was empty
+	// or players who were there before a map reload
+	// get whitelisted
+	bool m_VerifiedForChat = false;
+
+	// Similiar to ddnets IsAfk()
+	// but with a much shorter timer
+	// this is used to quickly detect if someone
+	// goes afk during a high pace non casual game
+	bool m_IsCompetitiveAfk = false;
+
+	// similar to ddnets m_JoinTick
+	// but uses time instead of tick
+	// so it also works when the world is paused
+	int64_t m_JoinTime = 0;
 
 #ifndef IN_CLASS_PLAYER
 };

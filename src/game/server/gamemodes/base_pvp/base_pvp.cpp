@@ -40,6 +40,13 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	m_pSqlStats = new CSqlStats(GameServer(), ((CServer *)Server())->DbPool());
 	m_pExtraColumns = nullptr;
 	m_pSqlStats->SetExtraColumns(m_pExtraColumns);
+
+	// https://github.com/ddnet-insta/ddnet-insta/issues/253
+	// always umute spectators on map change or "reload" command
+	//
+	// this contructor is not called on "restart" commands
+	if(g_Config.m_SvTournamentChatSmart)
+		g_Config.m_SvTournamentChat = 0;
 }
 
 void CGameControllerPvp::OnInit()
@@ -178,6 +185,7 @@ void CGameControllerPvp::InitPlayer(CPlayer *pPlayer)
 	pPlayer->m_GameStateBroadcast = false;
 	pPlayer->m_Score = 0; // ddnet-insta
 	pPlayer->m_DisplayScore = GameServer()->m_DisplayScore;
+	pPlayer->m_JoinTime = time_get();
 
 	RoundInitPlayer(pPlayer);
 }
@@ -1065,9 +1073,11 @@ void CGameControllerPvp::Tick()
 
 		OnCharacterTick(pPlayer->GetCharacter());
 	}
-	// call anticamper
+
 	if(g_Config.m_SvAnticamper && !GameServer()->m_World.m_Paused)
 		Anticamper();
+	if(g_Config.m_SvTournamentChatSmart)
+		SmartChatTick();
 
 	// win check
 	if((m_GameState == IGS_GAME_RUNNING || m_GameState == IGS_GAME_PAUSED) && !GameServer()->m_World.m_ResetRequested)
@@ -1079,6 +1089,13 @@ void CGameControllerPvp::Tick()
 void CGameControllerPvp::OnPlayerTick(class CPlayer *pPlayer)
 {
 	pPlayer->InstagibTick();
+
+	// this is needed for the smart tournament chat
+	// otherwise players get marked as afk during pause
+	// and then the game is considered not competitive anymore
+	// which is wrong
+	if(GameServer()->m_World.m_Paused)
+		pPlayer->UpdatePlaytime();
 
 	if(pPlayer->m_GameStateBroadcast)
 	{
@@ -1419,6 +1436,11 @@ void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 
 		GameServer()->AlertOnSpecialInstagibConfigs(ClientId);
 		GameServer()->ShowCurrentInstagibConfigsMotd(ClientId);
+	}
+
+	if((Server()->Tick() - GameServer()->m_NonEmptySince) / Server()->TickSpeed() < 20)
+	{
+		pPlayer->m_VerifiedForChat = true;
 	}
 
 	CheckReadyStates(); // ddnet-insta

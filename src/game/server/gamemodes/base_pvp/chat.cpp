@@ -1,3 +1,4 @@
+#include <base/math.h>
 #include <base/system.h>
 #include <engine/shared/config.h>
 #include <game/generated/protocol.h>
@@ -9,6 +10,74 @@
 #include <game/version.h>
 
 #include "base_pvp.h"
+
+void CGameControllerPvp::DoWarmup(int Seconds)
+{
+	CGameControllerDDRace::DoWarmup(Seconds);
+
+	if(Seconds)
+	{
+		if(g_Config.m_SvTournamentChatSmart && !DetectedCasualRound())
+		{
+			g_Config.m_SvTournamentChat = g_Config.m_SvTournamentChatSmart;
+			GameServer()->SendChat(-1, TEAM_ALL, g_Config.m_SvTournamentChatSmart == 1 ? "Spectators can no longer use public chat" : "All can no longer use public chat");
+		}
+	}
+}
+
+bool CGameControllerPvp::DetectedCasualRound()
+{
+	int NumAfks = 0;
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		if(pPlayer->m_IsCompetitiveAfk && pPlayer->GetTeam() != TEAM_SPECTATORS)
+			NumAfks++;
+	}
+
+	int ActivePlayers = NumActivePlayers();
+	bool FreeSlots = ActivePlayers < Server()->MaxClients() - g_Config.m_SvSpectatorSlots;
+
+	// yes if someone leaves during a dm1 1on1
+	// spectators can start chatting instantly
+	// and that makes sense
+	//
+	// if a ctf game drops down to one player this is always
+	// a casual round again
+	if(ActivePlayers < 2)
+		return true;
+
+	// two people did not move in the last 6 seconds
+	// and at least one team is missing players
+	if(FreeSlots && NumAfks > 1)
+		return true;
+
+	// could also check:
+	// - chat usage (trigger words)
+	// - team switches
+	// - vote calls
+	// see https://github.com/ddnet-insta/ddnet-insta/issues/256
+
+	return false;
+}
+
+void CGameControllerPvp::SmartChatTick()
+{
+	// do not compute this stuff every tick
+	// waste of clock cycles
+	if(Server()->Tick() % 10)
+		return;
+
+	if(DetectedCasualRound())
+	{
+		if(g_Config.m_SvTournamentChat)
+		{
+			SendChat(-1, TEAM_ALL, "Spectators can use public chat again. Because this is no longer a competitve round.");
+			g_Config.m_SvTournamentChat = 0;
+		}
+	}
+}
 
 bool CGameControllerPvp::AllowPublicChat(const CPlayer *pPlayer)
 {
@@ -282,12 +351,18 @@ bool CGameControllerPvp::IsChatBlocked(const CNetMsg_Cl_Say *pMsg, int Length, i
 	if(pPlayer->m_GotPingedInChat)
 		return false;
 
+	// all kinds of verifications such as
+	// joining a few seconds after the server was empty
+	// or being on the server before a map change
+	if(pPlayer->m_VerifiedForChat)
+		return false;
+
 	// spectators can not send the playerflag chatting
 	// legit chat binds also do not send the playerflag chatting
 	// so after 20 seconds we allow everyone to use the chat
 	// to cover those cases.
 	// It should still filter out the reconnecting spam bots.
-	int SecondsConnected = (Server()->Tick() - pPlayer->m_JoinTick) / Server()->TickSpeed();
+	int SecondsConnected = (time_get() - pPlayer->m_JoinTime) / time_freq();
 	int SecondsUntilAllowed = maximum(0, 20 - SecondsConnected);
 	if(SecondsUntilAllowed == 0)
 		return false;
