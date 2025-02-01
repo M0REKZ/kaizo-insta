@@ -46,6 +46,7 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	//+KZ
 	m_InvisibleShieldId = Server()->SnapNewId();
 	m_HasBallSnapId = Server()->SnapNewId();
+	m_PortalKindId = Server()->SnapNewId();
 		
 	m_Input = LastInput;
 	// never initialize both to zero
@@ -83,6 +84,11 @@ CCharacter::~CCharacter()
 	if(m_HasBallSnapId != -1)
 	{
 		Server()->SnapFreeId(m_HasBallSnapId);
+	}
+
+	if(m_PortalKindId != -1)
+	{
+		Server()->SnapFreeId(m_PortalKindId);
 	}
 }
 
@@ -1004,6 +1010,26 @@ void CCharacter::PreTick()
 void CCharacter::Tick()
 {
 
+	if(m_pPlayer->m_PlayerFlags & PLAYERFLAG_AIM)
+	{
+		m_AimPressed = true;
+	}
+	else
+	{
+		m_AimPressed = false;
+		m_Waitingforreleaseaim = false;
+	}
+
+	if(m_Core.m_ActiveWeapon == WEAPON_PORTAL_GUN && m_AimPressed && !m_Waitingforreleaseaim)
+	{
+		m_BluePortal = !m_BluePortal;
+		m_Waitingforreleaseaim = true;
+		if(m_BluePortal)
+			GameServer()->SendBroadcast("Portal Gun: Blue Portal",m_pPlayer->GetCid());
+		else
+			GameServer()->SendBroadcast("Portal Gun: Orange Portal",m_pPlayer->GetCid());
+	}
+
 	//m_Dying--;
 	if(m_pPlayer->m_Rollback)
 	{
@@ -1650,6 +1676,8 @@ bool CCharacter::IsSnappingCharacterInView(int SnappingClientId)
 void CCharacter::Snap(int SnappingClient)
 {
 	int Id = m_pPlayer->GetCid();
+	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
+	bool Sixup = Server()->IsSixup(SnappingClient);
 
 	if(m_Invisible)
 	{
@@ -1685,6 +1713,15 @@ void CCharacter::Snap(int SnappingClient)
 		pProj->m_StartTick = Server()->Tick();
 		pProj->m_Type = WEAPON_HAMMER;
 		break;
+	}
+
+	if(m_Core.m_ActiveWeapon == WEAPON_PORTAL_GUN || m_Core.m_ActiveWeapon == WEAPON_TASER)
+	{
+				vec2 postemp;
+				
+		postemp = m_Pos + (normalize(vec2(m_Input.m_TargetX,m_Input.m_TargetY)) * 82);
+
+		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_PortalKindId,postemp,postemp,Server()->Tick(),m_pPlayer->GetCid(),m_Core.m_ActiveWeapon == WEAPON_PORTAL_GUN ? (m_BluePortal ? LASERTYPE_RIFLE : LASERTYPE_SHOTGUN) : LASERTYPE_FREEZE);
 	}
 	
 	if(!Server()->Translate(Id, SnappingClient))

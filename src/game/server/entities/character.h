@@ -288,12 +288,15 @@ private:
 	bool m_QuadWater;
 	int m_InvisibleShieldId = -1;
 	int m_HasBallSnapId = -1;
+	int m_PortalKindId = -1;
 	int m_BallQueuedWeapon;
 	int m_BallReleaseTick;
 	int m_slowDeathTick = 0; //from pointer
 	int m_healthArmorZoneTick = 0; // from pointer
 	bool m_SnapCustomWeapon = false;
 	int m_CustomWeapon = 0;
+	bool m_AimPressed = false;
+	bool m_Waitingforreleaseaim = false;
 	
 public:
 	void HandleKZBot(CNetObj_PlayerInput &Input);

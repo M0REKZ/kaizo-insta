@@ -30,6 +30,7 @@
 #include <game/generated/protocolglue.h>
 
 #include "entities/character.h"
+#include "entities/kz/portal.h"
 #include "gamemodes/DDRace.h"
 #include "gamemodes/DDNetKZ.h"
 #include "gamemodes/vanilla/BOMB/BOMB.h"
@@ -3899,6 +3900,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("getportalgun", "?i[id]", CFGFLAG_SERVER, ConGetPortalGun, this, "Get Portal Gun");
 	Console()->Register("orangeportal", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConOrangePortal, this, "Use Orange Portal");
 	Console()->Register("blueportal", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConBluePortal, this, "Use Blue Portal");
+	Console()->Register("resetportals", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConResetPortals, this, "Reset both Portals");
 
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 
@@ -6001,6 +6003,36 @@ void CGameContext::ConBluePortal(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->m_BluePortal = true;
+}
+
+void CGameContext::ConResetPortals(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID;
+
+	ClientID = pResult->m_ClientId;
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+
+	for(CPortalKZ* p = (CPortalKZ*)pSelf->m_World.FindFirst(CGameWorld::CUSTOM_ENTTYPE_PORTAL);p;p = (CPortalKZ*)p->TypeNext())
+	{
+		if(p->m_Owner == ClientID)
+		{
+			p->Reset();
+			CPortalKZ* p2 = p->GetOtherPortal();
+			if(p2)
+			{
+				p2->Reset();
+			}
+			return;
+		}
+	}
 }
 
 void CGameContext::SendDiscordChatMessage(int ClientID, const char* msg)

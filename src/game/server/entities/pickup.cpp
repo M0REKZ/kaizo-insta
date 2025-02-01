@@ -65,7 +65,7 @@ void CPickup::Tick()
 
 				if(pChr->Team() == TEAM_SUPER)
 					continue;
-				for(int j = WEAPON_SHOTGUN; j < NUM_WEAPONS; j++)
+				for(int j = WEAPON_SHOTGUN; j < NUM_CUSTOM_WEAPONS; j++)
 				{
 					if(pChr->GetWeaponGot(j))
 					{
