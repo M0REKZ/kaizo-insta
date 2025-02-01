@@ -1078,6 +1078,11 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 		Type = POWERUP_WEAPON;
 		SubType = WEAPON_PORTAL_GUN;
 	}
+	else if(Index == TILE_WEAPON_MINIGUN)
+	{
+		Type = POWERUP_WEAPON;
+		SubType = WEAPON_MINIGUN;
+	}
 
 	//+KZ: some non-insta game modes dont spawn certain things so im better leaving this as config variables
 	if(m_IsInstagibKZ && ((Type == POWERUP_HEALTH)||(Type == POWERUP_ARMOR) || (Type == POWERUP_WEAPON) || Index == TILE_MINE))

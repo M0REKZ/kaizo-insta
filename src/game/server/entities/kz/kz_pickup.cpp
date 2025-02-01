@@ -130,6 +130,8 @@ void CKZPickup::Tick()
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
 						else if(m_Subtype == WEAPON_PORTAL_GUN)
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
+						else if(m_Subtype == WEAPON_MINIGUN)
+							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
 
 						if(pChr->GetPlayer())
 							GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCid(), m_Subtype);
@@ -271,6 +273,31 @@ void CKZPickup::Snap(int SnappingClient)
 
 			GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_Id2,postemp,postemp,Server()->Tick(),-1,Server()->Tick() % 3);
 			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_LASER, m_Number);
+		}
+		else if(m_Subtype == WEAPON_MINIGUN)
+		{
+			vec2 postemp;
+			vec2 veltemp;
+					
+			postemp.x = m_Pos.x + 32*sin((float)Server()->Tick() / 25.0);
+			postemp.y = m_Pos.y + 32*cos((float)Server()->Tick() / 25.0);
+
+			veltemp.x = ((m_Pos.x + 32*sin(((float)Server()->Tick()+1) / 25.0)) - postemp.x);
+			veltemp.y = ((m_Pos.y + 32*cos(((float)Server()->Tick()+1) / 25.0)) - postemp.y);
+			veltemp = normalize(veltemp);
+
+			CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(m_Id2);
+			if(!pProj)
+			{
+				return;
+			}
+			pProj->m_X = postemp.x;
+			pProj->m_Y = postemp.y;
+			pProj->m_VelX = veltemp.x;
+			pProj->m_VelY = veltemp.y;
+			pProj->m_StartTick = Server()->Tick();
+			pProj->m_Type = WEAPON_SHOTGUN;
+			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_GRENADE, m_Number);
 		}
 	}
 }

@@ -167,6 +167,11 @@ class CGameContext : public IGameServer
 	static void ConBluePortal(IConsole::IResult *pResult, void *pUserData);
 	static void ConResetPortals(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConMinigun(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnMinigun(IConsole::IResult *pResult, void *pUserData);
+	static void ConGetMinigun(IConsole::IResult *pResult, void *pUserData);
+
+
 	void Construct(int Resetting);
 	void Destruct(int Resetting);
 	void AddVote(const char *pDescription, const char *pCommand);

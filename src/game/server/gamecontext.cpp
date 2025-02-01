@@ -3902,6 +3902,10 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("blueportal", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConBluePortal, this, "Use Blue Portal");
 	Console()->Register("resetportals", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConResetPortals, this, "Reset both Portals");
 
+	Console()->Register("minigun", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConMinigun, this, "Set Minigun as active weapon (if have it)");
+	Console()->Register("unminigun", "?i[id]", CFGFLAG_SERVER, ConUnMinigun, this, "Remove Minigun");
+	Console()->Register("getminigun", "?i[id]", CFGFLAG_SERVER, ConGetMinigun, this, "Get Minigun");
+
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 
 	Console()->Chain("sv_vote_kick", ConchainSettingUpdate, this);
@@ -6033,6 +6037,97 @@ void CGameContext::ConResetPortals(IConsole::IResult *pResult, void *pUserData)
 			return;
 		}
 	}
+}
+
+void CGameContext::ConMinigun(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID = pResult->m_ClientId;
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_MINIGUN);
+
+	if(got)
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_MINIGUN);
+}
+
+void CGameContext::ConUnMinigun(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID;
+
+	if(pResult->NumArguments())
+	{
+		ClientID = pResult->GetInteger(0);
+	}
+	else
+	{
+		ClientID = pResult->m_ClientId;
+	}
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_MINIGUN);
+
+	if(got)
+	{
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_MINIGUN, false);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_MINIGUN, 0);
+	}
+
+	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_GUN);
+}
+
+void CGameContext::ConGetMinigun(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID;
+
+	if(pResult->NumArguments())
+	{
+		ClientID = pResult->GetInteger(0);
+	}
+	else
+	{
+		ClientID = pResult->m_ClientId;
+	}
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_MINIGUN);
+
+	if(!got)
+	{
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_MINIGUN, true);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_MINIGUN, 10);
+	}
+
+	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_MINIGUN);
 }
 
 void CGameContext::SendDiscordChatMessage(int ClientID, const char* msg)

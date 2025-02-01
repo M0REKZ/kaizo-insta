@@ -11,6 +11,7 @@
 #include "kz/mine.h"
 #include "kz/ball.h"
 #include "kz/portal_projectile.h"
+#include "kz/minigun_projectile.h"
 
 #include <antibot/antibot_data.h>
 
@@ -71,6 +72,7 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 
 	m_aCustomWeaponSnaps[WEAPON_TASER - CUSTOM_WEAPON_START] = WEAPON_LASER;
 	m_aCustomWeaponSnaps[WEAPON_PORTAL_GUN - CUSTOM_WEAPON_START] = WEAPON_LASER;
+	m_aCustomWeaponSnaps[WEAPON_MINIGUN - CUSTOM_WEAPON_START] = WEAPON_GRENADE;
 
 }
 
@@ -222,6 +224,10 @@ void CCharacter::SetWeapon(int W)
 	else if(m_Core.m_ActiveWeapon == WEAPON_PORTAL_GUN)
 	{
 		GameServer()->SendBroadcast("Weapon: Portal Gun",m_pPlayer->GetCid());
+	}
+	else if(m_Core.m_ActiveWeapon == WEAPON_MINIGUN)
+	{
+		GameServer()->SendBroadcast("Weapon: Minigun",m_pPlayer->GetCid());
 	}
 	
 	
@@ -540,7 +546,7 @@ void CCharacter::FireWeapon()
 		FullAuto = true;
 	if(m_Core.m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
 		FullAuto = true;
-	if(m_Core.m_ActiveWeapon == WEAPON_TASER || m_Core.m_ActiveWeapon == WEAPON_PORTAL_GUN) //+KZ
+	if(m_Core.m_ActiveWeapon == WEAPON_TASER || m_Core.m_ActiveWeapon == WEAPON_PORTAL_GUN || m_Core.m_ActiveWeapon == WEAPON_MINIGUN) //+KZ
 		FullAuto = true;
 	// allow firing directly after coming out of freeze or being unfrozen
 	// by something
@@ -810,6 +816,13 @@ void CCharacter::FireWeapon()
 		GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
+
+	case WEAPON_MINIGUN:
+	{
+		new CMinigunProjectile(GameWorld(),m_pPlayer->GetCid(),m_Pos,Direction);
+		GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+	}
+	break;
 	//---------------
 	}
 
@@ -826,6 +839,10 @@ void CCharacter::FireWeapon()
 		if(m_Core.m_ActiveWeapon == WEAPON_TASER || m_Core.m_ActiveWeapon == WEAPON_PORTAL_GUN)
 		{
 			m_ReloadTimer = GetTuning(m_TuneZone)->m_LaserFireDelay * Server()->TickSpeed() / 1000;
+		}
+		else if(m_Core.m_ActiveWeapon == WEAPON_MINIGUN)
+		{
+			m_ReloadTimer = 0.1 * Server()->TickSpeed();
 		}
 	}
 }
