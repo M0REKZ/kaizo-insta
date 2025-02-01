@@ -1036,17 +1036,6 @@ int IGameController::MakeLosersCry()
 
 bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Val1, int Val2)
 {
-
-
-	//+KZ: some non-insta game modes dont spawn certain things so im better leaving this as config variables, even if it looks "ugly"
-	if(m_IsInstagibKZ && (Index == TILE_BIGARMOR || Index == TILE_BIGHEART || Index == TILE_RANDOMWEAPON || Index == TILE_MINE))
-		return false;
-	
-	if(g_Config.m_SvSpawnPickupWeapons ? false : (Index == TILE_RANDOMWEAPON))
-		return false;
-	if(g_Config.m_SvSpawnPickups ? false : (Index == TILE_BIGARMOR || Index == TILE_BIGHEART))
-		return false;
-
 	
 	int Type = -1;
 	int SubType = 0;
@@ -1089,6 +1078,16 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 		Type = POWERUP_WEAPON;
 		SubType = WEAPON_PORTAL_GUN;
 	}
+
+	//+KZ: some non-insta game modes dont spawn certain things so im better leaving this as config variables
+	if(m_IsInstagibKZ && ((Type == POWERUP_HEALTH)||(Type == POWERUP_ARMOR) || (Type == POWERUP_WEAPON) || Index == TILE_MINE))
+		return false;
+
+	if(g_Config.m_SvSpawnPickups ? false : ((Type == POWERUP_HEALTH)||(Type == POWERUP_ARMOR)))
+		return false;
+
+	if(g_Config.m_SvSpawnPickupWeapons ? false : (Type == POWERUP_WEAPON))
+		return false;
 
 	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 	
