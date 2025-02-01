@@ -3,17 +3,20 @@
 #ifndef GAME_SERVER_ENTITIES_RANDOMPICKUP_H
 #define GAME_SERVER_ENTITIES_RANDOMPICKUP_H
 
-#include <game/server/entities/ddnet_pvp/vanilla_pickup.h>
+#include <game/server/entities/kz/kz_pickup.h>
 
-class CRandomWeapon : public CVanillaPickup
+class CRandomWeapon : public CKZPickup
 {
 public:
-	CRandomWeapon(CGameWorld *pGameWorld, int Type, int SubType = 0, int Layer = 0, int Number = 0);
+	CRandomWeapon(CGameWorld *pGameWorld, int Layer = 0, int Number = 0);
 	void Tick() override;
+	void Snap(int SnappingClient) override;
 
 private:
 
-	bool m_ChangedType;
+	bool m_ChangedType[MAX_CLIENTS];
+	int m_Subtype[MAX_CLIENTS];
+
 
 };
 

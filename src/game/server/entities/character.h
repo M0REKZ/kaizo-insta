@@ -310,6 +310,7 @@ public:
 	bool m_HasBall = false;
 	bool m_HasFlagBall = false;
 	int m_DropFlagBallTicks = 0;
+	bool m_BluePortal = true;
 	int m_Mines;
 	bool m_TakingNoOwnerDamage = false;
 	//void Die(int Killer, int Weapon, int tick, bool SendKillMsg = true); //JSAURUS rollback

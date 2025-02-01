@@ -19,10 +19,7 @@
 CFlagBall::CFlagBall(CGameWorld *pGameWorld, int Team)
 : CFlag(pGameWorld, Team)
 {
-	//m_StandPos = Pos;
-	//m_Pos = Pos;
-	//m_FlagSnapOffset = Server()->m_pController->m_FlagSnapTeamOffset;
-	//Server()->m_pController->m_FlagSnapTeamOffset++;
+	m_ObjType = CGameWorld::CUSTOM_ENTTYPE_FLAGBALL;
 }
 
 void CFlagBall::Reset()

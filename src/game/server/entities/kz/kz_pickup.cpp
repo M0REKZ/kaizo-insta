@@ -13,21 +13,35 @@
 #include "kz_pickup.h"
 #include <game/kztiles.h>
 
+static constexpr int gs_PickupPhysSize = 14;
+
 CKZPickup::CKZPickup(CGameWorld *pGameWorld, int Type, int SubType, int Layer, int Number) :
-	CVanillaPickup(pGameWorld, Type, SubType, Layer, Number)
+CEntity(pGameWorld,CGameWorld::CUSTOM_ENTTYPE_KZPICKUP,vec2(0,0),gs_PickupPhysSize)
 {
-	//if(m_Subtype && (m_Type == POWERUP_HEALTH || m_Type == POWERUP_ARMOR))
-	//{
-		m_Id2 = Server()->SnapNewId();
-	//}
-	//else
-	//{
-	//	m_Id2 = -1;
-	//}
+	m_Type = Type;
+	m_Subtype = SubType;
+
+	m_Layer = Layer;
+	m_Number = Number;
+
+	int SpawnDelay = m_Type == POWERUP_NINJA ? 90 : 0;
+
+	m_Id2 = Server()->SnapNewId();
+
 	for(int i=0;i < MAX_CLIENTS;i++)
 	{
-		m_SpawnTickTeam[i] = -1;
+		if(SpawnDelay > 0)
+			m_SpawnTickTeam[i] = Server()->Tick() + Server()->TickSpeed() * SpawnDelay;
+		else
+			m_SpawnTickTeam[i] = -1;
 	}
+
+	GameWorld()->InsertEntity(this);
+}
+
+CKZPickup::CKZPickup(CGameWorld *pGameWorld, int Objtype, vec2 Pos, int ProximityRadius) :
+CEntity(pGameWorld,Objtype,Pos,ProximityRadius)
+{
 }
 
 CKZPickup::~CKZPickup()
@@ -114,6 +128,8 @@ void CKZPickup::Tick()
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
 						else if(m_Subtype == WEAPON_TASER)
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
+						else if(m_Subtype == WEAPON_PORTAL_GUN)
+							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
 
 						if(pChr->GetPlayer())
 							GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCid(), m_Subtype);
@@ -222,7 +238,7 @@ void CKZPickup::Snap(int SnappingClient)
 		pProj->m_VelY = 0;
 		pProj->m_StartTick = Server()->Tick();
 		pProj->m_Type = WEAPON_HAMMER;
-		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, 0, m_Number);
+		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, m_Subtype, m_Number);
 	}
 	else
 	{
@@ -246,5 +262,24 @@ void CKZPickup::Snap(int SnappingClient)
 			pProj->m_Type = WEAPON_LASER;
 			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_LASER, m_Number);
 		}
+		else if(m_Subtype == WEAPON_PORTAL_GUN)
+		{
+			vec2 postemp;
+					
+			postemp.x = m_Pos.x + 32*sin((float)Server()->Tick() / 25.0);
+			postemp.y = m_Pos.y + 32*cos((float)Server()->Tick() / 25.0);
+
+			GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_Id2,postemp,postemp,Server()->Tick(),-1,Server()->Tick() % 3);
+			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_LASER, m_Number);
+		}
+	}
+}
+
+void CKZPickup::Move()
+{
+	if(Server()->Tick() % (int)(Server()->TickSpeed() * 0.15f) == 0)
+	{
+		Collision()->MoverSpeed(m_Pos.x, m_Pos.y, &m_Core);
+		m_Pos += m_Core;
 	}
 }

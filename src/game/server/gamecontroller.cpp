@@ -1084,6 +1084,11 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 		Type = POWERUP_WEAPON;
 		SubType = WEAPON_TASER;
 	}
+	else if(Index == TILE_WEAPON_PORTAL_GUN)
+	{
+		Type = POWERUP_WEAPON;
+		SubType = WEAPON_PORTAL_GUN;
+	}
 
 	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 	
@@ -1091,7 +1096,7 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 	{
 		if(Index == TILE_RANDOMWEAPON)
 		{
-			CRandomWeapon *pPickup = new CRandomWeapon(&GameServer()->m_World, Type, SubType, Layer, Val1);
+			CRandomWeapon *pPickup = new CRandomWeapon(&GameServer()->m_World, Layer, Val1);
 			pPickup->m_Pos = Pos;
 		}
 		else

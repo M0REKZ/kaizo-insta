@@ -160,6 +160,12 @@ class CGameContext : public IGameServer
 	static void ConUnTaser(IConsole::IResult *pResult, void *pUserData);
 	static void ConGetTaser(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConPortalGun(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnPortalGun(IConsole::IResult *pResult, void *pUserData);
+	static void ConGetPortalGun(IConsole::IResult *pResult, void *pUserData);
+	static void ConOrangePortal(IConsole::IResult *pResult, void *pUserData);
+	static void ConBluePortal(IConsole::IResult *pResult, void *pUserData);
+
 	void Construct(int Resetting);
 	void Destruct(int Resetting);
 	void AddVote(const char *pDescription, const char *pCommand);

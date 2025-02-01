@@ -18,7 +18,7 @@
 #include <game/server/entities/projectile.h>
 
 CMine::CMine(CGameWorld *pGameWorld, vec2 Pos, int Owner, bool active, bool respawn) :
-CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
+CEntity(pGameWorld, CGameWorld::CUSTOM_ENTTYPE_MINE)
 {
 	m_Pos = Pos;
 	m_Owner = Owner;

@@ -20,7 +20,7 @@
 #include <game/kztiles.h>
 
 CBall::CBall(CGameWorld *pGameWorld, int Owner, vec2 Pos, vec2 Dir) :
-CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
+CEntity(pGameWorld, CGameWorld::CUSTOM_ENTTYPE_BALL)
 {
 	
 	//m_Type = Type;

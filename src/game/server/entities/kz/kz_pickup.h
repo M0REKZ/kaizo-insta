@@ -6,10 +6,13 @@
 #include <game/server/entity.h>
 #include <game/server/entities/ddnet_pvp/vanilla_pickup.h>
 
-class CKZPickup : public CVanillaPickup
+class CKZPickup : public CEntity
 {
 public:
+	static const int ms_CollisionExtraSize = 6;
+
 	CKZPickup(CGameWorld *pGameWorld, int Type, int SubType = 0, int Layer = 0, int Number = 0);
+	CKZPickup(CGameWorld *pGameWorld, int Objtype, vec2 Pos = vec2(0, 0), int ProximityRadius = 0);
 	virtual ~CKZPickup();
 
 	void Reset() override;
@@ -20,6 +23,20 @@ public:
 	int m_SpawnTickTeam[MAX_CLIENTS];
 	
 	int m_Id2; //+KZ from Pointer tw+
+
+	int Type() const { return m_Type; }
+	int Subtype() const { return m_Subtype; }
+
+	int GetSpawnTick(int Team = 0) { return m_SpawnTickTeam[Team]; } //+KZ
+
+protected:
+	int m_Type;
+	int m_Subtype;
+
+	// DDRace
+
+	void Move();
+	vec2 m_Core;
 };
 
 #endif

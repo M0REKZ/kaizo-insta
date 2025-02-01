@@ -17,7 +17,7 @@
 #include <game/server/gamecontroller.h>
 
 CGrenadeLauncher::CGrenadeLauncher(CGameWorld *pGameWorld, vec2 Pos, vec2 Dir) :
-CEntity(pGameWorld, CGameWorld::ENTTYPE_PROJECTILE)
+CEntity(pGameWorld, CGameWorld::CUSTOM_ENTTYPE_GRENADE_LAUNCHER)
 {
 	m_Pos = Pos;
 	m_Dir = Dir;

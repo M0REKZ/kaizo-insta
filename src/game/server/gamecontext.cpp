@@ -3894,6 +3894,12 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("untaser", "?i[id]", CFGFLAG_SERVER, ConUnTaser, this, "Remove Taser");
 	Console()->Register("gettaser", "?i[id]", CFGFLAG_SERVER, ConGetTaser, this, "Get Taser");
 
+	Console()->Register("portalgun", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConPortalGun, this, "Set Portal Gun as active weapon (if have it)");
+	Console()->Register("unportalgun", "?i[id]", CFGFLAG_SERVER, ConUnPortalGun, this, "Remove Portal Gun");
+	Console()->Register("getportalgun", "?i[id]", CFGFLAG_SERVER, ConGetPortalGun, this, "Get Portal Gun");
+	Console()->Register("orangeportal", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConOrangePortal, this, "Use Orange Portal");
+	Console()->Register("blueportal", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConBluePortal, this, "Use Blue Portal");
+
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 
 	Console()->Chain("sv_vote_kick", ConchainSettingUpdate, this);
@@ -5864,6 +5870,137 @@ void CGameContext::ConGetTaser(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_TASER);
+}
+
+void CGameContext::ConPortalGun(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID = pResult->m_ClientId;
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_PORTAL_GUN);
+
+	if(got)
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_PORTAL_GUN);
+}
+
+void CGameContext::ConUnPortalGun(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID;
+
+	if(pResult->NumArguments())
+	{
+		ClientID = pResult->GetInteger(0);
+	}
+	else
+	{
+		ClientID = pResult->m_ClientId;
+	}
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_PORTAL_GUN);
+
+	if(got)
+	{
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_PORTAL_GUN, false);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_PORTAL_GUN, 0);
+	}
+
+	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_GUN);
+}
+
+void CGameContext::ConGetPortalGun(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID;
+
+	if(pResult->NumArguments())
+	{
+		ClientID = pResult->GetInteger(0);
+	}
+	else
+	{
+		ClientID = pResult->m_ClientId;
+	}
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_PORTAL_GUN);
+
+	if(!got)
+	{
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_PORTAL_GUN, true);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_PORTAL_GUN, 10);
+	}
+
+	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_PORTAL_GUN);
+}
+
+void CGameContext::ConOrangePortal(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID;
+
+	ClientID = pResult->m_ClientId;
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+
+	pSelf->m_apPlayers[ClientID]->GetCharacter()->m_BluePortal = false;
+}
+
+void CGameContext::ConBluePortal(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID;
+
+	ClientID = pResult->m_ClientId;
+	
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+
+	pSelf->m_apPlayers[ClientID]->GetCharacter()->m_BluePortal = true;
 }
 
 void CGameContext::SendDiscordChatMessage(int ClientID, const char* msg)
