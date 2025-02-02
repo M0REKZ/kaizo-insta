@@ -2742,6 +2742,10 @@ if(SERVER)
     entities/projectile.h
     entities/kz/ball.cpp
     entities/kz/ball.h
+    entities/kz/blackhole.cpp
+    entities/kz/blackhole.h
+    entities/kz/blackhole_ammo.cpp
+    entities/kz/blackhole_ammo.h
     entities/kz/fdd_stable_projectile.cpp
     entities/kz/fdd_stable_projectile.h
     entities/kz/portal.cpp

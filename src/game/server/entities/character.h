@@ -289,6 +289,8 @@ private:
 	int m_InvisibleShieldId = -1;
 	int m_HasBallSnapId = -1;
 	int m_PortalKindId = -1;
+	int m_CursorId[2] = {-1,-1};
+	bool m_ShowCursor = false;
 	int m_BallQueuedWeapon;
 	int m_BallReleaseTick;
 	int m_slowDeathTick = 0; //from pointer

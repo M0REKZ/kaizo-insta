@@ -116,30 +116,46 @@ void CKZPickup::Tick()
 
 				if(m_Subtype >= 0 && m_Subtype < NUM_CUSTOM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
 				{
-					if((m_Subtype >= 0 && m_Subtype < NUM_WEAPONS) ? pChr->GetWeaponAmmo(m_Subtype) < 10 : pChr->GetWeaponAmmo(m_Subtype) < pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START])
-					{
-						pChr->GiveWeapon(m_Subtype, false, 10);
 
-						if(m_Subtype == WEAPON_GRENADE)
-							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
-						else if(m_Subtype == WEAPON_SHOTGUN)
-							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
-						else if(m_Subtype == WEAPON_LASER)
-							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
-						else if(m_Subtype == WEAPON_TASER)
-							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
-						else if(m_Subtype == WEAPON_PORTAL_GUN)
-							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
-						else if(m_Subtype == WEAPON_MINIGUN)
+						if(m_Subtype == WEAPON_GRENADE && pChr->GetWeaponAmmo(m_Subtype) < 10)
 						{
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
-							pChr->SetWeaponAmmo(WEAPON_MINIGUN,1000);
+							pChr->GiveWeapon(m_Subtype, false, 10);
+						}
+						else if(m_Subtype == WEAPON_SHOTGUN && pChr->GetWeaponAmmo(m_Subtype) < 10)
+						{
+							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
+							pChr->GiveWeapon(m_Subtype, false, 10);
+						}
+						else if(m_Subtype == WEAPON_LASER && pChr->GetWeaponAmmo(m_Subtype) < 10)
+						{
+							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
+							pChr->GiveWeapon(m_Subtype, false, 10);
+						}
+						else if(m_Subtype == WEAPON_TASER && pChr->GetWeaponAmmo(m_Subtype) < pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START])
+						{
+							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
+							pChr->GiveWeapon(m_Subtype, false, pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START]);
+						}
+						else if(m_Subtype == WEAPON_PORTAL_GUN && pChr->GetWeaponAmmo(m_Subtype) < pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START])
+						{
+							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
+							pChr->GiveWeapon(m_Subtype, false, pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START]);
+						}
+						else if(m_Subtype == WEAPON_MINIGUN && pChr->GetWeaponAmmo(m_Subtype) < pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START])
+						{
+							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
+							pChr->GiveWeapon(m_Subtype, false, pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START]);
+						}
+						else if(m_Subtype == WEAPON_BLACKHOLE && !pChr->GetWeaponGot(WEAPON_BLACKHOLE))
+						{
+							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
+							pChr->GiveWeapon(m_Subtype, false, 0);
 						}
 
 						if(pChr->GetPlayer())
 							GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCid(), m_Subtype);
 						Picked = true;
-					}
 				}
 				break;
 
@@ -300,6 +316,31 @@ void CKZPickup::Snap(int SnappingClient)
 			pProj->m_VelY = veltemp.y;
 			pProj->m_StartTick = Server()->Tick();
 			pProj->m_Type = WEAPON_SHOTGUN;
+			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_GRENADE, m_Number);
+		}
+		if(m_Subtype == WEAPON_BLACKHOLE)
+		{
+			vec2 postemp;
+			vec2 veltemp;
+					
+			postemp.x = m_Pos.x + 32*sin((float)Server()->Tick() / 25.0);
+			postemp.y = m_Pos.y + 32*cos((float)Server()->Tick() / 25.0);
+
+			veltemp.x = ((m_Pos.x + 32*sin(((float)Server()->Tick()+1) / 25.0)) - postemp.x);
+			veltemp.y = ((m_Pos.y + 32*cos(((float)Server()->Tick()+1) / 25.0)) - postemp.y);
+			veltemp = normalize(veltemp);
+
+			CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(m_Id2);
+			if(!pProj)
+			{
+				return;
+			}
+			pProj->m_X = postemp.x;
+			pProj->m_Y = postemp.y;
+			pProj->m_VelX = veltemp.x;
+			pProj->m_VelY = veltemp.y;
+			pProj->m_StartTick = Server()->Tick();
+			pProj->m_Type = WEAPON_GRENADE;
 			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_GRENADE, m_Number);
 		}
 	}

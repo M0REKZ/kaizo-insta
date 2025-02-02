@@ -24,6 +24,7 @@
 #include "entities/kz/mine.h"
 #include "entities/kz/grenade_launcher.h"
 #include "entities/kz/kz_pickup.h"
+#include "entities/kz/blackhole_ammo.h"
 #include "entities/projectile.h"
 
 IGameController::IGameController(class CGameContext *pGameServer) :
@@ -1083,6 +1084,11 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 		Type = POWERUP_WEAPON;
 		SubType = WEAPON_MINIGUN;
 	}
+	else if(Index == TILE_WEAPON_BLACKHOLE)
+	{
+		Type = POWERUP_WEAPON;
+		SubType = WEAPON_BLACKHOLE;
+	}
 
 	//+KZ: some non-insta game modes dont spawn certain things so im better leaving this as config variables
 	if(m_IsInstagibKZ && ((Type == POWERUP_HEALTH)||(Type == POWERUP_ARMOR) || (Type == POWERUP_WEAPON) || Index == TILE_MINE))
@@ -1111,6 +1117,12 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 		return true;
 	}
 	
+	if(Index == TILE_WEAPON_BLACKHOLE_AMMO)
+	{
+		new CBlackHoleAmmo(&GameServer()->m_World,Pos,Layer,Val1);
+		return true;
+	}
+
 	if(Index == TILE_MINE)
 	{
 		new CMine(&GameServer()->m_World, Pos, -1, false, true);

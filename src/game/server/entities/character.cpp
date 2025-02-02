@@ -12,6 +12,7 @@
 #include "kz/ball.h"
 #include "kz/portal_projectile.h"
 #include "kz/minigun_projectile.h"
+#include "kz/blackhole.h"
 
 #include <antibot/antibot_data.h>
 
@@ -48,6 +49,8 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	m_InvisibleShieldId = Server()->SnapNewId();
 	m_HasBallSnapId = Server()->SnapNewId();
 	m_PortalKindId = Server()->SnapNewId();
+	m_CursorId[0] = Server()->SnapNewId();
+	m_CursorId[1] = Server()->SnapNewId();
 		
 	m_Input = LastInput;
 	// never initialize both to zero
@@ -73,10 +76,17 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	m_aCustomWeaponSnaps[WEAPON_TASER - CUSTOM_WEAPON_START] = WEAPON_LASER;
 	m_aCustomWeaponSnaps[WEAPON_PORTAL_GUN - CUSTOM_WEAPON_START] = WEAPON_LASER;
 	m_aCustomWeaponSnaps[WEAPON_MINIGUN - CUSTOM_WEAPON_START] = WEAPON_GRENADE;
+	m_aCustomWeaponSnaps[WEAPON_BLACKHOLE - CUSTOM_WEAPON_START] = WEAPON_GRENADE;
 
 	m_aCustomWeaponMaxAmmo[WEAPON_TASER - CUSTOM_WEAPON_START] = 10;
 	m_aCustomWeaponMaxAmmo[WEAPON_PORTAL_GUN - CUSTOM_WEAPON_START] = 10;
 	m_aCustomWeaponMaxAmmo[WEAPON_MINIGUN - CUSTOM_WEAPON_START] = 1000;
+	m_aCustomWeaponMaxAmmo[WEAPON_MINIGUN - CUSTOM_WEAPON_START] = 10;
+
+	m_aCustomWeaponAmmo[WEAPON_TASER - CUSTOM_WEAPON_START] = 0;
+	m_aCustomWeaponAmmo[WEAPON_PORTAL_GUN - CUSTOM_WEAPON_START] = 0;
+	m_aCustomWeaponAmmo[WEAPON_MINIGUN - CUSTOM_WEAPON_START] = 0;
+	m_aCustomWeaponAmmo[WEAPON_MINIGUN - CUSTOM_WEAPON_START] = 0;
 
 }
 
@@ -95,6 +105,16 @@ CCharacter::~CCharacter()
 	if(m_PortalKindId != -1)
 	{
 		Server()->SnapFreeId(m_PortalKindId);
+	}
+
+	if(m_CursorId[0] != -1)
+	{
+		Server()->SnapFreeId(m_CursorId[0]);
+	}
+
+	if(m_CursorId[1] != -1)
+	{
+		Server()->SnapFreeId(m_CursorId[1]);
 	}
 }
 
@@ -232,6 +252,16 @@ void CCharacter::SetWeapon(int W)
 	else if(m_Core.m_ActiveWeapon == WEAPON_MINIGUN)
 	{
 		GameServer()->SendBroadcast("Weapon: Minigun",m_pPlayer->GetCid());
+	}
+	else if(m_Core.m_ActiveWeapon == WEAPON_BLACKHOLE)
+	{
+		GameServer()->SendBroadcast("Weapon: Blackhole",m_pPlayer->GetCid());
+		m_ShowCursor = true;
+	}
+
+	if(m_Core.m_ActiveWeapon != WEAPON_BLACKHOLE)
+	{
+		m_ShowCursor = false;
 	}
 	
 	
@@ -607,6 +637,8 @@ void CCharacter::FireWeapon()
 
 	vec2 ProjStartPos = m_Pos + Direction * GetProximityRadius() * 0.75f;
 
+	int InitialAmmo = GetWeaponAmmo(m_Core.m_ActiveWeapon);
+
 	// ddnet-insta
 	if(GameServer()->m_pController->OnFireWeapon(*this, m_Core.m_ActiveWeapon, Direction, MouseTarget, ProjStartPos) && m_Core.m_ActiveWeapon >=0 && m_Core.m_ActiveWeapon < NUM_WEAPONS)
 		return;
@@ -825,6 +857,16 @@ void CCharacter::FireWeapon()
 	{
 		new CMinigunProjectile(GameWorld(),m_pPlayer->GetCid(),m_Pos,Direction);
 		GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
+	}
+	break;
+
+	case WEAPON_BLACKHOLE:
+	{
+		new CBlackHole(GameWorld(),vec2(m_Pos.x + m_Input.m_TargetX,m_Pos.y + m_Input.m_TargetY),m_pPlayer->GetCid());
+		GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, TeamMask());
+
+		if(InitialAmmo == GetWeaponAmmo(WEAPON_BLACKHOLE))
+			m_aCustomWeaponAmmo[WEAPON_BLACKHOLE - CUSTOM_WEAPON_START]--;
 	}
 	break;
 	//---------------
@@ -1713,6 +1755,50 @@ void CCharacter::Snap(int SnappingClient)
 		//+KZ: indicator idea taken from catch16
 		GameServer()->SnapPickup(CSnapContext(GameServer()->GetClientVersion(SnappingClient), Server()->IsSixup(SnappingClient)), m_InvisibleShieldId, postemp, POWERUP_ARMOR, 0, 0);
 		
+	}
+
+	if(m_ShowCursor && Id == SnappingClient)
+	{
+		while(true)
+		{
+			vec2 postemp;
+				
+			postemp.x = m_Pos.x + m_Input.m_TargetX + 32*sin((float)(Server()->Tick() / 25.0) *2);
+			postemp.y = m_Pos.y + m_Input.m_TargetY + 32*cos((float)(Server()->Tick() / 25.0) *2);
+
+			CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(m_CursorId[0]);
+			if(!pProj)
+			{
+				break;
+			}
+			pProj->m_X = postemp.x;
+			pProj->m_Y = postemp.y;
+			pProj->m_VelX = 0;
+			pProj->m_VelY = 0;
+			pProj->m_StartTick = Server()->Tick();
+			pProj->m_Type = WEAPON_HAMMER;
+			break;
+		}
+		while(true)
+		{
+			vec2 postemp;
+				
+			postemp.x = m_Pos.x + m_Input.m_TargetX + 32*sin(((float)(Server()->Tick() / 25.0) +200) *2);
+			postemp.y = m_Pos.y + m_Input.m_TargetY + 32*cos(((float)(Server()->Tick() / 25.0) +200) *2);
+
+			CNetObj_Projectile *pProj = Server()->SnapNewItem<CNetObj_Projectile>(m_CursorId[1]);
+			if(!pProj)
+			{
+				break;
+			}
+			pProj->m_X = postemp.x;
+			pProj->m_Y = postemp.y;
+			pProj->m_VelX = 0;
+			pProj->m_VelY = 0;
+			pProj->m_StartTick = Server()->Tick();
+			pProj->m_Type = WEAPON_HAMMER;
+			break;
+		}
 	}
 
 	while(m_HasBall)
