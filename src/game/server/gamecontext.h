@@ -171,6 +171,11 @@ class CGameContext : public IGameServer
 	static void ConUnMinigun(IConsole::IResult *pResult, void *pUserData);
 	static void ConGetMinigun(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConBlackHole(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnBlackHole(IConsole::IResult *pResult, void *pUserData);
+	static void ConGetBlackHole(IConsole::IResult *pResult, void *pUserData);
+	static void ConGetBlackHoleAmmo(IConsole::IResult *pResult, void *pUserData);
+
 
 	void Construct(int Resetting);
 	void Destruct(int Resetting);

@@ -3906,6 +3906,11 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("unminigun", "?i[id]", CFGFLAG_SERVER, ConUnMinigun, this, "Remove Minigun");
 	Console()->Register("getminigun", "?i[id]", CFGFLAG_SERVER, ConGetMinigun, this, "Get Minigun");
 
+	Console()->Register("blackhole", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConBlackHole, this, "Set Blackhole as active weapon (if have it)");
+	Console()->Register("unblackhole", "?i[id]", CFGFLAG_SERVER, ConUnBlackHole, this, "Remove Blackhole");
+	Console()->Register("getblackhole", "?i[id]", CFGFLAG_SERVER, ConGetBlackHole, this, "Get Blackhole");
+	Console()->Register("getblackholeammo", "?i[id] ?i[amount]", CFGFLAG_SERVER, ConGetBlackHoleAmmo, this, "Get Blackhole Ammo");
+
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 
 	Console()->Chain("sv_vote_kick", ConchainSettingUpdate, this);
@@ -6128,6 +6133,136 @@ void CGameContext::ConGetMinigun(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_MINIGUN);
+}
+
+void CGameContext::ConBlackHole(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID = pResult->m_ClientId;
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_BLACKHOLE);
+
+	if(got)
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_BLACKHOLE);
+}
+
+void CGameContext::ConUnBlackHole(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID;
+
+	if(pResult->NumArguments())
+	{
+		ClientID = pResult->GetInteger(0);
+	}
+	else
+	{
+		ClientID = pResult->m_ClientId;
+	}
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_BLACKHOLE);
+
+	if(got)
+	{
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_BLACKHOLE, false);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_BLACKHOLE, 0);
+	}
+
+	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_GUN);
+}
+
+void CGameContext::ConGetBlackHole(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID;
+
+	if(pResult->NumArguments())
+	{
+		ClientID = pResult->GetInteger(0);
+	}
+	else
+	{
+		ClientID = pResult->m_ClientId;
+	}
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_BLACKHOLE);
+
+	if(!got)
+	{
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_BLACKHOLE, true);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_BLACKHOLE, 1);
+	}
+
+	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_BLACKHOLE);
+}
+
+void CGameContext::ConGetBlackHoleAmmo(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID;
+
+	int Num = pResult->NumArguments();
+	int Amount = 1;
+
+	if(Num >= 1)
+	{
+		ClientID = pResult->GetInteger(0);
+		if(Num >=2)
+		{
+			Amount = pResult->GetInteger(1);
+		}
+	}
+	else
+	{
+		ClientID = pResult->m_ClientId;
+	}
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_BLACKHOLE);
+
+	if(got)
+	{
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_BLACKHOLE, pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponAmmo(WEAPON_BLACKHOLE)+Amount);
+	}
 }
 
 void CGameContext::SendDiscordChatMessage(int ClientID, const char* msg)
