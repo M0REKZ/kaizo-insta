@@ -51,7 +51,7 @@ public:
 	virtual bool CanHookGrabKZ(CCharacter *pChr);
 	int m_OrigTeam;
 
-	CFlag *GetOtherFlag();
+	virtual CFlag *GetOtherFlag();
 };
 
 #endif

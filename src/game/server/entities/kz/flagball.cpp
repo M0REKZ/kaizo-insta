@@ -218,3 +218,18 @@ bool CFlagBall::CanHookGrabKZ(CCharacter *pChr)
 		return false;
 	return true;
 }
+
+CFlagBall* CFlagBall::GetOtherFlagball()
+{
+	CFlagBall* f = (CFlagBall*)GameWorld()->FindFirst(CGameWorld::CUSTOM_ENTTYPE_FLAGBALL);
+
+	if(f != this)
+		return f;
+	
+	return (CFlagBall*)f->TypeNext();
+}
+
+CFlag *CFlagBall::GetOtherFlag()
+{
+	return GetOtherFlagball();
+}

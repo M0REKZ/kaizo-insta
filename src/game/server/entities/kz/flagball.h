@@ -24,6 +24,9 @@ public:
 	virtual void HandleKZTiles() override;
 
 	virtual bool CanHookGrabKZ(CCharacter * pChr) override;
+
+	CFlagBall* GetOtherFlagball();
+	virtual CFlag* GetOtherFlag() override;
 };
 
 #endif
