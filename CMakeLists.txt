@@ -1426,6 +1426,7 @@ set(EXPECTED_DATA
   editor/entities_clear/race.png
   editor/entities_clear/vanilla.png
   editor/front.png
+  editor/KZCustom-Entities.png
   editor/speed_arrow.png
   editor/speed_arrow_array.png
   editor/speedup.png
@@ -1485,6 +1486,7 @@ set(EXPECTED_DATA
   languages/traditional_chinese.txt
   languages/turkish.txt
   languages/ukrainian.txt
+  mapres/kz/KZCustom-Entities.png
   mapres/basic_freeze.png
   mapres/bg_cloud1.png
   mapres/bg_cloud2.png
