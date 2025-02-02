@@ -176,6 +176,10 @@ class CGameContext : public IGameServer
 	static void ConGetBlackHole(IConsole::IResult *pResult, void *pUserData);
 	static void ConGetBlackHoleAmmo(IConsole::IResult *pResult, void *pUserData);
 
+	static void ConChargeHammer(IConsole::IResult *pResult, void *pUserData);
+	static void ConUnChargeHammer(IConsole::IResult *pResult, void *pUserData);
+	static void ConGetChargeHammer(IConsole::IResult *pResult, void *pUserData);
+
 
 	void Construct(int Resetting);
 	void Destruct(int Resetting);

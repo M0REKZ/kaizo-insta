@@ -77,16 +77,19 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	m_aCustomWeaponSnaps[WEAPON_PORTAL_GUN - CUSTOM_WEAPON_START] = WEAPON_LASER;
 	m_aCustomWeaponSnaps[WEAPON_MINIGUN - CUSTOM_WEAPON_START] = WEAPON_GRENADE;
 	m_aCustomWeaponSnaps[WEAPON_BLACKHOLE - CUSTOM_WEAPON_START] = WEAPON_GRENADE;
+	m_aCustomWeaponSnaps[WEAPON_CHARGE_HAMMER - CUSTOM_WEAPON_START] = WEAPON_HAMMER;
 
 	m_aCustomWeaponMaxAmmo[WEAPON_TASER - CUSTOM_WEAPON_START] = 10;
 	m_aCustomWeaponMaxAmmo[WEAPON_PORTAL_GUN - CUSTOM_WEAPON_START] = 10;
 	m_aCustomWeaponMaxAmmo[WEAPON_MINIGUN - CUSTOM_WEAPON_START] = 1000;
-	m_aCustomWeaponMaxAmmo[WEAPON_MINIGUN - CUSTOM_WEAPON_START] = 10;
+	m_aCustomWeaponMaxAmmo[WEAPON_BLACKHOLE - CUSTOM_WEAPON_START] = 10;
+	m_aCustomWeaponMaxAmmo[WEAPON_CHARGE_HAMMER - CUSTOM_WEAPON_START] = -1;
 
 	m_aCustomWeaponAmmo[WEAPON_TASER - CUSTOM_WEAPON_START] = 0;
 	m_aCustomWeaponAmmo[WEAPON_PORTAL_GUN - CUSTOM_WEAPON_START] = 0;
 	m_aCustomWeaponAmmo[WEAPON_MINIGUN - CUSTOM_WEAPON_START] = 0;
-	m_aCustomWeaponAmmo[WEAPON_MINIGUN - CUSTOM_WEAPON_START] = 0;
+	m_aCustomWeaponAmmo[WEAPON_BLACKHOLE - CUSTOM_WEAPON_START] = 0;
+	m_aCustomWeaponAmmo[WEAPON_CHARGE_HAMMER - CUSTOM_WEAPON_START] = 0;
 
 }
 
@@ -257,6 +260,10 @@ void CCharacter::SetWeapon(int W)
 	{
 		GameServer()->SendBroadcast("Weapon: Blackhole",m_pPlayer->GetCid());
 		m_ShowCursor = true;
+	}
+	else if(m_Core.m_ActiveWeapon == WEAPON_CHARGE_HAMMER)
+	{
+		GameServer()->SendBroadcast("Weapon: Charge Hammer",m_pPlayer->GetCid());
 	}
 
 	if(m_Core.m_ActiveWeapon != WEAPON_BLACKHOLE)
@@ -580,7 +587,7 @@ void CCharacter::FireWeapon()
 		FullAuto = true;
 	if(m_Core.m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
 		FullAuto = true;
-	if(m_Core.m_ActiveWeapon == WEAPON_TASER || m_Core.m_ActiveWeapon == WEAPON_PORTAL_GUN || m_Core.m_ActiveWeapon == WEAPON_MINIGUN) //+KZ
+	if(m_Core.m_ActiveWeapon == WEAPON_TASER || m_Core.m_ActiveWeapon == WEAPON_PORTAL_GUN || m_Core.m_ActiveWeapon == WEAPON_MINIGUN || m_Core.m_ActiveWeapon == WEAPON_CHARGE_HAMMER) //+KZ
 		FullAuto = true;
 	// allow firing directly after coming out of freeze or being unfrozen
 	// by something
@@ -599,7 +606,7 @@ void CCharacter::FireWeapon()
 	if(FullAuto && (m_LatestInput.m_Fire & 1) && (m_Core.m_ActiveWeapon < NUM_WEAPONS ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : m_aCustomWeaponAmmo[m_Core.m_ActiveWeapon - CUSTOM_WEAPON_START]))
 		WillFire = true;
 
-	if(!WillFire)
+	if(!WillFire && m_Core.m_ActiveWeapon != WEAPON_CHARGE_HAMMER)
 		return;
 
 	if(m_FreezeTime)
@@ -869,10 +876,36 @@ void CCharacter::FireWeapon()
 			m_aCustomWeaponAmmo[WEAPON_BLACKHOLE - CUSTOM_WEAPON_START]--;
 	}
 	break;
+	case WEAPON_CHARGE_HAMMER:
+	{
+		if(!m_superhammer_charge_time && WillFire)
+		{
+			GameServer()->CreateSound(m_Pos + Direction*32*4, SOUND_GRENADE_EXPLODE);
+			GameServer()->CreateExplosion(m_Pos + Direction*32*4, m_pPlayer->GetCid(), WEAPON_HAMMER, false, Team());
+		}
+
+		if (WillFire) {
+		m_superhammer_charge_time++;
+		if (m_superhammer_charge_time <= 60 && m_superhammer_charge_time % 15 == 0)
+			GameServer()->CreateSound(m_Pos, SOUND_WEAPON_NOAMMO);
+		} else {
+			if (m_superhammer_charge_time > 15) {
+				GameServer()->CreateSound(m_Pos + Direction*32*4, SOUND_GRENADE_EXPLODE);
+				GameServer()->CreateExplosion(m_Pos + Direction*32*4, m_pPlayer->GetCid(), WEAPON_HAMMER, false,Team());
+				if (m_superhammer_charge_time > 30)
+					GameServer()->CreateExplosion(m_Pos + Direction*32*7, m_pPlayer->GetCid(), WEAPON_HAMMER, false,Team());
+				if (m_superhammer_charge_time > 45)
+					GameServer()->CreateExplosion(m_Pos + Direction*32*10, m_pPlayer->GetCid(), WEAPON_HAMMER, false,Team());
+				if (m_superhammer_charge_time > 60)
+					GameServer()->CreateExplosion(m_Pos + Direction*32*13, m_pPlayer->GetCid(), WEAPON_HAMMER, false,Team());
+			}
+			m_superhammer_charge_time = 0;
+		}
+	}
 	//---------------
 	}
-
-	m_AttackTick = Server()->Tick();
+	if(WillFire)
+		m_AttackTick = Server()->Tick();
 
 	if(!m_ReloadTimer && m_Core.m_ActiveWeapon < NUM_WEAPONS)
 	{

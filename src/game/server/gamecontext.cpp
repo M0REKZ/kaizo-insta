@@ -3911,6 +3911,10 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("getblackhole", "?i[id]", CFGFLAG_SERVER, ConGetBlackHole, this, "Get Blackhole");
 	Console()->Register("getblackholeammo", "?i[id] ?i[amount]", CFGFLAG_SERVER, ConGetBlackHoleAmmo, this, "Get Blackhole Ammo");
 
+	Console()->Register("chargehammer", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConChargeHammer, this, "Set Charge Hammer as active weapon (if have it)");
+	Console()->Register("unchargehammer", "?i[id]", CFGFLAG_SERVER, ConUnChargeHammer, this, "Remove Charge Hammer");
+	Console()->Register("getchargehammer", "?i[id]", CFGFLAG_SERVER, ConGetChargeHammer, this, "Get Charge Hammer");
+
 	Console()->Chain("sv_motd", ConchainSpecialMotdupdate, this);
 
 	Console()->Chain("sv_vote_kick", ConchainSettingUpdate, this);
@@ -6263,6 +6267,97 @@ void CGameContext::ConGetBlackHoleAmmo(IConsole::IResult *pResult, void *pUserDa
 	{
 		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_BLACKHOLE, pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponAmmo(WEAPON_BLACKHOLE)+Amount);
 	}
+}
+
+void CGameContext::ConChargeHammer(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID = pResult->m_ClientId;
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_CHARGE_HAMMER);
+
+	if(got)
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_CHARGE_HAMMER);
+}
+
+void CGameContext::ConUnChargeHammer(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID;
+
+	if(pResult->NumArguments())
+	{
+		ClientID = pResult->GetInteger(0);
+	}
+	else
+	{
+		ClientID = pResult->m_ClientId;
+	}
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_CHARGE_HAMMER);
+
+	if(got)
+	{
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_CHARGE_HAMMER, false);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_CHARGE_HAMMER, 0);
+	}
+
+	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_GUN);
+}
+
+void CGameContext::ConGetChargeHammer(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID;
+
+	if(pResult->NumArguments())
+	{
+		ClientID = pResult->GetInteger(0);
+	}
+	else
+	{
+		ClientID = pResult->m_ClientId;
+	}
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_CHARGE_HAMMER);
+
+	if(!got)
+	{
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_CHARGE_HAMMER, true);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_CHARGE_HAMMER, -1);
+	}
+
+	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_CHARGE_HAMMER);
 }
 
 void CGameContext::SendDiscordChatMessage(int ClientID, const char* msg)

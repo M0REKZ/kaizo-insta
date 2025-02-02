@@ -300,6 +300,7 @@ private:
 	bool m_AimPressed = false;
 	bool m_Waitingforreleaseaim = false;
 	bool m_insidetilejump = false;
+	int m_superhammer_charge_time = 0; //from pointer
 	
 public:
 	void HandleKZBot(CNetObj_PlayerInput &Input);

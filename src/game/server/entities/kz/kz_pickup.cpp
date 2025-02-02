@@ -152,6 +152,11 @@ void CKZPickup::Tick()
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
 							pChr->GiveWeapon(m_Subtype, false, 0);
 						}
+						else if(m_Subtype == WEAPON_CHARGE_HAMMER && !pChr->GetWeaponGot(WEAPON_CHARGE_HAMMER))
+						{
+							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
+							pChr->GiveWeapon(m_Subtype);
+						}
 
 						if(pChr->GetPlayer())
 							GameServer()->SendWeaponPickup(pChr->GetPlayer()->GetCid(), m_Subtype);
@@ -342,6 +347,16 @@ void CKZPickup::Snap(int SnappingClient)
 			pProj->m_StartTick = Server()->Tick();
 			pProj->m_Type = WEAPON_GRENADE;
 			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_GRENADE, m_Number);
+		}
+		if(m_Subtype == WEAPON_CHARGE_HAMMER)
+		{
+			vec2 postemp;
+					
+			postemp.x = m_Pos.x + 32*sin((float)Server()->Tick() / 25.0);
+			postemp.y = m_Pos.y + 32*cos((float)Server()->Tick() / 25.0);
+
+			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), m_Id2, postemp, POWERUP_ARMOR, 0, m_Number);
+			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_HAMMER, m_Number);
 		}
 	}
 }
