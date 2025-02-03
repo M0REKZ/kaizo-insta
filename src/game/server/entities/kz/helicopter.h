@@ -21,6 +21,7 @@ public:
 
 	int m_ExtraLaserIds[11];
 	bool m_Direction = false;
+	int m_ReloadTimer = 0;
 
 protected:
 
