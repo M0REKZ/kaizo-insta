@@ -87,9 +87,8 @@ void CVehicle::Tick()
 
 	if(m_Vel.x || m_Vel.y)
 	{
-		int pushedsides = 0;
 		Collision()->MoveBox(&m_Pos,&m_Vel,m_Size,vec2(0.f,0.f));
-		Collision()->PushBoxOutsideQuads(&m_Pos,m_Size,&pushedsides);
+		Collision()->PushBoxOutsideQuads(&m_Pos,m_Size,&m_CollidedSides);
 	}
 
 	if((GameServer()->Collision()->GetCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH) || (GameServer()->Collision()->GetFrontCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH) || GameLayerClipped(m_Pos))

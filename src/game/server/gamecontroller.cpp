@@ -26,6 +26,7 @@
 #include "entities/kz/kz_pickup.h"
 #include "entities/kz/blackhole_ammo.h"
 #include "entities/kz/helicopter.h"
+#include "entities/kz/jet.h"
 #include "entities/projectile.h"
 
 IGameController::IGameController(class CGameContext *pGameServer) :
@@ -1132,6 +1133,12 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 	if(Index == TILE_VEHICLE_HELICOPTER)
 	{
 		new CHelicopter(&GameServer()->m_World,Pos);
+		return true;
+	}
+
+	if(Index == TILE_VEHICLE_JET)
+	{
+		new CJet(&GameServer()->m_World,Pos);
 		return true;
 	}
 

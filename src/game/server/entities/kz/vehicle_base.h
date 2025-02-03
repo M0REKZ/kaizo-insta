@@ -27,6 +27,7 @@ protected:
 	vec2 m_Size;
 	vec2 m_Vel;
 	float m_MountDistance;
+	int m_CollidedSides = 0;
 
 	int m_Owner;
 	vec2 m_MountOffset;

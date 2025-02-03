@@ -2770,6 +2770,8 @@ if(SERVER)
     entities/kz/vehicle_base.h
     entities/kz/helicopter.cpp
     entities/kz/helicopter.h
+    entities/kz/jet.cpp
+    entities/kz/jet.h
     entity.cpp
     entity.h
     eventhandler.cpp

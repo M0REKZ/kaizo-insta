@@ -33,6 +33,7 @@
 #include "entities/kz/portal.h"
 #include "entities/kz/vehicle_base.h"
 #include "entities/kz/helicopter.h"
+#include "entities/kz/jet.h"
 #include "gamemodes/DDRace.h"
 #include "gamemodes/DDNetKZ.h"
 #include "gamemodes/vanilla/BOMB/BOMB.h"
@@ -5873,6 +5874,15 @@ void CGameContext::ConExitVehicle(IConsole::IResult *pResult, void *pUserData)
 		return;
 
 	for(CHelicopter* Heli = (CHelicopter*)pSelf->m_World.FindFirst(CGameWorld::CUSTOM_ENTTYPE_HELICOPTER);Heli;Heli = (CHelicopter*)Heli->TypeNext())
+	{
+		if(Heli->GetMounter() == pChr)
+		{
+			Heli->UnMount();
+			return;
+		}
+	}
+
+	for(CJet* Heli = (CJet*)pSelf->m_World.FindFirst(CGameWorld::CUSTOM_ENTTYPE_JET);Heli;Heli = (CJet*)Heli->TypeNext())
 	{
 		if(Heli->GetMounter() == pChr)
 		{
