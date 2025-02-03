@@ -33,7 +33,7 @@ void CPortalProjectile::Tick()
 	if(Collision()->CheckPoint(m_Pos))
 	{
 		new CPortalKZ(GameWorld(),oldpos,m_Owner,m_BluePortal);
-		GameServer()->CreateSound(m_Pos,SOUND_LASER_BOUNCE,GameServer()->GetPlayerChar(m_Owner)->TeamMask());
+		GameServer()->CreateSound(m_Pos,SOUND_LASER_BOUNCE,m_TeamMask);
 		Reset();
 	}
 }
