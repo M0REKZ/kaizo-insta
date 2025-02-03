@@ -68,6 +68,9 @@ void CVehicle::Tick()
 			if(!pChr->IsAlive())
 				continue;
 
+			if(pChr->Core()->m_Mounted)
+				continue;
+
 			if(distance(m_Pos,pChr->m_Pos) > m_MountDistance)
 				continue;
 			

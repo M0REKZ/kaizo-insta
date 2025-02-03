@@ -31,6 +31,8 @@
 
 #include "entities/character.h"
 #include "entities/kz/portal.h"
+#include "entities/kz/vehicle_base.h"
+#include "entities/kz/helicopter.h"
 #include "gamemodes/DDRace.h"
 #include "gamemodes/DDNetKZ.h"
 #include "gamemodes/vanilla/BOMB/BOMB.h"
@@ -3889,6 +3891,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("rejoin_shutdown", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConShutdownRejoin, this, "Shutdown and make players rejoin same server");
 	Console()->Register("redirect_client", "i[id] i[port]", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConRedirectClient, this, "Redirect client to another server (Works for DDNet version 17.2 and above)");
 	Console()->Register("sparkles", "?i[id]", CFGFLAG_SERVER, ConSparkles, this, "Get Sparkles");
+	Console()->Register("exit", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConExitVehicle, this, "Unmount Vehicle");
 
 	//+KZ Custom Weapons
 	Console()->Register("taser", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConTaser, this, "Set Taser as active weapon (if have it)");
@@ -5850,6 +5853,33 @@ void CGameContext::ConUnTaser(IConsole::IResult *pResult, void *pUserData)
 	}
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_GUN);
+}
+
+void CGameContext::ConExitVehicle(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID = pResult->m_ClientId;
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	CCharacter* pChr = pSelf->m_apPlayers[ClientID]->GetCharacter();
+
+	if(!pChr)
+		return;
+
+	for(CHelicopter* Heli = (CHelicopter*)pSelf->m_World.FindFirst(CGameWorld::CUSTOM_ENTTYPE_HELICOPTER);Heli;Heli = (CHelicopter*)Heli->TypeNext())
+	{
+		if(Heli->GetMounter() == pChr)
+		{
+			Heli->UnMount();
+			return;
+		}
+	}
 }
 
 void CGameContext::ConGetTaser(IConsole::IResult *pResult, void *pUserData)

@@ -16,6 +16,7 @@ public:
 	virtual void Snap(int SnappingClient) override;
 
 	void UnMount();
+	CCharacter* GetMounter() { return m_pMounter; }
 
 protected:
 

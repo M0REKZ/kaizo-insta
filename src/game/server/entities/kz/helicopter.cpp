@@ -11,6 +11,7 @@
 #include <game/server/gamecontroller.h>
 
 #include "helicopter.h"
+#include "minigun_projectile.h"
 #include <game/kztiles.h>
 
 CHelicopter::CHelicopter(CGameWorld *pGameWorld, vec2 Pos, int Owner, int Layer) :
@@ -125,5 +126,11 @@ void CHelicopter::HandleMounterInput(const CNetObj_PlayerInput* Input)
 	if(Input->m_Hook)
 	{
 		m_Vel.y = 5.f;
+	}
+
+	if(Input->m_Fire)
+	{
+		new CMinigunProjectile(GameWorld(),m_pMounter->GetPlayer()->GetCid(),m_Pos,normalize(vec2(Input->m_TargetX, Input->m_TargetY)));
+		GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, m_pMounter->TeamMask());
 	}
 }
