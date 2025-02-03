@@ -131,10 +131,10 @@ void CHelicopter::HandleMounterInput(const CNetObj_PlayerInput* Input)
 		m_Vel.y = 5.f;
 	}
 
-	if(Input->m_Fire & 1 && !m_ReloadTimer)
+	/*if(Input->m_Fire & 1 && !m_ReloadTimer)
 	{
 		new CMinigunProjectile(GameWorld(),m_pMounter->GetPlayer()->GetCid(),m_Pos,normalize(vec2(Input->m_TargetX, Input->m_TargetY)));
 		GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, m_pMounter->TeamMask());
 		m_ReloadTimer = 0.1 * Server()->TickSpeed();
-	}
+	}*/
 }
