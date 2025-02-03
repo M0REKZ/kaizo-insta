@@ -13,7 +13,7 @@ protected:
 	int m_VelX;
 	int m_VelY;
 
-	//CClientMask m_TeamMask;
+	CClientMask m_TeamMask;
 	int m_Owner;
 	bool m_HideOnSpec;
 	bool m_OnlyShowOwner;

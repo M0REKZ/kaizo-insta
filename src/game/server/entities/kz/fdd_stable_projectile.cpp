@@ -14,7 +14,11 @@ CStableProjectile::CStableProjectile(CGameWorld *pGameWorld, int Type, int Owner
 	m_HideOnSpec = HideOnSpec;
 	m_LastResetTick = Server()->Tick();
 	m_CalculatedVel = false;
-	//m_TeamMask = GameServer()->GetPlayerChar(m_Owner)->TeamMask();
+	CCharacter* pOwnerChar = GameServer()->GetPlayerChar(m_Owner);
+	if(pOwnerChar)
+		m_TeamMask = pOwnerChar->TeamMask();
+	else
+		m_TeamMask = CClientMask().set();
 	m_OnlyShowOwner = OnlyShowOwner;
 
 	//GameWorld()->InsertEntity(this); do it in derivated classes +KZ

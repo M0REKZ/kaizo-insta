@@ -22,7 +22,7 @@ void CMinigunProjectile::Tick()
 	CStableProjectile::Tick();
 	if(Collision()->CheckPoint(m_Pos))
 	{
-		GameServer()->CreateSound(m_Pos,SOUND_HOOK_NOATTACH,GameServer()->GetPlayerChar(m_Owner)->TeamMask());
+		GameServer()->CreateSound(m_Pos,SOUND_HOOK_NOATTACH,m_TeamMask);
 		Reset();
 	}
 
@@ -35,7 +35,7 @@ void CMinigunProjectile::Tick()
 	if(pChr)
 	{
 		pChr->TakeDamage(m_Dir * 2,1,m_Owner,WEAPON_GUN);
-		GameServer()->CreateSound(m_Pos,SOUND_HOOK_ATTACH_PLAYER,GameServer()->GetPlayerChar(m_Owner)->TeamMask());
+		GameServer()->CreateSound(m_Pos,SOUND_HOOK_ATTACH_PLAYER,m_TeamMask);
 		Reset();
 	}
 }
