@@ -17,11 +17,9 @@ public:
 	void Tick() override;
 	void Snap(int SnappingClient) override;
 
-	int m_SpawnTickTeam[MAX_CLIENTS];
+	int m_SpawnTick;
 	
 	int m_Id2; //+KZ from Pointer tw+
-
-	int GetSpawnTick(int Team = 0) { return m_SpawnTickTeam[Team]; } //+KZ
 
 protected:
 

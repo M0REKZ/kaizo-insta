@@ -24,6 +24,8 @@ MACRO_CONFIG_INT(SvFlagHookGrab, sv_flag_hook_grab, 0, 0, 1, CFGFLAG_SERVER, "In
 MACRO_CONFIG_INT(SvRollback, sv_rollback, 0, 0, 1, CFGFLAG_SERVER, "Enables / Disables rollback support")
 MACRO_CONFIG_INT(SvAntiAdbotPointer, sv_antiadbot_pointer, 1, 0, 3, CFGFLAG_SERVER, "Whether Pointer's AntiAdbot should be on")
 MACRO_CONFIG_STR(SvChatDiscordWebhook, sv_chat_discord_webhook, 512, "", CFGFLAG_SERVER, "Where to send chat messages written by players")
+MACRO_CONFIG_INT(SvBlackholeLife, sv_blackhole_life, 5, 0, 999, CFGFLAG_SERVER, "Blackhole lifetime")
+
 
 //For Vanilla
 MACRO_CONFIG_INT(SvSpawnPickupWeapons, sv_spawn_pickup_weapons, 1, 0, 1, CFGFLAG_SERVER, "enable or disable weapons spawning (does not work on instagib)")

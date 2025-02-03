@@ -21,6 +21,7 @@ CEntity(pGameWorld,CGameWorld::CUSTOM_ENTTYPE_BLACKHOLE,vec2(0,0),gs_PickupPhysS
 	m_Pos = Pos;
 	m_Layer = Layer;
 	m_Owner = Owner;
+	m_SpawnTick = Server()->Tick();
 
 	GameWorld()->InsertEntity(this);
 
@@ -40,6 +41,12 @@ void CBlackHole::Tick()
 	CCharacter* pOwner = GameServer()->GetPlayerChar(m_Owner);
 
 	if(!pOwner)
+	{
+		Reset();
+		return;
+	}
+
+	if(g_Config.m_SvBlackholeLife && Server()->Tick()-m_SpawnTick > g_Config.m_SvBlackholeLife * Server()->TickSpeed())
 	{
 		Reset();
 		return;
