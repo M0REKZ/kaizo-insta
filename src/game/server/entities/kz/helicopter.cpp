@@ -128,7 +128,7 @@ void CHelicopter::HandleMounterInput(const CNetObj_PlayerInput* Input)
 		m_Vel.y = 5.f;
 	}
 
-	if(Input->m_Fire)
+	if(Input->m_Fire & 1)
 	{
 		new CMinigunProjectile(GameWorld(),m_pMounter->GetPlayer()->GetCid(),m_Pos,normalize(vec2(Input->m_TargetX, Input->m_TargetY)));
 		GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, m_pMounter->TeamMask());
