@@ -192,6 +192,26 @@ void CCharacterCore::Reset()
 
 void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 {
+	if(m_Mounted)
+	{
+		if(UseInput)
+		{
+			m_Direction = m_Input.m_Direction;
+
+			// setup angle
+			float TmpAngle = std::atan2(m_Input.m_TargetY, m_Input.m_TargetX);
+			if(TmpAngle < -(pi / 2.0f))
+			{
+				m_Angle = (int)((TmpAngle + (2.0f * pi)) * 256.0f);
+			}
+			else
+			{
+				m_Angle = (int)(TmpAngle * 256.0f);
+			}
+		}
+		return;
+	}
+
 	m_QuadCollided = false;
 
 	m_MoveRestrictions = m_pCollision->GetMoveRestrictions(UseInput ? IsSwitchActiveCb : nullptr, this, m_Pos);
@@ -591,6 +611,9 @@ void CCharacterCore::TickDeferred()
 
 void CCharacterCore::Move()
 {
+	if(m_Mounted)
+		return;
+
 	float RampValue = VelocityRamp(length(m_Vel) * 50, m_Tuning.m_VelrampStart, m_Tuning.m_VelrampRange, m_Tuning.m_VelrampCurvature);
 
 	/*if(m_StandingQuad.m_pQuad)

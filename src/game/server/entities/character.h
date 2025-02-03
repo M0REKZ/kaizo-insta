@@ -314,6 +314,7 @@ public:
 	void CatchBall();
 	void SetSparkles(bool v) { m_Sparkles = v; }
 	bool GetSparkles() { return m_Sparkles; }
+	const CNetObj_PlayerInput* GetInput() const { return &m_Input; }
 	bool m_HasBall = false;
 	bool m_HasFlagBall = false;
 	int m_DropFlagBallTicks = 0;

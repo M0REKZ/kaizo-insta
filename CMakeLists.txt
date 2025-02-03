@@ -2766,6 +2766,10 @@ if(SERVER)
     entities/kz/mine.h
     entities/kz/random_weapon.cpp
     entities/kz/random_weapon.h
+    entities/kz/vehicle_base.cpp
+    entities/kz/vehicle_base.h
+    entities/kz/helicopter.cpp
+    entities/kz/helicopter.h
     entity.cpp
     entity.h
     eventhandler.cpp

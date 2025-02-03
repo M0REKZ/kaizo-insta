@@ -635,6 +635,9 @@ void CCharacter::FireWeapon()
 		return;
 	}
 	
+	if(m_Core.m_Mounted)
+		return;
+
 	// check for ammo
     
 	if(m_Core.m_ActiveWeapon >=0 && m_Core.m_ActiveWeapon < NUM_WEAPONS && !m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
