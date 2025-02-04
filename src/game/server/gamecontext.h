@@ -156,7 +156,10 @@ class CGameContext : public IGameServer
 	static void ConSparkles(IConsole::IResult *pResult, void *pUserData);
 	static void ConExitVehicle(IConsole::IResult *pResult, void *pUserData);
 
+
 	//+KZ Custom Weapons
+	static void ConGetMines(IConsole::IResult *pResult, void *pUserData);
+
 	static void ConTaser(IConsole::IResult *pResult, void *pUserData);
 	static void ConUnTaser(IConsole::IResult *pResult, void *pUserData);
 	static void ConGetTaser(IConsole::IResult *pResult, void *pUserData);

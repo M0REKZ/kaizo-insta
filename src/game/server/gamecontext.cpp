@@ -3895,6 +3895,8 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("exit", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConExitVehicle, this, "Unmount Vehicle");
 
 	//+KZ Custom Weapons
+	Console()->Register("getmines", "?i[id] ?i[amount]", CFGFLAG_SERVER, ConGetMines, this, "Get Mines");
+
 	Console()->Register("taser", "", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConTaser, this, "Set Taser as active weapon (if have it)");
 	Console()->Register("untaser", "?i[id]", CFGFLAG_SERVER, ConUnTaser, this, "Remove Taser");
 	Console()->Register("gettaser", "?i[id]", CFGFLAG_SERVER, ConGetTaser, this, "Get Taser");
@@ -6398,6 +6400,41 @@ void CGameContext::ConGetChargeHammer(IConsole::IResult *pResult, void *pUserDat
 	}
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_CHARGE_HAMMER);
+}
+
+void CGameContext::ConGetMines(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID;
+
+	int Num = pResult->NumArguments();
+	int Amount = 1;
+
+	if(Num >= 1)
+	{
+		ClientID = pResult->GetInteger(0);
+		if(Num >=2)
+		{
+			Amount = pResult->GetInteger(1);
+		}
+	}
+	else
+	{
+		ClientID = pResult->m_ClientId;
+	}
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+
+	pSelf->m_apPlayers[ClientID]->GetCharacter()->m_Mines += Amount;
+	
 }
 
 void CGameContext::SendDiscordChatMessage(int ClientID, const char* msg)
