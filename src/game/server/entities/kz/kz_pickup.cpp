@@ -186,7 +186,7 @@ void CKZPickup::Tick()
 				break;
 			};
 
-			if(Picked)
+			if(Picked && (GameServer()->m_pController->m_IsInstagibKZ || GameServer()->m_pController->IsVanillaGameType() || m_Type != POWERUP_WEAPON))
 			{
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "pickup player='%d:%s' item=%d",
@@ -216,7 +216,14 @@ void CKZPickup::Snap(int SnappingClient)
 
 	CCharacter *pChar = GameServer()->GetPlayerChar(SnappingClient);
 
-	if(!(pChar && m_SpawnTickTeam[pChar->Team()] == -1))
+	int Team = 0;
+
+	if(!pChar)
+		Team = 0;
+	else
+		Team = pChar->Team();
+
+	if(!(m_SpawnTickTeam[Team] == -1))
 		return;
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);

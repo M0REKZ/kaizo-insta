@@ -150,7 +150,14 @@ void CRandomWeapon::Snap(int SnappingClient)
 
 	CCharacter *pChar = GameServer()->GetPlayerChar(SnappingClient);
 
-	if(!(pChar && m_SpawnTickTeam[pChar->Team()] == -1))
+	int Team = 0;
+
+	if(!pChar)
+		Team = 0;
+	else
+		Team = pChar->Team();
+
+	if(!(m_SpawnTickTeam[Team] == -1))
 		return;
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
@@ -167,7 +174,7 @@ void CRandomWeapon::Snap(int SnappingClient)
 			return;
 	}
 
-	if ((m_Type == POWERUP_HEALTH || m_Type == POWERUP_ARMOR) && m_Subtype[pChar->Team()] == 1 && m_Id2 != -1)
+	if ((m_Type == POWERUP_HEALTH || m_Type == POWERUP_ARMOR) && m_Subtype[Team] == 1 && m_Id2 != -1)
 	{
 		vec2 pos1, pos2;
 		
@@ -180,7 +187,7 @@ void CRandomWeapon::Snap(int SnappingClient)
 		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), pos1, m_Type, 0, m_Number);
 		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), m_Id2, pos2, m_Type, 0, m_Number);
 	}
-	else if(m_Subtype[pChar->Team()] >=0 && m_Subtype[pChar->Team()] < NUM_WEAPONS)
+	else if(m_Subtype[Team] >=0 && m_Subtype[Team] < NUM_WEAPONS)
 	{
 		vec2 postemp;
 				
@@ -198,6 +205,6 @@ void CRandomWeapon::Snap(int SnappingClient)
 		pProj->m_VelY = 0;
 		pProj->m_StartTick = Server()->Tick();
 		pProj->m_Type = WEAPON_HAMMER;
-		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, m_Subtype[pChar->Team()], m_Number);
+		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, m_Subtype[Team], m_Number);
 	}
 }
