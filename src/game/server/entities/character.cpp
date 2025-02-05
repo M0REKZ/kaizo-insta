@@ -3300,6 +3300,11 @@ bool CCharacter::Freeze(int Seconds)
 		GameServer()->m_pController->SetArmorProgressEmpty(this); // ddnet-insta
 		m_FreezeTime = Seconds * Server()->TickSpeed();
 		m_Core.m_FreezeStart = Server()->Tick();
+		if(m_pPlayer && !m_FrozenKZ)
+		{
+			m_pPlayer->m_RageQuitTick = Server()->Tick();
+			m_FrozenKZ = true;
+		}
 		return true;
 	}
 	return false;
@@ -3321,6 +3326,11 @@ bool CCharacter::UnFreeze()
 		m_FreezeTime = 0;
 		m_Core.m_FreezeStart = 0;
 		m_FrozenLastTick = true;
+		if(m_pPlayer && m_FrozenKZ)
+		{
+			m_pPlayer->m_RageQuitTick = Server()->Tick();
+			m_FrozenKZ = false;
+		}
 		return true;
 	}
 	return false;

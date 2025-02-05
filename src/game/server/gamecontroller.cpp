@@ -496,12 +496,18 @@ void IGameController::OnPlayerConnect(CPlayer *pPlayer)
 
 void IGameController::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason)
 {
+	bool IsRageQuit = false;
+	if(pPlayer->m_RageQuitTick + Server()->TickSpeed() * 5 > Server()->Tick())
+	{
+		IsRageQuit = true;
+	}
+
 	pPlayer->OnDisconnect();
 	int ClientId = pPlayer->GetCid();
 	if(Server()->ClientIngame(ClientId) || Server()->ClientRedirected(ClientId))
 	{
 		char aBuf[512];
-		if(pPlayer->m_RageQuitTick + Server()->TickSpeed() * 5 > Server()->Tick())
+		if(IsRageQuit)
 		{
 			if(pReason && *pReason)
 				str_format(aBuf, sizeof(aBuf), "'%s' rage quitted (%s)", Server()->ClientName(ClientId), pReason);
