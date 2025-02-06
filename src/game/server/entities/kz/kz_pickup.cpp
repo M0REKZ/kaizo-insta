@@ -137,7 +137,7 @@ void CKZPickup::Tick()
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
 							pChr->GiveWeapon(m_Subtype, false, -1);
 						}
-						else if(m_Subtype == WEAPON_GRENADE && pChr->GetWeaponAmmo(m_Subtype) < 10)
+						else if(m_Subtype == WEAPON_GRENADE && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) < 10))
 						{
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
 							if(m_Ammo == -2)
@@ -145,7 +145,7 @@ void CKZPickup::Tick()
 							else
 								pChr->GiveWeapon(m_Subtype, false, m_Ammo);
 						}
-						else if(m_Subtype == WEAPON_SHOTGUN && pChr->GetWeaponAmmo(m_Subtype) < 10)
+						else if(m_Subtype == WEAPON_SHOTGUN && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) < 10))
 						{
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
 							if(m_Ammo == -2)
@@ -153,7 +153,7 @@ void CKZPickup::Tick()
 							else
 								pChr->GiveWeapon(m_Subtype, false, m_Ammo);
 						}
-						else if(m_Subtype == WEAPON_LASER && pChr->GetWeaponAmmo(m_Subtype) < 10)
+						else if(m_Subtype == WEAPON_LASER && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) < 10))
 						{
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
 							if(m_Ammo == -2)

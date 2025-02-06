@@ -111,7 +111,7 @@ void CRandomWeapon::Tick()
 
 				if(m_Subtype[pChr->Team()] >= 0 && m_Subtype[pChr->Team()] < NUM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype[pChr->Team()]) || pChr->GetWeaponAmmo(m_Subtype[pChr->Team()]) != -1))
 				{
-					if(pChr->GetWeaponAmmo(m_Subtype[pChr->Team()]) < 10)
+					if(!pChr->GetWeaponGot(m_Subtype[pChr->Team()]) || pChr->GetWeaponAmmo(m_Subtype[pChr->Team()]) < 10)
 					{
 						pChr->GiveWeapon(m_Subtype[pChr->Team()], false, 10);
 
