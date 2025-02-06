@@ -62,10 +62,10 @@ void CKZPickup::Tick()
 	if(m_MarkedForDestroy)
 		return;
 
-	if(m_DropTick + Server()->TickSpeed() > Server()->Tick())
+	if(m_Dropped && m_DropTick + Server()->TickSpeed() > Server()->Tick())
 		return;
 
-	if(m_DropTick + Server()->TickSpeed() * 30 < Server()->Tick()) //if dropped dont stay forever
+	if(m_Dropped && m_DropTick + Server()->TickSpeed() * 30 < Server()->Tick()) //if dropped dont stay forever
 	{
 		Reset();
 		return;
