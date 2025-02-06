@@ -1133,6 +1133,11 @@ void CCharacter::Tick()
 			GameServer()->SendBroadcast("Portal Gun: Orange Portal",m_pPlayer->GetCid());
 	}
 
+	if(m_ConfettiKZ && Server()->Tick() % 5 == 0)
+	{
+		GameServer()->CreateFinishEffect(m_Pos,TeamMask());
+	}
+
 	//m_Dying--;
 	if(m_pPlayer->m_Rollback)
 	{
@@ -3678,6 +3683,17 @@ void CCharacter::HandleKZTiles()
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You lost sparkles");
 		m_Sparkles = false;
+	}
+
+	if(TileIndex == TILE_CONFETTI_ON && !m_ConfettiKZ)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You got confetti");
+		m_ConfettiKZ = true;
+	}
+	else if(TileIndex == TILE_CONFETTI_OFF && m_ConfettiKZ)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You lost confetti");
+		m_ConfettiKZ = false;
 	}
 
 	if(TileIndex == TILE_SIT && !m_Sit)

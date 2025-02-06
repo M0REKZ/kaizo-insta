@@ -3905,6 +3905,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("redirect_client", "i[id] i[port]", CFGFLAG_CHAT |  CFGFLAG_SERVER, ConRedirectClient, this, "Redirect client to another server (Works for DDNet version 17.2 and above)");
 	Console()->Register("sparkles", "?i[id]", CFGFLAG_SERVER, ConSparkles, this, "Get Sparkles");
 	Console()->Register("exit", "", CFGFLAG_CHAT | CFGFLAG_SERVER, ConExitVehicle, this, "Unmount Vehicle");
+	Console()->Register("teeconfetti", "?i[id]", CFGFLAG_SERVER, ConTeeConfetti, this, "Get Confetti");
 
 	//+KZ Custom Weapons
 	Console()->Register("getmines", "?i[id] ?i[amount]", CFGFLAG_SERVER, ConGetMines, this, "Get Mines");
@@ -5812,6 +5813,36 @@ void CGameContext::ConSparkles(IConsole::IResult *pResult, void *pUserData)
 		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetSparkles(true);
 	else
 		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetSparkles(false);
+}
+
+void CGameContext::ConTeeConfetti(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID;
+
+	if(pResult->NumArguments())
+	{
+		ClientID = pResult->GetInteger(0);
+	}
+	else
+	{
+		ClientID = pResult->m_ClientId;
+	}
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+	
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter()->m_ConfettiKZ)
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->m_ConfettiKZ = true;
+	else
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->m_ConfettiKZ = false;
 }
 
 void CGameContext::ConTaser(IConsole::IResult *pResult, void *pUserData)

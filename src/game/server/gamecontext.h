@@ -155,6 +155,7 @@ class CGameContext : public IGameServer
 	static void ConRedirectClient(IConsole::IResult *pResult, void *pUserData);
 	static void ConSparkles(IConsole::IResult *pResult, void *pUserData);
 	static void ConExitVehicle(IConsole::IResult *pResult, void *pUserData);
+	static void ConTeeConfetti(IConsole::IResult *pResult, void *pUserData);
 
 
 	//+KZ Custom Weapons
