@@ -13,6 +13,7 @@
 #include "kz/portal_projectile.h"
 #include "kz/minigun_projectile.h"
 #include "kz/blackhole.h"
+#include "kz/kz_pickup.h"
 
 #include <antibot/antibot_data.h>
 
@@ -569,6 +570,9 @@ void CCharacter::HandleWeaponSwitch()
 
 void CCharacter::FireWeapon()
 {
+	if(m_HasNoWeapon)
+		return;
+
 	if(m_ReloadTimer != 0)
 	{
 		if(m_LatestInput.m_Fire & 1)
@@ -1672,7 +1676,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 
 		pCharacter->m_AttackTick = m_AttackTick;
 		pCharacter->m_Direction = m_Input.m_Direction;
-		if(m_HasFlagBall || m_DropFlagBallTicks > 0)
+		if(m_HasNoWeapon || m_HasFlagBall || m_DropFlagBallTicks > 0)
 			pCharacter->m_Weapon = -1;
 		else if(m_SnapCustomWeapon)
 			pCharacter->m_Weapon = m_aCustomWeaponSnaps[m_Core.m_ActiveWeapon - CUSTOM_WEAPON_START];
@@ -3344,6 +3348,9 @@ void CCharacter::ResetJumps()
 
 void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 {
+	if(!Remove)
+		m_HasNoWeapon = false;
+
 	if(Weapon >= 0 && Weapon < NUM_WEAPONS)
 	{
 		if(Weapon == WEAPON_NINJA)
@@ -3380,6 +3387,17 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 		{
 			m_aCustomWeaponAmmo[Weapon-CUSTOM_WEAPON_START] = Ammo;
 		}
+	}
+
+	int w = FindGotWeaponKZ();
+	if(w != -1)
+	{
+		SetActiveWeapon(w);
+	}
+	else
+	{
+		SetActiveWeapon(WEAPON_GUN);
+		m_HasNoWeapon = true;
 	}
 }
 
@@ -4862,4 +4880,39 @@ bool CCharacter::TakeDamage(vec2 Force, int Dmg, int From, int Weapon, int tick)
 	}
 
 	return false;
+}
+
+bool CCharacter::DropWeapon(int Weapon)
+{
+	if(GetWeaponGot(Weapon))
+	{
+		CKZPickup* pickup = new CKZPickup(GameWorld(),POWERUP_WEAPON,Weapon);
+		pickup->m_Pos = m_Pos;
+		pickup->m_Dropped = true;
+		pickup->m_DropTick = Server()->Tick();
+		pickup->m_Vel = normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY)) * 10;
+		pickup->m_ThisTeamOnly = Team();
+		pickup->m_Ammo = GetWeaponAmmo(Weapon);
+
+		GameServer()->CreateSound(m_Pos,SOUND_WEAPON_SWITCH,TeamMask());
+
+		GiveWeapon(Weapon,true,0);
+
+		return true;
+	}
+	return false;
+}
+
+int CCharacter::FindGotWeaponKZ()
+{
+	bool got;
+	for(int i=WEAPON_HAMMER;i<NUM_CUSTOM_WEAPONS;i++)
+	{
+		got = GetWeaponGot(i);
+		if(got)
+		{
+			return i;
+		}
+	}
+	return -1;
 }

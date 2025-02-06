@@ -58,6 +58,18 @@ void CKZPickup::Reset()
 void CKZPickup::Tick()
 {
 	Move();
+
+	if(m_MarkedForDestroy)
+		return;
+
+	if(m_DropTick + Server()->TickSpeed() > Server()->Tick())
+		return;
+
+	if(m_DropTick + Server()->TickSpeed() * 30 < Server()->Tick()) //if dropped dont stay forever
+	{
+		Reset();
+		return;
+	}
 	
 	for(int i=0;i < MAX_CLIENTS;i++)
 	{
@@ -83,6 +95,9 @@ void CKZPickup::Tick()
 	{
 		if(pChr && pChr->IsAlive())
 		{
+			if(pChr->Team() != m_ThisTeamOnly)
+				continue;
+
 			if(m_SpawnTickTeam[pChr->Team()] > 0)
 				continue;
 
@@ -117,40 +132,66 @@ void CKZPickup::Tick()
 				if(m_Subtype >= 0 && m_Subtype < NUM_CUSTOM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
 				{
 
-						if(m_Subtype == WEAPON_GRENADE && pChr->GetWeaponAmmo(m_Subtype) < 10)
+						if((m_Subtype == WEAPON_GUN || m_Subtype == WEAPON_HAMMER) && !pChr->GetWeaponGot(m_Subtype))
+						{
+							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
+							pChr->GiveWeapon(m_Subtype, false, -1);
+						}
+						else if(m_Subtype == WEAPON_GRENADE && pChr->GetWeaponAmmo(m_Subtype) < 10)
 						{
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
-							pChr->GiveWeapon(m_Subtype, false, 10);
+							if(m_Ammo == -2)
+								pChr->GiveWeapon(m_Subtype, false, 10);
+							else
+								pChr->GiveWeapon(m_Subtype, false, m_Ammo);
 						}
 						else if(m_Subtype == WEAPON_SHOTGUN && pChr->GetWeaponAmmo(m_Subtype) < 10)
 						{
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
-							pChr->GiveWeapon(m_Subtype, false, 10);
+							if(m_Ammo == -2)
+								pChr->GiveWeapon(m_Subtype, false, 10);
+							else
+								pChr->GiveWeapon(m_Subtype, false, m_Ammo);
 						}
 						else if(m_Subtype == WEAPON_LASER && pChr->GetWeaponAmmo(m_Subtype) < 10)
 						{
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
-							pChr->GiveWeapon(m_Subtype, false, 10);
+							if(m_Ammo == -2)
+								pChr->GiveWeapon(m_Subtype, false, 10);
+							else
+								pChr->GiveWeapon(m_Subtype, false, m_Ammo);
 						}
-						else if(m_Subtype == WEAPON_TASER && pChr->GetWeaponAmmo(m_Subtype) < pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START])
+						else if(m_Subtype == WEAPON_TASER && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) < pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START]))
 						{
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
-							pChr->GiveWeapon(m_Subtype, false, pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START]);
+							if(m_Ammo == -2)
+								pChr->GiveWeapon(m_Subtype, false, pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START]);
+							else
+								pChr->GiveWeapon(m_Subtype, false, m_Ammo);
 						}
-						else if(m_Subtype == WEAPON_PORTAL_GUN && pChr->GetWeaponAmmo(m_Subtype) < pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START])
+						else if(m_Subtype == WEAPON_PORTAL_GUN && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) < pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START]))
 						{
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
-							pChr->GiveWeapon(m_Subtype, false, pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START]);
+							if(m_Ammo == -2)
+								pChr->GiveWeapon(m_Subtype, false, pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START]);
+							else
+								pChr->GiveWeapon(m_Subtype, false, m_Ammo);
 						}
-						else if(m_Subtype == WEAPON_MINIGUN && pChr->GetWeaponAmmo(m_Subtype) < pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START])
+						else if(m_Subtype == WEAPON_MINIGUN && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) < pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START]))
 						{
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
-							pChr->GiveWeapon(m_Subtype, false, pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START]);
+							if(m_Ammo == -2)
+								pChr->GiveWeapon(m_Subtype, false, pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START]);
+							else
+								pChr->GiveWeapon(m_Subtype, false, m_Ammo);
 						}
 						else if(m_Subtype == WEAPON_BLACKHOLE && !pChr->GetWeaponGot(WEAPON_BLACKHOLE))
 						{
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
-							pChr->GiveWeapon(m_Subtype, false, 0);
+							if(m_Ammo == -2)
+								pChr->GiveWeapon(m_Subtype, false, 0);
+							else
+								pChr->GiveWeapon(m_Subtype, false, m_Ammo);
 						}
 						else if(m_Subtype == WEAPON_CHARGE_HAMMER && !pChr->GetWeaponGot(WEAPON_CHARGE_HAMMER))
 						{
@@ -186,7 +227,7 @@ void CKZPickup::Tick()
 				break;
 			};
 
-			if(Picked && (GameServer()->m_pController->m_IsInstagibKZ || GameServer()->m_pController->IsVanillaGameType() || m_Type != POWERUP_WEAPON))
+			if(!m_Dropped && Picked && (GameServer()->m_pController->m_IsInstagibKZ || GameServer()->m_pController->IsVanillaGameType() || m_Type != POWERUP_WEAPON))
 			{
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "pickup player='%d:%s' item=%d",
@@ -195,6 +236,14 @@ void CKZPickup::Tick()
 				int RespawnTime = m_Type == POWERUP_NINJA ? 90 : 15;
 				if(RespawnTime >= 0)
 					m_SpawnTickTeam[pChr->Team()] = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
+			}
+			else if(m_Dropped && Picked)
+			{
+				char aBuf[256];
+				str_format(aBuf, sizeof(aBuf), "pickup player='%d:%s' item=%d",
+					pChr->GetPlayer()->GetCid(), Server()->ClientName(pChr->GetPlayer()->GetCid()), m_Type);
+				GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
+				Reset();
 			}
 		}
 	}
@@ -216,12 +265,26 @@ void CKZPickup::Snap(int SnappingClient)
 
 	CCharacter *pChar = GameServer()->GetPlayerChar(SnappingClient);
 
-	int Team = 0;
+	int Team;
 
-	if(!pChar)
-		Team = 0;
+	if(m_ThisTeamOnly == -1)
+	{
+		if(!pChar)
+			Team = 0;
+		else
+			Team = pChar->Team();
+	}
 	else
-		Team = pChar->Team();
+	{
+		if(!pChar)
+			Team = m_ThisTeamOnly;
+		else
+			Team = pChar->Team();
+	}
+
+	if(m_ThisTeamOnly != -1 && Team != m_ThisTeamOnly)
+		return;
+
 
 	if(!(m_SpawnTickTeam[Team] == -1))
 		return;
@@ -370,9 +433,75 @@ void CKZPickup::Snap(int SnappingClient)
 
 void CKZPickup::Move()
 {
-	if(Server()->Tick() % (int)(Server()->TickSpeed() * 0.15f) == 0)
+	if(!m_Dropped)
 	{
-		Collision()->MoverSpeed(m_Pos.x, m_Pos.y, &m_Core);
-		m_Pos += m_Core;
+		if(Server()->Tick() % (int)(Server()->TickSpeed() * 0.15f) == 0)
+		{
+			Collision()->MoverSpeed(m_Pos.x, m_Pos.y, &m_Core);
+			m_Pos += m_Core;
+		}
+	}
+	else
+	{
+		//flag physics
+
+		if((GameServer()->Collision()->GetCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH) ||
+			(GameServer()->Collision()->GetFrontCollisionAt(m_Pos.x, m_Pos.y) == TILE_DEATH) ||
+			GameLayerClipped(m_Pos))
+		{
+			Reset();
+			return;
+		}
+
+		
+			if(Server()->Tick() > m_DropTick + Server()->TickSpeed() * 30)
+			{
+				Reset();
+				return;
+			}
+			else
+			{
+				// Friction
+				m_IsGrounded = false;
+				if(GameServer()->Collision()->CheckPoint(m_Pos.x + gs_PickupPhysSize / 2, m_Pos.y + gs_PickupPhysSize / 2 + 5))
+					m_IsGrounded = true;
+				if(GameServer()->Collision()->CheckPoint(m_Pos.x - gs_PickupPhysSize / 2, m_Pos.y + gs_PickupPhysSize / 2 + 5))
+					m_IsGrounded = true;
+
+				if(m_IsGrounded)
+				{
+					m_Vel.x *= 0.75f;
+				}
+				else
+				{
+					m_Vel.x *= 0.98f;
+				}
+
+				// Gravity
+				m_Vel.y += GameWorld()->m_Core.m_aTuning[0].m_Gravity;
+				GameServer()->Collision()->MoveBox(&m_Pos, &m_Vel, vec2(gs_PickupPhysSize, gs_PickupPhysSize), vec2(0.5, 0.5));
+
+				//ICTFX Flag teleport
+				int index = GameServer()->Collision()->GetMapIndex(m_Pos);
+				//CCollision * col = GameServer()->Collision();
+				int tele = GameServer()->Collision()->IsTeleport(index);
+				if(!tele)
+					tele = GameServer()->Collision()->IsEvilTeleport(index);
+				if(!tele)
+					tele = GameServer()->Collision()->IsCheckTeleport(index);
+				if(!tele)
+					tele = GameServer()->Collision()->IsCheckEvilTeleport(index);
+
+				if(tele)
+				{
+					int size = GameServer()->Collision()->TeleOuts(tele-1).size();
+					if(size)
+					{
+						int RandomOut = rand() % size;
+						m_Pos = GameServer()->Collision()->TeleOuts(tele-1)[RandomOut];
+					}
+				}
+			}
+		
 	}
 }

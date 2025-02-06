@@ -23,6 +23,12 @@ public:
 	int m_SpawnTickTeam[MAX_CLIENTS];
 	
 	int m_Id2; //+KZ from Pointer tw+
+	bool m_Dropped = false;
+	int m_DropTick = 0;
+	vec2 m_Vel = vec2(0,0);
+	int m_ThisTeamOnly = -1;
+	bool m_IsGrounded = false;
+	int m_Ammo = -2;
 
 	int Type() const { return m_Type; }
 	int Subtype() const { return m_Subtype; }

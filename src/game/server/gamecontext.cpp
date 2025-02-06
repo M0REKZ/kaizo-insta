@@ -2669,6 +2669,18 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 
 void CGameContext::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
 {
+	//+KZ
+	if(g_Config.m_SvDropWeapons)
+	{
+		CPlayer *pPlayer = m_apPlayers[ClientId];
+		CCharacter* pChr = pPlayer->GetCharacter();
+		if(pMsg->m_Vote == -1 && pChr && pChr->IsAlive())
+		{
+			if(pChr->DropWeapon(pChr->GetActiveWeapon()))
+				return;
+		}
+	}
+	
 	// ddnet-insta
 	if(m_pController->OnVoteNetMessage(pMsg, ClientId))
 		return;
@@ -5851,8 +5863,7 @@ void CGameContext::ConUnTaser(IConsole::IResult *pResult, void *pUserData)
 
 	if(got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_TASER, false);
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_TASER, 0);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_TASER,true,0);
 	}
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_GUN);
@@ -5922,8 +5933,7 @@ void CGameContext::ConGetTaser(IConsole::IResult *pResult, void *pUserData)
 
 	if(!got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_TASER, true);
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_TASER, 10);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_TASER,false,10);
 	}
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_TASER);
@@ -5978,8 +5988,7 @@ void CGameContext::ConUnPortalGun(IConsole::IResult *pResult, void *pUserData)
 
 	if(got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_PORTAL_GUN, false);
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_PORTAL_GUN, 0);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_PORTAL_GUN,true,0);
 	}
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_GUN);
@@ -6013,8 +6022,7 @@ void CGameContext::ConGetPortalGun(IConsole::IResult *pResult, void *pUserData)
 
 	if(!got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_PORTAL_GUN, true);
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_PORTAL_GUN, 10);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_PORTAL_GUN,false,10);
 	}
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_PORTAL_GUN);
@@ -6139,8 +6147,7 @@ void CGameContext::ConUnMinigun(IConsole::IResult *pResult, void *pUserData)
 
 	if(got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_MINIGUN, false);
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_MINIGUN, 0);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_MINIGUN,true,0);
 	}
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_GUN);
@@ -6174,8 +6181,7 @@ void CGameContext::ConGetMinigun(IConsole::IResult *pResult, void *pUserData)
 
 	if(!got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_MINIGUN, true);
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_MINIGUN, 10);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_MINIGUN,false,1000);
 	}
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_MINIGUN);
@@ -6230,8 +6236,7 @@ void CGameContext::ConUnBlackHole(IConsole::IResult *pResult, void *pUserData)
 
 	if(got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_BLACKHOLE, false);
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_BLACKHOLE, 0);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_BLACKHOLE,true,0);
 	}
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_GUN);
@@ -6265,8 +6270,7 @@ void CGameContext::ConGetBlackHole(IConsole::IResult *pResult, void *pUserData)
 
 	if(!got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_BLACKHOLE, true);
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_BLACKHOLE, 1);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_BLACKHOLE,false,1);
 	}
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_BLACKHOLE);
@@ -6360,8 +6364,7 @@ void CGameContext::ConUnChargeHammer(IConsole::IResult *pResult, void *pUserData
 
 	if(got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_CHARGE_HAMMER, false);
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_CHARGE_HAMMER, 0);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_CHARGE_HAMMER,true,0);
 	}
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_GUN);
@@ -6395,8 +6398,7 @@ void CGameContext::ConGetChargeHammer(IConsole::IResult *pResult, void *pUserDat
 
 	if(!got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponGot(WEAPON_CHARGE_HAMMER, true);
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_CHARGE_HAMMER, -1);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_CHARGE_HAMMER,false,-1);
 	}
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_CHARGE_HAMMER);

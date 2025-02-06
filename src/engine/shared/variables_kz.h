@@ -25,6 +25,7 @@ MACRO_CONFIG_INT(SvRollback, sv_rollback, 0, 0, 1, CFGFLAG_SERVER, "Enables / Di
 MACRO_CONFIG_INT(SvAntiAdbotPointer, sv_antiadbot_pointer, 1, 0, 3, CFGFLAG_SERVER, "Whether Pointer's AntiAdbot should be on")
 MACRO_CONFIG_STR(SvChatDiscordWebhook, sv_chat_discord_webhook, 512, "", CFGFLAG_SERVER, "Where to send chat messages written by players")
 MACRO_CONFIG_INT(SvBlackholeLife, sv_blackhole_life, 5, 0, 999, CFGFLAG_SERVER, "Blackhole lifetime")
+MACRO_CONFIG_INT(SvDropWeapons, sv_drop_weapons, 0, 0, 1, CFGFLAG_SERVER, "Allow drop weapons")
 
 
 //For Vanilla
