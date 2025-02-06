@@ -95,7 +95,7 @@ void CKZPickup::Tick()
 	{
 		if(pChr && pChr->IsAlive())
 		{
-			if(pChr->Team() != m_ThisTeamOnly)
+			if(m_ThisTeamOnly != -1 && pChr->Team() != m_ThisTeamOnly)
 				continue;
 
 			if(m_SpawnTickTeam[pChr->Team()] > 0)
