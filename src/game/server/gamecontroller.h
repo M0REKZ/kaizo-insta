@@ -146,12 +146,6 @@ public:
 	// void EndRound(); // ddnet-insta
 	void ChangeMap(const char *pToMap);
 
-	void CheckGameInfo();
-	bool IsFriendlyFire(int ClientId1, int ClientId2);
-	bool IsTeamplay() const { return m_GameFlags & GAMEFLAG_TEAMS; }
-
-	bool IsForceBalanced();
-
 	/*
 
 	*/
@@ -175,7 +169,7 @@ public:
 
 	CClientMask GetMaskForPlayerWorldEvent(int Asker, int ExceptID = -1);
 
-	bool IsTeamPlay() { return m_GameFlags & GAMEFLAG_TEAMS; }
+	bool IsTeamPlay() const { return m_GameFlags & GAMEFLAG_TEAMS; }
 	// DDRace
 
 	float m_CurrentRecord;

@@ -134,11 +134,6 @@ void IGameController::CheckReadyStates(int WithoutId)
 	{
 		switch(m_GameState)
 		{
-		case IGS_WARMUP_USER:
-			// all players are ready -> end warmup
-			if(GetPlayersReadyState(WithoutId))
-				SetGameState(IGS_WARMUP_USER, 0);
-			break;
 		case IGS_GAME_PAUSED:
 			// all players are ready -> unpause the game
 			if(GetPlayersReadyState(WithoutId))
@@ -148,6 +143,7 @@ void IGameController::CheckReadyStates(int WithoutId)
 			}
 			break;
 		case IGS_GAME_RUNNING:
+		case IGS_WARMUP_USER:
 		case IGS_WARMUP_GAME:
 		case IGS_START_COUNTDOWN_UNPAUSE:
 		case IGS_START_COUNTDOWN_ROUND_START:
@@ -190,7 +186,7 @@ bool IGameController::DoWincheckRound()
 	if(IsWarmup())
 		return false;
 
-	if(IsTeamplay())
+	if(IsTeamPlay())
 	{
 		// check score win condition
 		if((m_GameInfo.m_ScoreLimit > 0 && (m_aTeamscore[TEAM_RED] >= m_GameInfo.m_ScoreLimit || m_aTeamscore[TEAM_BLUE] >= m_GameInfo.m_ScoreLimit)) ||
@@ -256,7 +252,7 @@ bool IGameController::IsFriendlyFire(int ClientId1, int ClientId2)
 	if(ClientId1 == ClientId2)
 		return false;
 
-	if(IsTeamplay())
+	if(IsTeamPlay())
 	{
 		if(!GameServer()->m_apPlayers[ClientId1] || !GameServer()->m_apPlayers[ClientId2])
 			return false;
