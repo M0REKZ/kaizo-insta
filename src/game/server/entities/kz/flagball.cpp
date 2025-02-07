@@ -131,7 +131,7 @@ void CFlagBall::HandleKZTiles()
 {
 	CFlag::HandleKZTiles();
 
-		if((Collision()->KZFound()) && GameServer()->m_pController->IsTeamplay())
+		if((Collision()->KZFound()) && GameServer()->m_pController->IsTeamPlay())
 	{
 		
 		int TileIndex = Collision()->GetKZTileIndex(m_Pos);

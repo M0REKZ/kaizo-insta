@@ -3891,7 +3891,7 @@ void CCharacter::HandleKZTiles()
 		Die(m_pPlayer->GetCid(), WEAPON_WORLD);
 	}
 	
-	if(GameServer()->m_pController->IsTeamplay())
+	if(GameServer()->m_pController->IsTeamPlay())
 	{
 		
 		if(TileIndex == TILE_BALL_REDSLAM)
@@ -4812,7 +4812,7 @@ void CCharacter::DoPointerBotAI(CNetObj_PlayerInput &Input)
 				vec2 pos = GameServer()->m_apPlayers[i]->GetCharacter()->m_Pos;
 				float d = sqrt((pos.x - m_Pos.x)*(pos.x - m_Pos.x) + (1.35)*(pos.y - m_Pos.y)*(pos.y - m_Pos.y));
 				// vertical distance is multiplied by a factor, since screens are larger horizontally
-				if (d < smallestDistance && !(GameServer()->m_pController->IsTeamplay() && GameServer()->m_apPlayers[i]->GetTeam() == m_pPlayer->GetTeam())) {
+				if (d < smallestDistance && !(GameServer()->m_pController->IsTeamPlay() && GameServer()->m_apPlayers[i]->GetTeam() == m_pPlayer->GetTeam())) {
 					smallestDistance = d;
 					m_botAggroPointer = i;
 				}

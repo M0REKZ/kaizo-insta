@@ -49,7 +49,7 @@ void CMine::Tick()
 			
 			if(apCloseChars[i] && apCloseChars[i]->IsAlive() && apCloseChars[i]->GetPlayer()->GetCid() != m_Owner)
 			{
-				if(m_Owner < 0 ? false : (GameServer()->m_pController->IsTeamplay() && apCloseChars[i]->GetPlayer()->GetTeam() == GameServer()->m_apPlayers[m_Owner]->GetTeam()))
+				if(m_Owner < 0 ? false : (GameServer()->m_pController->IsTeamPlay() && apCloseChars[i]->GetPlayer()->GetTeam() == GameServer()->m_apPlayers[m_Owner]->GetTeam()))
 					continue;
 				
 				pChr = apCloseChars[i];
@@ -111,7 +111,7 @@ void CMine::Tick()
 					continue;
 				if(p->GetOwnerId() != m_Owner && p->GetOwnerId() != -1)
 				{
-					if(m_Owner < 0 ? false : (GameServer()->m_pController->IsTeamplay() && GameServer()->m_apPlayers[p->GetOwnerId()]->GetTeam() == GameServer()->m_apPlayers[m_Owner]->GetTeam()))
+					if(m_Owner < 0 ? false : (GameServer()->m_pController->IsTeamPlay() && GameServer()->m_apPlayers[p->GetOwnerId()]->GetTeam() == GameServer()->m_apPlayers[m_Owner]->GetTeam()))
 						continue;
 					
 					float Len = 0.0f;
