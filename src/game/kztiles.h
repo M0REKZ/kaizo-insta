@@ -3,6 +3,7 @@
 #ifndef KZTILES_H
 #define KZTILES_H
 
+#include <game/generated/protocol.h>
 #include <game/mapitems.h>
 
 enum
