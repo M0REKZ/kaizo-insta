@@ -33,6 +33,7 @@ public:
 	void OnCharacterSpawn(class CCharacter *pChr) override;
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
 	void Tick() override;
+	bool CanJoinTeam(int Team, int NotThisId, char *pErrorReason, int ErrorReasonSize) override;
 	int GetAutoTeam(int NotThisId) override;
 	int SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags) override;
 	int SnapGameInfoExFlags2(int SnappingClient, int DDRaceFlags) override;
@@ -101,7 +102,6 @@ public:
 	bool ForceNetworkClipping(const CEntity *pEntity, int SnappingClient, vec2 CheckPos) override;
 	bool ForceNetworkClippingLine(const CEntity *pEntity, int SnappingClient, vec2 StartPos, vec2 EndPos) override;
 
-	bool HasWinningScore(const CPlayer *pPlayer) const;
 	bool IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage) override;
 	bool IsLoser(const CPlayer *pPlayer) override;
 	bool IsStatTrack(char *pReason = nullptr, int SizeOfReason = 0) override;

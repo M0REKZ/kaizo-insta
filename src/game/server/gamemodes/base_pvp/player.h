@@ -9,6 +9,7 @@
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
+#include <game/server/teeinfo.h>
 #include <optional>
 #include <vector>
 
@@ -23,6 +24,13 @@ class CPlayer
 
 public:
 	void InstagibTick();
+	void RainbowTick();
+
+	int m_RainbowColor = 0;
+
+	// backup of the players skin
+	// for when cosmetics like rainbow are turned off
+	CTeeInfo m_TeeInfosNoCosmetics;
 
 	void ProcessStatsResult(CInstaSqlResult &Result);
 
@@ -42,12 +50,23 @@ public:
 
 	// Will be -1 when the player is alive
 	int m_KillerId = -1;
+
+	// never call this method use DoTeamChange() instead
+	// otherwise the m_aTeamSize goes out of sync
+	// and the in game slots break
 	void SetTeamSpoofed(int Team, bool DoChatMsg = false);
+
+	// never call this method use DoTeamChange() instead
+	// otherwise the m_aTeamSize goes out of sync
+	// and the in game slots break
 	void SetTeamNoKill(int Team, bool DoChatMsg = false);
-	void SetTeamRaw(int Team) { m_Team = Team; }
+
+	// try to avoid using that method because it is hacky
+	void SetTeamRaw(int Team);
+
 	// dead players can not respawn
 	// will be used like m_RespawnDisabled in 0.7
-	bool m_IsDead;
+	bool m_IsDead = false;
 	bool m_GotRespawnInfo = false;
 	bool m_WantsToJoinSpectators = false;
 	std::vector<int> m_vVictimIds;

@@ -504,6 +504,30 @@ public:
 			pPlayer - player that was connected on round start
 	*/
 	virtual void RoundInitPlayer(class CPlayer *pPlayer){};
+
+	/*
+		Function: FreeInGameSlots
+			The amount of free in game slots.
+			Used to block players from joining the game if
+			for example a 1vs1 one is running and already
+			2 players are playing.
+
+			In ddnet-insta this value is more complex than
+			looking at read red + team blue and the SvPlayerSlots / SvSpectatorSlots config
+			because we also have game modes such as zCatch
+			where players can be spectators during the time they are dead
+			but they are still considered active players
+			while there are also permanent spectators that do not
+			occupy any slots.
+
+			Call this method if you want to know how many players can still join the game.
+			And overwrite it if you have a more custom demand to count these than
+			looking at players that are not spectators.
+
+			If this method returns 0 players will see this error in the broadcast
+			"Only %d active players are allowed"
+	*/
+	virtual int FreeInGameSlots();
 	virtual CClientMask FreezeDamageIndicatorMask(CCharacter *pChr);
 	virtual void OnDDRaceTimeLoad(class CPlayer *pPlayer, float Time);
 
@@ -619,7 +643,7 @@ public:
 	bool HasEnoughPlayers() const { return (IsTeamPlay() && m_aTeamSize[TEAM_RED] > 0 && m_aTeamSize[TEAM_BLUE] > 0) || (!IsTeamPlay() && m_aTeamSize[TEAM_RED] > 1); }
 	void SetGameState(EGameState GameState, int Timer = 0);
 
-	bool m_AllowSkinChange = true;
+	bool m_AllowSkinColorChange = true;
 
 	// protected:
 public:
@@ -682,6 +706,7 @@ public:
 	virtual void OnUpdateZcatchColorConfig(){};
 	virtual void OnUpdateSpectatorVotesConfig(){};
 	virtual bool DropFlag(class CCharacter *pChr) { return false; };
+	virtual bool HasWinningScore(const CPlayer *pPlayer) const;
 
 	/*
 		Variable: m_GamePauseStartTime
@@ -701,7 +726,7 @@ public:
 	// depends on the base pvp controller to tick
 	int m_TicksUntilShutdown = 0;
 
-	bool IsSkinChangeAllowed() const { return m_AllowSkinChange; }
+	bool IsSkinColorChangeAllowed() const { return m_AllowSkinColorChange; }
 	int GameFlags() const { return m_GameFlags; }
 	void CheckGameInfo();
 	bool IsFriendlyFire(int ClientId1, int ClientId2);

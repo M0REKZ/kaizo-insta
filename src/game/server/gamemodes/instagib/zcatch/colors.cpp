@@ -1,3 +1,4 @@
+#include <game/server/entities/character.h>
 #include <game/server/player.h>
 #include <game/server/teeinfo.h>
 
@@ -10,7 +11,7 @@ static int ColorToSixup(int Color6)
 
 int CGameControllerZcatch::GetBodyColorTeetime(int Kills)
 {
-	return maximum(0, 160 - Kills * 10) * 0x010000 + 0xff00;
+	return (maximum(0, 160 - (Kills * 10)) * 0x010000) + 0xff00;
 }
 
 int CGameControllerZcatch::GetBodyColorSavander(int Kills)
@@ -86,6 +87,9 @@ void CGameControllerZcatch::OnUpdateZcatchColorConfig()
 
 void CGameControllerZcatch::SetCatchColors(CPlayer *pPlayer)
 {
+	if(pPlayer->GetCharacter() && pPlayer->GetCharacter()->HasRainbow())
+		return;
+
 	int Color = GetBodyColor(pPlayer->m_KillsThatCount);
 
 	// it would be cleaner if this only applied to the winner
@@ -127,6 +131,8 @@ void CGameControllerZcatch::SendSkinBodyColor7(int ClientId, int Color)
 
 	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
 	if(!pPlayer)
+		return;
+	if(pPlayer->GetCharacter() && pPlayer->GetCharacter()->HasRainbow())
 		return;
 
 	// also update 0.6 just to be sure

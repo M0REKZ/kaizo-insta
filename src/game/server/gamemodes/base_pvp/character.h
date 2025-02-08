@@ -26,7 +26,9 @@ public:
 		useful for votes
 	*/
 	void ResetInstaSettings();
-	bool m_IsGodmode;
+
+	// player can not be damaged with weapons
+	bool m_IsGodmode = false;
 
 	int Health() { return m_Health; };
 	int Armor() { return m_Armor; };
@@ -47,6 +49,13 @@ public:
 		Same radius as vanilla death tiles.
 	*/
 	bool IsTouchingTile(int Tile);
+
+	void Rainbow(bool Activate);
+	bool HasRainbow() const { return m_Rainbow; }
+
+private:
+	// players skin changes colors
+	bool m_Rainbow = false;
 
 #ifndef IN_CLASS_CHARACTER
 };

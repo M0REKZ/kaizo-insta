@@ -16,7 +16,7 @@ CGameControllerVanilla::CGameControllerVanilla(class CGameContext *pGameServer) 
 {
 	m_GameFlags = 0;
 	m_IsVanillaGameType = true;
-	m_AllowSkinChange = true;
+	m_AllowSkinColorChange = true;
 	m_DefaultWeapon = WEAPON_GUN;
 }
 
@@ -115,7 +115,7 @@ bool CGameControllerVanilla::OnEntity(int Index, int x, int y, int Layer, int Fl
 	if(g_Config.m_SvSpawnPickups ? false : (Index == ENTITY_ARMOR_1 || Index == ENTITY_HEALTH_1))
 		return false;
 	
-	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
+	const vec2 Pos((x * 32.0f) + 16.0f, (y * 32.0f) + 16.0f);
 
 	int Type = -1;
 	int SubType = 0;

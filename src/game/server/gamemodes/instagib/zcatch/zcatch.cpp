@@ -9,6 +9,7 @@
 #include <game/server/entities/flag.h>
 #include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
+#include <game/server/gamemodes/instagib/base_instagib.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/version.h>
@@ -19,7 +20,7 @@ CGameControllerZcatch::CGameControllerZcatch(class CGameContext *pGameServer) :
 	CGameControllerInstagib(pGameServer)
 {
 	m_GameFlags = 0;
-	m_AllowSkinChange = false;
+	m_AllowSkinColorChange = false;
 	m_pGameType = "zCatchᵏᶻ";
 	m_WinType = WIN_BY_SURVIVAL;
 	m_DefaultWeapon = GetDefaultWeaponBasedOnSpawnWeapons();
@@ -281,7 +282,7 @@ void CGameControllerZcatch::ReleasePlayer(class CPlayer *pPlayer, const char *pM
 
 	if(pPlayer->m_WantsToJoinSpectators)
 	{
-		pPlayer->SetTeam(TEAM_SPECTATORS);
+		DoTeamChange(pPlayer, TEAM_SPECTATORS, true);
 		pPlayer->m_WantsToJoinSpectators = false;
 	}
 	else
@@ -492,6 +493,45 @@ bool CGameControllerZcatch::CanJoinTeam(int Team, int NotThisId, char *pErrorRea
 	return CGameControllerInstagib::CanJoinTeam(Team, NotThisId, pErrorReason, ErrorReasonSize);
 }
 
+int CGameControllerZcatch::GetAutoTeam(int NotThisId)
+{
+	if(IsCatchGameRunning() && IsGameRunning() && PlayerWithMostKillsThatCount())
+	{
+		return TEAM_SPECTATORS;
+	}
+
+	return CGameControllerInstagib::GetAutoTeam(NotThisId);
+}
+
+int CGameControllerZcatch::FreeInGameSlots()
+{
+	int Players = 0;
+	for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+		// alive spectators are considered permanent spectators
+		// they do not count as in game players
+		// and do not occupy in game slots
+		if(!pPlayer->m_IsDead && pPlayer->GetTeam() == TEAM_SPECTATORS)
+			continue;
+
+		Players++;
+	}
+
+	int Slots = Server()->MaxClients() - g_Config.m_SvSpectatorSlots;
+	return maximum(0, Slots - Players);
+}
+
+void CGameControllerZcatch::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
+{
+	UpdateCatchTicks(pPlayer);
+
+	CGameControllerInstagib::DoTeamChange(pPlayer, Team, DoChatMsg);
+
+	CheckChangeGameState();
+}
+
 void CGameControllerZcatch::UpdateCatchTicks(class CPlayer *pPlayer)
 {
 	char aBuf[512];
@@ -513,15 +553,6 @@ void CGameControllerZcatch::UpdateCatchTicks(class CPlayer *pPlayer)
 
 	if(g_Config.m_SvDebugStats > 1)
 		SendChat(-1, TEAM_ALL, aBuf);
-}
-
-void CGameControllerZcatch::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
-{
-	UpdateCatchTicks(pPlayer);
-
-	CGameControllerInstagib::DoTeamChange(pPlayer, Team, DoChatMsg);
-
-	CheckChangeGameState();
 }
 
 bool CGameControllerZcatch::CheckChangeGameState()
@@ -551,16 +582,6 @@ bool CGameControllerZcatch::CheckChangeGameState()
 	return false;
 }
 
-int CGameControllerZcatch::GetAutoTeam(int NotThisId)
-{
-	if(IsCatchGameRunning() && PlayerWithMostKillsThatCount())
-	{
-		return TEAM_SPECTATORS;
-	}
-
-	return CGameControllerInstagib::GetAutoTeam(NotThisId);
-}
-
 void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 {
 	// SetTeam is not called on join and m_LastSetTeam is initialized to zero
@@ -576,37 +597,48 @@ void CGameControllerZcatch::OnPlayerConnect(CPlayer *pPlayer)
 
 	CGameControllerInstagib::OnPlayerConnect(pPlayer);
 
-	CPlayer *pBestPlayer = PlayerWithMostKillsThatCount();
-	if(pBestPlayer && IsCatchGameRunning() && IsGameRunning())
+	// if a player joins as spectator that means
+	// either the in game slots are full
+	// or the server is in tournament mode
+	// either way the player will be become a permanent alive spectator
+	//
+	// those players do not affect the in game things
+	// so they can not be caught by the leading player
+	// and they can also not change the game state
+	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
 	{
-		// avoid team change message by pre setting it
-		pPlayer->SetTeamRaw(TEAM_SPECTATORS);
-		KillPlayer(pPlayer, GameServer()->m_apPlayers[pBestPlayer->GetCid()], false);
+		CPlayer *pBestPlayer = PlayerWithMostKillsThatCount();
+		if(pBestPlayer && IsCatchGameRunning() && IsGameRunning())
+		{
+			// avoid team change message by pre setting it
+			pPlayer->SetTeamRaw(TEAM_SPECTATORS);
+			KillPlayer(pPlayer, GameServer()->m_apPlayers[pBestPlayer->GetCid()], false);
 
-		char aBuf[512];
-		str_format(aBuf, sizeof(aBuf), "'%s' is now spectating you (selfkill to release them)", Server()->ClientName(pPlayer->GetCid()));
-		SendChatTarget(pBestPlayer->GetCid(), aBuf);
-	}
-	// complicated way of saying not tournament mode
-	else if(CGameControllerInstagib::GetAutoTeam(pPlayer->GetCid()) != TEAM_SPECTATORS && pPlayer->GetTeam() == TEAM_SPECTATORS)
-	{
-		// auto join running games if nobody made a kill yet
-		// SetTeam will kill us and delay the spawning
-		// so you are stuck in the scoreboard for a second when joining a active round
-		// but lets call that a feature for now so you have to to get ready
-		pPlayer->SetTeam(TEAM_RED);
-	}
+			char aBuf[512];
+			str_format(aBuf, sizeof(aBuf), "'%s' is now spectating you (selfkill to release them)", Server()->ClientName(pPlayer->GetCid()));
+			SendChatTarget(pBestPlayer->GetCid(), aBuf);
+		}
+		// complicated way of saying not tournament mode
+		else if(CGameControllerInstagib::GetAutoTeam(pPlayer->GetCid()) != TEAM_SPECTATORS && pPlayer->GetTeam() == TEAM_SPECTATORS)
+		{
+			// auto join running games if nobody made a kill yet
+			// DoTeamChange will kill us and delay the spawning
+			// so you are stuck in the scoreboard for a second when joining a active round
+			// but lets call that a feature for now so you have to to get ready
+			DoTeamChange(pPlayer, TEAM_RED, false);
+		}
 
-	m_aBodyColors[pPlayer->GetCid()] = GetBodyColor(0);
-	SetCatchColors(pPlayer);
-	SendSkinBodyColor7(pPlayer->GetCid(), pPlayer->m_TeeInfos.m_ColorBody);
+		m_aBodyColors[pPlayer->GetCid()] = GetBodyColor(0);
+		SetCatchColors(pPlayer);
+		SendSkinBodyColor7(pPlayer->GetCid(), pPlayer->m_TeeInfos.m_ColorBody);
 
-	if(!CheckChangeGameState())
-	{
-		if(CatchGameState() == ECatchGameState::WAITING_FOR_PLAYERS)
-			SendChatTarget(pPlayer->GetCid(), "Waiting for more players to start the round.");
-		else if(CatchGameState() == ECatchGameState::RELEASE_GAME)
-			SendChatTarget(pPlayer->GetCid(), "This is a release game.");
+		if(!CheckChangeGameState())
+		{
+			if(CatchGameState() == ECatchGameState::WAITING_FOR_PLAYERS)
+				SendChatTarget(pPlayer->GetCid(), "Waiting for more players to start the round.");
+			else if(CatchGameState() == ECatchGameState::RELEASE_GAME)
+				SendChatTarget(pPlayer->GetCid(), "This is a release game.");
+		}
 	}
 }
 
