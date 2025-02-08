@@ -43,6 +43,12 @@ void CGameControllerDDNetKZ::Tick()
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
+		
+		if(!GameServer()->m_apPlayers[i])
+			continue;
+	
+		OnPlayerTick(GameServer()->m_apPlayers[i]);
+
 		if(GameServer()->m_apPlayers[i] && GameServer()->m_apPlayers[i]->GetCharacter())
 		{
 			if(GameServer()->GetPlayerChar(i)->m_Health <= 0)
@@ -273,4 +279,9 @@ int CGameControllerDDNetKZ::OnCharacterDeath(class CCharacter *pVictim, class CP
 	}
 
 	return HadFlag;
+}
+
+void CGameControllerDDNetKZ::OnPlayerTick(class CPlayer *pPlayer)
+{
+	pPlayer->RainbowTick();
 }

@@ -22,6 +22,7 @@ public:
 	void Snap(int SnappingClient) override;
 	bool OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos) override;
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
+	void OnPlayerTick(class CPlayer *pPlayer);
 
 	//Flag(ball xD)
 	class CFlagBall *m_apFlagBalls[2];
