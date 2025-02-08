@@ -3657,6 +3657,17 @@ void CCharacter::HandleKZTiles()
 		SetInvincible(false);
 	}
 
+	if(TileIndex == TILE_RAINBOW_ON && !m_Rainbow)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You got rainbow");
+		Rainbow(true);
+	}
+	else if(TileIndex == TILE_RAINBOW_OFF && m_Rainbow)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You lost rainbow");
+		Rainbow(false);
+	}
+
 	if(TileIndex == TILE_GODMODE && !m_IsGodmode)
 	{
 		char aBuf[128];
