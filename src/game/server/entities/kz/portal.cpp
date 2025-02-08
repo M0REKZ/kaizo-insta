@@ -163,7 +163,7 @@ void CPortalKZ::Snap(int SnappingClient)
 		Team = pChr->Team();
 	}
 
-	if(pOwner->Team() != Team)
+	if(pOwner->Team() != TEAM_SUPER && pOwner->Team() != Team)
 		return;
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
