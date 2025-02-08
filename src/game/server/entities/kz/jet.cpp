@@ -20,7 +20,7 @@ CVehicle(pGameWorld, Pos, Owner, Layer)
 	m_ObjType = CGameWorld::CUSTOM_ENTTYPE_JET;
 
 	m_Vel = vec2(0,0);
-	m_Size = vec2(32,32);
+	m_Size = vec2(30,30);
 	m_MountOffset = vec2(0,0);
 	m_pMounter = nullptr;
 	m_MountDistance = 64.f;

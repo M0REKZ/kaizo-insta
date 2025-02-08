@@ -20,7 +20,7 @@ CVehicle(pGameWorld, Pos, Owner, Layer)
 	m_ObjType = CGameWorld::CUSTOM_ENTTYPE_HELICOPTER;
 
 	m_Vel = vec2(0,0);
-	m_Size = vec2(64,64);
+	m_Size = vec2(30,30);
 	m_MountOffset = vec2(0,0);
 	m_pMounter = nullptr;
 	m_MountDistance = 64.f;
@@ -72,17 +72,17 @@ void CHelicopter::Snap(int SnappingClient)
 
 	//draw helicopter
 	//GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),ID,TO,FROM,Server()->Tick(),m_Owner,LASERTYPE_DOOR);
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),GetId(),vec2(m_Pos.x - m_Size.x/2,m_Pos.y + m_Size.y/2),vec2(m_Pos.x + m_Size.x/2,m_Pos.y + m_Size.y/2),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[0],vec2(m_Pos.x - m_Size.x/2,m_Pos.y + m_Size.y/2),vec2(m_Pos.x - (m_Size.x/2 + 16),m_Pos.y),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[1],vec2(m_Pos.x + m_Size.x/2,m_Pos.y + m_Size.y/2),vec2(m_Pos.x + (m_Size.x/2 + 16),m_Pos.y),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),GetId(),vec2(m_Pos.x - m_Size.x,m_Pos.y + m_Size.y),vec2(m_Pos.x + m_Size.x,m_Pos.y + m_Size.y),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[0],vec2(m_Pos.x - m_Size.x,m_Pos.y + m_Size.y),vec2(m_Pos.x - (m_Size.x + 16),m_Pos.y),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[1],vec2(m_Pos.x + m_Size.x,m_Pos.y + m_Size.y),vec2(m_Pos.x + (m_Size.x + 16),m_Pos.y),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
 
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[2],vec2(m_Pos.x - m_Size.x/2,m_Pos.y - m_Size.y/2),vec2(m_Pos.x + m_Size.x/2,m_Pos.y - m_Size.y/2),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[3],vec2(m_Pos.x - m_Size.x/2,m_Pos.y - m_Size.y/2),vec2(m_Pos.x - (m_Size.x/2 + 16),m_Pos.y),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[4],vec2(m_Pos.x + m_Size.x/2,m_Pos.y - m_Size.y/2),vec2(m_Pos.x + (m_Size.x/2 + 16),m_Pos.y),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[2],vec2(m_Pos.x - m_Size.x,m_Pos.y - m_Size.y),vec2(m_Pos.x + m_Size.x,m_Pos.y - m_Size.y),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[3],vec2(m_Pos.x - m_Size.x,m_Pos.y - m_Size.y),vec2(m_Pos.x - (m_Size.x + 16),m_Pos.y),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[4],vec2(m_Pos.x + m_Size.x,m_Pos.y - m_Size.y),vec2(m_Pos.x + (m_Size.x + 16),m_Pos.y),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
 
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[5],vec2(m_Pos.x,m_Pos.y - (m_Size.y/2 + 20)),vec2(m_Pos.x,m_Pos.y - m_Size.y/2),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[6],vec2(m_Pos.x,m_Pos.y - (m_Size.y/2 + 20)),vec2(m_Pos.x - (m_Size.x/2 + 16),m_Pos.y - (m_Size.y/2 + 20)),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
-	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[7],vec2(m_Pos.x,m_Pos.y - (m_Size.y/2 + 20)),vec2(m_Pos.x + (m_Size.x/2 + 16),m_Pos.y - (m_Size.y/2 + 20)),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[5],vec2(m_Pos.x,m_Pos.y - (m_Size.y + 20)),vec2(m_Pos.x,m_Pos.y - m_Size.y),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[6],vec2(m_Pos.x,m_Pos.y - (m_Size.y + 20)),vec2(m_Pos.x - (m_Size.x + 16),m_Pos.y - (m_Size.y + 20)),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
+	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[7],vec2(m_Pos.x,m_Pos.y - (m_Size.y + 20)),vec2(m_Pos.x + (m_Size.x + 16),m_Pos.y - (m_Size.y + 20)),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
 
 	vec2 postemp;
 	vec2 postemp2;
@@ -95,15 +95,15 @@ void CHelicopter::Snap(int SnappingClient)
 
 	if(m_Direction)
 	{
-		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[8],vec2(m_Pos.x - (m_Size.x/2 + 16),m_Pos.y),vec2(m_Pos.x - (m_Size.x/2 + 50),m_Pos.y),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
-		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[9],vec2(m_Pos.x - (m_Size.x/2 + 50),m_Pos.y),vec2(m_Pos.x - (m_Size.x/2 + 50),m_Pos.y)+postemp,Server()->Tick(),m_Owner,LASERTYPE_DOOR);
-		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[10],vec2(m_Pos.x - (m_Size.x/2 + 50),m_Pos.y),vec2(m_Pos.x - (m_Size.x/2 + 50),m_Pos.y)+postemp2,Server()->Tick(),m_Owner,LASERTYPE_DOOR);
+		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[8],vec2(m_Pos.x - (m_Size.x + 16),m_Pos.y),vec2(m_Pos.x - (m_Size.x + 50),m_Pos.y),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
+		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[9],vec2(m_Pos.x - (m_Size.x + 50),m_Pos.y),vec2(m_Pos.x - (m_Size.x + 50),m_Pos.y)+postemp,Server()->Tick(),m_Owner,LASERTYPE_DOOR);
+		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[10],vec2(m_Pos.x - (m_Size.x + 50),m_Pos.y),vec2(m_Pos.x - (m_Size.x + 50),m_Pos.y)+postemp2,Server()->Tick(),m_Owner,LASERTYPE_DOOR);
 	}
 	else
 	{
-		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[8],vec2(m_Pos.x + (m_Size.x/2 + 16),m_Pos.y),vec2(m_Pos.x + (m_Size.x/2 + 50),m_Pos.y),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
-		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[9],vec2(m_Pos.x + (m_Size.x/2 + 50),m_Pos.y),vec2(m_Pos.x + (m_Size.x/2 + 50),m_Pos.y)+postemp,Server()->Tick(),m_Owner,LASERTYPE_DOOR);
-		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[10],vec2(m_Pos.x + (m_Size.x/2 + 50),m_Pos.y),vec2(m_Pos.x + (m_Size.x/2 + 50),m_Pos.y)+postemp2,Server()->Tick(),m_Owner,LASERTYPE_DOOR);
+		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[8],vec2(m_Pos.x + (m_Size.x + 16),m_Pos.y),vec2(m_Pos.x + (m_Size.x + 50),m_Pos.y),Server()->Tick(),m_Owner,LASERTYPE_DOOR);
+		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[9],vec2(m_Pos.x + (m_Size.x + 50),m_Pos.y),vec2(m_Pos.x + (m_Size.x + 50),m_Pos.y)+postemp,Server()->Tick(),m_Owner,LASERTYPE_DOOR);
+		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_ExtraLaserIds[10],vec2(m_Pos.x + (m_Size.x + 50),m_Pos.y),vec2(m_Pos.x + (m_Size.x + 50),m_Pos.y)+postemp2,Server()->Tick(),m_Owner,LASERTYPE_DOOR);
 	}
 }
 

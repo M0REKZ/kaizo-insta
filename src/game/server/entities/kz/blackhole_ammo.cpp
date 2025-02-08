@@ -118,10 +118,17 @@ void CBlackHoleAmmo::Snap(int SnappingClient)
 
 	CCharacter *pChar = GameServer()->GetPlayerChar(SnappingClient);
 
-	if(pChar->Team() < 0 || pChar->Team() >= MAX_CLIENTS)
+	int Team;
+
+	if(!pChar)
+		Team = 0;
+	else
+		Team = pChar->Team();
+
+	if(Team < 0 || Team >= MAX_CLIENTS)
 		return;
 
-	if(!(pChar && m_SpawnTickTeam[pChar->Team()] == -1))
+	if(!(m_SpawnTickTeam[Team] == -1))
 		return;
 
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
