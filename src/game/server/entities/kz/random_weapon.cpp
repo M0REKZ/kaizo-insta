@@ -96,6 +96,9 @@ void CRandomWeapon::Tick()
 	{
 		if(pChr && pChr->IsAlive())
 		{
+			if(pChr->Team() < 0 || pChr->Team() >= MAX_CLIENTS)
+				continue;
+
 			if(m_SpawnTickTeam[pChr->Team()] > 0)
 				continue;
 
@@ -156,6 +159,9 @@ void CRandomWeapon::Snap(int SnappingClient)
 		Team = 0;
 	else
 		Team = pChar->Team();
+
+	if(Team < 0 || Team >= MAX_CLIENTS)
+		return;
 
 	if(!(m_SpawnTickTeam[Team] == -1))
 		return;

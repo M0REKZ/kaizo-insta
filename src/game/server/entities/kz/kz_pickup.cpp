@@ -98,6 +98,9 @@ void CKZPickup::Tick()
 			if(m_ThisTeamOnly != -1 && pChr->Team() != m_ThisTeamOnly)
 				continue;
 
+			if(pChr->Team() < 0 || pChr->Team() >= MAX_CLIENTS)
+				continue;
+
 			if(m_SpawnTickTeam[pChr->Team()] > 0)
 				continue;
 
@@ -285,6 +288,8 @@ void CKZPickup::Snap(int SnappingClient)
 	if(m_ThisTeamOnly != -1 && Team != m_ThisTeamOnly)
 		return;
 
+	if(Team < 0 || Team >= MAX_CLIENTS)
+		return;
 
 	if(!(m_SpawnTickTeam[Team] == -1))
 		return;

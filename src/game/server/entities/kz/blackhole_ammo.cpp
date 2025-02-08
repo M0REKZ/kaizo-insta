@@ -72,6 +72,9 @@ void CBlackHoleAmmo::Tick()
 			if(!pChr->GetWeaponGot(WEAPON_BLACKHOLE))
 				continue;
 
+			if(pChr->Team() < 0 || pChr->Team() >= MAX_CLIENTS)
+				continue;
+
 			if(m_SpawnTickTeam[pChr->Team()] > 0)
 				continue;
 
@@ -114,6 +117,9 @@ void CBlackHoleAmmo::Snap(int SnappingClient)
 		return;
 
 	CCharacter *pChar = GameServer()->GetPlayerChar(SnappingClient);
+
+	if(pChar->Team() < 0 || pChar->Team() >= MAX_CLIENTS)
+		return;
 
 	if(!(pChar && m_SpawnTickTeam[pChar->Team()] == -1))
 		return;

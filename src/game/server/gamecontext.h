@@ -157,6 +157,9 @@ class CGameContext : public IGameServer
 	static void ConExitVehicle(IConsole::IResult *pResult, void *pUserData);
 	static void ConTeeConfetti(IConsole::IResult *pResult, void *pUserData);
 
+	//+KZ Vehicles
+	static void ConSpawnHelicopter(IConsole::IResult *pResult, void *pUserData);
+	static void ConSpawnJet(IConsole::IResult *pResult, void *pUserData);
 
 	//+KZ Custom Weapons
 	static void ConGetMines(IConsole::IResult *pResult, void *pUserData);
