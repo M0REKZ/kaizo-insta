@@ -32,8 +32,29 @@ void CPortalProjectile::Tick()
 	CStableProjectile::Tick();
 	if(Collision()->CheckPoint(m_Pos))
 	{
-		new CPortalKZ(GameWorld(),oldpos,m_Owner,m_BluePortal);
-		GameServer()->CreateSound(m_Pos,SOUND_LASER_BOUNCE,m_TeamMask);
+		if(g_Config.m_SvPortalMode == 0) //default
+		{
+			new CPortalKZ(GameWorld(),oldpos,m_Owner,m_BluePortal);
+			GameServer()->CreateSound(m_Pos,SOUND_LASER_BOUNCE,m_TeamMask);
+		}
+		else if(g_Config.m_SvPortalMode == 1) //only certain tiles
+		{
+			int TileIndex = Collision()->GetKZTileIndex(m_Pos);
+			if(TileIndex == KZ_TILE_ALLOW_PORTAL)
+			{
+				new CPortalKZ(GameWorld(),oldpos,m_Owner,m_BluePortal);
+				GameServer()->CreateSound(m_Pos,SOUND_LASER_BOUNCE,m_TeamMask);
+			}
+		}
+		else if(g_Config.m_SvPortalMode == 2) //pprace compat
+		{
+			int TileIndex = Collision()->GetFrontTileIndex(Collision()->GetMapIndex(m_Pos));
+			if(TileIndex == TILE_LFREEZE)
+			{
+				new CPortalKZ(GameWorld(),oldpos,m_Owner,m_BluePortal);
+				GameServer()->CreateSound(m_Pos,SOUND_LASER_BOUNCE,m_TeamMask);
+			}
+		}
 		Reset();
 	}
 }

@@ -227,5 +227,32 @@ bool CPortalKZ::CheckPosition(vec2 Pos)
 		m_Pos2 = vec2(Pos.x+32,Pos.y);
 	}
 
+	//Check if able to teleport
+
+	bool dotele = false;
+
+	if(m_Pos.x == m_Pos2.x)
+	{
+		if(IsTeleportViable(vec2(m_Pos.x + 32.f, m_Pos.y + 32.f)))
+		{
+			dotele = true;
+		}
+		else if(IsTeleportViable(vec2(m_Pos.x - 32.f, m_Pos.y + 32.f)))
+		{
+			dotele = true;
+		}
+	}
+	else
+	{
+		if(IsTeleportViable(vec2(m_Pos.x + 32.f, m_Pos.y + 32.f)))
+		{
+			dotele = true;
+		}
+		else if(IsTeleportViable(vec2(m_Pos.x + 32.f, m_Pos.y - 32.f)))
+		{
+			dotele = true;
+		}
+	}
+
 	return false;
 }

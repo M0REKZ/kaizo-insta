@@ -14,6 +14,7 @@
 #include "kz/minigun_projectile.h"
 #include "kz/blackhole.h"
 #include "kz/kz_pickup.h"
+#include "kz/portal.h"
 
 #include <antibot/antibot_data.h>
 
@@ -2212,6 +2213,24 @@ void CCharacter::HandleTiles(int Index)
 	else if(((m_TileIndex == TILE_LUNFREEZE) || (m_TileFIndex == TILE_LUNFREEZE)) && !m_Core.m_Super && !m_Core.m_Invincible)
 	{
 		m_Core.m_LiveFrozen = false;
+
+		//+KZ for pprace compat
+		if(g_Config.m_SvPortalMode == 2)
+		{
+			for(CPortalKZ* p = (CPortalKZ*)GameWorld()->FindFirst(CGameWorld::CUSTOM_ENTTYPE_PORTAL);p;p = (CPortalKZ*)p->TypeNext())
+			{
+				if(p->m_Owner == m_pPlayer->GetCid())
+				{
+					p->Reset();
+					CPortalKZ* p2 = p->GetOtherPortal();
+					if(p2)
+					{
+						p2->Reset();
+					}
+					return;
+				}
+			}
+		}
 	}
 
 	// endless hook
@@ -3718,6 +3737,29 @@ void CCharacter::HandleKZTiles()
 	else if(TileIndex != KZ_TILE_SIT && m_Sit)
 	{
 		m_Sit = false;
+	}
+
+	//+KZ for pprace compat
+	if(TileIndex == KZ_TILE_RESET_PORTAL && !m_PortalReset)
+	{
+		for(CPortalKZ* p = (CPortalKZ*)GameWorld()->FindFirst(CGameWorld::CUSTOM_ENTTYPE_PORTAL);p;p = (CPortalKZ*)p->TypeNext())
+		{
+			if(p->m_Owner == m_pPlayer->GetCid())
+			{
+				p->Reset();
+				CPortalKZ* p2 = p->GetOtherPortal();
+				if(p2)
+				{
+					p2->Reset();
+				}
+				return;
+			}
+		}
+		m_PortalReset = true;
+	}
+	else if(TileIndex != KZ_TILE_RESET_PORTAL && m_PortalReset)
+	{
+		m_PortalReset = false;
 	}
 
 	int NewJumps = m_Core.m_Jumps;

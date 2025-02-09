@@ -302,6 +302,7 @@ private:
 	bool m_insidetilejump = false;
 	int m_superhammer_charge_time = 0; //from pointer
 	bool m_FrozenKZ = false;
+	bool m_PortalReset = false;
 	
 public:
 	void HandleKZBot(CNetObj_PlayerInput &Input);
