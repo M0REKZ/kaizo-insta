@@ -33,6 +33,12 @@ CGameControllerDDNetKZ::CGameControllerDDNetKZ(class CGameContext *pGameServer) 
 
 	m_flagstand_temp_i_0 = 0;
 	m_flagstand_temp_i_1 = 0;
+
+	GameServer()->Tuning()->Set("gun_curvature", 0);
+	GameServer()->Tuning()->Set("gun_speed", 1400);
+	GameServer()->Tuning()->Set("shotgun_curvature", 0);
+	GameServer()->Tuning()->Set("shotgun_speed", 500);
+	GameServer()->Tuning()->Set("shotgun_speeddiff", 0);
 }
 
 CGameControllerDDNetKZ::~CGameControllerDDNetKZ() = default;
