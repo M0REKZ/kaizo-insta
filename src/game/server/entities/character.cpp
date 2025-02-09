@@ -570,9 +570,6 @@ void CCharacter::HandleWeaponSwitch()
 
 void CCharacter::FireWeapon()
 {
-	if(m_HasNoWeapon)
-		return;
-
 	if(m_ReloadTimer != 0)
 	{
 		if(m_LatestInput.m_Fire & 1)
@@ -655,6 +652,9 @@ void CCharacter::FireWeapon()
 
 	// ddnet-insta
 	if(GameServer()->m_pController->OnFireWeapon(*this, m_Core.m_ActiveWeapon, Direction, MouseTarget, ProjStartPos) && m_Core.m_ActiveWeapon >=0 && m_Core.m_ActiveWeapon < NUM_WEAPONS)
+		return;
+
+	if(m_HasNoWeapon)
 		return;
 
 	switch(m_Core.m_ActiveWeapon)
