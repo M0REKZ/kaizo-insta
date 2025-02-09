@@ -638,7 +638,7 @@ const char *CEditor::ExplainVanilla(int Tile, int Layer)
 		if(Layer == LAYER_GAME)
 			return "SHIELD: Gives player +1 shield.";
 		break;
-	case KZ_TILE_VANILLA_HEART:
+	case TILE_VANILLA_HEART:
 		if(Layer == LAYER_GAME)
 			return "HEART: Gives player +1 health";
 		break;
