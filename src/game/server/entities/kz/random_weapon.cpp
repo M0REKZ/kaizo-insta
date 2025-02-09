@@ -24,16 +24,11 @@ CKZPickup(pGameWorld,CGameWorld::CUSTOM_ENTTYPE_RANDOM_WEAPON,vec2(0,0),gs_Picku
 	m_Layer = Layer;
 	m_Number = Number;
 
-	int SpawnDelay = m_Type == POWERUP_NINJA ? 90 : 0;
-
 	m_Id2 = Server()->SnapNewId();
 
 	for(int i=0;i < MAX_CLIENTS;i++)
 	{
-		if(SpawnDelay > 0)
-			m_SpawnTickTeam[i] = Server()->Tick() + Server()->TickSpeed() * SpawnDelay;
-		else
-			m_SpawnTickTeam[i] = -1;
+		m_SpawnTickTeam[i] = -1;
 
 		int rnd = 0;
 		while(rnd == WEAPON_HAMMER || rnd == WEAPON_GUN)
@@ -102,7 +97,7 @@ void CRandomWeapon::Tick()
 			if(m_SpawnTickTeam[pChr->Team()] > 0)
 				continue;
 
-			if(distance(m_Pos,pChr->m_Pos) > (GetProximityRadius() + ms_CollisionExtraSize))
+			if(distance(m_Pos,pChr->m_Pos) > (GetProximityRadius() + ms_CollisionExtraSize + pChr->GetProximityRadius()))
 				continue;
 
 			if(m_Number > 0 && !Switchers()[m_Number].m_aStatus[pChr->Team()])
@@ -138,9 +133,7 @@ void CRandomWeapon::Tick()
 				str_format(aBuf, sizeof(aBuf), "pickup player='%d:%s' item=%d",
 					pChr->GetPlayer()->GetCid(), Server()->ClientName(pChr->GetPlayer()->GetCid()), m_Type);
 				GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
-				int RespawnTime = m_Type == POWERUP_NINJA ? 90 : 15;
-				if(RespawnTime >= 0)
-					m_SpawnTickTeam[pChr->Team()] = Server()->Tick() + Server()->TickSpeed() * RespawnTime;
+				m_SpawnTickTeam[pChr->Team()] = Server()->Tick() + Server()->TickSpeed() * 15;
 			}
 		}
 	}
@@ -211,6 +204,6 @@ void CRandomWeapon::Snap(int SnappingClient)
 		pProj->m_VelY = 0;
 		pProj->m_StartTick = Server()->Tick();
 		pProj->m_Type = WEAPON_HAMMER;
-		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, m_Subtype[Team], m_Number);
+		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Subtype[Team] == WEAPON_NINJA ? POWERUP_NINJA : m_Type, m_Subtype[Team], m_Number);
 	}
 }

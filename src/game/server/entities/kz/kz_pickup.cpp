@@ -104,7 +104,7 @@ void CKZPickup::Tick()
 			if(m_SpawnTickTeam[pChr->Team()] > 0)
 				continue;
 
-			if(distance(m_Pos,pChr->m_Pos) > (GetProximityRadius() + ms_CollisionExtraSize))
+			if(distance(m_Pos,pChr->m_Pos) > (GetProximityRadius() + ms_CollisionExtraSize + pChr->GetProximityRadius()))
 				continue;
 
 			if(m_Number > 0 && !Switchers()[m_Number].m_aStatus[pChr->Team()])
