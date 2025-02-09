@@ -106,9 +106,9 @@ bool CCharacter::OnFngFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direc
 		GetTuning(m_TuneZone)->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
 		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
 	}
-	else if(m_Core.m_ActiveWeapon < NUM_CUSTOM_WEAPONS)
+	else if(m_Core.m_ActiveWeapon < KZ_NUM_CUSTOM_WEAPONS)
 	{
-		if(m_Core.m_ActiveWeapon == WEAPON_TASER)
+		if(m_Core.m_ActiveWeapon == KZ_WEAPON_TASER)
 		{
 			m_ReloadTimer = GetTuning(m_TuneZone)->m_LaserFireDelay * Server()->TickSpeed() / 1000;
 		}

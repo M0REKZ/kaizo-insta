@@ -62,7 +62,7 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	if(g_Config.m_SvRollback && m_Owner >= 0 && m_Owner < MAX_CLIENTS && GameServer()->m_apPlayers[m_Owner]->m_Rollback && GameServer()->m_apPlayers[m_Owner]->GetCharacter())
 		tick = GameServer()->m_apPlayers[m_Owner]->GetCharacter()->GetCore().m_LastAckedSnapshot; //--------
 
-	if(pOwnerChar ? (!pOwnerChar->LaserHitDisabled() && (m_Type == WEAPON_LASER || m_Type == WEAPON_TASER)) || (!pOwnerChar->ShotgunHitDisabled() && m_Type == WEAPON_SHOTGUN) : g_Config.m_SvHit)
+	if(pOwnerChar ? (!pOwnerChar->LaserHitDisabled() && (m_Type == WEAPON_LASER || m_Type == KZ_WEAPON_TASER)) || (!pOwnerChar->ShotgunHitDisabled() && m_Type == WEAPON_SHOTGUN) : g_Config.m_SvHit)
 		pHit = GameWorld()->IntersectCharacterTick(m_Pos, To, 0.f, At, tick, pDontHitSelf ? pOwnerChar : nullptr, m_Owner);
 	else
 		pHit = GameWorld()->IntersectCharacterTick(m_Pos, To, 0.f, At, tick, pDontHitSelf ? pOwnerChar : nullptr, m_Owner, pOwnerChar);
@@ -116,8 +116,8 @@ bool CLaser::HitCharacter(vec2 From, vec2 To)
 	}
 	if(GameServer()->m_pController->OnLaserHit(m_Bounces, m_Owner, m_Type, pHit))
 	{
-		pHit->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type == WEAPON_TASER ? WEAPON_LASER : m_Type, m_StartTick); //Starttick JSAURUS rollback
-		if(m_Type == WEAPON_TASER)
+		pHit->TakeDamage(vec2(0, 0), 0, m_Owner, m_Type == KZ_WEAPON_TASER ? WEAPON_LASER : m_Type, m_StartTick); //Starttick JSAURUS rollback
+		if(m_Type == KZ_WEAPON_TASER)
 			pHit->Freeze();
 	}
 	return true;
@@ -237,7 +237,7 @@ void CLaser::DoBounce()
 
 	//CCharacter *pOwnerChar = GameServer()->GetPlayerChar(m_Owner); +KZ commented this
 	if(m_Owner >= 0 && m_Energy <= 0 && !m_TeleportCancelled && pOwnerChar &&
-		pOwnerChar->IsAlive() && pOwnerChar->HasTelegunLaser() && (m_Type == WEAPON_LASER || m_Type == WEAPON_TASER))
+		pOwnerChar->IsAlive() && pOwnerChar->HasTelegunLaser() && (m_Type == WEAPON_LASER || m_Type == KZ_WEAPON_TASER))
 	{
 		vec2 PossiblePos;
 		bool Found = false;
@@ -246,7 +246,7 @@ void CLaser::DoBounce()
 		bool pDontHitSelf = (g_Config.m_SvForceLaserType ? g_Config.m_SvForceLaserType != 1 : g_Config.m_SvOldLaser) || (m_Bounces == 0 && !m_WasTele);
 		vec2 At;
 		CCharacter *pHit;
-		if(pOwnerChar ? (!pOwnerChar->LaserHitDisabled() && (m_Type == WEAPON_LASER || m_Type == WEAPON_TASER)) : g_Config.m_SvHit)
+		if(pOwnerChar ? (!pOwnerChar->LaserHitDisabled() && (m_Type == WEAPON_LASER || m_Type == KZ_WEAPON_TASER)) : g_Config.m_SvHit)
 			pHit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : nullptr, m_Owner);
 		else
 			pHit = GameServer()->m_World.IntersectCharacter(m_Pos, To, 0.f, At, pDontHitSelf ? pOwnerChar : nullptr, m_Owner, pOwnerChar);
@@ -279,7 +279,7 @@ void CLaser::DoBounce()
 				// Delay = 0 means all.
 				int delay = GameServer()->Collision()->GetSwitchDelay(MapIndex);
 
-				if((delay != 3 && delay != 0) && (m_Type == WEAPON_LASER || m_Type == WEAPON_TASER))
+				if((delay != 3 && delay != 0) && (m_Type == WEAPON_LASER || m_Type == KZ_WEAPON_TASER))
 				{
 					IsSwitchTeleGun = IsBlueSwitchTeleGun = false;
 				}
@@ -290,7 +290,7 @@ void CLaser::DoBounce()
 			// Teleport is canceled if the last bounce tile is not a TILE_ALLOW_TELE_GUN.
 			// Teleport also works if laser didn't bounce.
 			m_TeleportCancelled =
-				(m_Type == WEAPON_LASER || m_Type == WEAPON_TASER) && (TileFIndex != TILE_ALLOW_TELE_GUN && TileFIndex != TILE_ALLOW_BLUE_TELE_GUN && !IsSwitchTeleGun && !IsBlueSwitchTeleGun);
+				(m_Type == WEAPON_LASER || m_Type == KZ_WEAPON_TASER) && (TileFIndex != TILE_ALLOW_TELE_GUN && TileFIndex != TILE_ALLOW_BLUE_TELE_GUN && !IsSwitchTeleGun && !IsBlueSwitchTeleGun);
 		}
 	}
 
@@ -354,7 +354,7 @@ void CLaser::Snap(int SnappingClient)
 	int LaserType = m_Type == WEAPON_LASER ? LASERTYPE_RIFLE : m_Type == WEAPON_SHOTGUN ? LASERTYPE_SHOTGUN : -1;
 
 	GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion), GetId(),
-		m_Pos, m_From, m_EvalTick, m_Owner, m_Type == WEAPON_TASER ? LASERTYPE_FREEZE : LaserType, 0, m_Number);
+		m_Pos, m_From, m_EvalTick, m_Owner, m_Type == KZ_WEAPON_TASER ? LASERTYPE_FREEZE : LaserType, 0, m_Number);
 }
 
 void CLaser::SwapClients(int Client1, int Client2)

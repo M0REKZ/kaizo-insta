@@ -69,7 +69,7 @@ void CBlackHoleAmmo::Tick()
 	{
 		if(pChr && pChr->IsAlive())
 		{
-			if(!pChr->GetWeaponGot(WEAPON_BLACKHOLE))
+			if(!pChr->GetWeaponGot(KZ_WEAPON_BLACKHOLE))
 				continue;
 
 			if(pChr->Team() < 0 || pChr->Team() >= MAX_CLIENTS)
@@ -87,13 +87,13 @@ void CBlackHoleAmmo::Tick()
 			bool Picked = false;
 			// player picked us up, is someone was hooking us, let them go
 			
-			pChr->SetWeaponAmmo(WEAPON_BLACKHOLE,pChr->GetWeaponAmmo(WEAPON_BLACKHOLE)+1);
+			pChr->SetWeaponAmmo(KZ_WEAPON_BLACKHOLE,pChr->GetWeaponAmmo(KZ_WEAPON_BLACKHOLE)+1);
 			GameServer()->CreateSound(m_Pos, SOUND_PICKUP_ARMOR, pChr->TeamMask());
 
 			
 				char aBuf[256];
 				str_format(aBuf, sizeof(aBuf), "pickup player='%d:%s' item=%d",
-					pChr->GetPlayer()->GetCid(), Server()->ClientName(pChr->GetPlayer()->GetCid()), WEAPON_BLACKHOLE);
+					pChr->GetPlayer()->GetCid(), Server()->ClientName(pChr->GetPlayer()->GetCid()), KZ_WEAPON_BLACKHOLE);
 				GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_DEBUG, "game", aBuf);
 				int RespawnTime = 15;
 				if(RespawnTime >= 0)

@@ -132,7 +132,7 @@ void CKZPickup::Tick()
 
 			case POWERUP_WEAPON:
 
-				if(m_Subtype >= 0 && m_Subtype < NUM_CUSTOM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
+				if(m_Subtype >= 0 && m_Subtype < KZ_NUM_CUSTOM_WEAPONS && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) != -1))
 				{
 
 						if((m_Subtype == WEAPON_GUN || m_Subtype == WEAPON_HAMMER) && !pChr->GetWeaponGot(m_Subtype))
@@ -164,31 +164,31 @@ void CKZPickup::Tick()
 							else
 								pChr->GiveWeapon(m_Subtype, false, m_Ammo);
 						}
-						else if(m_Subtype == WEAPON_TASER && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) < pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START]))
+						else if(m_Subtype == KZ_WEAPON_TASER && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) < pChr->m_aCustomWeaponMaxAmmo[m_Subtype-KZ_CUSTOM_WEAPON_START]))
 						{
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
 							if(m_Ammo == -2)
-								pChr->GiveWeapon(m_Subtype, false, pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START]);
+								pChr->GiveWeapon(m_Subtype, false, pChr->m_aCustomWeaponMaxAmmo[m_Subtype-KZ_CUSTOM_WEAPON_START]);
 							else
 								pChr->GiveWeapon(m_Subtype, false, m_Ammo);
 						}
-						else if(m_Subtype == WEAPON_PORTAL_GUN && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) < pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START]))
+						else if(m_Subtype == KZ_WEAPON_PORTAL_GUN && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) < pChr->m_aCustomWeaponMaxAmmo[m_Subtype-KZ_CUSTOM_WEAPON_START]))
 						{
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
 							if(m_Ammo == -2)
-								pChr->GiveWeapon(m_Subtype, false, pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START]);
+								pChr->GiveWeapon(m_Subtype, false, pChr->m_aCustomWeaponMaxAmmo[m_Subtype-KZ_CUSTOM_WEAPON_START]);
 							else
 								pChr->GiveWeapon(m_Subtype, false, m_Ammo);
 						}
-						else if(m_Subtype == WEAPON_MINIGUN && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) < pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START]))
+						else if(m_Subtype == KZ_WEAPON_MINIGUN && (!pChr->GetWeaponGot(m_Subtype) || pChr->GetWeaponAmmo(m_Subtype) < pChr->m_aCustomWeaponMaxAmmo[m_Subtype-KZ_CUSTOM_WEAPON_START]))
 						{
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
 							if(m_Ammo == -2)
-								pChr->GiveWeapon(m_Subtype, false, pChr->m_aCustomWeaponMaxAmmo[m_Subtype-CUSTOM_WEAPON_START]);
+								pChr->GiveWeapon(m_Subtype, false, pChr->m_aCustomWeaponMaxAmmo[m_Subtype-KZ_CUSTOM_WEAPON_START]);
 							else
 								pChr->GiveWeapon(m_Subtype, false, m_Ammo);
 						}
-						else if(m_Subtype == WEAPON_BLACKHOLE && !pChr->GetWeaponGot(WEAPON_BLACKHOLE))
+						else if(m_Subtype == KZ_WEAPON_BLACKHOLE && !pChr->GetWeaponGot(KZ_WEAPON_BLACKHOLE))
 						{
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_GRENADE, pChr->TeamMask());
 							if(m_Ammo == -2)
@@ -196,7 +196,7 @@ void CKZPickup::Tick()
 							else
 								pChr->GiveWeapon(m_Subtype, false, m_Ammo);
 						}
-						else if(m_Subtype == WEAPON_CHARGE_HAMMER && !pChr->GetWeaponGot(WEAPON_CHARGE_HAMMER))
+						else if(m_Subtype == KZ_WEAPON_CHARGE_HAMMER && !pChr->GetWeaponGot(KZ_WEAPON_CHARGE_HAMMER))
 						{
 							GameServer()->CreateSound(m_Pos, SOUND_PICKUP_SHOTGUN, pChr->TeamMask());
 							pChr->GiveWeapon(m_Subtype);
@@ -343,7 +343,7 @@ void CKZPickup::Snap(int SnappingClient)
 	}
 	else
 	{
-		if(m_Subtype == WEAPON_TASER)
+		if(m_Subtype == KZ_WEAPON_TASER)
 		{
 			vec2 postemp;
 					
@@ -363,7 +363,7 @@ void CKZPickup::Snap(int SnappingClient)
 			pProj->m_Type = WEAPON_LASER;
 			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_LASER, m_Number);
 		}
-		else if(m_Subtype == WEAPON_PORTAL_GUN)
+		else if(m_Subtype == KZ_WEAPON_PORTAL_GUN)
 		{
 			vec2 postemp;
 					
@@ -373,7 +373,7 @@ void CKZPickup::Snap(int SnappingClient)
 			GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_Id2,postemp,postemp,Server()->Tick(),-1,Server()->Tick() % 3);
 			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_LASER, m_Number);
 		}
-		else if(m_Subtype == WEAPON_MINIGUN)
+		else if(m_Subtype == KZ_WEAPON_MINIGUN)
 		{
 			vec2 postemp;
 			vec2 veltemp;
@@ -398,7 +398,7 @@ void CKZPickup::Snap(int SnappingClient)
 			pProj->m_Type = WEAPON_SHOTGUN;
 			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_GRENADE, m_Number);
 		}
-		if(m_Subtype == WEAPON_BLACKHOLE)
+		if(m_Subtype == KZ_WEAPON_BLACKHOLE)
 		{
 			vec2 postemp;
 			vec2 veltemp;
@@ -423,7 +423,7 @@ void CKZPickup::Snap(int SnappingClient)
 			pProj->m_Type = WEAPON_GRENADE;
 			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_GRENADE, m_Number);
 		}
-		if(m_Subtype == WEAPON_CHARGE_HAMMER)
+		if(m_Subtype == KZ_WEAPON_CHARGE_HAMMER)
 		{
 			vec2 postemp;
 					

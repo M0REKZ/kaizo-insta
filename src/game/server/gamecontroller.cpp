@@ -1044,17 +1044,17 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 	int Type = -1;
 	int SubType = 0;
 
-	if(Index == TILE_BIGARMOR)
+	if(Index == KZ_TILE_BIGARMOR)
 	{
 		Type = POWERUP_ARMOR;
 		SubType = 1;
 	}
-	else if(Index == TILE_BIGHEART)
+	else if(Index == KZ_TILE_BIGHEART)
 	{
 		Type = POWERUP_HEALTH;
 		SubType = 1;
 	}
-	else if(Index == TILE_RANDOMWEAPON)
+	else if(Index == KZ_TILE_RANDOMWEAPON)
 	{
 		Type = POWERUP_WEAPON;
 		
@@ -1064,42 +1064,42 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 			SubType = rand() % NUM_WEAPONS;
 		}
 	}
-	else if(Index == TILE_VANILLA_HEART)
+	else if(Index == KZ_TILE_VANILLA_HEART)
 	{
 		Type = POWERUP_HEALTH;
 	}
-	else if(Index == TILE_VANILLA_ARMOR)
+	else if(Index == KZ_TILE_VANILLA_ARMOR)
 	{
 		Type = POWERUP_ARMOR;
 	}
-	else if(Index == TILE_WEAPON_TASER)
+	else if(Index == KZ_TILE_WEAPON_TASER)
 	{
 		Type = POWERUP_WEAPON;
-		SubType = WEAPON_TASER;
+		SubType = KZ_WEAPON_TASER;
 	}
-	else if(Index == TILE_WEAPON_PORTAL_GUN)
+	else if(Index == KZ_TILE_WEAPON_PORTAL_GUN)
 	{
 		Type = POWERUP_WEAPON;
-		SubType = WEAPON_PORTAL_GUN;
+		SubType = KZ_WEAPON_PORTAL_GUN;
 	}
-	else if(Index == TILE_WEAPON_MINIGUN)
+	else if(Index == KZ_TILE_WEAPON_MINIGUN)
 	{
 		Type = POWERUP_WEAPON;
-		SubType = WEAPON_MINIGUN;
+		SubType = KZ_WEAPON_MINIGUN;
 	}
-	else if(Index == TILE_WEAPON_BLACKHOLE)
+	else if(Index == KZ_TILE_WEAPON_BLACKHOLE)
 	{
 		Type = POWERUP_WEAPON;
-		SubType = WEAPON_BLACKHOLE;
+		SubType = KZ_WEAPON_BLACKHOLE;
 	}
-	else if(Index == TILE_WEAPON_CHARGE_HAMMER)
+	else if(Index == KZ_TILE_WEAPON_CHARGE_HAMMER)
 	{
 		Type = POWERUP_WEAPON;
-		SubType = WEAPON_CHARGE_HAMMER;
+		SubType = KZ_WEAPON_CHARGE_HAMMER;
 	}
 
 	//+KZ: some non-insta game modes dont spawn certain things so im better leaving this as config variables
-	if(m_IsInstagibKZ && ((Type == POWERUP_HEALTH)||(Type == POWERUP_ARMOR) || (Type == POWERUP_WEAPON) || Index == TILE_MINE))
+	if(m_IsInstagibKZ && ((Type == POWERUP_HEALTH)||(Type == POWERUP_ARMOR) || (Type == POWERUP_WEAPON) || Index == KZ_TILE_MINE))
 		return false;
 
 	if(g_Config.m_SvSpawnPickups ? false : ((Type == POWERUP_HEALTH)||(Type == POWERUP_ARMOR)))
@@ -1112,7 +1112,7 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 	
 	if(Type != -1) // NOLINT(clang-analyzer-unix.Malloc)
 	{
-		if(Index == TILE_RANDOMWEAPON)
+		if(Index == KZ_TILE_RANDOMWEAPON)
 		{
 			CRandomWeapon *pPickup = new CRandomWeapon(&GameServer()->m_World, Layer, Val1);
 			pPickup->m_Pos = Pos;
@@ -1125,36 +1125,36 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 		return true;
 	}
 	
-	if(Index == TILE_WEAPON_BLACKHOLE_AMMO)
+	if(Index == KZ_TILE_WEAPON_BLACKHOLE_AMMO)
 	{
 		new CBlackHoleAmmo(&GameServer()->m_World,Pos,Layer,Val1);
 		return true;
 	}
 
-	if(Index == TILE_VEHICLE_HELICOPTER)
+	if(Index == KZ_TILE_VEHICLE_HELICOPTER)
 	{
 		new CHelicopter(&GameServer()->m_World,Pos);
 		return true;
 	}
 
-	if(Index == TILE_VEHICLE_JET)
+	if(Index == KZ_TILE_VEHICLE_JET)
 	{
 		new CJet(&GameServer()->m_World,Pos);
 		return true;
 	}
 
-	if(Index == TILE_MINE)
+	if(Index == KZ_TILE_MINE)
 	{
 		new CMine(&GameServer()->m_World, Pos, -1, false, true);
 		return true;
 	}
-	else if(Index == TILE_MINE_ACTIVE)
+	else if(Index == KZ_TILE_MINE_ACTIVE)
 	{
 		new CMine(&GameServer()->m_World, Pos, -1, true, true);
 		return true;
 	}
 	
-	if(Index == TILE_GRENADE_LAUNCHER_H)
+	if(Index == KZ_TILE_GRENADE_LAUNCHER_H)
 	{
 		vec2 Dir;
 		
@@ -1170,7 +1170,7 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 		new CGrenadeLauncher(&GameServer()->m_World, Pos, Dir);
 	}
 	
-	if(Index == TILE_GRENADE_LAUNCHER_D)
+	if(Index == KZ_TILE_GRENADE_LAUNCHER_D)
 	{
 		vec2 Dir;
 		
@@ -1190,7 +1190,7 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 		new CGrenadeLauncher(&GameServer()->m_World, Pos, Dir);
 	}
 	
-	if(Index == TILE_BALL)
+	if(Index == KZ_TILE_BALL)
 	{
 		if(m_BallSpawnNum < 10)
 		{
@@ -1199,7 +1199,7 @@ bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, 
 		}
 		new CBall(&GameServer()->m_World, -1, Pos, vec2(0,0));
 	}
-	else if(Index == TILE_BALL_ALTSPAWN)
+	else if(Index == KZ_TILE_BALL_ALTSPAWN)
 	{
 		if(m_BallSpawnNum < 10)
 		{

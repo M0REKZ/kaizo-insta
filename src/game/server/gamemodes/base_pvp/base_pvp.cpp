@@ -1636,10 +1636,10 @@ bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &
 	if(Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_Ammo > 0) // -1 == unlimited
 		Character.m_Core.m_aWeapons[Character.m_Core.m_ActiveWeapon].m_Ammo--;
 	}
-	else if(Character.m_Core.m_ActiveWeapon < NUM_CUSTOM_WEAPONS)
+	else if(Character.m_Core.m_ActiveWeapon < KZ_NUM_CUSTOM_WEAPONS)
 	{
-		if(Character.m_aCustomWeaponAmmo[Character.m_Core.m_ActiveWeapon - CUSTOM_WEAPON_START] > 0)
-			Character.m_aCustomWeaponAmmo[Character.m_Core.m_ActiveWeapon - CUSTOM_WEAPON_START]--;
+		if(Character.m_aCustomWeaponAmmo[Character.m_Core.m_ActiveWeapon - KZ_CUSTOM_WEAPON_START] > 0)
+			Character.m_aCustomWeaponAmmo[Character.m_Core.m_ActiveWeapon - KZ_CUSTOM_WEAPON_START]--;
 	}
 
 	if(Weapon == WEAPON_GUN)
@@ -1720,9 +1720,9 @@ bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &
 		Character.GetTuning(Character.m_TuneZone)->Get(38 + Character.m_Core.m_ActiveWeapon, &FireDelay);
 		Character.m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
 	}
-	else if(Character.m_Core.m_ActiveWeapon < NUM_CUSTOM_WEAPONS)
+	else if(Character.m_Core.m_ActiveWeapon < KZ_NUM_CUSTOM_WEAPONS)
 	{
-		if(Character.m_Core.m_ActiveWeapon == WEAPON_TASER)
+		if(Character.m_Core.m_ActiveWeapon == KZ_WEAPON_TASER)
 		{
 			Character.m_ReloadTimer = Character.GetTuning(Character.m_TuneZone)->m_LaserFireDelay * Server()->TickSpeed() / 1000;
 		}

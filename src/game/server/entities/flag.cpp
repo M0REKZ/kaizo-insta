@@ -219,7 +219,7 @@ void CFlag::HandleKZTiles()
 	
 	int TileIndex = Collision()->GetKZTileIndex(Collision()->GetKZIndex(m_Pos));
 	
-	if(TileIndex == TILE_NOFLAG)
+	if(TileIndex == KZ_TILE_NOFLAG)
 	{
 		Reset();
 		GameServer()->m_pController->OnFlagReturn(this);

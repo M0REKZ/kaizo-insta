@@ -74,23 +74,23 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	if(m_pPlayer)
 		m_Core.m_PlayerRollback = m_pPlayer->m_Rollback; //JSAURUS rollback
 
-	m_aCustomWeaponSnaps[WEAPON_TASER - CUSTOM_WEAPON_START] = WEAPON_LASER;
-	m_aCustomWeaponSnaps[WEAPON_PORTAL_GUN - CUSTOM_WEAPON_START] = WEAPON_LASER;
-	m_aCustomWeaponSnaps[WEAPON_MINIGUN - CUSTOM_WEAPON_START] = WEAPON_GRENADE;
-	m_aCustomWeaponSnaps[WEAPON_BLACKHOLE - CUSTOM_WEAPON_START] = WEAPON_GRENADE;
-	m_aCustomWeaponSnaps[WEAPON_CHARGE_HAMMER - CUSTOM_WEAPON_START] = WEAPON_HAMMER;
+	m_aCustomWeaponSnaps[KZ_WEAPON_TASER - KZ_CUSTOM_WEAPON_START] = WEAPON_LASER;
+	m_aCustomWeaponSnaps[KZ_WEAPON_PORTAL_GUN - KZ_CUSTOM_WEAPON_START] = WEAPON_LASER;
+	m_aCustomWeaponSnaps[KZ_WEAPON_MINIGUN - KZ_CUSTOM_WEAPON_START] = WEAPON_GRENADE;
+	m_aCustomWeaponSnaps[KZ_WEAPON_BLACKHOLE - KZ_CUSTOM_WEAPON_START] = WEAPON_GRENADE;
+	m_aCustomWeaponSnaps[KZ_WEAPON_CHARGE_HAMMER - KZ_CUSTOM_WEAPON_START] = WEAPON_HAMMER;
 
-	m_aCustomWeaponMaxAmmo[WEAPON_TASER - CUSTOM_WEAPON_START] = 10;
-	m_aCustomWeaponMaxAmmo[WEAPON_PORTAL_GUN - CUSTOM_WEAPON_START] = 10;
-	m_aCustomWeaponMaxAmmo[WEAPON_MINIGUN - CUSTOM_WEAPON_START] = 1000;
-	m_aCustomWeaponMaxAmmo[WEAPON_BLACKHOLE - CUSTOM_WEAPON_START] = 10;
-	m_aCustomWeaponMaxAmmo[WEAPON_CHARGE_HAMMER - CUSTOM_WEAPON_START] = -1;
+	m_aCustomWeaponMaxAmmo[KZ_WEAPON_TASER - KZ_CUSTOM_WEAPON_START] = 10;
+	m_aCustomWeaponMaxAmmo[KZ_WEAPON_PORTAL_GUN - KZ_CUSTOM_WEAPON_START] = 10;
+	m_aCustomWeaponMaxAmmo[KZ_WEAPON_MINIGUN - KZ_CUSTOM_WEAPON_START] = 1000;
+	m_aCustomWeaponMaxAmmo[KZ_WEAPON_BLACKHOLE - KZ_CUSTOM_WEAPON_START] = 10;
+	m_aCustomWeaponMaxAmmo[KZ_WEAPON_CHARGE_HAMMER - KZ_CUSTOM_WEAPON_START] = -1;
 
-	m_aCustomWeaponAmmo[WEAPON_TASER - CUSTOM_WEAPON_START] = 0;
-	m_aCustomWeaponAmmo[WEAPON_PORTAL_GUN - CUSTOM_WEAPON_START] = 0;
-	m_aCustomWeaponAmmo[WEAPON_MINIGUN - CUSTOM_WEAPON_START] = 0;
-	m_aCustomWeaponAmmo[WEAPON_BLACKHOLE - CUSTOM_WEAPON_START] = 0;
-	m_aCustomWeaponAmmo[WEAPON_CHARGE_HAMMER - CUSTOM_WEAPON_START] = 0;
+	m_aCustomWeaponAmmo[KZ_WEAPON_TASER - KZ_CUSTOM_WEAPON_START] = 0;
+	m_aCustomWeaponAmmo[KZ_WEAPON_PORTAL_GUN - KZ_CUSTOM_WEAPON_START] = 0;
+	m_aCustomWeaponAmmo[KZ_WEAPON_MINIGUN - KZ_CUSTOM_WEAPON_START] = 0;
+	m_aCustomWeaponAmmo[KZ_WEAPON_BLACKHOLE - KZ_CUSTOM_WEAPON_START] = 0;
+	m_aCustomWeaponAmmo[KZ_WEAPON_CHARGE_HAMMER - KZ_CUSTOM_WEAPON_START] = 0;
 
 }
 
@@ -240,34 +240,34 @@ void CCharacter::SetWeapon(int W)
 	m_Core.m_ActiveWeapon = W;
 	GameServer()->CreateSound(m_Pos, SOUND_WEAPON_SWITCH, TeamMask());
 
-	if(m_Core.m_ActiveWeapon < 0 || m_Core.m_ActiveWeapon >= NUM_CUSTOM_WEAPONS)
+	if(m_Core.m_ActiveWeapon < 0 || m_Core.m_ActiveWeapon >= KZ_NUM_CUSTOM_WEAPONS)
 		m_Core.m_ActiveWeapon = 0;
 
 	//+KZ
 	
-	if(m_Core.m_ActiveWeapon == WEAPON_TASER)
+	if(m_Core.m_ActiveWeapon == KZ_WEAPON_TASER)
 	{
 		GameServer()->SendBroadcast("Weapon: Taser",m_pPlayer->GetCid());
 	}
-	else if(m_Core.m_ActiveWeapon == WEAPON_PORTAL_GUN)
+	else if(m_Core.m_ActiveWeapon == KZ_WEAPON_PORTAL_GUN)
 	{
 		GameServer()->SendBroadcast("Weapon: Portal Gun",m_pPlayer->GetCid());
 	}
-	else if(m_Core.m_ActiveWeapon == WEAPON_MINIGUN)
+	else if(m_Core.m_ActiveWeapon == KZ_WEAPON_MINIGUN)
 	{
 		GameServer()->SendBroadcast("Weapon: Minigun",m_pPlayer->GetCid());
 	}
-	else if(m_Core.m_ActiveWeapon == WEAPON_BLACKHOLE)
+	else if(m_Core.m_ActiveWeapon == KZ_WEAPON_BLACKHOLE)
 	{
 		GameServer()->SendBroadcast("Weapon: Blackhole",m_pPlayer->GetCid());
 		m_ShowCursor = true;
 	}
-	else if(m_Core.m_ActiveWeapon == WEAPON_CHARGE_HAMMER)
+	else if(m_Core.m_ActiveWeapon == KZ_WEAPON_CHARGE_HAMMER)
 	{
 		GameServer()->SendBroadcast("Weapon: Charge Hammer",m_pPlayer->GetCid());
 	}
 
-	if(m_Core.m_ActiveWeapon != WEAPON_BLACKHOLE)
+	if(m_Core.m_ActiveWeapon != KZ_WEAPON_BLACKHOLE)
 	{
 		m_ShowCursor = false;
 	}
@@ -493,7 +493,7 @@ void CCharacter::HandleNinja()
 void CCharacter::DoWeaponSwitch()
 {
 	// make sure we can switch
-	if(m_ReloadTimer != 0 || m_QueuedWeapon == -1 || m_Core.m_aWeapons[WEAPON_NINJA].m_Got || (m_QueuedWeapon >= 0 && m_QueuedWeapon < NUM_WEAPONS ? !m_Core.m_aWeapons[m_QueuedWeapon].m_Got : ( m_QueuedWeapon >= CUSTOM_WEAPON_START && m_QueuedWeapon < NUM_CUSTOM_WEAPONS ? !m_aCustomWeaponGot[m_QueuedWeapon - CUSTOM_WEAPON_START] : false)))
+	if(m_ReloadTimer != 0 || m_QueuedWeapon == -1 || m_Core.m_aWeapons[WEAPON_NINJA].m_Got || (m_QueuedWeapon >= 0 && m_QueuedWeapon < NUM_WEAPONS ? !m_Core.m_aWeapons[m_QueuedWeapon].m_Got : ( m_QueuedWeapon >= KZ_CUSTOM_WEAPON_START && m_QueuedWeapon < KZ_NUM_CUSTOM_WEAPONS ? !m_aCustomWeaponGot[m_QueuedWeapon - KZ_CUSTOM_WEAPON_START] : false)))
 		return;
 	
 	if(m_HasBall) //+KZ Ball
@@ -523,12 +523,12 @@ void CCharacter::HandleWeaponSwitch()
 	{
 		while(Next) // Next Weapon selection
 		{
-			WantedWeapon = (WantedWeapon + 1) % NUM_CUSTOM_WEAPONS;
+			WantedWeapon = (WantedWeapon + 1) % KZ_NUM_CUSTOM_WEAPONS;
 			if(WantedWeapon >= 0 && WantedWeapon < NUM_WEAPONS && m_Core.m_aWeapons[WantedWeapon].m_Got)
 			{
 					Next--;
 			}
-			else if(WantedWeapon >= CUSTOM_WEAPON_START && WantedWeapon < NUM_CUSTOM_WEAPONS && m_aCustomWeaponGot[WantedWeapon - CUSTOM_WEAPON_START])
+			else if(WantedWeapon >= KZ_CUSTOM_WEAPON_START && WantedWeapon < KZ_NUM_CUSTOM_WEAPONS && m_aCustomWeaponGot[WantedWeapon - KZ_CUSTOM_WEAPON_START])
 			{
 					Next--;
 			}
@@ -539,12 +539,12 @@ void CCharacter::HandleWeaponSwitch()
 	{
 		while(Prev) // Prev Weapon selection
 		{
-			WantedWeapon = (WantedWeapon - 1) < 0 ? NUM_CUSTOM_WEAPONS - 1 : WantedWeapon - 1;
+			WantedWeapon = (WantedWeapon - 1) < 0 ? KZ_NUM_CUSTOM_WEAPONS - 1 : WantedWeapon - 1;
 			if(WantedWeapon >= 0 && WantedWeapon < NUM_WEAPONS && m_Core.m_aWeapons[WantedWeapon].m_Got)
 			{
 					Prev--;
 			}
-			else if(WantedWeapon >= CUSTOM_WEAPON_START && WantedWeapon < NUM_CUSTOM_WEAPONS && m_aCustomWeaponGot[WantedWeapon - CUSTOM_WEAPON_START])
+			else if(WantedWeapon >= KZ_CUSTOM_WEAPON_START && WantedWeapon < KZ_NUM_CUSTOM_WEAPONS && m_aCustomWeaponGot[WantedWeapon - KZ_CUSTOM_WEAPON_START])
 			{
 					Prev--;
 			}
@@ -560,7 +560,7 @@ void CCharacter::HandleWeaponSwitch()
 	{
 		m_QueuedWeapon = WantedWeapon;
 	}
-	else if(WantedWeapon >= CUSTOM_WEAPON_START && WantedWeapon < NUM_CUSTOM_WEAPONS && WantedWeapon != m_Core.m_ActiveWeapon && m_aCustomWeaponGot[WantedWeapon - CUSTOM_WEAPON_START])
+	else if(WantedWeapon >= KZ_CUSTOM_WEAPON_START && WantedWeapon < KZ_NUM_CUSTOM_WEAPONS && WantedWeapon != m_Core.m_ActiveWeapon && m_aCustomWeaponGot[WantedWeapon - KZ_CUSTOM_WEAPON_START])
 	{
 		m_QueuedWeapon = WantedWeapon;
 	}
@@ -588,7 +588,7 @@ void CCharacter::FireWeapon()
 		FullAuto = true;
 	if(m_Core.m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
 		FullAuto = true;
-	if(m_Core.m_ActiveWeapon == WEAPON_TASER || m_Core.m_ActiveWeapon == WEAPON_PORTAL_GUN || m_Core.m_ActiveWeapon == WEAPON_MINIGUN || m_Core.m_ActiveWeapon == WEAPON_CHARGE_HAMMER) //+KZ
+	if(m_Core.m_ActiveWeapon == KZ_WEAPON_TASER || m_Core.m_ActiveWeapon == KZ_WEAPON_PORTAL_GUN || m_Core.m_ActiveWeapon == KZ_WEAPON_MINIGUN || m_Core.m_ActiveWeapon == KZ_WEAPON_CHARGE_HAMMER) //+KZ
 		FullAuto = true;
 	// allow firing directly after coming out of freeze or being unfrozen
 	// by something
@@ -604,10 +604,10 @@ void CCharacter::FireWeapon()
 	if(CountInput(m_LatestPrevInput.m_Fire, m_LatestInput.m_Fire).m_Presses)
 		WillFire = true;
 
-	if(FullAuto && (m_LatestInput.m_Fire & 1) && (m_Core.m_ActiveWeapon < NUM_WEAPONS ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : m_aCustomWeaponAmmo[m_Core.m_ActiveWeapon - CUSTOM_WEAPON_START]))
+	if(FullAuto && (m_LatestInput.m_Fire & 1) && (m_Core.m_ActiveWeapon < NUM_WEAPONS ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : m_aCustomWeaponAmmo[m_Core.m_ActiveWeapon - KZ_CUSTOM_WEAPON_START]))
 		WillFire = true;
 
-	if(!WillFire && m_Core.m_ActiveWeapon != WEAPON_CHARGE_HAMMER)
+	if(!WillFire && m_Core.m_ActiveWeapon != KZ_WEAPON_CHARGE_HAMMER)
 		return;
 
 	if(m_FreezeTime)
@@ -643,7 +643,7 @@ void CCharacter::FireWeapon()
     
 	if(m_Core.m_ActiveWeapon >=0 && m_Core.m_ActiveWeapon < NUM_WEAPONS && !m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo)
 		return;
-	else if(m_Core.m_ActiveWeapon >= CUSTOM_WEAPON_START && m_Core.m_ActiveWeapon < NUM_CUSTOM_WEAPONS && !m_aCustomWeaponAmmo[m_Core.m_ActiveWeapon-CUSTOM_WEAPON_START])
+	else if(m_Core.m_ActiveWeapon >= KZ_CUSTOM_WEAPON_START && m_Core.m_ActiveWeapon < KZ_NUM_CUSTOM_WEAPONS && !m_aCustomWeaponAmmo[m_Core.m_ActiveWeapon-KZ_CUSTOM_WEAPON_START])
 		return;
 
 	vec2 ProjStartPos = m_Pos + Direction * GetProximityRadius() * 0.75f;
@@ -851,39 +851,39 @@ void CCharacter::FireWeapon()
 
 	//+KZ
 
-	case WEAPON_TASER:
+	case KZ_WEAPON_TASER:
 	{
 		float LaserReach = GetTuning(m_TuneZone)->m_LaserReach;
 
-		new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), WEAPON_TASER);
+		new CLaser(GameWorld(), m_Pos, Direction, LaserReach, m_pPlayer->GetCid(), KZ_WEAPON_TASER);
 		GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
 
-	case WEAPON_PORTAL_GUN:
+	case KZ_WEAPON_PORTAL_GUN:
 	{
 		new CPortalProjectile(GameWorld(),m_pPlayer->GetCid(),m_Pos,Direction,m_BluePortal);
 		GameServer()->CreateSound(m_Pos, SOUND_LASER_FIRE, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
 
-	case WEAPON_MINIGUN:
+	case KZ_WEAPON_MINIGUN:
 	{
 		new CMinigunProjectile(GameWorld(),m_pPlayer->GetCid(),m_Pos,Direction);
 		GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, TeamMask()); // NOLINT(clang-analyzer-unix.Malloc)
 	}
 	break;
 
-	case WEAPON_BLACKHOLE:
+	case KZ_WEAPON_BLACKHOLE:
 	{
 		new CBlackHole(GameWorld(),vec2(m_Pos.x + m_Input.m_TargetX,m_Pos.y + m_Input.m_TargetY),m_pPlayer->GetCid());
 		GameServer()->CreateSound(m_Pos, SOUND_HOOK_LOOP, TeamMask());
 
-		if(InitialAmmo == GetWeaponAmmo(WEAPON_BLACKHOLE))
-			m_aCustomWeaponAmmo[WEAPON_BLACKHOLE - CUSTOM_WEAPON_START]--;
+		if(InitialAmmo == GetWeaponAmmo(KZ_WEAPON_BLACKHOLE))
+			m_aCustomWeaponAmmo[KZ_WEAPON_BLACKHOLE - KZ_CUSTOM_WEAPON_START]--;
 	}
 	break;
-	case WEAPON_CHARGE_HAMMER:
+	case KZ_WEAPON_CHARGE_HAMMER:
 	{
 		if(!m_superhammer_charge_time && WillFire)
 		{
@@ -920,13 +920,13 @@ void CCharacter::FireWeapon()
 		GetTuning(m_TuneZone)->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
 		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
 	}
-	else if(m_Core.m_ActiveWeapon < NUM_CUSTOM_WEAPONS)
+	else if(m_Core.m_ActiveWeapon < KZ_NUM_CUSTOM_WEAPONS)
 	{
-		if(m_Core.m_ActiveWeapon == WEAPON_TASER || m_Core.m_ActiveWeapon == WEAPON_PORTAL_GUN)
+		if(m_Core.m_ActiveWeapon == KZ_WEAPON_TASER || m_Core.m_ActiveWeapon == KZ_WEAPON_PORTAL_GUN)
 		{
 			m_ReloadTimer = GetTuning(m_TuneZone)->m_LaserFireDelay * Server()->TickSpeed() / 1000;
 		}
-		else if(m_Core.m_ActiveWeapon == WEAPON_MINIGUN)
+		else if(m_Core.m_ActiveWeapon == KZ_WEAPON_MINIGUN)
 		{
 			m_ReloadTimer = 0.1 * Server()->TickSpeed();
 		}
@@ -1123,7 +1123,7 @@ void CCharacter::Tick()
 		m_Waitingforreleaseaim = false;
 	}
 
-	if(m_Core.m_ActiveWeapon == WEAPON_PORTAL_GUN && m_AimPressed && !m_Waitingforreleaseaim)
+	if(m_Core.m_ActiveWeapon == KZ_WEAPON_PORTAL_GUN && m_AimPressed && !m_Waitingforreleaseaim)
 	{
 		m_BluePortal = !m_BluePortal;
 		m_Waitingforreleaseaim = true;
@@ -1640,7 +1640,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 	{
 		Health = m_Health;
 		Armor = m_Armor;
-		AmmoCount = (m_FreezeTime == 0) ? (m_Core.m_ActiveWeapon < NUM_WEAPONS ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : m_aCustomWeaponAmmo[m_Core.m_ActiveWeapon - CUSTOM_WEAPON_START]) : 0;
+		AmmoCount = (m_FreezeTime == 0) ? (m_Core.m_ActiveWeapon < NUM_WEAPONS ? m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Ammo : m_aCustomWeaponAmmo[m_Core.m_ActiveWeapon - KZ_CUSTOM_WEAPON_START]) : 0;
 	}
     if(!(((CServer*)Server())->m_aClients[m_pPlayer->GetCid()].m_KZBot))
 	if(GetPlayer()->IsAfk() || GetPlayer()->IsPaused() || GetPlayer()->m_MenuAFK || Sitting())
@@ -1661,7 +1661,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 	if(GameServer()->m_pController->OnCharacterSnap(SnappingClient, Id))
 		return;
 	
-	if(Weapon >= CUSTOM_WEAPON_START)
+	if(Weapon >= KZ_CUSTOM_WEAPON_START)
 		m_SnapCustomWeapon = true;
 	else
 		m_SnapCustomWeapon = false;
@@ -1688,7 +1688,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 		if(m_HasNoWeapon || m_HasFlagBall || m_DropFlagBallTicks > 0)
 			pCharacter->m_Weapon = -1;
 		else if(m_SnapCustomWeapon)
-			pCharacter->m_Weapon = m_aCustomWeaponSnaps[m_Core.m_ActiveWeapon - CUSTOM_WEAPON_START];
+			pCharacter->m_Weapon = m_aCustomWeaponSnaps[m_Core.m_ActiveWeapon - KZ_CUSTOM_WEAPON_START];
 		else
 			pCharacter->m_Weapon = Weapon;
 		pCharacter->m_AmmoCount = AmmoCount;
@@ -1719,7 +1719,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 		if(m_HasFlagBall || m_DropFlagBallTicks > 0)
 			pCharacter->m_Weapon = -1;
 		else if(m_SnapCustomWeapon)
-			pCharacter->m_Weapon = m_aCustomWeaponSnaps[m_Core.m_ActiveWeapon - CUSTOM_WEAPON_START];
+			pCharacter->m_Weapon = m_aCustomWeaponSnaps[m_Core.m_ActiveWeapon - KZ_CUSTOM_WEAPON_START];
 		else
 			pCharacter->m_Weapon = Weapon;
 		pCharacter->m_AmmoCount = AmmoCount;
@@ -1871,13 +1871,13 @@ void CCharacter::Snap(int SnappingClient)
 		break;
 	}
 
-	if(m_Core.m_ActiveWeapon == WEAPON_PORTAL_GUN || m_Core.m_ActiveWeapon == WEAPON_TASER)
+	if(m_Core.m_ActiveWeapon == KZ_WEAPON_PORTAL_GUN || m_Core.m_ActiveWeapon == KZ_WEAPON_TASER)
 	{
 				vec2 postemp;
 				
 		postemp = m_Pos + (normalize(vec2(m_Input.m_TargetX,m_Input.m_TargetY)) * 82);
 
-		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_PortalKindId,postemp,postemp,Server()->Tick(),m_pPlayer->GetCid(),m_Core.m_ActiveWeapon == WEAPON_PORTAL_GUN ? (m_BluePortal ? LASERTYPE_RIFLE : LASERTYPE_SHOTGUN) : LASERTYPE_FREEZE);
+		GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_PortalKindId,postemp,postemp,Server()->Tick(),m_pPlayer->GetCid(),m_Core.m_ActiveWeapon == KZ_WEAPON_PORTAL_GUN ? (m_BluePortal ? LASERTYPE_RIFLE : LASERTYPE_SHOTGUN) : LASERTYPE_FREEZE);
 	}
 	
 	if(!Server()->Translate(Id, SnappingClient))
@@ -3334,7 +3334,7 @@ bool CCharacter::UnFreeze()
 	{
 		// m_Armor = 10; // ddnet-insta do not set m_Armor use SetArmorProgress instead
 		GameServer()->m_pController->SetArmorProgressFull(this); // ddnet-insta
-		if(m_Core.m_ActiveWeapon < NUM_WEAPONS ? !m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Got : !m_aCustomWeaponGot[m_Core.m_ActiveWeapon - CUSTOM_WEAPON_START])
+		if(m_Core.m_ActiveWeapon < NUM_WEAPONS ? !m_Core.m_aWeapons[m_Core.m_ActiveWeapon].m_Got : !m_aCustomWeaponGot[m_Core.m_ActiveWeapon - KZ_CUSTOM_WEAPON_START])
 			m_Core.m_ActiveWeapon = WEAPON_GUN;
 		m_FreezeTime = 0;
 		m_Core.m_FreezeStart = 0;
@@ -3383,9 +3383,9 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 
 		m_Core.m_aWeapons[Weapon].m_Got = !Remove;
 	}
-	else if(Weapon >= CUSTOM_WEAPON_START && Weapon < NUM_CUSTOM_WEAPONS)
+	else if(Weapon >= KZ_CUSTOM_WEAPON_START && Weapon < KZ_NUM_CUSTOM_WEAPONS)
 	{
-		m_aCustomWeaponGot[Weapon-CUSTOM_WEAPON_START] = !Remove;
+		m_aCustomWeaponGot[Weapon-KZ_CUSTOM_WEAPON_START] = !Remove;
 
 		if(Remove)
 		{
@@ -3394,7 +3394,7 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 		}
 		else
 		{
-			m_aCustomWeaponAmmo[Weapon-CUSTOM_WEAPON_START] = Ammo;
+			m_aCustomWeaponAmmo[Weapon-KZ_CUSTOM_WEAPON_START] = Ammo;
 		}
 	}
 
@@ -3609,7 +3609,7 @@ void CCharacter::HandleKZTiles()
 	bool ApplyRest = false;
 	
 	
-	if(TileIndex == TILE_ADMIN)
+	if(TileIndex == KZ_TILE_ADMIN)
 	{
 		if(Server()->GetAuthedState(m_pPlayer->GetCid()) == AUTHED_NO)
 		{
@@ -3617,7 +3617,7 @@ void CCharacter::HandleKZTiles()
 			GameServer()->SendChatTarget(m_pPlayer->GetCid(), "Only Admins allowed");
 		}
 	}
-	if(TileIndex == TILE_NOAIR || TileIndex == TILE_WATER)
+	if(TileIndex == KZ_TILE_NOAIR || TileIndex == KZ_TILE_WATER)
 	{
 		m_NoAir = true;
 	}
@@ -3626,53 +3626,53 @@ void CCharacter::HandleKZTiles()
 		m_NoAir = false;
 	}
 	
-	if(TileIndex == TILE_WATER || TileIndex == TILE_FLY)
+	if(TileIndex == KZ_TILE_WATER || TileIndex == KZ_TILE_FLY)
 	{
 		m_Core.m_JumpedTotal = 0;
 		m_Core.m_Jumped = 0;
 	}
 	
-	if(TileIndex == TILE_WATER && !m_Water)
+	if(TileIndex == KZ_TILE_WATER && !m_Water)
 	{
 		m_Water = true;
 	}
-	else if(TileIndex != TILE_WATER && m_Water)
+	else if(TileIndex != KZ_TILE_WATER && m_Water)
 	{
 		m_Water = false;
 	}
 	
-	if(TileIndex == TILE_INVISIBLE && !m_Invisible)
+	if(TileIndex == KZ_TILE_INVISIBLE && !m_Invisible)
 	{
 		m_Invisible = true;
 	}
-	else if(TileIndex != TILE_INVISIBLE && m_Invisible)
+	else if(TileIndex != KZ_TILE_INVISIBLE && m_Invisible)
 	{
 		m_Invisible = false;
 	}
 
-	if(TileIndex == TILE_INVINCIBLE && !m_Core.m_Invincible)
+	if(TileIndex == KZ_TILE_INVINCIBLE && !m_Core.m_Invincible)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You are invincible");
 		SetInvincible(true);
 	}
-	else if(TileIndex == TILE_NO_INVINCIBLE && m_Core.m_Invincible)
+	else if(TileIndex == KZ_TILE_NO_INVINCIBLE && m_Core.m_Invincible)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "Now you are not invincible, sad...");
 		SetInvincible(false);
 	}
 
-	if(TileIndex == TILE_RAINBOW_ON && !m_Rainbow)
+	if(TileIndex == KZ_TILE_RAINBOW_ON && !m_Rainbow)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You got rainbow");
 		Rainbow(true);
 	}
-	else if(TileIndex == TILE_RAINBOW_OFF && m_Rainbow)
+	else if(TileIndex == KZ_TILE_RAINBOW_OFF && m_Rainbow)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You lost rainbow");
 		Rainbow(false);
 	}
 
-	if(TileIndex == TILE_GODMODE && !m_IsGodmode)
+	if(TileIndex == KZ_TILE_GODMODE && !m_IsGodmode)
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "'%s' got godmode!", Server()->ClientName(m_pPlayer->GetCid()));
@@ -3680,7 +3680,7 @@ void CCharacter::HandleKZTiles()
 
 		m_IsGodmode = true;
 	}
-	else if(TileIndex == TILE_NO_GODMODE && m_IsGodmode)
+	else if(TileIndex == KZ_TILE_NO_GODMODE && m_IsGodmode)
 	{
 		char aBuf[128];
 		str_format(aBuf, sizeof(aBuf), "'%s' lost godmode...", Server()->ClientName(m_pPlayer->GetCid()));
@@ -3689,51 +3689,51 @@ void CCharacter::HandleKZTiles()
 		m_IsGodmode = false;
 	}
 
-	if(TileIndex == TILE_SPARKLES_ON && !m_Sparkles)
+	if(TileIndex == KZ_TILE_SPARKLES_ON && !m_Sparkles)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You got sparkles");
 		m_Sparkles = true;
 	}
-	else if(TileIndex == TILE_SPARKLES_OFF && m_Sparkles)
+	else if(TileIndex == KZ_TILE_SPARKLES_OFF && m_Sparkles)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You lost sparkles");
 		m_Sparkles = false;
 	}
 
-	if(TileIndex == TILE_CONFETTI_ON && !m_ConfettiKZ)
+	if(TileIndex == KZ_TILE_CONFETTI_ON && !m_ConfettiKZ)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You got confetti");
 		m_ConfettiKZ = true;
 	}
-	else if(TileIndex == TILE_CONFETTI_OFF && m_ConfettiKZ)
+	else if(TileIndex == KZ_TILE_CONFETTI_OFF && m_ConfettiKZ)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You lost confetti");
 		m_ConfettiKZ = false;
 	}
 
-	if(TileIndex == TILE_SIT && !m_Sit)
+	if(TileIndex == KZ_TILE_SIT && !m_Sit)
 	{
 		m_Sit = true;
 	}
-	else if(TileIndex != TILE_SIT && m_Sit)
+	else if(TileIndex != KZ_TILE_SIT && m_Sit)
 	{
 		m_Sit = false;
 	}
 
 	int NewJumps = m_Core.m_Jumps;
 
-	if(TileIndex == TILE_PLUS_JUMP && !m_insidetilejump)
+	if(TileIndex == KZ_TILE_PLUS_JUMP && !m_insidetilejump)
 	{
 		NewJumps++;
 		m_insidetilejump = true;
 	}
-	else if(TileIndex == TILE_MINUS_JUMP && !m_insidetilejump)
+	else if(TileIndex == KZ_TILE_MINUS_JUMP && !m_insidetilejump)
 	{
 		if(NewJumps > 0)
 			NewJumps--;
 		m_insidetilejump = true;
 	}
-	else if(m_insidetilejump && TileIndex != TILE_PLUS_JUMP && TileIndex != TILE_MINUS_JUMP)
+	else if(m_insidetilejump && TileIndex != KZ_TILE_PLUS_JUMP && TileIndex != KZ_TILE_MINUS_JUMP)
 	{
 		m_insidetilejump = false;
 	}
@@ -3752,55 +3752,55 @@ void CCharacter::HandleKZTiles()
 	}
 	
 	
-	if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == TILE_5_DAMAGE)
+	if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == KZ_TILE_5_DAMAGE)
 	{
 		DoKZDamage(vec2(15,0), 5, m_pPlayer->GetCid(), WEAPON_WORLD);
 	}
-	if(Collision()->GetKZTileIndex(m_Pos.x + 15 , m_Pos.y) == TILE_5_DAMAGE)
+	if(Collision()->GetKZTileIndex(m_Pos.x + 15 , m_Pos.y) == KZ_TILE_5_DAMAGE)
 	{
 		DoKZDamage(vec2(-15,0), 5, m_pPlayer->GetCid(), WEAPON_WORLD);
 	}
-	if(Collision()->GetKZTileIndex(m_Pos.x , m_Pos.y - 15) == TILE_5_DAMAGE)
+	if(Collision()->GetKZTileIndex(m_Pos.x , m_Pos.y - 15) == KZ_TILE_5_DAMAGE)
 	{
 		DoKZDamage(vec2(0,15), 5, m_pPlayer->GetCid(), WEAPON_WORLD);
 	}
-	if(Collision()->GetKZTileIndex(m_Pos.x, m_Pos.y + 15 ) == TILE_5_DAMAGE)
+	if(Collision()->GetKZTileIndex(m_Pos.x, m_Pos.y + 15 ) == KZ_TILE_5_DAMAGE)
 	{
 		DoKZDamage(vec2(0,-15), 5, m_pPlayer->GetCid(), WEAPON_WORLD);
 	}
 
-	if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == TILE_1_DAMAGE)
+	if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == KZ_TILE_1_DAMAGE)
 	{
 		DoKZDamage(vec2(15,0), 1, m_pPlayer->GetCid(), WEAPON_WORLD);
 	}
-	if(Collision()->GetKZTileIndex(m_Pos.x + 15 , m_Pos.y) == TILE_1_DAMAGE)
+	if(Collision()->GetKZTileIndex(m_Pos.x + 15 , m_Pos.y) == KZ_TILE_1_DAMAGE)
 	{
 		DoKZDamage(vec2(-15,0), 1, m_pPlayer->GetCid(), WEAPON_WORLD);
 	}
-	if(Collision()->GetKZTileIndex(m_Pos.x , m_Pos.y - 15) == TILE_1_DAMAGE)
+	if(Collision()->GetKZTileIndex(m_Pos.x , m_Pos.y - 15) == KZ_TILE_1_DAMAGE)
 	{
 		DoKZDamage(vec2(0,15), 1, m_pPlayer->GetCid(), WEAPON_WORLD);
 	}
-	if(Collision()->GetKZTileIndex(m_Pos.x, m_Pos.y + 15 ) == TILE_1_DAMAGE)
+	if(Collision()->GetKZTileIndex(m_Pos.x, m_Pos.y + 15 ) == KZ_TILE_1_DAMAGE)
 	{
 		DoKZDamage(vec2(0,-15), 1, m_pPlayer->GetCid(), WEAPON_WORLD);
 	}
 	
 	
 	bool found = false;
-	if(Collision()->GetKZTileIndex(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_SLOWDEATH)
+	if(Collision()->GetKZTileIndex(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == KZ_TILE_SLOWDEATH)
 	{
 		found = true;
 	}
-	if(Collision()->GetKZTileIndex(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_SLOWDEATH)
+	if(Collision()->GetKZTileIndex(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == KZ_TILE_SLOWDEATH)
 	{
 		found = true;
 	}
-	if(Collision()->GetKZTileIndex(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_SLOWDEATH)
+	if(Collision()->GetKZTileIndex(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == KZ_TILE_SLOWDEATH)
 	{
 		found = true;
 	}
-	if(Collision()->GetKZTileIndex(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_SLOWDEATH)
+	if(Collision()->GetKZTileIndex(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == KZ_TILE_SLOWDEATH)
 	{
 		found = true;
 	}
@@ -3817,19 +3817,19 @@ void CCharacter::HandleKZTiles()
 	
 	
 	found = false;
-	if(Collision()->GetKZTileIndex(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_HEALTHZONE)
+	if(Collision()->GetKZTileIndex(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == KZ_TILE_HEALTHZONE)
 	{
 		found = true;
 	}
-	if(Collision()->GetKZTileIndex(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_HEALTHZONE)
+	if(Collision()->GetKZTileIndex(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == KZ_TILE_HEALTHZONE)
 	{
 		found = true;
 	}
-	if(Collision()->GetKZTileIndex(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_HEALTHZONE)
+	if(Collision()->GetKZTileIndex(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == KZ_TILE_HEALTHZONE)
 	{
 		found = true;
 	}
-	if(Collision()->GetKZTileIndex(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_HEALTHZONE)
+	if(Collision()->GetKZTileIndex(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == KZ_TILE_HEALTHZONE)
 	{
 		found = true;
 	}
@@ -3851,19 +3851,19 @@ void CCharacter::HandleKZTiles()
 	
 	
 	found = false;
-	if(Collision()->GetKZTileIndex(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_ARMORZONE)
+	if(Collision()->GetKZTileIndex(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == KZ_TILE_ARMORZONE)
 	{
 		found = true;
 	}
-	if(Collision()->GetKZTileIndex(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_ARMORZONE)
+	if(Collision()->GetKZTileIndex(m_Pos.x + GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == KZ_TILE_ARMORZONE)
 	{
 		found = true;
 	}
-	if(Collision()->GetKZTileIndex(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == TILE_ARMORZONE)
+	if(Collision()->GetKZTileIndex(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y - GetProximityRadius() / 3.f) == KZ_TILE_ARMORZONE)
 	{
 		found = true;
 	}
-	if(Collision()->GetKZTileIndex(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == TILE_ARMORZONE)
+	if(Collision()->GetKZTileIndex(m_Pos.x - GetProximityRadius() / 3.f, m_Pos.y + GetProximityRadius() / 3.f) == KZ_TILE_ARMORZONE)
 	{
 		found = true;
 	}
@@ -3883,7 +3883,7 @@ void CCharacter::HandleKZTiles()
 	}
 	
 	
-	if(m_HasBall && TileIndex == TILE_NO_BALL)
+	if(m_HasBall && TileIndex == KZ_TILE_NO_BALL)
 	{
 		CBall *ball = new CBall(&GameServer()->m_World, m_pPlayer->GetCid(), m_Pos, vec2(0,0));
 		ball->GoToStartPos();
@@ -3893,7 +3893,7 @@ void CCharacter::HandleKZTiles()
 		m_BallQueuedWeapon = -1;
 	}
 	
-	if(TileIndex == TILE_TEE_KILL)
+	if(TileIndex == KZ_TILE_TEE_KILL)
 	{
 		if(m_HasBall)
 		{
@@ -3909,7 +3909,7 @@ void CCharacter::HandleKZTiles()
 	if(GameServer()->m_pController->IsTeamPlay())
 	{
 		
-		if(TileIndex == TILE_BALL_REDSLAM)
+		if(TileIndex == KZ_TILE_BALL_REDSLAM)
 		{
 			if(m_HasBall)
 			{
@@ -3921,7 +3921,7 @@ void CCharacter::HandleKZTiles()
 			}
 			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
 		}
-		else if(TileIndex == TILE_BALL_BLUESLAM)
+		else if(TileIndex == KZ_TILE_BALL_BLUESLAM)
 		{
 			if(m_HasBall)
 			{
@@ -3933,7 +3933,7 @@ void CCharacter::HandleKZTiles()
 			}
 			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
 		}
-		else if(TileIndex == TILE_BALL_NOTEAMSLAM)
+		else if(TileIndex == KZ_TILE_BALL_NOTEAMSLAM)
 		{
 			if(m_HasBall)
 			{
@@ -3946,33 +3946,33 @@ void CCharacter::HandleKZTiles()
 			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
 		}
 		
-		if(m_pPlayer->GetTeam() == TEAM_BLUE && TileIndex == TILE_TEAMRED_DEATH)
+		if(m_pPlayer->GetTeam() == TEAM_BLUE && TileIndex == KZ_TILE_TEAMRED_DEATH)
 		{
 			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
 		}
-		else if(m_pPlayer->GetTeam() == TEAM_RED && TileIndex == TILE_TEAMBLUE_DEATH)
+		else if(m_pPlayer->GetTeam() == TEAM_RED && TileIndex == KZ_TILE_TEAMBLUE_DEATH)
 		{
 			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
 		}
 		
 		if(m_pPlayer->GetTeam() == TEAM_BLUE)
 		{
-			if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == TILE_TEAMRED)
+			if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == KZ_TILE_TEAMRED)
 			{
 				m_MoveRestrictions |= CANTMOVE_LEFT;
 				ApplyRest = true;
 			}
-			if(Collision()->GetKZTileIndex(m_Pos.x + 15 , m_Pos.y) == TILE_TEAMRED)
+			if(Collision()->GetKZTileIndex(m_Pos.x + 15 , m_Pos.y) == KZ_TILE_TEAMRED)
 			{
 				m_MoveRestrictions |= CANTMOVE_RIGHT;
 				ApplyRest = true;
 			}
-			if(Collision()->GetKZTileIndex(m_Pos.x , m_Pos.y - 15) == TILE_TEAMRED)
+			if(Collision()->GetKZTileIndex(m_Pos.x , m_Pos.y - 15) == KZ_TILE_TEAMRED)
 			{
 				m_MoveRestrictions |= CANTMOVE_UP;
 				ApplyRest = true;
 			}
-			if(Collision()->GetKZTileIndex(m_Pos.x, m_Pos.y + 15 ) == TILE_TEAMRED)
+			if(Collision()->GetKZTileIndex(m_Pos.x, m_Pos.y + 15 ) == KZ_TILE_TEAMRED)
 			{
 				m_MoveRestrictions |= CANTMOVE_DOWN;
 				m_Core.m_Jumped = 0;
@@ -3982,22 +3982,22 @@ void CCharacter::HandleKZTiles()
 		}
 		else if(m_pPlayer->GetTeam() == TEAM_RED)
 		{
-			if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == TILE_TEAMBLUE)
+			if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == KZ_TILE_TEAMBLUE)
 			{
 				m_MoveRestrictions |= CANTMOVE_LEFT;
 				ApplyRest = true;
 			}
-			if(Collision()->GetKZTileIndex(m_Pos.x + 15 , m_Pos.y) == TILE_TEAMBLUE)
+			if(Collision()->GetKZTileIndex(m_Pos.x + 15 , m_Pos.y) == KZ_TILE_TEAMBLUE)
 			{
 				m_MoveRestrictions |= CANTMOVE_RIGHT;
 				ApplyRest = true;
 			}
-			if(Collision()->GetKZTileIndex(m_Pos.x , m_Pos.y - 15) == TILE_TEAMBLUE)
+			if(Collision()->GetKZTileIndex(m_Pos.x , m_Pos.y - 15) == KZ_TILE_TEAMBLUE)
 			{
 				m_MoveRestrictions |= CANTMOVE_UP;
 				ApplyRest = true;
 			}
-			if(Collision()->GetKZTileIndex(m_Pos.x, m_Pos.y + 15 ) == TILE_TEAMBLUE)
+			if(Collision()->GetKZTileIndex(m_Pos.x, m_Pos.y + 15 ) == KZ_TILE_TEAMBLUE)
 			{
 				m_MoveRestrictions |= CANTMOVE_DOWN;
 				m_Core.m_Jumped = 0;
@@ -4937,7 +4937,7 @@ bool CCharacter::DropWeapon(int Weapon)
 int CCharacter::FindGotWeaponKZ()
 {
 	bool got;
-	for(int i=WEAPON_HAMMER;i<NUM_CUSTOM_WEAPONS;i++)
+	for(int i=WEAPON_HAMMER;i<KZ_NUM_CUSTOM_WEAPONS;i++)
 	{
 		got = GetWeaponGot(i);
 		if(got)

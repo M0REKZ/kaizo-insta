@@ -5905,10 +5905,10 @@ void CGameContext::ConTaser(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
 		return;
 
-	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_TASER);
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(KZ_WEAPON_TASER);
 
 	if(got)
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_TASER);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(KZ_WEAPON_TASER);
 }
 
 void CGameContext::ConUnTaser(IConsole::IResult *pResult, void *pUserData)
@@ -5935,11 +5935,11 @@ void CGameContext::ConUnTaser(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
 		return;
 
-	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_TASER);
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(KZ_WEAPON_TASER);
 
 	if(got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_TASER,true,0);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(KZ_WEAPON_TASER,true,0);
 	}
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_GUN);
@@ -6005,14 +6005,14 @@ void CGameContext::ConGetTaser(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
 		return;
 
-	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_TASER);
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(KZ_WEAPON_TASER);
 
 	if(!got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_TASER,false,10);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(KZ_WEAPON_TASER,false,10);
 	}
 
-	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_TASER);
+	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(KZ_WEAPON_TASER);
 }
 
 void CGameContext::ConPortalGun(IConsole::IResult *pResult, void *pUserData)
@@ -6030,10 +6030,10 @@ void CGameContext::ConPortalGun(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
 		return;
 
-	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_PORTAL_GUN);
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(KZ_WEAPON_PORTAL_GUN);
 
 	if(got)
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_PORTAL_GUN);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(KZ_WEAPON_PORTAL_GUN);
 }
 
 void CGameContext::ConUnPortalGun(IConsole::IResult *pResult, void *pUserData)
@@ -6060,11 +6060,11 @@ void CGameContext::ConUnPortalGun(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
 		return;
 
-	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_PORTAL_GUN);
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(KZ_WEAPON_PORTAL_GUN);
 
 	if(got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_PORTAL_GUN,true,0);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(KZ_WEAPON_PORTAL_GUN,true,0);
 	}
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_GUN);
@@ -6094,14 +6094,14 @@ void CGameContext::ConGetPortalGun(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
 		return;
 
-	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_PORTAL_GUN);
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(KZ_WEAPON_PORTAL_GUN);
 
 	if(!got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_PORTAL_GUN,false,10);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(KZ_WEAPON_PORTAL_GUN,false,10);
 	}
 
-	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_PORTAL_GUN);
+	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(KZ_WEAPON_PORTAL_GUN);
 }
 
 void CGameContext::ConOrangePortal(IConsole::IResult *pResult, void *pUserData)
@@ -6189,10 +6189,10 @@ void CGameContext::ConMinigun(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
 		return;
 
-	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_MINIGUN);
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(KZ_WEAPON_MINIGUN);
 
 	if(got)
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_MINIGUN);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(KZ_WEAPON_MINIGUN);
 }
 
 void CGameContext::ConUnMinigun(IConsole::IResult *pResult, void *pUserData)
@@ -6219,11 +6219,11 @@ void CGameContext::ConUnMinigun(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
 		return;
 
-	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_MINIGUN);
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(KZ_WEAPON_MINIGUN);
 
 	if(got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_MINIGUN,true,0);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(KZ_WEAPON_MINIGUN,true,0);
 	}
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_GUN);
@@ -6253,14 +6253,14 @@ void CGameContext::ConGetMinigun(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
 		return;
 
-	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_MINIGUN);
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(KZ_WEAPON_MINIGUN);
 
 	if(!got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_MINIGUN,false,1000);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(KZ_WEAPON_MINIGUN,false,1000);
 	}
 
-	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_MINIGUN);
+	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(KZ_WEAPON_MINIGUN);
 }
 
 void CGameContext::ConBlackHole(IConsole::IResult *pResult, void *pUserData)
@@ -6278,10 +6278,10 @@ void CGameContext::ConBlackHole(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
 		return;
 
-	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_BLACKHOLE);
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(KZ_WEAPON_BLACKHOLE);
 
 	if(got)
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_BLACKHOLE);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(KZ_WEAPON_BLACKHOLE);
 }
 
 void CGameContext::ConUnBlackHole(IConsole::IResult *pResult, void *pUserData)
@@ -6308,11 +6308,11 @@ void CGameContext::ConUnBlackHole(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
 		return;
 
-	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_BLACKHOLE);
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(KZ_WEAPON_BLACKHOLE);
 
 	if(got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_BLACKHOLE,true,0);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(KZ_WEAPON_BLACKHOLE,true,0);
 	}
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_GUN);
@@ -6342,14 +6342,14 @@ void CGameContext::ConGetBlackHole(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
 		return;
 
-	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_BLACKHOLE);
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(KZ_WEAPON_BLACKHOLE);
 
 	if(!got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_BLACKHOLE,false,1);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(KZ_WEAPON_BLACKHOLE,false,1);
 	}
 
-	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_BLACKHOLE);
+	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(KZ_WEAPON_BLACKHOLE);
 }
 
 void CGameContext::ConGetBlackHoleAmmo(IConsole::IResult *pResult, void *pUserData)
@@ -6383,11 +6383,11 @@ void CGameContext::ConGetBlackHoleAmmo(IConsole::IResult *pResult, void *pUserDa
 	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
 		return;
 
-	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_BLACKHOLE);
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(KZ_WEAPON_BLACKHOLE);
 
 	if(got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(WEAPON_BLACKHOLE, pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponAmmo(WEAPON_BLACKHOLE)+Amount);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeaponAmmo(KZ_WEAPON_BLACKHOLE, pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponAmmo(KZ_WEAPON_BLACKHOLE)+Amount);
 	}
 }
 
@@ -6406,10 +6406,10 @@ void CGameContext::ConChargeHammer(IConsole::IResult *pResult, void *pUserData)
 	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
 		return;
 
-	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_CHARGE_HAMMER);
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(KZ_WEAPON_CHARGE_HAMMER);
 
 	if(got)
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_CHARGE_HAMMER);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(KZ_WEAPON_CHARGE_HAMMER);
 }
 
 void CGameContext::ConUnChargeHammer(IConsole::IResult *pResult, void *pUserData)
@@ -6436,11 +6436,11 @@ void CGameContext::ConUnChargeHammer(IConsole::IResult *pResult, void *pUserData
 	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
 		return;
 
-	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_CHARGE_HAMMER);
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(KZ_WEAPON_CHARGE_HAMMER);
 
 	if(got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_CHARGE_HAMMER,true,0);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(KZ_WEAPON_CHARGE_HAMMER,true,0);
 	}
 
 	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_GUN);
@@ -6470,14 +6470,14 @@ void CGameContext::ConGetChargeHammer(IConsole::IResult *pResult, void *pUserDat
 	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
 		return;
 
-	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(WEAPON_CHARGE_HAMMER);
+	bool got = pSelf->m_apPlayers[ClientID]->GetCharacter()->GetWeaponGot(KZ_WEAPON_CHARGE_HAMMER);
 
 	if(!got)
 	{
-		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(WEAPON_CHARGE_HAMMER,false,-1);
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->GiveWeapon(KZ_WEAPON_CHARGE_HAMMER,false,-1);
 	}
 
-	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(WEAPON_CHARGE_HAMMER);
+	pSelf->m_apPlayers[ClientID]->GetCharacter()->SetWeapon(KZ_WEAPON_CHARGE_HAMMER);
 }
 
 void CGameContext::ConGetMines(IConsole::IResult *pResult, void *pUserData)

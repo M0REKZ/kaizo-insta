@@ -136,7 +136,7 @@ void CFlagBall::HandleKZTiles()
 		
 		int TileIndex = Collision()->GetKZTileIndex(m_Pos);
 		
-		if(TileIndex == TILE_BALL_REDGOAL || TileIndex == TILE_BALL_REDSLAM)
+		if(TileIndex == KZ_TILE_BALL_REDGOAL || TileIndex == KZ_TILE_BALL_REDSLAM)
 		{
 			if(m_pCarrier)
 				GameServer()->m_pController->m_aTeamscore[TEAM_BLUE]+= 100;
@@ -145,7 +145,7 @@ void CFlagBall::HandleKZTiles()
 			Reset();
 			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 		}
-		else if(TileIndex == TILE_BALL_BLUEGOAL || TileIndex == TILE_BALL_BLUESLAM)
+		else if(TileIndex == KZ_TILE_BALL_BLUEGOAL || TileIndex == KZ_TILE_BALL_BLUESLAM)
 		{
 			if(m_pCarrier)
 				GameServer()->m_pController->m_aTeamscore[TEAM_RED]+= 100;
@@ -154,12 +154,12 @@ void CFlagBall::HandleKZTiles()
 			Reset();
 			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 		}
-		else if(TileIndex == TILE_NO_BALL)
+		else if(TileIndex == KZ_TILE_NO_BALL)
 		{
 			Reset();
 			//GameServer()->CreateSound(CurPosition, m_SoundImpact);
 		}
-		else if(m_pLastCarrier && (TileIndex == TILE_BALL_NOTEAMGOAL || TileIndex == TILE_BALL_NOTEAMSLAM))
+		else if(m_pLastCarrier && (TileIndex == KZ_TILE_BALL_NOTEAMGOAL || TileIndex == KZ_TILE_BALL_NOTEAMSLAM))
 		{
 			if(m_pCarrier)
 				GameServer()->m_pController->m_aTeamscore[m_pCarrier->GetPlayer()->GetTeam()]+= 100;
@@ -168,7 +168,7 @@ void CFlagBall::HandleKZTiles()
 			Reset();
 			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 		}
-		else if(TileIndex == TILE_FLAGBALL_REDGOAL) //FLAGBALL TILES +KZ
+		else if(TileIndex == KZ_TILE_FLAGBALL_REDGOAL) //FLAGBALL TILES +KZ
 		{
 			if(m_pCarrier)
 			{
@@ -180,7 +180,7 @@ void CFlagBall::HandleKZTiles()
 			Reset();
 			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 		}
-		else if(TileIndex == TILE_FLAGBALL_BLUEGOAL)
+		else if(TileIndex == KZ_TILE_FLAGBALL_BLUEGOAL)
 		{
 			if(m_pCarrier)
 			{
@@ -192,7 +192,7 @@ void CFlagBall::HandleKZTiles()
 			Reset();
 			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE);
 		}
-		else if(TileIndex == TILE_FLAGBALL_NOTEAMGOAL)
+		else if(TileIndex == KZ_TILE_FLAGBALL_NOTEAMGOAL)
 		{
 			if(m_pCarrier)
 			{
