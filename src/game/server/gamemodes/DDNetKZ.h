@@ -3,18 +3,16 @@
 #define GAME_SERVER_GAMEMODES_DDNETKZ_H
 
 #include <game/server/gamecontroller.h>
-#include "DDRace.h"
+#include "base_pvp/base_pvp.h"
 #include <game/server/entities/kz/flagball.h>
 
-class CGameControllerDDNetKZ : public CGameControllerDDRace
+class CGameControllerDDNetKZ : public CGameControllerPvp
 {
 public:
 	CGameControllerDDNetKZ(class CGameContext *pGameServer);
 	~CGameControllerDDNetKZ();
 
-	CScore *Score();
 	void Tick() override;
-	int SnapGameInfoExFlags2(int SnappingClient, int DDRaceFlags) override;
 	void SetArmorProgress(CCharacter *pCharacer, int Progress) override{};
 	void SetArmorProgressFull(CCharacter *pCharacer) override{};
 	void SetArmorProgressEmpty(CCharacter *pCharacer) override{};
@@ -22,7 +20,18 @@ public:
 	void Snap(int SnappingClient) override;
 	bool OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos) override;
 	int OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon) override;
-	void OnPlayerTick(class CPlayer *pPlayer);
+	void OnCharacterSpawn(class CCharacter *pChr) override;
+
+	//override unwanted basepvp functions
+	virtual bool DoWincheckRound() override { return false; }
+	virtual void SetSpawnWeapons(class CCharacter *pChr) override {};
+	void OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason) override;
+	virtual bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override { return false; };
+	int SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags) override;
+	void UpdateSpawnWeapons(bool Silent, bool Apply) override {};
+	void InitPlayer(class CPlayer *pPlayer) override {};
+	virtual int SnapPlayerScore(int SnappingClient, CPlayer *pPlayer, int DDRaceScore) override { return CGameControllerDDRace::SnapPlayerScore(SnappingClient, pPlayer, DDRaceScore); };
+	
 
 	//Flag(ball xD)
 	class CFlagBall *m_apFlagBalls[2];

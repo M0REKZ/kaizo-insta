@@ -16,7 +16,7 @@
 #define TEST_TYPE_NAME "TestDDraceNetwork"
 
 CGameControllerDDNetKZ::CGameControllerDDNetKZ(class CGameContext *pGameServer) :
-	CGameControllerDDRace(pGameServer)
+	CGameControllerPvp(pGameServer)
 {
 	// game
 	m_AllowSkinChange = true;
@@ -39,7 +39,7 @@ CGameControllerDDNetKZ::~CGameControllerDDNetKZ() = default;
 
 void CGameControllerDDNetKZ::Tick()
 {
-	CGameControllerDDRace::Tick();
+	CGameControllerPvp::Tick();
 
 	for(int i = 0; i < MAX_CLIENTS; i++)
 	{
@@ -93,14 +93,9 @@ void CGameControllerDDNetKZ::Tick()
 	}
 }
 
-int CGameControllerDDNetKZ::SnapGameInfoExFlags2(int SnappingClient, int DDRaceFlags)
-{
-	return GAMEINFOFLAG2_HUD_AMMO | GAMEINFOFLAG2_HUD_HEALTH_ARMOR;
-}
-
 bool CGameControllerDDNetKZ::OnEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Number)
 {
-	CGameControllerDDRace::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
+	CGameControllerPvp::OnEntity(Index, x, y, Layer, Flags, Initial, Number);
 
 	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 	int Team = -1;
@@ -155,7 +150,7 @@ bool CGameControllerDDNetKZ::OnEntity(int Index, int x, int y, int Layer, int Fl
 
 void CGameControllerDDNetKZ::Snap(int SnappingClient)
 {
-	CGameControllerDDRace::Snap(SnappingClient);
+	CGameControllerPvp::Snap(SnappingClient);
 
 	bool invert = false;
 
@@ -281,7 +276,57 @@ int CGameControllerDDNetKZ::OnCharacterDeath(class CCharacter *pVictim, class CP
 	return HadFlag;
 }
 
-void CGameControllerDDNetKZ::OnPlayerTick(class CPlayer *pPlayer)
+void CGameControllerDDNetKZ::OnPlayerDisconnect(CPlayer *pPlayer, const char *pReason)
 {
-	pPlayer->RainbowTick();
+	CGameControllerDDRace::OnPlayerDisconnect(pPlayer, pReason);
+}
+
+int CGameControllerDDNetKZ::SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags)
+{
+	int Flags =
+		GAMEINFOFLAG_PREDICT_VANILLA | // ddnet-insta
+		GAMEINFOFLAG_ENTITIES_VANILLA | // ddnet-insta
+		GAMEINFOFLAG_BUG_VANILLA_BOUNCE | // ddnet-insta
+		GAMEINFOFLAG_GAMETYPE_VANILLA | // ddnet-insta
+		GAMEINFOFLAG_TIMESCORE |
+		//GAMEINFOFLAG_GAMETYPE_RACE |
+		//GAMEINFOFLAG_GAMETYPE_DDRACE |
+		GAMEINFOFLAG_GAMETYPE_DDNET |
+		GAMEINFOFLAG_UNLIMITED_AMMO |
+		GAMEINFOFLAG_RACE_RECORD_MESSAGE |
+		GAMEINFOFLAG_ALLOW_EYE_WHEEL |
+		/* GAMEINFOFLAG_ALLOW_HOOK_COLL | */ // https://github.com/ddnet-insta/ddnet-insta/issues/195
+		GAMEINFOFLAG_ALLOW_ZOOM |
+		GAMEINFOFLAG_BUG_DDRACE_GHOST |
+		/* GAMEINFOFLAG_BUG_DDRACE_INPUT | */ // https://github.com/ddnet-insta/ddnet-insta/issues/161
+		GAMEINFOFLAG_PREDICT_DDRACE |
+		GAMEINFOFLAG_PREDICT_DDRACE_TILES |
+		GAMEINFOFLAG_ENTITIES_DDNET |
+		GAMEINFOFLAG_ENTITIES_DDRACE |
+		GAMEINFOFLAG_ENTITIES_RACE |
+		GAMEINFOFLAG_RACE;
+	//if(!g_Config.m_SvAllowZoom) //allow zoom always in ddrace -> +KZ
+	//	Flags &= ~(GAMEINFOFLAG_ALLOW_ZOOM);
+
+	// ddnet clients do not predict sv_old_laser correctly
+	// https://github.com/ddnet/ddnet/issues/7589
+	if(g_Config.m_SvOldLaser)
+		Flags &= ~(GAMEINFOFLAG_PREDICT_DDRACE);
+
+	return Flags;
+}
+
+void CGameControllerDDNetKZ::OnCharacterSpawn(class CCharacter *pChr)
+{
+	pChr->SetTeams(&Teams());
+	Teams().OnCharacterSpawn(pChr->GetPlayer()->GetCid());
+
+	// default health
+	pChr->IncreaseHealth(10);
+
+	// give default weapons
+	pChr->GiveWeapon(WEAPON_HAMMER);
+	pChr->GiveWeapon(WEAPON_GUN);
+
+	pChr->SetActiveWeapon(WEAPON_HAMMER);
 }
