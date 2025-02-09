@@ -24,6 +24,12 @@ CEntity(pGameWorld, CGameWorld::CUSTOM_ENTTYPE_MINE)
 	m_Owner = Owner;
 	m_Active = active;
 	m_Respawn = respawn;
+
+	if(m_Owner >= 0 && m_Owner < MAX_CLIENTS)
+	{
+		m_Lifetime = g_Config.m_SvMinesLife * Server()->TickSpeed();
+		m_Respawn = false;
+	}
 	
 	GameWorld()->InsertEntity(this);
 }
@@ -31,6 +37,16 @@ CEntity(pGameWorld, CGameWorld::CUSTOM_ENTTYPE_MINE)
 void CMine::Tick()
 {
 	Move();
+
+	if(m_Lifetime > 0)
+	{
+		m_Lifetime--;
+		if(m_Lifetime == 0)
+		{
+			m_Explode = true;
+			m_RespawnTick = 0;
+		}
+	}
 	
 	if(m_RespawnTick)
 	{
@@ -169,6 +185,13 @@ void CMine::Tick()
 					GameServer()->CreateExplosion(m_Pos, Proj->GetOwnerId(), WEAPON_GRENADE, true, -1, CClientMask().set());
 				else
 					GameServer()->CreateExplosion(m_Pos, m_Owner, WEAPON_GRENADE, true, -1, CClientMask().set());
+			}
+			else if(m_Lifetime == 0)
+			{
+				if(m_Owner < 0 || m_Owner >= MAX_CLIENTS)
+					GameServer()->CreateExplosion(m_Pos, -1, WEAPON_GRENADE, true, -1);
+				else
+					GameServer()->CreateExplosion(m_Pos, m_Owner, WEAPON_GRENADE, true, -1);
 			}
 			
 			GameServer()->CreateSound(m_Pos, SOUND_GRENADE_EXPLODE);

@@ -20,6 +20,7 @@ private:
 	int m_Owner;
 	int m_RespawnTick;
 	bool m_Explode = false;
+	int m_Lifetime = -1;
 	
 	// DDRace
 
