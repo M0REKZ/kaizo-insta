@@ -30,6 +30,24 @@ void CPortalProjectile::Tick()
 	vec2 oldpos = m_Pos;
 	m_Pos += m_Dir * 15;
 	CStableProjectile::Tick();
+
+	if(Collision()->GetKZTileIndex(m_Pos) == KZ_TILE_RESET_PORTAL)
+	{
+		Reset();
+		return;
+	}
+
+	if(g_Config.m_SvPortalMode == 2)
+	{
+		int TileIndex = Collision()->GetTileIndex(Collision()->GetMapIndex(m_Pos));
+		int TileIndex2 = Collision()->GetFrontTileIndex(Collision()->GetMapIndex(m_Pos));
+		if(TileIndex == TILE_LUNFREEZE || TileIndex2 == TILE_LUNFREEZE)
+		{
+			Reset();
+			return;
+		}
+	}
+
 	if(Collision()->CheckPoint(m_Pos))
 	{
 		if(g_Config.m_SvPortalMode == 0) //default
@@ -39,8 +57,12 @@ void CPortalProjectile::Tick()
 		}
 		else if(g_Config.m_SvPortalMode == 1) //only certain tiles
 		{
-			int TileIndex = Collision()->GetKZTileIndex(m_Pos);
-			if(TileIndex == KZ_TILE_ALLOW_PORTAL)
+			if(Collision()->GetKZTileIndex(m_Pos) == KZ_TILE_ALLOW_PORTAL)
+			{
+				new CPortalKZ(GameWorld(),oldpos,m_Owner,m_BluePortal);
+				GameServer()->CreateSound(m_Pos,SOUND_LASER_BOUNCE,m_TeamMask);
+			}
+			else if(Collision()->GetKZTileIndex(oldpos) == KZ_TILE_ALLOW_PORTAL)
 			{
 				new CPortalKZ(GameWorld(),oldpos,m_Owner,m_BluePortal);
 				GameServer()->CreateSound(m_Pos,SOUND_LASER_BOUNCE,m_TeamMask);

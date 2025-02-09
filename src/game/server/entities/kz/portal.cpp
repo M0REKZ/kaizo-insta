@@ -254,5 +254,8 @@ bool CPortalKZ::CheckPosition(vec2 Pos)
 		}
 	}
 
+	if(!dotele)
+		return true;
+
 	return false;
 }
