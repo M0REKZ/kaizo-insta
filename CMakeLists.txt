@@ -2307,6 +2307,7 @@ if(CLIENT)
     graphics_threaded.h
     input.cpp
     input.h
+    keynames.cpp
     keynames.h
     notifications.cpp
     notifications.h
