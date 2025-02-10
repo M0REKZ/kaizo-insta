@@ -257,7 +257,7 @@ class CCharacter *CGameContext::GetPlayerChar(int ClientId)
 	return m_apPlayers[ClientId]->GetCharacter();
 }
 
-bool CGameContext::EmulateBug(int Bug)
+bool CGameContext::EmulateBug(int Bug) const
 {
 	return m_MapBugs.Contains(Bug);
 }
@@ -1795,6 +1795,8 @@ bool CGameContext::OnClientDataPersist(int ClientId, void *pData)
 	pPersistent->m_ForceAFK = m_apPlayers[ClientId]->m_ForceAFK; //+KZ
 	pPersistent->m_Rollback = m_apPlayers[ClientId]->m_Rollback; //+KZ JSAURUS rollback
 
+	m_pController->OnClientDataPersist(m_apPlayers[ClientId], pPersistent); // ddnet-insta
+
 	return true;
 }
 
@@ -1858,6 +1860,10 @@ void CGameContext::OnClientConnected(int ClientId, void *pData)
 	SendSettings(ClientId);
 
 	Server()->ExpireServerInfo();
+
+	// ddnet-insta
+	if(pPersistentData)
+		m_pController->OnClientDataRestore(m_apPlayers[ClientId], pPersistentData);
 }
 
 void CGameContext::OnClientDrop(int ClientId, const char *pReason)

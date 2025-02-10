@@ -201,6 +201,8 @@ class CGameContext : public IGameServer
 
 	struct CPersistentClientData
 	{
+#define IN_CLASS_PERSISTENTCLIENTDATA // ddnet-insta
+#include <game/server/instagib/persistent_client_data.h> // ddnet-insta
 		bool m_IsSpectator;
 		bool m_IsAfk;
 		int m_LastWhisperTo;
@@ -246,7 +248,7 @@ public:
 
 	// helper functions
 	class CCharacter *GetPlayerChar(int ClientId);
-	bool EmulateBug(int Bug);
+	bool EmulateBug(int Bug) const;
 	std::vector<SSwitchers> &Switchers() { return m_World.m_Core.m_vSwitchers; }
 
 	// voting
