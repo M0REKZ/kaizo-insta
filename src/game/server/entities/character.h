@@ -284,6 +284,7 @@ private:
 	bool m_Sparkles = false;
 	bool m_Sit = false;
 	bool m_Water;
+	bool m_SentWaterTune = false;
 	bool m_NoAir;
 	bool m_QuadWater;
 	int m_InvisibleShieldId = -1;

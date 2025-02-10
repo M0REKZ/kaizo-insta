@@ -1605,7 +1605,7 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 	if(m_pPlayer->GetCid() == SnappingClient)
 	{
 		int Faketuning = 0;
-		if(m_pPlayer->GetClientVersion() < VERSION_DDNET_NEW_HUD)
+		if(m_pPlayer->GetClientVersion() < VERSION_DDNET_NEW_HUD || m_Core.m_Mounted || m_Water)
 		{
 			if(m_Core.m_Jetpack && Weapon != WEAPON_NINJA)
 				Faketuning |= FAKETUNE_JETPACK;
@@ -1619,10 +1619,18 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 				Faketuning |= FAKETUNE_NOHOOK;
 			if(!m_Core.m_EndlessJump && m_Core.m_Jumps == 0)
 				Faketuning |= FAKETUNE_NOJUMP;
+			if(m_Core.m_Mounted)
+			{
+				Faketuning |= FAKETUNE_NOHOOK;
+				Faketuning |= FAKETUNE_NOCOLL;
+				Faketuning |= FAKETUNE_NOJUMP;
+				Faketuning |= FAKETUNE_NOHAMMER;
+			}
 		}
-		if(Faketuning != m_NeededFaketuning)
+		if(Faketuning != m_NeededFaketuning || m_Water != m_SentWaterTune)
 		{
 			m_NeededFaketuning = Faketuning;
+			m_SentWaterTune = m_Water;
 			GameServer()->SendTuningParams(m_pPlayer->GetCid(), m_TuneZone); // update tunings
 		}
 	}

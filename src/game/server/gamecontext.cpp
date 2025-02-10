@@ -995,11 +995,6 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 		pParams = (int *)&m_Tuning;
 	else
 		pParams = (int *)&(m_aTuningList[Zone]);
-
-	union { //+KZ for modded tunes
-		float a;
-		int b;
-	} tempunionkz;
 	
 	for(unsigned i = 0; i < sizeof(m_Tuning) / sizeof(int); i++)
 	{
@@ -1010,45 +1005,72 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 			{
 				continue;
 			}
-			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 12)) //+KZ Water
+			else if(m_apPlayers[ClientId]->GetCharacter()->Core()->m_Mounted && (i == 8)) //+KZ Vehicles HookLength
 			{
-				tempunionkz.a = 0.3f;
-				Msg.AddInt(tempunionkz.b);
+				Msg.AddInt(0);
 			}
-			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 2)) //+KZ Water
+			else if(m_apPlayers[ClientId]->GetCharacter()->Core()->m_Mounted && (i == 3)) //+KZ Vehicles GroundJumpImpulse
 			{
-				tempunionkz.a = 0.9f;
-				Msg.AddInt(tempunionkz.b);
+				Msg.AddInt(0);
 			}
-			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 0)) //+KZ Water
+			else if(m_apPlayers[ClientId]->GetCharacter()->Core()->m_Mounted && (i == 4)) //+KZ Vehicles AirJumpImpulse
 			{
-				tempunionkz.a = 6.0f;
-				Msg.AddInt(tempunionkz.b);
+				Msg.AddInt(0);
 			}
-			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 3)) //+KZ Water
+			else if(m_apPlayers[ClientId]->GetCharacter()->Core()->m_Mounted && (i == 0)) //+KZ Vehicles GroundControlSpeed
 			{
-				tempunionkz.a = 6.0f;
-				Msg.AddInt(tempunionkz.b);
+				Msg.AddInt(0);
 			}
-			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 7)) //+KZ Water
+			else if(m_apPlayers[ClientId]->GetCharacter()->Core()->m_Mounted && (i == 1)) //+KZ Vehicles GroundControlAccel
 			{
-				tempunionkz.a = 0.9f;
-				Msg.AddInt(tempunionkz.b);
+				Msg.AddInt(0);
 			}
-			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 5)) //+KZ Water
+			else if(m_apPlayers[ClientId]->GetCharacter()->Core()->m_Mounted && (i == 5)) //+KZ Vehicles AirControlSpeed
 			{
-				tempunionkz.a = 6.0f;
-				Msg.AddInt(tempunionkz.b);
+				Msg.AddInt(0);
 			}
-			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 4)) //+KZ Water
+			else if(m_apPlayers[ClientId]->GetCharacter()->Core()->m_Mounted && (i == 6)) //+KZ Vehicles AirControlAccel
 			{
-				tempunionkz.a = 6.0f;
-				Msg.AddInt(tempunionkz.b);
+				Msg.AddInt(0);
 			}
-			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 11)) //+KZ Water
+			else if(m_apPlayers[ClientId]->GetCharacter()->Core()->m_Mounted && (i == 12)) //+KZ Vehicles Gravity
 			{
-				tempunionkz.a = 7.0f;
-				Msg.AddInt(tempunionkz.b);
+				Msg.AddInt(0);
+			}
+			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 12)) //+KZ Water Gravity
+			{
+				//tempunionkz.a = 0.3f;
+				Msg.AddInt(0);
+			}
+			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 2)) //+KZ Water GroundFriction
+			{
+				//tempunionkz.a = 0.9f;
+				Msg.AddInt(1);
+			}
+			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 0)) //+KZ Water GroundControlSpeed
+			{
+				Msg.AddInt(6);
+			}
+			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 3)) //+KZ Water GroundJumpImpulse
+			{
+				Msg.AddInt(6);
+			}
+			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 7)) //+KZ Water AirFriction
+			{
+				//tempunionkz.a = 0.9f;
+				Msg.AddInt(1);
+			}
+			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 5)) //+KZ Water AirControlSpeed
+			{
+				Msg.AddInt(6);
+			}
+			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 4)) //+KZ Water AirJumpImpulse
+			{
+				Msg.AddInt(6);
+			}
+			else if(m_apPlayers[ClientId]->GetCharacter()->InWater() && (i == 11)) //+KZ Water HookDragSpeed
+			{
+				Msg.AddInt(7);
 			}
 			else if((i == 31) // collision
 				&& (m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO || m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOCOLL))
