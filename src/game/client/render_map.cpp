@@ -1272,7 +1272,7 @@ void CRenderTools::RenderTunemap(CTuneTile *pTune, int w, int h, float Scale, Co
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderKZCustomOverlay(CKZCustomTile *pSpeedup, int w, int h, float Scale, float Alpha) const
+void CRenderTools::RenderKZCustomOverlay(CKZCustomTileV2 *pSpeedup, int w, int h, float Scale, float Alpha) const
 {
 		float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);
@@ -1330,7 +1330,7 @@ void CRenderTools::RenderKZCustomOverlay(CKZCustomTile *pSpeedup, int w, int h, 
 	Graphics()->MapScreen(ScreenX0, ScreenY0, ScreenX1, ScreenY1);
 }
 
-void CRenderTools::RenderKZCustommap(CKZCustomTile *pKZCustomTile, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const
+void CRenderTools::RenderKZCustommap(CKZCustomTileV2 *pKZCustomTile, int w, int h, float Scale, ColorRGBA Color, int RenderFlags) const
 {
 	float ScreenX0, ScreenY0, ScreenX1, ScreenY1;
 	Graphics()->GetScreen(&ScreenX0, &ScreenY0, &ScreenX1, &ScreenY1);

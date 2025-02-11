@@ -1535,7 +1535,7 @@ void CMapLayers::OnRender()
 				int TileLayerAndOverlayCount = 0;
 				{
 					DataIndex = pTMap->m_KZCustom;
-					TileSize = sizeof(CKZCustomTile);
+					TileSize = sizeof(CKZCustomTileV2);
 					TileLayerAndOverlayCount = 1;
 				}
 

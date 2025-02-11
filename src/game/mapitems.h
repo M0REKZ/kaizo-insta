@@ -550,12 +550,22 @@ bool IsRotatableTile(int Index);
 bool IsCreditsTile(int TileIndex);
 int PackColor(CColor Color);
 
-class CKZCustomTile
+class CKZCustomTileV1
 {
 public:
 	unsigned char m_Index;
 	unsigned char m_Val1;
 	unsigned char m_Val2;
+	unsigned char m_Flags;
+};
+
+class CKZCustomTileV2
+{
+public:
+	unsigned char m_Index;
+	unsigned char m_Val1;
+	unsigned short int m_Val2;
+	unsigned short int m_Val3;
 	unsigned char m_Flags;
 };
 

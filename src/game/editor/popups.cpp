@@ -3007,14 +3007,16 @@ CUi::EPopupMenuFunctionResult CEditor::PopupKZCustom(void *pContext, CUIRect Vie
 
 	enum
 	{
-		PROP_FORCE = 0,
-		PROP_MAXSPEED,
+		PROP_VAL1 = 0,
+		PROP_VAL2,
+		PROP_VAL3,
 		NUM_PROPS
 	};
 
 	CProperty aProps[] = {
 		{"Val1", pEditor->m_KZCustomVal1, PROPTYPE_INT, 1, 255},
-		{"Val2", pEditor->m_KZCustomVal2, PROPTYPE_INT, 0, 255},
+		{"Val2", pEditor->m_KZCustomVal2, PROPTYPE_INT, 0, 65535},
+		{"Val3", pEditor->m_KZCustomVal3, PROPTYPE_INT, 0, 65535},
 		{nullptr},
 	};
 
@@ -3022,13 +3024,17 @@ CUi::EPopupMenuFunctionResult CEditor::PopupKZCustom(void *pContext, CUIRect Vie
 	int NewVal = 0;
 	int Prop = pEditor->DoProperties(&View, aProps, s_aIds, &NewVal);
 
-	if(Prop == PROP_FORCE)
+	if(Prop == PROP_VAL1)
 	{
-		pEditor->m_KZCustomVal1 = clamp(NewVal, 1, 255);
+		pEditor->m_KZCustomVal1 = clamp(NewVal, 0, 255);
 	}
-	else if(Prop == PROP_MAXSPEED)
+	else if(Prop == PROP_VAL2)
 	{
-		pEditor->m_KZCustomVal2 = clamp(NewVal, 0, 255);
+		pEditor->m_KZCustomVal2 = clamp(NewVal, 0, 65535);
+	}
+	else if(Prop == PROP_VAL3)
+	{
+		pEditor->m_KZCustomVal3 = clamp(NewVal, 0, 65535);
 	}
 
 	return CUi::POPUP_KEEP_OPEN;

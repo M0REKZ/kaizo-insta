@@ -160,7 +160,14 @@ void CCollision::Init(class CLayers *pLayers)
 
 void CCollision::Unload()
 {
-	m_pKZTiles = nullptr; //+KZ
+	if(!m_KZTilesAllocated)
+		m_pKZTiles = nullptr; //+KZ
+	else
+	{
+		free(m_pKZTiles);
+		m_pKZTiles = nullptr;
+		m_KZTilesAllocated = false;
+	}
 	m_KZWidth = 0;
 	m_KZHeight = 0;
 	
@@ -1853,19 +1860,52 @@ void CCollision::FindKZLayer()
 	//+KZ
 	if(m_pLayers->KZCustomLayer())
 	{
-		if(m_pLayers->KZCustomLayer()->m_Layer.m_Version == 1) //New Layer version that supports Val1 and Val2
+		if(m_pLayers->KZCustomLayer()->m_Layer.m_Version == 2) //New Layer version that supports Val1, Val2 and Val3
 		{
-			m_pKZTiles = static_cast<CKZCustomTile *>(m_pLayers->Map()->GetData(m_pLayers->KZCustomLayer()->m_KZCustom));
+			m_pKZTiles = static_cast<CKZCustomTileV2 *>(m_pLayers->Map()->GetData(m_pLayers->KZCustomLayer()->m_KZCustom));
 			m_KZWidth = m_pLayers->KZCustomLayer()->m_Width;
 			m_KZHeight = m_pLayers->KZCustomLayer()->m_Height;
 		}
-		else //Old layer version which used just simple CTiles, translate into CKZCustomTile...
+		else if(m_pLayers->KZCustomLayer()->m_Layer.m_Version == 1) //Layer version 1 that supports Val1 and Val2
 		{
-			CKZCustomTile TempTile;
-			CTile* pTempTiles = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->KZCustomLayer()->m_Data));
-			m_pKZTiles = static_cast<CKZCustomTile *>(m_pLayers->Map()->GetData(m_pLayers->KZCustomLayer()->m_Data));
+			CKZCustomTileV2 TempTile;
+			CKZCustomTileV1* pTempTiles = static_cast<CKZCustomTileV1 *>(m_pLayers->Map()->GetData(m_pLayers->KZCustomLayer()->m_KZCustom));
+
 			m_KZWidth = m_pLayers->KZCustomLayer()->m_Width;
 			m_KZHeight = m_pLayers->KZCustomLayer()->m_Height;
+
+			const size_t TilemapCount = (size_t)m_pLayers->KZCustomLayer()->m_Width * m_pLayers->KZCustomLayer()->m_Height;
+			const size_t TilemapSize = TilemapCount * sizeof(CKZCustomTileV2);
+
+			m_pKZTiles = static_cast<CKZCustomTileV2 *>(malloc(TilemapSize));
+			if(!m_pKZTiles)
+				return;
+			for(int i = 0; i < m_KZWidth * m_KZHeight; i++)
+			{
+				TempTile.m_Index = pTempTiles[i].m_Index;
+				TempTile.m_Flags = pTempTiles[i].m_Flags;
+				TempTile.m_Val1 = pTempTiles[i].m_Val1;
+				TempTile.m_Val2 = pTempTiles[i].m_Val2;
+				TempTile.m_Val3 = 0;
+
+				m_pKZTiles[i] = TempTile;
+			}
+			m_KZTilesAllocated = true;
+		}
+		else //Old layer version which used just simple CTiles, translate into CKZCustomTile...
+		{
+			CKZCustomTileV2 TempTile;
+			CTile* pTempTiles = static_cast<CTile *>(m_pLayers->Map()->GetData(m_pLayers->KZCustomLayer()->m_Data));
+
+			m_KZWidth = m_pLayers->KZCustomLayer()->m_Width;
+			m_KZHeight = m_pLayers->KZCustomLayer()->m_Height;
+
+			const size_t TilemapCount = (size_t)m_pLayers->KZCustomLayer()->m_Width * m_pLayers->KZCustomLayer()->m_Height;
+			const size_t TilemapSize = TilemapCount * sizeof(CKZCustomTileV2);
+
+			m_pKZTiles = static_cast<CKZCustomTileV2 *>(malloc(TilemapSize));
+			if(!m_pKZTiles)
+				return;
 			for(int i = 0; i < m_KZWidth * m_KZHeight; i++)
 			{
 				TempTile.m_Index = pTempTiles[i].m_Index;
@@ -1875,6 +1915,7 @@ void CCollision::FindKZLayer()
 
 				m_pKZTiles[i] = TempTile;
 			}
+			m_KZTilesAllocated = true;
 		}
 	}
 }

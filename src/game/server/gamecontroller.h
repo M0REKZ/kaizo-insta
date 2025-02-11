@@ -182,7 +182,7 @@ public:
 	//+KZ
 	bool m_AllowSkinChange = true; //restored from ddnet-insta
 	bool IsSkinChangeAllowed() const { return m_AllowSkinChange; } //restored from ddnet-insta
-	virtual bool OnKZEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Val1, int Val2);
+	virtual bool OnKZEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Val1, int Val2, int Val3);
 	virtual bool OnCharacterSnap(int SnappingClient, int Id) {return false;}
 	virtual bool CanSpecPlayer(int ClientID) {return true;}
 };

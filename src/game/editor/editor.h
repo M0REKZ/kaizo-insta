@@ -474,7 +474,7 @@ public:
 		//+KZ
 		m_KZCustomVal1 = 0;
 		m_KZCustomVal2 = 0;
-		//m_KZCustomVal3 = 0;
+		m_KZCustomVal3 = 0;
 	}
 
 	class CHoverTile
@@ -1183,8 +1183,8 @@ public:
 
 	//+KZ
 	unsigned char m_KZCustomVal1;
-	unsigned char m_KZCustomVal2;
-	//short m_KZCustomVal3;
+	unsigned short int m_KZCustomVal2;
+	unsigned short int m_KZCustomVal3;
 
 	unsigned char m_SwitchNum;
 	unsigned char m_SwitchDelay;

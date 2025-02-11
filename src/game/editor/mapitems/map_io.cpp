@@ -223,8 +223,8 @@ bool CEditorMap::Save(const char *pFileName, const std::function<void(const char
 						Item.m_Tune = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CTuneTile), std::static_pointer_cast<CLayerTune>(pLayerTiles)->m_pTuneTile);
 					else if(pLayerTiles->m_KZCustom)
 					{
-						Item.m_KZCustom = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CKZCustomTile), std::static_pointer_cast<CLayerKZCustom>(pLayerTiles)->m_pKZCustomTile);
-						Item.m_Layer.m_Version = 1; //+KZ KZCustom new version
+						Item.m_KZCustom = Writer.AddData((size_t)pLayerTiles->m_Width * pLayerTiles->m_Height * sizeof(CKZCustomTileV2), std::static_pointer_cast<CLayerKZCustom>(pLayerTiles)->m_pKZCustomTile);
+						Item.m_Layer.m_Version = 2; //+KZ KZCustom new version
 					}
 				}
 				else
@@ -859,14 +859,43 @@ bool CEditorMap::Load(const char *pFileName, int StorageType, const std::functio
 					}
 					else if(!str_comp_nocase("KZCustom", aBuf))
 					{
-						if(pTilemapItem->m_Layer.m_Version == 1)
+						if(pTilemapItem->m_Layer.m_Version == 2)
 						{
 							void *pSwitchData = DataFile.GetData(pTilemapItem->m_KZCustom);
 							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_KZCustom);
-							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CKZCustomTile))
+							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CKZCustomTileV2))
 							{
-									CKZCustomTile *pLayerSwitchTiles = std::static_pointer_cast<CLayerKZCustom>(pTiles)->m_pKZCustomTile;
-									mem_copy(pLayerSwitchTiles, pSwitchData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CKZCustomTile));
+									CKZCustomTileV2 *pLayerSwitchTiles = std::static_pointer_cast<CLayerKZCustom>(pTiles)->m_pKZCustomTile;
+									mem_copy(pLayerSwitchTiles, pSwitchData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CKZCustomTileV2));
+
+									for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
+									{
+											pTiles->m_pTiles[i].m_Index = pLayerSwitchTiles[i].m_Index;
+											pTiles->m_pTiles[i].m_Flags = pLayerSwitchTiles[i].m_Flags;
+									}
+								
+							}
+							DataFile.UnloadData(pTilemapItem->m_KZCustom);
+						}
+						else if(pTilemapItem->m_Layer.m_Version == 1)
+						{
+							void *pSwitchData = DataFile.GetData(pTilemapItem->m_KZCustom);
+							unsigned int Size = DataFile.GetDataSize(pTilemapItem->m_KZCustom);
+							if(Size >= (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CKZCustomTileV1))
+							{
+									CKZCustomTileV2 *pLayerSwitchTiles = std::static_pointer_cast<CLayerKZCustom>(pTiles)->m_pKZCustomTile;
+									mem_copy(pLayerSwitchTiles, pSwitchData, (size_t)pTiles->m_Width * pTiles->m_Height * sizeof(CKZCustomTileV1));
+
+									CKZCustomTileV1 * OldKZTiles = (CKZCustomTileV1 *)pSwitchData;
+
+									for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
+									{
+									        pLayerSwitchTiles[i].m_Index = OldKZTiles[i].m_Index;
+											pLayerSwitchTiles[i].m_Flags = OldKZTiles[i].m_Flags;
+											pLayerSwitchTiles[i].m_Val1 = OldKZTiles[i].m_Val1;
+											pLayerSwitchTiles[i].m_Val2 = OldKZTiles[i].m_Val2;
+											pLayerSwitchTiles[i].m_Val3 = 0;
+									}
 
 									for(int i = 0; i < pTiles->m_Width * pTiles->m_Height; i++)
 									{

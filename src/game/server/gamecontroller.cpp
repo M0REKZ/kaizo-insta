@@ -1038,7 +1038,7 @@ int IGameController::MakeLosersCry()
     return loserteam;
 }
 
-bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Val1, int Val2)
+bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Val1, int Val2, int Val3)
 {
 	
 	int Type = -1;

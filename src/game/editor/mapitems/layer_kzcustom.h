@@ -13,6 +13,7 @@ struct SKZCustomTileStateChange
 		int m_Flags;
 		int m_Val2;
 		int m_Index;
+		int m_Val3;
 	} m_Previous, m_Current;
 };
 
@@ -23,10 +24,10 @@ public:
 	CLayerKZCustom(const CLayerKZCustom &Other);
 	~CLayerKZCustom();
 
-	CKZCustomTile *m_pKZCustomTile;
+	CKZCustomTileV2 *m_pKZCustomTile;
 	int m_KZCustomVal1;
 	int m_KZCustomVal2;
-	//int m_KZCustomVal3;
+	int m_KZCustomVal3;
 
 	void Resize(int NewW, int NewH) override;
 	void Shift(int Direction) override;

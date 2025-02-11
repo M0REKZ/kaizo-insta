@@ -399,10 +399,12 @@ int CLayerTiles::BrushGrab(std::shared_ptr<CLayerGroup> pBrush, CUIRect Rect)
 						//m_pEditor->m_KZCustomVal3 = pGrabbed->m_pKZCustomTile[y * pGrabbed->m_Width + x].m_Val3;
 						m_pEditor->m_KZCustomVal1 = pGrabbed->m_pKZCustomTile[y * pGrabbed->m_Width + x].m_Val1;
 						m_pEditor->m_KZCustomVal2 = pGrabbed->m_pKZCustomTile[y * pGrabbed->m_Width + x].m_Val2;
+						m_pEditor->m_KZCustomVal3 = pGrabbed->m_pKZCustomTile[y * pGrabbed->m_Width + x].m_Val3;
 					//}
 				}
 		pGrabbed->m_KZCustomVal1 = m_pEditor->m_KZCustomVal1;
 		pGrabbed->m_KZCustomVal2 = m_pEditor->m_KZCustomVal2;
+		pGrabbed->m_KZCustomVal3 = m_pEditor->m_KZCustomVal3;
 		//pGrabbed->m_KZCustomVal3 = m_pEditor->m_KZCustomVal3;
 		str_copy(pGrabbed->m_aFileName, m_pEditor->m_aFileName);
 	}

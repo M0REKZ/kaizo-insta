@@ -48,7 +48,7 @@ public:
 	
 	//+KZ
 	
-	CKZCustomTile* GetKZTiles() { return m_pKZTiles; }
+	CKZCustomTileV2* GetKZTiles() { return m_pKZTiles; }
 	bool KZFound() { return m_pKZTiles != 0; }
 	int GetKZWidth() { return m_KZWidth; }
 	int GetKZHeight() { return m_KZHeight; }
@@ -205,7 +205,8 @@ private:
 	
 	void FindKZLayer();
 	
-	CKZCustomTile *m_pKZTiles;
+	CKZCustomTileV2 *m_pKZTiles;
+	bool m_KZTilesAllocated = false;
 	
 	CTile *m_pTiles;
 	CTeleTile *m_pTele;
