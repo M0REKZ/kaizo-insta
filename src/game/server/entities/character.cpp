@@ -3687,6 +3687,30 @@ void CCharacter::HandleKZTiles()
 		}
 	}
 
+	if(TileIndex == KZ_TILE_FREEZE_SPEEDUP && (m_FreezeTime > 0 || m_Core.m_DeepFrozen || m_Core.m_LiveFrozen))
+	{
+		CKZCustomTileV2* pTile = Collision()->GetKZTile(Collision()->GetKZIndex(m_Pos));
+		
+		if(pTile)
+		{
+			vec2 TempVel = vec2(0,0);
+
+			int Force = pTile->m_Val1;
+			int MaxVel = pTile->m_Val2;
+			int Angle = pTile->m_Val3;
+
+			float RadAngle = Angle * 3.14159f/180.f;
+
+			TempVel.x = cos(RadAngle);
+			TempVel.y = sin(RadAngle);
+
+			TempVel.x = clamp(TempVel.x * Force , (float)-MaxVel, (float)MaxVel);
+			TempVel.y = clamp(TempVel.y * Force , (float)-MaxVel, (float)MaxVel);
+
+			m_Core.m_Vel = ClampVel(m_MoveRestrictions, TempVel);
+		}
+	}
+
 	if(TileIndex == KZ_TILE_INVINCIBLE && !m_Core.m_Invincible)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You are invincible");

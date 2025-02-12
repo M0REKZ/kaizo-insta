@@ -16,6 +16,7 @@
 
 #include <game/mapitems.h>
 #include <game/mapitems_ex.h>
+#include <game/kztiles.h>
 
 #include <chrono>
 #include <cmath>
@@ -1310,18 +1311,37 @@ void CRenderTools::RenderKZCustomOverlay(CKZCustomTileV2 *pSpeedup, int w, int h
 
 			int Force = (int)pSpeedup[c].m_Val1;
 			int MaxSpeed = (int)pSpeedup[c].m_Val2;
+			int Angle = (int)pSpeedup[c].m_Val3;
+
+
+			if(pSpeedup[c].m_Index == KZ_TILE_FREEZE_SPEEDUP)
+			{
+				// draw arrow
+				Graphics()->TextureSet(g_pData->m_aImages[IMAGE_SPEEDUP_ARROW].m_Id);
+				Graphics()->QuadsBegin();
+				Graphics()->SetColor(1.0f, 1.0f, 1.0f, Alpha);
+				SelectSprite(SPRITE_SPEEDUP_ARROW);
+				Graphics()->QuadsSetRotation(Angle * (pi / 180.0f));
+				DrawSprite(mx * Scale + 16, my * Scale + 10, 25.0f);
+				Graphics()->QuadsEnd();
+			}
 
 				if(g_Config.m_ClTextEntities)
 				{
 					if(Force)
 					{
 					str_format(aBuf, sizeof(aBuf), "%d", Force);
-					TextRender()->Text(mx * Scale, (my + 0.5f + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
+					TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 3.f, aBuf);
 					}
 					if(MaxSpeed)
 					{
 						str_format(aBuf, sizeof(aBuf), "%d", MaxSpeed);
-						TextRender()->Text(mx * Scale, (my + ToCenterOffset / 2) * Scale, Size * Scale / 2.f, aBuf);
+						TextRender()->Text(mx * Scale, (my + 0.3f + ToCenterOffset / 2) * Scale, Size * Scale / 3.f, aBuf);
+					}
+					if(Angle)
+					{
+						str_format(aBuf, sizeof(aBuf), "%d", Angle);
+						TextRender()->Text(mx * Scale, (my + 0.6f + ToCenterOffset / 2) * Scale, Size * Scale / 3.f, aBuf);
 					}
 				}
 		}
