@@ -285,7 +285,57 @@ int CGameControllerDDNetKZ::OnCharacterDeath(class CCharacter *pVictim, class CP
 
 void CGameControllerDDNetKZ::OnPlayerDisconnect(CPlayer *pPlayer, const char *pReason)
 {
-	CGameControllerDDRace::OnPlayerDisconnect(pPlayer, pReason);
+	if(GameState() != IGS_END_ROUND)
+		SaveStatsOnDisconnect(pPlayer);
+
+	m_InvalidateConnectedIpsCache = true;
+	pPlayer->OnDisconnect();
+	int ClientId = pPlayer->GetCid();
+	if(Server()->ClientIngame(ClientId))
+	{
+		char aBuf[512];
+		if(pPlayer->m_RageQuitTick + Server()->TickSpeed() * 5 > Server()->Tick())
+		{
+			if(pReason && *pReason)
+				str_format(aBuf, sizeof(aBuf), "'%s' rage quitted (%s)", Server()->ClientName(ClientId), pReason);
+			else
+				str_format(aBuf, sizeof(aBuf), "'%s' rage quitted", Server()->ClientName(ClientId));
+		}
+		else
+		{
+		if(pReason && *pReason)
+			str_format(aBuf, sizeof(aBuf), "'%s' has left the game (%s)", Server()->ClientName(ClientId), pReason);
+		else
+			str_format(aBuf, sizeof(aBuf), "'%s' has left the game", Server()->ClientName(ClientId));
+		}
+		if(!g_Config.m_SvTournamentJoinMsgs || pPlayer->GetTeam() != TEAM_SPECTATORS)
+			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::FLAG_SIX);
+		else if(g_Config.m_SvTournamentJoinMsgs == 2)
+			SendChatSpectators(aBuf, CGameContext::FLAG_SIX);
+
+		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", ClientId, Server()->ClientName(ClientId));
+		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
+	}
+
+	// ddnet-insta
+	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
+	{
+		--m_aTeamSize[pPlayer->GetTeam()];
+	}
+
+	bool WasModerator = pPlayer->m_Moderating && Server()->ClientIngame(ClientId);
+
+	IGameController::OnPlayerDisconnect(pPlayer, pReason);
+
+	if(!GameServer()->PlayerModerating() && WasModerator)
+		GameServer()->SendChat(-1, TEAM_ALL, "Server kick/spec votes are no longer actively moderated.");
+
+	if(g_Config.m_SvTeam != SV_TEAM_FORCED_SOLO)
+		Teams().SetForceCharacterTeam(ClientId, TEAM_FLOCK);
+
+	for(int Team = TEAM_FLOCK + 1; Team < TEAM_SUPER; Team++)
+		if(Teams().IsInvited(Team, ClientId))
+			Teams().SetClientInvited(Team, ClientId, false);
 }
 
 int CGameControllerDDNetKZ::SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags)
