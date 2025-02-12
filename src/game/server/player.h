@@ -249,6 +249,7 @@ public:
 	bool m_Rollback = false;
 	int m_MsgBotCount = 0;
 	int m_RageQuitTick = 0;
+	int m_RedirectTo = 0;
 };
 
 #endif

@@ -1841,6 +1841,13 @@ int CCollision::GetKZIndex(float x, float y) const
 	return Ny * m_KZWidth + Nx;
 }
 
+CKZCustomTileV2* CCollision::GetKZTile(int Index)
+{
+	if(!KZFound() || Index < 0)
+		return nullptr;
+	return &m_pKZTiles[Index];
+}
+
 int CCollision::GetKZIndexInt(int x, int y) const
 {
 	return y * m_KZWidth + x;

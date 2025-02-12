@@ -49,6 +49,7 @@ public:
 	//+KZ
 	
 	CKZCustomTileV2* GetKZTiles() { return m_pKZTiles; }
+	CKZCustomTileV2* GetKZTile(int Index);
 	bool KZFound() { return m_pKZTiles != 0; }
 	int GetKZWidth() { return m_KZWidth; }
 	int GetKZHeight() { return m_KZHeight; }

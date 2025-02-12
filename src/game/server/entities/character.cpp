@@ -3677,6 +3677,16 @@ void CCharacter::HandleKZTiles()
 		m_Invisible = false;
 	}
 
+	if(TileIndex == KZ_TILE_REDIRECT)
+	{
+		CKZCustomTileV2* pTile = Collision()->GetKZTile(Collision()->GetKZIndex(m_Pos));
+
+		if(pTile && m_pPlayer)
+		{
+			m_pPlayer->m_RedirectTo = pTile->m_Val3;
+		}
+	}
+
 	if(TileIndex == KZ_TILE_INVINCIBLE && !m_Core.m_Invincible)
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You are invincible");

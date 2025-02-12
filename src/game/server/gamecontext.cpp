@@ -1173,6 +1173,12 @@ void CGameContext::OnTick()
 
 			m_apPlayers[i]->Tick();
 			m_apPlayers[i]->PostTick();
+
+			if(m_apPlayers[i]->m_RedirectTo)  //+KZ
+			{
+				Server()->RedirectClient(i, m_apPlayers[i]->m_RedirectTo);
+				continue; //player is deleted
+			}
 		}
 	}
 
