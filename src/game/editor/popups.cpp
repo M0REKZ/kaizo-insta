@@ -3014,7 +3014,7 @@ CUi::EPopupMenuFunctionResult CEditor::PopupKZCustom(void *pContext, CUIRect Vie
 	};
 
 	CProperty aProps[] = {
-		{"Val1", pEditor->m_KZCustomVal1, PROPTYPE_INT, 1, 255},
+		{"Val1", pEditor->m_KZCustomVal1, PROPTYPE_INT, 0, 255},
 		{"Val2", pEditor->m_KZCustomVal2, PROPTYPE_INT, 0, 65535},
 		{"Val3", pEditor->m_KZCustomVal3, PROPTYPE_INT, 0, 65535},
 		{nullptr},
