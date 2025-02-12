@@ -27,6 +27,7 @@ CGameControllerDDNetKZ::CGameControllerDDNetKZ(class CGameContext *pGameServer) 
 	m_DefaultWeapon = WEAPON_HAMMER;
 	m_IsInstagibKZ = false;
 	m_IsVanillaGameType = false;
+	m_AllowBangCommands = false;
 
 	m_apFlagBalls[0] = 0;
 	m_apFlagBalls[1] = 0;
