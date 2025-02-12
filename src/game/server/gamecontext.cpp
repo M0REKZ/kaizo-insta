@@ -3949,6 +3949,7 @@ void CGameContext::OnConsoleInit()
 	Console()->Register("teeconfetti", "?i[id]", CFGFLAG_SERVER, ConTeeConfetti, this, "Get Confetti");
 	Console()->Register("spawn_helicopter", "", CFGFLAG_SERVER, ConSpawnHelicopter, this, "Spawn Helicopter");
 	Console()->Register("spawn_jet", "", CFGFLAG_SERVER, ConSpawnJet, this, "Spawn Jet");
+	Console()->Register("snowflakes", "?i[id]", CFGFLAG_SERVER, ConSnowflakes, this, "Get Snowflakes");
 
 	//+KZ Custom Weapons
 	Console()->Register("getmines", "?i[id] ?i[amount]", CFGFLAG_SERVER, ConGetMines, this, "Get Mines");
@@ -5886,6 +5887,36 @@ void CGameContext::ConTeeConfetti(IConsole::IResult *pResult, void *pUserData)
 		pSelf->m_apPlayers[ClientID]->GetCharacter()->m_ConfettiKZ = true;
 	else
 		pSelf->m_apPlayers[ClientID]->GetCharacter()->m_ConfettiKZ = false;
+}
+
+void CGameContext::ConSnowflakes(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	int ClientID;
+
+	if(pResult->NumArguments())
+	{
+		ClientID = pResult->GetInteger(0);
+	}
+	else
+	{
+		ClientID = pResult->m_ClientId;
+	}
+
+	if(ClientID < 0 || ClientID >= MAX_CLIENTS)
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID])
+		return;
+
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter())
+		return;
+	
+	if(!pSelf->m_apPlayers[ClientID]->GetCharacter()->m_SnowFlakes)
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->m_SnowFlakes = true;
+	else
+		pSelf->m_apPlayers[ClientID]->GetCharacter()->m_SnowFlakes = false;
 }
 
 void CGameContext::ConSpawnHelicopter(IConsole::IResult *pResult, void *pUserData)

@@ -1982,6 +1982,9 @@ void CCharacter::Snap(int SnappingClient)
 
 	// ddnet-insta
 	GameServer()->m_pController->SnapDDNetCharacter(SnappingClient, this, pDDNetCharacter);
+
+	if(m_SnowFlakes)
+		pDDNetCharacter->m_Flags |= CHARACTERFLAG_MOVEMENTS_DISABLED;
 }
 
 void CCharacter::PostSnap()
@@ -3748,6 +3751,17 @@ void CCharacter::HandleKZTiles()
 		GameServer()->SendChat(-1, TEAM_ALL, aBuf);
 
 		m_IsGodmode = false;
+	}
+
+	if(TileIndex == KZ_TILE_SNOWFLAKES_ON && !m_SnowFlakes)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You got snowflakes");
+		m_SnowFlakes = true;
+	}
+	else if(TileIndex == KZ_TILE_SNOWFLAKES_OFF && m_SnowFlakes)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You lost snowflakes");
+		m_SnowFlakes = false;
 	}
 
 	if(TileIndex == KZ_TILE_SPARKLES_ON && !m_Sparkles)
