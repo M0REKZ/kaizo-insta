@@ -29,8 +29,10 @@ public:
 	virtual bool OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character) override { return false; };
 	int SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags) override;
 	void UpdateSpawnWeapons(bool Silent, bool Apply) override {};
-	void InitPlayer(class CPlayer *pPlayer) override {};
+	void InitPlayer(class CPlayer *pPlayer) override;
 	virtual int SnapPlayerScore(int SnappingClient, CPlayer *pPlayer, int DDRaceScore) override { return CGameControllerDDRace::SnapPlayerScore(SnappingClient, pPlayer, DDRaceScore); };
+	bool ForceNetworkClipping(const CEntity *pEntity, int SnappingClient, vec2 CheckPos) override { return false; };
+	bool ForceNetworkClippingLine(const CEntity *pEntity, int SnappingClient, vec2 StartPos, vec2 EndPos) override { return false; };
 	
 
 	//Flag(ball xD)

@@ -289,7 +289,7 @@ void CGameControllerDDNetKZ::OnPlayerDisconnect(CPlayer *pPlayer, const char *pR
 		SaveStatsOnDisconnect(pPlayer);
 
 	m_InvalidateConnectedIpsCache = true;
-	pPlayer->OnDisconnect();
+	
 	int ClientId = pPlayer->GetCid();
 	if(Server()->ClientIngame(ClientId))
 	{
@@ -325,7 +325,7 @@ void CGameControllerDDNetKZ::OnPlayerDisconnect(CPlayer *pPlayer, const char *pR
 
 	bool WasModerator = pPlayer->m_Moderating && Server()->ClientIngame(ClientId);
 
-	IGameController::OnPlayerDisconnect(pPlayer, pReason);
+	//IGameController::OnPlayerDisconnect(pPlayer, pReason);
 
 	if(!GameServer()->PlayerModerating() && WasModerator)
 		GameServer()->SendChat(-1, TEAM_ALL, "Server kick/spec votes are no longer actively moderated.");
@@ -386,4 +386,21 @@ void CGameControllerDDNetKZ::OnCharacterSpawn(class CCharacter *pChr)
 	pChr->GiveWeapon(WEAPON_GUN);
 
 	pChr->SetActiveWeapon(WEAPON_HAMMER);
+}
+
+void CGameControllerDDNetKZ::InitPlayer(CPlayer *pPlayer)
+{
+	pPlayer->m_Spree = 0;
+	pPlayer->m_UntrackedSpree = 0;
+	pPlayer->ResetStats();
+	pPlayer->m_SavedStats.Reset();
+
+	pPlayer->m_IsReadyToPlay = !GameServer()->m_pController->IsPlayerReadyMode();
+	pPlayer->m_DeadSpecMode = false;
+	pPlayer->m_GameStateBroadcast = false;
+	//pPlayer->m_Score = 0; // ddnet-insta
+	//pPlayer->m_DisplayScore = GameServer()->m_DisplayScore;
+	pPlayer->m_JoinTime = time_get();
+
+	RoundInitPlayer(pPlayer);
 }
