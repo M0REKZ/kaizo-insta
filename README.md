@@ -7,9 +7,9 @@ For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 ---
 
 Servers:
-* Instagib/Vanilla PVP: 178.156.153.34:8304
-* DDrace: 178.156.153.34:8305
-* Block: 178.156.153.34:8306
+* Instagib/Vanilla PVP: 159.69.89.235:8304
+* DDrace: 159.69.89.235:8305
+* Block: 159.69.89.235:8306
 
 # Settings and Commands
 
