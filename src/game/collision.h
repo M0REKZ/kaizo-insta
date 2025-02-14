@@ -20,6 +20,7 @@ class CTuneTile;
 class CDoorTile;
 struct CQuad;
 struct CMapItemLayerQuads;
+class CCharacterCore;
 
 enum
 {
@@ -35,6 +36,8 @@ struct QuadData
 	float m_Angle;
 };
 
+#include "gamecore.h"
+
 vec2 ClampVel(int MoveRestriction, vec2 Vel);
 
 typedef bool (*CALLBACK_SWITCHACTIVE)(int Number, void *pUser);
@@ -47,6 +50,7 @@ public:
 	~CCollision();
 	
 	//+KZ
+	bool m_IsTeamPlayKZ = false;
 	
 	CKZCustomTileV2* GetKZTiles() { return m_pKZTiles; }
 	CKZCustomTileV2* GetKZTile(int Index);
@@ -61,22 +65,24 @@ public:
 	int GetKZTileIndex(float x, float y) const { return GetKZTileIndex(GetKZIndex(x, y)); }
 	int UnIntersectLineKZ(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
 	int FastIntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision) const;
+
+	int IsSolidForCore(int x, int y, CCharacterCore* pCore) const;
 	
 	void Init(CLayers *pLayers);
 	void Unload();
 	void FillAntibot(CAntibotMapData *pMapData) const;
 
-	bool CheckPoint(float x, float y, QuadData *pOutQuad = nullptr, int *StartNum = nullptr) const { return IsSolid(round_to_int(x), round_to_int(y)) || IsSolidQuad(round_to_int(x), round_to_int(y), pOutQuad, StartNum); }
+	bool CheckPoint(float x, float y, QuadData *pOutQuad = nullptr, int *StartNum = nullptr, CCharacterCore* pCore = nullptr) const { return IsSolid(round_to_int(x), round_to_int(y)) || IsSolidQuad(round_to_int(x), round_to_int(y), pOutQuad, StartNum) || IsSolidForCore(round_to_int(x), round_to_int(y), pCore); }
 	bool CheckPoint(vec2 Pos, QuadData *pOutQuad = nullptr, int *StartNum = nullptr) const { return CheckPoint(Pos.x, Pos.y, pOutQuad, StartNum); }
 	int GetCollisionAt(float x, float y) const;
 	int GetWidth() const { return m_Width; }
 	int GetHeight() const { return m_Height; }
-	int IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, QuadData *pOutQuad = nullptr) const;
-	int IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr = nullptr, QuadData *pOutQuad = nullptr) const;
-	int IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr = nullptr, QuadData *pOutQuad = nullptr) const;
-	void MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, int *pBounces) const;
-	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, bool *pGrounded = nullptr) const;
-	bool TestBox(vec2 Pos, vec2 Size) const;
+	int IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, QuadData *pOutQuad = nullptr, CCharacterCore *pCore = nullptr) const;
+	int IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr = nullptr, QuadData *pOutQuad = nullptr, CCharacterCore *pCore = nullptr) const;
+	int IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr = nullptr, QuadData *pOutQuad = nullptr, CCharacterCore *pCore = nullptr) const;
+	void MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, int *pBounces, CCharacterCore* pCore = nullptr) const;
+	void MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, bool *pGrounded = nullptr, CCharacterCore* pCore = nullptr) const;
+	bool TestBox(vec2 Pos, vec2 Size, CCharacterCore* pCore = nullptr) const;
 	bool PushBoxOutsideQuads(vec2 *pInoutPos, vec2 Size, int *CollidedSides) const;
 
 	// DDRace

@@ -4341,6 +4341,8 @@ void CGameContext::OnInit(const void *pPersistentData)
 		m_pController = new CGameControllerDDNetKZ(this); //DDNetKZ -> +KZ
 	}
 
+	Collision()->m_IsTeamPlayKZ = m_pController->IsTeamPlay(); //+KZ
+
 	ReadCensorList();
 
 	m_TeeHistorianActive = g_Config.m_SvTeeHistorian;

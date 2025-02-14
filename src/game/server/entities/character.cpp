@@ -73,7 +73,10 @@ CCharacter::CCharacter(CGameWorld *pWorld, CNetObj_PlayerInput LastInput) :
 	m_RollbackDamageTick = 0; //JSAURUS rollback
 
 	if(m_pPlayer)
+	{
 		m_Core.m_PlayerRollback = m_pPlayer->m_Rollback; //JSAURUS rollback
+		m_Core.m_TeamKZ = m_pPlayer->GetTeam(); //+KZ Team Tile
+	}
 
 	m_aCustomWeaponSnaps[KZ_WEAPON_TASER - KZ_CUSTOM_WEAPON_START] = WEAPON_LASER;
 	m_aCustomWeaponSnaps[KZ_WEAPON_PORTAL_GUN - KZ_CUSTOM_WEAPON_START] = WEAPON_LASER;
@@ -434,7 +437,7 @@ void CCharacter::HandleNinja()
 			GetTuning(m_TuneZone)->m_GroundElasticityX,
 			GetTuning(m_TuneZone)->m_GroundElasticityY);
 
-		Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), GroundElasticity);
+		Collision()->MoveBox(&m_Core.m_Pos, &m_Core.m_Vel, vec2(GetProximityRadius(), GetProximityRadius()), GroundElasticity,nullptr,&m_Core);
 
 		// reset velocity so the client doesn't predict stuff
 		ResetVelocity();
@@ -1113,6 +1116,8 @@ void CCharacter::PreTick()
 
 void CCharacter::Tick()
 {
+	if(m_pPlayer && m_Core.m_TeamKZ != m_pPlayer->GetTeam())
+		m_Core.m_TeamKZ = m_pPlayer->GetTeam();
 
 	if(m_pPlayer->m_PlayerFlags & PLAYERFLAG_AIM)
 	{
@@ -1383,12 +1388,14 @@ void CCharacter::TickDeferred()
 		m_Core.Write(&Current);
 
 		// only allow dead reckoning for a top of 3 seconds
-		if(m_Core.m_HookedQuad.m_pQuad || m_Core.m_QuadCollided || m_Core.m_Reset || m_ReckoningTick + Server()->TickSpeed() * 3 < Server()->Tick() || mem_comp(&Predicted, &Current, sizeof(CNetObj_Character)) != 0)
+		if(m_Core.m_SendCoreThisTick || m_Core.m_HookedQuad.m_pQuad || m_Core.m_QuadCollided || m_Core.m_Reset || m_ReckoningTick + Server()->TickSpeed() * 3 < Server()->Tick() || mem_comp(&Predicted, &Current, sizeof(CNetObj_Character)) != 0)
 		{
 			m_ReckoningTick = Server()->Tick();
 			m_SendCore = m_Core;
 			m_ReckoningCore = m_Core;
 			m_Core.m_Reset = false;
+
+			m_Core.m_SendCoreThisTick = false;
 		}
 	}
 }
@@ -4051,57 +4058,6 @@ void CCharacter::HandleKZTiles()
 		else if(m_pPlayer->GetTeam() == TEAM_RED && TileIndex == KZ_TILE_TEAMBLUE_DEATH)
 		{
 			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
-		}
-		
-		if(m_pPlayer->GetTeam() == TEAM_BLUE)
-		{
-			if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == KZ_TILE_TEAMRED)
-			{
-				m_MoveRestrictions |= CANTMOVE_LEFT;
-				ApplyRest = true;
-			}
-			if(Collision()->GetKZTileIndex(m_Pos.x + 15 , m_Pos.y) == KZ_TILE_TEAMRED)
-			{
-				m_MoveRestrictions |= CANTMOVE_RIGHT;
-				ApplyRest = true;
-			}
-			if(Collision()->GetKZTileIndex(m_Pos.x , m_Pos.y - 15) == KZ_TILE_TEAMRED)
-			{
-				m_MoveRestrictions |= CANTMOVE_UP;
-				ApplyRest = true;
-			}
-			if(Collision()->GetKZTileIndex(m_Pos.x, m_Pos.y + 15 ) == KZ_TILE_TEAMRED)
-			{
-				m_MoveRestrictions |= CANTMOVE_DOWN;
-				m_Core.m_Jumped = 0;
-				m_Core.m_JumpedTotal = 0;
-				ApplyRest = true;
-			}
-		}
-		else if(m_pPlayer->GetTeam() == TEAM_RED)
-		{
-			if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == KZ_TILE_TEAMBLUE)
-			{
-				m_MoveRestrictions |= CANTMOVE_LEFT;
-				ApplyRest = true;
-			}
-			if(Collision()->GetKZTileIndex(m_Pos.x + 15 , m_Pos.y) == KZ_TILE_TEAMBLUE)
-			{
-				m_MoveRestrictions |= CANTMOVE_RIGHT;
-				ApplyRest = true;
-			}
-			if(Collision()->GetKZTileIndex(m_Pos.x , m_Pos.y - 15) == KZ_TILE_TEAMBLUE)
-			{
-				m_MoveRestrictions |= CANTMOVE_UP;
-				ApplyRest = true;
-			}
-			if(Collision()->GetKZTileIndex(m_Pos.x, m_Pos.y + 15 ) == KZ_TILE_TEAMBLUE)
-			{
-				m_MoveRestrictions |= CANTMOVE_DOWN;
-				m_Core.m_Jumped = 0;
-				m_Core.m_JumpedTotal = 0;
-				ApplyRest = true;
-			}
 		}
 	}
 	

@@ -223,7 +223,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 
 	//QuadData StandingQuad2 = {nullptr, vec2(0,0), 0};
 	// get ground state
-	const bool Grounded = (m_QuadRestrictions & CANTMOVE_DOWN) || m_pCollision->CheckPoint(m_Pos.x + PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5) || m_pCollision->CheckPoint(m_Pos.x - PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5);
+	const bool Grounded = (m_QuadRestrictions & CANTMOVE_DOWN) || m_pCollision->CheckPoint(m_Pos.x + PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5,nullptr,nullptr,this) || m_pCollision->CheckPoint(m_Pos.x - PhysicalSize() / 2, m_Pos.y + PhysicalSize() / 2 + 5,nullptr,nullptr,this);
 
 	/*if(!m_StandingQuad.m_pQuad)
 	{
@@ -642,7 +642,7 @@ void CCharacterCore::Move()
 	m_pCollision->MoveBox(&NewPos, &m_Vel, PhysicalSizeVec2(),
 		vec2(m_Tuning.m_GroundElasticityX,
 			m_Tuning.m_GroundElasticityY),
-		&Grounded);
+		&Grounded, this);
 
 	Grounded = Grounded || (m_QuadRestrictions & CANTMOVE_DOWN);
 

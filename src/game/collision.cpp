@@ -17,6 +17,8 @@
 #include <game/mapitems_insta.h>
 
 #include <engine/shared/config.h>
+#include "collision.h"
+#include "kztiles.h"
 
 vec2 ClampVel(int MoveRestriction, vec2 Vel)
 {
@@ -386,7 +388,7 @@ int CCollision::GetQuadIndex(int x, int y, QuadData *pOutQuad, int *StartNum) co
 }
 
 // TODO: rewrite this smarter!
-int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, QuadData *pOutQuad) const
+int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, QuadData *pOutQuad, CCharacterCore* pCore) const
 {
 	float Distance = distance(Pos0, Pos1);
 	int End(Distance + 1);
@@ -399,7 +401,7 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *p
 		int ix = round_to_int(Pos.x);
 		int iy = round_to_int(Pos.y);
 
-		if(CheckPoint(ix, iy, pOutQuad))
+		if(CheckPoint(ix, iy, pOutQuad,nullptr,pCore))
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
@@ -417,7 +419,7 @@ int CCollision::IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *p
 	return 0;
 }
 
-int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr, QuadData *pOutQuad) const
+int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr, QuadData *pOutQuad, CCharacterCore* pCore) const
 {
 	float Distance = distance(Pos0, Pos1);
 	int End(Distance + 1);
@@ -450,7 +452,7 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision,
 		}
 
 		int hit = 0;
-		if(CheckPoint(ix, iy, pOutQuad))
+		if(CheckPoint(ix, iy, pOutQuad,nullptr,pCore))
 		{
 			if(!IsThrough(ix, iy, dx, dy, Pos0, Pos1))
 				hit = GetCollisionAt(ix, iy);
@@ -477,7 +479,7 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision,
 	return 0;
 }
 
-int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr, QuadData *pOutQuad) const
+int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, int *pTeleNr, QuadData *pOutQuad, CCharacterCore* pCore)const
 {
 	float Distance = distance(Pos0, Pos1);
 	int End(Distance + 1);
@@ -517,7 +519,7 @@ int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollisio
 			return TILE_TELEINWEAPON;
 		}
 
-		if(CheckPoint(ix, iy) || (pOutQuad && pOutQuad->m_pQuad && (pOutQuad->m_pQuad->m_ColorEnvOffset == TILE_SOLID || pOutQuad->m_pQuad->m_ColorEnvOffset == TILE_NOHOOK)))
+		if(CheckPoint(ix, iy,nullptr,nullptr,pCore) || (pOutQuad && pOutQuad->m_pQuad && (pOutQuad->m_pQuad->m_ColorEnvOffset == TILE_SOLID || pOutQuad->m_pQuad->m_ColorEnvOffset == TILE_NOHOOK)))
 		{
 			if(pOutCollision)
 				*pOutCollision = Pos;
@@ -536,7 +538,7 @@ int CCollision::IntersectLineTeleWeapon(vec2 Pos0, vec2 Pos1, vec2 *pOutCollisio
 }
 
 // TODO: OPT: rewrite this smarter!
-void CCollision::MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, int *pBounces) const
+void CCollision::MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, int *pBounces, CCharacterCore* pCore) const
 {
 	if(pBounces)
 		*pBounces = 0;
@@ -546,7 +548,7 @@ void CCollision::MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, i
 	if(CheckPoint(Pos + Vel))
 	{
 		int Affected = 0;
-		if(CheckPoint(Pos.x + Vel.x, Pos.y))
+		if(CheckPoint(Pos.x + Vel.x, Pos.y, nullptr, nullptr, pCore))
 		{
 			pInoutVel->x *= -Elasticity;
 			if(pBounces)
@@ -554,7 +556,7 @@ void CCollision::MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, i
 			Affected++;
 		}
 
-		if(CheckPoint(Pos.x, Pos.y + Vel.y))
+		if(CheckPoint(Pos.x, Pos.y + Vel.y, nullptr, nullptr, pCore))
 		{
 			pInoutVel->y *= -Elasticity;
 			if(pBounces)
@@ -574,21 +576,21 @@ void CCollision::MovePoint(vec2 *pInoutPos, vec2 *pInoutVel, float Elasticity, i
 	}
 }
 
-bool CCollision::TestBox(vec2 Pos, vec2 Size) const
+bool CCollision::TestBox(vec2 Pos, vec2 Size, CCharacterCore* pCore) const
 {
 	Size *= 0.5f;
-	if(CheckPoint(Pos.x - Size.x, Pos.y - Size.y))
+	if(CheckPoint(Pos.x - Size.x, Pos.y - Size.y, nullptr, nullptr, pCore))
 		return true;
-	if(CheckPoint(Pos.x + Size.x, Pos.y - Size.y))
+	if(CheckPoint(Pos.x + Size.x, Pos.y - Size.y, nullptr, nullptr, pCore))
 		return true;
-	if(CheckPoint(Pos.x - Size.x, Pos.y + Size.y))
+	if(CheckPoint(Pos.x - Size.x, Pos.y + Size.y, nullptr, nullptr, pCore))
 		return true;
-	if(CheckPoint(Pos.x + Size.x, Pos.y + Size.y))
+	if(CheckPoint(Pos.x + Size.x, Pos.y + Size.y, nullptr, nullptr, pCore))
 		return true;
 	return false;
 }
 
-void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, bool *pGrounded) const
+void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elasticity, bool *pGrounded, CCharacterCore* pCore) const
 {
 	// do the move
 	vec2 Pos = *pInoutPos;
@@ -622,11 +624,11 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elast
 				break;
 			}
 
-			if(TestBox(vec2(NewPos.x, NewPos.y), Size))
+			if(TestBox(vec2(NewPos.x, NewPos.y), Size,pCore))
 			{
 				int Hits = 0;
 
-				if(TestBox(vec2(Pos.x, NewPos.y), Size))
+				if(TestBox(vec2(Pos.x, NewPos.y), Size,pCore))
 				{
 					if(pGrounded && ElasticityY > 0 && Vel.y > 0)
 						*pGrounded = true;
@@ -635,7 +637,7 @@ void CCollision::MoveBox(vec2 *pInoutPos, vec2 *pInoutVel, vec2 Size, vec2 Elast
 					Hits++;
 				}
 
-				if(TestBox(vec2(NewPos.x, Pos.y), Size))
+				if(TestBox(vec2(NewPos.x, Pos.y), Size,pCore))
 				{
 					NewPos.x = Pos.x;
 					Vel.x *= -ElasticityX;
@@ -2039,5 +2041,19 @@ int CCollision::FastIntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec
 		*pOutCollision = Pos1;
 	if(pOutBeforeCollision)
 		*pOutBeforeCollision = Pos1;
+	return 0;
+}
+
+int CCollision::IsSolidForCore(int x, int y, CCharacterCore *pCore) const
+{
+	if(pCore)
+	{
+		int KZTileIndex = GetKZTileIndex(GetKZIndex(x, y));
+		if(m_IsTeamPlayKZ && ((KZTileIndex == KZ_TILE_TEAMRED && pCore->m_TeamKZ == TEAM_BLUE) || (KZTileIndex == KZ_TILE_TEAMBLUE && pCore->m_TeamKZ == TEAM_RED)))
+		{
+			pCore->m_SendCoreThisTick = true;
+			return KZTileIndex;
+		}
+	}
 	return 0;
 }

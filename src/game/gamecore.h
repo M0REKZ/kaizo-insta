@@ -279,6 +279,8 @@ public:
 	int m_LastAckedSnapshot; //JSAURUS rollback
 	vec2 m_Positions[POSITION_HISTORY];  //JSAURUS rollback
 	bool m_PlayerRollback = false;
+	int m_TeamKZ = TEAM_RED;
+	bool m_SendCoreThisTick = false;
 	bool m_Mounted = false;
 	void SetMoveRestrictions(int m) { m_MoveRestrictions = m; }
 private:
