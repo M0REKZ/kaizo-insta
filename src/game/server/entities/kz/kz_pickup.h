@@ -5,6 +5,7 @@
 
 #include <game/server/entity.h>
 #include <game/server/entities/ddnet_pvp/vanilla_pickup.h>
+#include <game/teamscore.h>
 
 class CKZPickup : public CEntity
 {
