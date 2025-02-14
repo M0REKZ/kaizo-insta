@@ -28,7 +28,7 @@ CEntity(pGameWorld,CGameWorld::CUSTOM_ENTTYPE_KZPICKUP,vec2(0,0),gs_PickupPhysSi
 
 	m_Id2 = Server()->SnapNewId();
 
-	for(int i=0;i < MAX_CLIENTS;i++)
+	for(int i=0;i < NUM_DDRACE_TEAMS;i++)
 	{
 		if(SpawnDelay > 0)
 			m_SpawnTickTeam[i] = Server()->Tick() + Server()->TickSpeed() * SpawnDelay;
@@ -71,7 +71,7 @@ void CKZPickup::Tick()
 		return;
 	}
 	
-	for(int i=0;i < MAX_CLIENTS;i++)
+	for(int i=0;i < NUM_DDRACE_TEAMS;i++)
 	{
 		// wait for respawn
 		if(m_SpawnTickTeam[i] > 0)
@@ -98,7 +98,7 @@ void CKZPickup::Tick()
 			if(m_ThisTeamOnly != -1 && pChr->Team() != m_ThisTeamOnly)
 				continue;
 
-			if(pChr->Team() < 0 || pChr->Team() >= MAX_CLIENTS)
+			if(pChr->Team() < 0 || pChr->Team() >= NUM_DDRACE_TEAMS)
 				continue;
 
 			if(m_SpawnTickTeam[pChr->Team()] > 0)
@@ -254,7 +254,7 @@ void CKZPickup::Tick()
 
 void CKZPickup::TickPaused()
 {
-	for(int i = 0;i<MAX_CLIENTS;i++)
+	for(int i = 0;i<NUM_DDRACE_TEAMS;i++)
 	{
 		if(m_SpawnTickTeam[i] != -1)
 			++m_SpawnTickTeam[i];
@@ -288,7 +288,7 @@ void CKZPickup::Snap(int SnappingClient)
 	if(m_ThisTeamOnly != -1 && Team != m_ThisTeamOnly)
 		return;
 
-	if(Team < 0 || Team >= MAX_CLIENTS)
+	if(Team < 0 || Team >= NUM_DDRACE_TEAMS)
 		return;
 
 	if(!(m_SpawnTickTeam[Team] == -1))

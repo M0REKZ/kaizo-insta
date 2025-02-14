@@ -14,8 +14,8 @@ public:
 
 private:
 
-	bool m_ChangedType[MAX_CLIENTS];
-	int m_Subtype[MAX_CLIENTS];
+	bool m_ChangedType[NUM_DDRACE_TEAMS];
+	int m_Subtype[NUM_DDRACE_TEAMS];
 
 
 };

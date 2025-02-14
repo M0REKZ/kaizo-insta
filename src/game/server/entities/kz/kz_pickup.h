@@ -20,7 +20,7 @@ public:
 	void TickPaused() override;
 	void Snap(int SnappingClient) override;
 
-	int m_SpawnTickTeam[MAX_CLIENTS];
+	int m_SpawnTickTeam[NUM_DDRACE_TEAMS];
 	
 	int m_Id2; //+KZ from Pointer tw+
 	bool m_Dropped = false;

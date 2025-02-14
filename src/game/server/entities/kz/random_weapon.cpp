@@ -26,7 +26,7 @@ CKZPickup(pGameWorld,CGameWorld::CUSTOM_ENTTYPE_RANDOM_WEAPON,vec2(0,0),gs_Picku
 
 	m_Id2 = Server()->SnapNewId();
 
-	for(int i=0;i < MAX_CLIENTS;i++)
+	for(int i=0;i < NUM_DDRACE_TEAMS;i++)
 	{
 		m_SpawnTickTeam[i] = -1;
 
@@ -46,7 +46,7 @@ CKZPickup(pGameWorld,CGameWorld::CUSTOM_ENTTYPE_RANDOM_WEAPON,vec2(0,0),gs_Picku
 void CRandomWeapon::Tick()
 {
 
-	for(int i=0;i < MAX_CLIENTS;i++)
+	for(int i=0;i < NUM_DDRACE_TEAMS;i++)
 	{
 		if(!m_ChangedType[i] && m_SpawnTickTeam[i] >= 0)
 		{
@@ -67,7 +67,7 @@ void CRandomWeapon::Tick()
 	
 	Move();
 	
-	for(int i=0;i < MAX_CLIENTS;i++)
+	for(int i=0;i < NUM_DDRACE_TEAMS;i++)
 	{
 		// wait for respawn
 		if(m_SpawnTickTeam[i] > 0)
@@ -91,7 +91,7 @@ void CRandomWeapon::Tick()
 	{
 		if(pChr && pChr->IsAlive())
 		{
-			if(pChr->Team() < 0 || pChr->Team() >= MAX_CLIENTS)
+			if(pChr->Team() < 0 || pChr->Team() >= NUM_DDRACE_TEAMS)
 				continue;
 
 			if(m_SpawnTickTeam[pChr->Team()] > 0)
@@ -153,7 +153,7 @@ void CRandomWeapon::Snap(int SnappingClient)
 	else
 		Team = pChar->Team();
 
-	if(Team < 0 || Team >= MAX_CLIENTS)
+	if(Team < 0 || Team >= NUM_DDRACE_TEAMS)
 		return;
 
 	if(!(m_SpawnTickTeam[Team] == -1))
