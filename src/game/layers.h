@@ -5,10 +5,10 @@
 
 class IMap;
 
-struct CMapItemGroup;
-struct CMapItemLayer;
-struct CMapItemLayerTilemap;
-struct CMapItemLayerQuads;
+class CMapItemGroup;
+class CMapItemLayer;
+class CMapItemLayerTilemap;
+class CMapItemLayerQuads;
 
 class CLayers
 {
