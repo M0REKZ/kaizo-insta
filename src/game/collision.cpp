@@ -455,7 +455,7 @@ int CCollision::IntersectLineTeleHook(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision,
 		if(CheckPoint(ix, iy, pOutQuad,nullptr,pCore))
 		{
 			if(!IsThrough(ix, iy, dx, dy, Pos0, Pos1))
-				hit = GetCollisionAt(ix, iy);
+				hit = GetCollisionAt(ix, iy, pCore);
 		}
 		else if(IsHookBlocker(ix, iy, Pos0, Pos1))
 		{
@@ -1687,13 +1687,21 @@ vec3 CCollision::BarycentricCoordinates(const vec2 &t0, const vec2 &t1, const ve
 	return bary;
 }
 
-int CCollision::GetCollisionAt(float x, float y) const
+int CCollision::GetCollisionAt(float x, float y, CCharacterCore* pCore) const
 {
 	int i = GetTile(round_to_int(x), round_to_int(y));
 	if(i)
 		return i;
 	else
-		return GetQuadIndex(round_to_int(x), round_to_int(y));
+	{
+		i = GetQuadIndex(round_to_int(x), round_to_int(y));
+		if(i)
+			return i;
+		else
+		{
+			return IsSolidForCore(round_to_int(x), round_to_int(y), pCore);
+		}
+	}
 }
 
 bool CCollision::PushBoxOutsideQuads(vec2 *pInoutPos, vec2 Size, int *CollidedSides) const
@@ -1843,7 +1851,7 @@ int CCollision::GetKZIndex(float x, float y) const
 	return Ny * m_KZWidth + Nx;
 }
 
-CKZCustomTileV2* CCollision::GetKZTile(int Index)
+CKZCustomTileV2* CCollision::GetKZTile(int Index) const
 {
 	if(!KZFound() || Index < 0)
 		return nullptr;
@@ -2048,11 +2056,19 @@ int CCollision::IsSolidForCore(int x, int y, CCharacterCore *pCore) const
 {
 	if(pCore)
 	{
-		int KZTileIndex = GetKZTileIndex(GetKZIndex(x, y));
-		if(m_IsTeamPlayKZ && ((KZTileIndex == KZ_TILE_TEAMRED && pCore->m_TeamKZ == TEAM_BLUE) || (KZTileIndex == KZ_TILE_TEAMBLUE && pCore->m_TeamKZ == TEAM_RED)))
+		CKZCustomTileV2* KZTile = GetKZTile(GetKZIndex(x, y));
+		if(!KZTile)
+			return 0;
+
+		if(m_IsTeamPlayKZ && ((KZTile->m_Index == KZ_TILE_TEAMRED && pCore->m_TeamKZ == TEAM_BLUE) || (KZTile->m_Index == KZ_TILE_TEAMBLUE && pCore->m_TeamKZ == TEAM_RED)))
 		{
 			pCore->m_SendCoreThisTick = true;
-			return KZTileIndex;
+			return KZTile->m_Index;
+		}
+		else if(KZTile->m_Index == KZ_TILE_SWITCHABLE_TILE && (KZTile->m_Val2 == TILE_SOLID || KZTile->m_Val2 == TILE_NOHOOK) && pCore->m_pWorld && pCore->m_pTeams && !pCore->m_pWorld->m_vSwitchers.empty() && pCore->m_pWorld->m_vSwitchers[KZTile->m_Val1].m_aStatus[0])
+		{
+			pCore->m_SendCoreThisTick = true;
+			return KZTile->m_Val2;
 		}
 	}
 	return 0;

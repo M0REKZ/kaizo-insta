@@ -10,6 +10,7 @@
 #include <vector>
 
 #include <game/mapitems.h>
+#include "teamscore.h"
 
 class CTile;
 class CLayers;
@@ -53,8 +54,8 @@ public:
 	bool m_IsTeamPlayKZ = false;
 	
 	CKZCustomTileV2* GetKZTiles() { return m_pKZTiles; }
-	CKZCustomTileV2* GetKZTile(int Index);
-	bool KZFound() { return m_pKZTiles != 0; }
+	CKZCustomTileV2* GetKZTile(int Index) const;
+	bool KZFound() const { return m_pKZTiles != 0; }
 	int GetKZWidth() { return m_KZWidth; }
 	int GetKZHeight() { return m_KZHeight; }
 	int GetKZIndex(float x, float y) const;
@@ -74,7 +75,7 @@ public:
 
 	bool CheckPoint(float x, float y, QuadData *pOutQuad = nullptr, int *StartNum = nullptr, CCharacterCore* pCore = nullptr) const { return IsSolid(round_to_int(x), round_to_int(y)) || IsSolidQuad(round_to_int(x), round_to_int(y), pOutQuad, StartNum) || IsSolidForCore(round_to_int(x), round_to_int(y), pCore); }
 	bool CheckPoint(vec2 Pos, QuadData *pOutQuad = nullptr, int *StartNum = nullptr) const { return CheckPoint(Pos.x, Pos.y, pOutQuad, StartNum); }
-	int GetCollisionAt(float x, float y) const;
+	int GetCollisionAt(float x, float y, CCharacterCore* pCore = nullptr)const;
 	int GetWidth() const { return m_Width; }
 	int GetHeight() const { return m_Height; }
 	int IntersectLine(vec2 Pos0, vec2 Pos1, vec2 *pOutCollision, vec2 *pOutBeforeCollision, QuadData *pOutQuad = nullptr, CCharacterCore *pCore = nullptr) const;

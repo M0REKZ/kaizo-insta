@@ -178,10 +178,11 @@ public:
 
 class CCharacterCore
 {
+public:
+
 	CWorldCore *m_pWorld = nullptr;
 	CCollision *m_pCollision;
 
-public:
 	static constexpr float PhysicalSize() { return 28.0f; };
 	static constexpr vec2 PhysicalSizeVec2() { return vec2(28.0f, 28.0f); };
 	vec2 m_Pos;
@@ -283,7 +284,7 @@ public:
 	bool m_SendCoreThisTick = false;
 	bool m_Mounted = false;
 	void SetMoveRestrictions(int m) { m_MoveRestrictions = m; }
-private:
+//private:
 	CTeamsCore *m_pTeams;
 	int m_MoveRestrictions;
 	int m_QuadRestrictions;
