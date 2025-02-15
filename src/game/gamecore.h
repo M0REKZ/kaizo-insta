@@ -19,7 +19,7 @@
 
 class CCollision;
 class CTeamsCore;
-struct CQuad;
+class CQuad;
 
 class CTuneParam
 {

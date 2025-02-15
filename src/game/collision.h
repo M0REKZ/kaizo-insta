@@ -19,8 +19,8 @@ class CSpeedupTile;
 class CSwitchTile;
 class CTuneTile;
 class CDoorTile;
-struct CQuad;
-struct CMapItemLayerQuads;
+class CQuad;
+class CMapItemLayerQuads;
 class CCharacterCore;
 
 enum
