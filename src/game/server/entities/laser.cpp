@@ -14,6 +14,7 @@
 
 //+KZ
 #include "flag.h"
+#include "kz/flagball.h"
 
 CLaser::CLaser(CGameWorld *pGameWorld, vec2 Pos, vec2 Direction, float StartEnergy, int Owner, int Type) :
 	CEntity(pGameWorld, CGameWorld::ENTTYPE_LASER)
@@ -370,6 +371,26 @@ void CLaser::HitFlag(vec2 From,vec2 To)
 	
 	vec2 outpos;
  	for (CFlag *flag = (CFlag*)GameWorld()->FindFirst(CGameWorld::ENTTYPE_FLAG); flag; flag = (CFlag *)flag->TypeNext())
+ 	{
+		if(flag->m_pCarrier)
+			continue;
+		closest_point_on_line(From, To, flag->m_Pos, outpos);
+ 		if (distance(flag->m_Pos, outpos) < 40.f)
+ 		{
+ 			flag->m_Vel += normalize(To - From) * g_Config.m_SvFlagLaserMomentum * 0.1f;
+			if(flag->m_AtStand)
+ 				flag->m_DropTick = Server()->Tick();
+			else if(!((flag->m_DropTick + Server()->TickSpeed()) > Server()->Tick()))
+				flag->m_DropTick = Server()->Tick() - Server()->TickSpeed(); //tricky trick to dont have grab cooldown
+
+			if(m_Owner >= 0 && m_Owner < MAX_CLIENTS)
+ 				flag->m_pLastCarrier = GameServer()->GetPlayerChar(m_Owner);
+			else
+				flag->m_pLastCarrier = nullptr;
+			flag->m_AtStand = false;
+ 		}
+ 	};
+	for (CFlagBall *flag = (CFlagBall*)GameWorld()->FindFirst(CGameWorld::CUSTOM_ENTTYPE_FLAGBALL); flag; flag = (CFlagBall *)flag->TypeNext())
  	{
 		if(flag->m_pCarrier)
 			continue;
