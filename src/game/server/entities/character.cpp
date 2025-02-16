@@ -3409,8 +3409,6 @@ void CCharacter::ResetJumps()
 
 void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 {
-	if(!Remove)
-		m_HasNoWeapon = false;
 
 	if(Weapon >= 0 && Weapon < NUM_WEAPONS)
 	{
@@ -3449,16 +3447,19 @@ void CCharacter::GiveWeapon(int Weapon, bool Remove, int Ammo)
 			m_aCustomWeaponAmmo[Weapon-KZ_CUSTOM_WEAPON_START] = Ammo;
 		}
 	}
-
-	int w = FindGotWeaponKZ();
-	if(w != -1)
+	if(Remove || m_HasNoWeapon)
 	{
-		SetActiveWeapon(w);
-	}
-	else
-	{
-		SetActiveWeapon(WEAPON_GUN);
-		m_HasNoWeapon = true;
+		int w = FindGotWeaponKZ();
+		if(w != -1)
+		{
+			SetActiveWeapon(w);
+			m_HasNoWeapon = false;
+		}
+		else
+		{
+			SetActiveWeapon(WEAPON_GUN);
+			m_HasNoWeapon = true;
+		}
 	}
 }
 
