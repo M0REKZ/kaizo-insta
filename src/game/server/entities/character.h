@@ -328,6 +328,12 @@ public:
 	bool m_ConfettiKZ = false;
 	bool m_SnowFlakes = false;
 	bool m_HammerPower = false;
+	int m_ReloadMultiplier; //from XXLDDRace
+	bool m_FastReload; //from XXLDDRace
+	bool m_ForceInvisible = false;
+	bool m_InsideXXLTile = false;
+	bool m_InsideForceInvisible = false;
+	bool m_InsideRemoveExtrasTile = false;
 	int m_Mines;
 	bool m_TakingNoOwnerDamage = false;
 	//void Die(int Killer, int Weapon, int tick, bool SendKillMsg = true); //JSAURUS rollback

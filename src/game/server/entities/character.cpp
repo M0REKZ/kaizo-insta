@@ -138,6 +138,10 @@ bool CCharacter::Spawn(CPlayer *pPlayer, vec2 Pos)
 	if(m_pPlayer)
 		m_Core.m_PlayerRollback = m_pPlayer->m_Rollback; //JSAURUS rollback
 	m_Core.m_DeathTick = -1; //JSAURUS rollback
+
+	m_FastReload = false;
+	m_ReloadMultiplier = 1000;
+
 	m_EmoteStop = -1;
 	m_LastAction = -1;
 	m_LastNoAmmoSound = -1;
@@ -589,6 +593,8 @@ void CCharacter::FireWeapon()
 	vec2 Direction = normalize(MouseTarget);
 
 	bool FullAuto = false;
+	if(m_FastReload && (m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER || m_Core.m_ActiveWeapon == WEAPON_HAMMER || m_Core.m_ActiveWeapon == WEAPON_GUN))
+		FullAuto = true;
 	if(m_Core.m_ActiveWeapon == WEAPON_GRENADE || m_Core.m_ActiveWeapon == WEAPON_SHOTGUN || m_Core.m_ActiveWeapon == WEAPON_LASER)
 		FullAuto = true;
 	if(m_Core.m_Jetpack && m_Core.m_ActiveWeapon == WEAPON_GUN)
@@ -935,7 +941,7 @@ void CCharacter::FireWeapon()
 	{
 		float FireDelay;
 		GetTuning(m_TuneZone)->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
-		m_ReloadTimer = FireDelay * Server()->TickSpeed() / 1000;
+		m_ReloadTimer = FireDelay * Server()->TickSpeed() / m_ReloadMultiplier; // sometimes 1000 sometimes 10000
 	}
 	else if(m_Core.m_ActiveWeapon < KZ_NUM_CUSTOM_WEAPONS)
 	{
@@ -1822,7 +1828,7 @@ void CCharacter::Snap(int SnappingClient)
 	int SnappingClientVersion = GameServer()->GetClientVersion(SnappingClient);
 	bool Sixup = Server()->IsSixup(SnappingClient);
 
-	if(m_Invisible)
+	if(m_Invisible || m_ForceInvisible)
 	{
 		if(Id != SnappingClient)
 			return;
@@ -3664,12 +3670,99 @@ void CCharacter::HandleKZTiles()
 	
 	if(TileIndex == KZ_TILE_ADMIN)
 	{
-		if(Server()->GetAuthedState(m_pPlayer->GetCid()) == AUTHED_NO)
+		if(Server()->GetAuthedState(m_pPlayer->GetCid()) != AUTHED_ADMIN)
 		{
 			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
 			GameServer()->SendChatTarget(m_pPlayer->GetCid(), "Only Admins allowed");
 		}
 	}
+	else if(TileIndex == KZ_TILE_MODERATOR)
+	{
+		if(Server()->GetAuthedState(m_pPlayer->GetCid()) != AUTHED_MOD)
+		{
+			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
+			GameServer()->SendChatTarget(m_pPlayer->GetCid(), "Only Moderators allowed");
+		}
+	}
+	else if(TileIndex == KZ_TILE_HELPER)
+	{
+		if(Server()->GetAuthedState(m_pPlayer->GetCid()) != AUTHED_HELPER)
+		{
+			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
+			GameServer()->SendChatTarget(m_pPlayer->GetCid(), "Only Helpers allowed");
+		}
+	}
+
+	if(TileIndex == KZ_TILE_XXL && m_FastReload && !m_InsideXXLTile)
+	{
+	
+		m_FastReload = false;
+		m_ReloadMultiplier = 1000;
+		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "XXL disabled");
+		m_InsideXXLTile = true;
+	}
+	else if(TileIndex == KZ_TILE_XXL && !m_FastReload && !m_InsideXXLTile)
+	{
+		m_FastReload = true;
+		m_ReloadMultiplier = 10000;
+		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "XXL enabled");
+		m_InsideXXLTile = true;
+	}
+	else if(TileIndex != KZ_TILE_XXL)
+	{
+		m_InsideXXLTile = false;
+	}
+
+	if(TileIndex == KZ_TILE_REMOVE_EXTRAS && !m_InsideRemoveExtrasTile)
+	{
+	
+		m_FastReload = false;
+		m_ReloadMultiplier = 1000;
+
+		Rainbow(false);
+
+		m_IsGodmode = false;
+
+		m_SnowFlakes = false;
+
+		SetInvincible(false);
+
+		m_Sparkles = false;
+
+		m_ForceInvisible = false;
+
+		m_ConfettiKZ = false;
+
+		m_HammerPower = false;
+
+		//Add others here
+
+		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "All Extras disabled");
+		m_InsideRemoveExtrasTile = true;
+	}
+	else if(TileIndex != KZ_TILE_REMOVE_EXTRAS)
+	{
+		m_InsideRemoveExtrasTile = false;
+	}
+
+	if(TileIndex == KZ_TILE_PERMA_INVISIBLE && m_ForceInvisible && !m_InsideForceInvisible)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "Invisible disabled");
+		m_ForceInvisible = false;
+		m_InsideForceInvisible = true;
+	}
+	else if(TileIndex == KZ_TILE_PERMA_INVISIBLE && !m_ForceInvisible && !m_InsideForceInvisible)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "Invisible enabled");
+		m_ForceInvisible = true;
+		m_InsideForceInvisible = true;
+	}
+	else if(TileIndex != KZ_TILE_PERMA_INVISIBLE)
+	{
+		m_InsideForceInvisible = false;
+	}
+	
+
 	if(TileIndex == KZ_TILE_NOAIR || TileIndex == KZ_TILE_WATER)
 	{
 		m_NoAir = true;
@@ -3865,7 +3958,12 @@ void CCharacter::HandleKZTiles()
 			NewJumps--;
 		m_insidetilejump = true;
 	}
-	else if(m_insidetilejump && TileIndex != KZ_TILE_PLUS_JUMP && TileIndex != KZ_TILE_MINUS_JUMP)
+	else if(TileIndex == KZ_TILE_RESET_JUMPS && !m_insidetilejump)
+	{
+		NewJumps = 2;
+		m_insidetilejump = true;
+	}
+	else if(m_insidetilejump && TileIndex != KZ_TILE_PLUS_JUMP && TileIndex != KZ_TILE_MINUS_JUMP && TileIndex != KZ_TILE_RESET_JUMPS)
 	{
 		m_insidetilejump = false;
 	}
