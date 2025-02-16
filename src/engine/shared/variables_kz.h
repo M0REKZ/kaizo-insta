@@ -28,6 +28,7 @@ MACRO_CONFIG_INT(SvBlackholeLife, sv_blackhole_life, 5, 0, 999, CFGFLAG_SERVER, 
 MACRO_CONFIG_INT(SvDropWeapons, sv_drop_weapons, 0, 0, 1, CFGFLAG_SERVER, "Allow drop weapons")
 MACRO_CONFIG_INT(SvMinesLife, sv_mines_life, 60, 0, 999, CFGFLAG_SERVER, "Mines lifetime")
 MACRO_CONFIG_INT(SvPortalMode, sv_portal_mode, 0, 0, 2, CFGFLAG_SERVER | CFGFLAG_GAME, "Portal spawning behavior (0 = default, 1 = only on allow portal tile, 2 = pprace compatibility)")
+MACRO_CONFIG_STR(SvRunWhenEmpty, sv_run_when_empty, 64, "", CFGFLAG_SERVER, "File to run when server is empty")
 
 
 //For Vanilla

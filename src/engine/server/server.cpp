@@ -3241,6 +3241,11 @@ int CServer::Run()
 					m_RunServer = STOPPING;
 				else
 					PacketWaiting = net_socket_read_wait(m_NetServer.Socket(), 1000000);
+
+				if(Config()->m_SvRunWhenEmpty[0] && m_RunServer != STOPPING)
+				{
+					Console()->ExecuteFile(Config()->m_SvRunWhenEmpty);
+				}
 			}
 			else
 			{
