@@ -15,6 +15,7 @@
 #include "kz/blackhole.h"
 #include "kz/kz_pickup.h"
 #include "kz/portal.h"
+#include "kz/flagball.h"
 
 #include <antibot/antibot_data.h>
 
@@ -4127,14 +4128,34 @@ void CCharacter::HandleFlagHookCatch()
 
 	if(m_Core.m_HookState == HOOK_FLYING)
 	{
+		bool grabbed = false;
+		vec2 tempoutpos = vec2(0,0);
 	 	for (CFlag *flag = (CFlag*)GameWorld()->FindFirst(CGameWorld::ENTTYPE_FLAG); flag; flag = (CFlag *)flag->TypeNext())
  		{
 			if(!(flag->CanHookGrabKZ(this)))
 				continue;
 
-			if(distance(m_Core.m_HookPos,flag->m_Pos) < 60.f)
+			closest_point_on_line(m_Core.m_Pos, m_Core.m_HookPos, flag->m_Pos, tempoutpos);
+
+			if(distance(tempoutpos,flag->m_Pos) < 60.f)
+			{
 				flag->Grab(this);
+				grabbed = true;
+			}
 		}
+		for (CFlagBall *flag = (CFlagBall*)GameWorld()->FindFirst(CGameWorld::CUSTOM_ENTTYPE_FLAGBALL); flag; flag = (CFlagBall *)flag->TypeNext())
+		{
+		   if(!(flag->CanHookGrabKZ(this)))
+			   continue;
+
+			closest_point_on_line(m_Core.m_Pos, m_Core.m_HookPos, flag->m_Pos, tempoutpos);
+			
+			if(distance(tempoutpos,flag->m_Pos) < 60.f)
+			{
+			   flag->Grab(this);
+			   grabbed = true;
+			}
+	   }
 	}
 }
 
