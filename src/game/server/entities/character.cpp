@@ -704,17 +704,29 @@ void CCharacter::FireWeapon()
 
 			vec2 Dir;
 			if(length(pTarget->m_Pos - m_Pos) > 0.0f)
-				Dir = normalize(pTarget->m_Pos - m_Pos);
+			{
+				if(!m_HammerPower)
+					Dir = normalize(pTarget->m_Pos - m_Pos);
+				else
+					Dir = normalize(vec2(m_LatestInput.m_TargetX, m_LatestInput.m_TargetY));
+			}
 			else
 				Dir = vec2(0.f, -1.f);
 
 			float Strength = GetTuning(m_TuneZone)->m_HammerStrength;
 
-			vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
-			Temp = ClampVel(pTarget->m_MoveRestrictions, Temp);
-			Temp -= pTarget->m_Core.m_Vel;
-			pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Strength, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
-				m_pPlayer->GetCid(), m_Core.m_ActiveWeapon);
+			if(!m_HammerPower)
+			{
+				vec2 Temp = pTarget->m_Core.m_Vel + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
+				Temp = ClampVel(pTarget->m_MoveRestrictions, Temp);
+				Temp -= pTarget->m_Core.m_Vel;
+				pTarget->TakeDamage((vec2(0.f, -1.0f) + Temp) * Strength, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage,
+					m_pPlayer->GetCid(), m_Core.m_ActiveWeapon);
+			}
+			else
+			{
+				pTarget->TakeDamage(vec2(0.f, -1.0f) + Dir * 10.0f*g_Config.m_SvHammerPower, g_pData->m_Weapons.m_Hammer.m_pBase->m_Damage, m_pPlayer->GetCid(), GetActiveWeapon());
+			}
 			pTarget->UnFreeze();
 
 			if(m_FreezeHammer)
@@ -3783,6 +3795,17 @@ void CCharacter::HandleKZTiles()
 	{
 		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You lost sparkles");
 		m_Sparkles = false;
+	}
+
+	if(TileIndex == KZ_TILE_HAMMER_POWER_ON && !m_HammerPower)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You got hammer power");
+		m_HammerPower = true;
+	}
+	else if(TileIndex == KZ_TILE_HAMMER_POWER_OFF && m_HammerPower)
+	{
+		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "You lost hammer power");
+		m_HammerPower = false;
 	}
 
 	if(TileIndex == KZ_TILE_CONFETTI_ON && !m_ConfettiKZ)

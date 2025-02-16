@@ -29,6 +29,7 @@ MACRO_CONFIG_INT(SvDropWeapons, sv_drop_weapons, 0, 0, 1, CFGFLAG_SERVER, "Allow
 MACRO_CONFIG_INT(SvMinesLife, sv_mines_life, 60, 0, 999, CFGFLAG_SERVER, "Mines lifetime")
 MACRO_CONFIG_INT(SvPortalMode, sv_portal_mode, 0, 0, 2, CFGFLAG_SERVER | CFGFLAG_GAME, "Portal spawning behavior (0 = default, 1 = only on allow portal tile, 2 = pprace compatibility)")
 MACRO_CONFIG_STR(SvRunWhenEmpty, sv_run_when_empty, 64, "", CFGFLAG_SERVER, "File to run when server is empty")
+MACRO_CONFIG_INT(SvHammerPower, sv_hammer_power, 5, 1, 500, CFGFLAG_SERVER, "Hammer's power (For Hammer Power Powerup)")
 
 
 //For Vanilla

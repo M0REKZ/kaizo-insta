@@ -327,6 +327,7 @@ public:
 	bool m_BluePortal = true;
 	bool m_ConfettiKZ = false;
 	bool m_SnowFlakes = false;
+	bool m_HammerPower = false;
 	int m_Mines;
 	bool m_TakingNoOwnerDamage = false;
 	//void Die(int Killer, int Weapon, int tick, bool SendKillMsg = true); //JSAURUS rollback
