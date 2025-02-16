@@ -4821,7 +4821,8 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 				dontjump = true;
 				butjumpifwall = true;
 			}
-			m_DontDoSmartTargetChase--;
+			if(m_DontDoSmartTargetChase > 0)
+				m_DontDoSmartTargetChase--;
 		}
 	}
 	
