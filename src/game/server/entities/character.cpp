@@ -1701,7 +1701,9 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 
 		pCharacter->m_AttackTick = m_AttackTick;
 		pCharacter->m_Direction = m_Input.m_Direction;
-		if(m_HasNoWeapon || m_HasFlagBall || m_DropFlagBallTicks > 0)
+		if(m_HasFlagBall || m_DropFlagBallTicks > 0)
+			pCharacter->m_Weapon = WEAPON_NINJA;
+		else if(m_HasNoWeapon)
 			pCharacter->m_Weapon = -1;
 		else if(m_SnapCustomWeapon)
 			pCharacter->m_Weapon = m_aCustomWeaponSnaps[m_Core.m_ActiveWeapon - KZ_CUSTOM_WEAPON_START];
