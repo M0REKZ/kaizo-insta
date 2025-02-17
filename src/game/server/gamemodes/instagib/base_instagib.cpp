@@ -20,6 +20,13 @@ CGameControllerInstagib::CGameControllerInstagib(class CGameContext *pGameServer
 
 CGameControllerInstagib::~CGameControllerInstagib() = default;
 
+int CGameControllerInstagib::SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags)
+{
+	int Flags = CGameControllerPvp::SnapGameInfoExFlags(SnappingClient, DDRaceFlags);
+	Flags &= ~(GAMEINFOFLAG_PREDICT_DDRACE);
+	return Flags;
+}
+
 bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
 	if(From == Character.GetPlayer()->GetCid())
