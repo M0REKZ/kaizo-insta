@@ -755,11 +755,6 @@ void IGameController::Tick()
 	}
 
 	{
-		for(int i = 0; i < 10; i++)
-		{
-			if(!m_aDontCampPos[i].m_PosSet)
-				continue;
-
 			for(CPlayer *pPlayer : GameServer()->m_apPlayers)
 			{
 
@@ -791,10 +786,24 @@ void IGameController::Tick()
 					pPlayer->m_CampZoneTick = Server()->Tick() + Server()->TickSpeed() * AnticamperTime;
 				}
 
-				// Check if the player is moving
-				if((m_aDontCampPos[i].m_Pos.x - pChr->m_Pos.x >= (float)AnticamperRange || m_aDontCampPos[i].m_Pos.x - pChr->m_Pos.x <= -(float)AnticamperRange) || (m_aDontCampPos[i].m_Pos.y - pChr->m_Pos.y >= (float)AnticamperRange || m_aDontCampPos[i].m_Pos.y - pChr->m_Pos.y <= -(float)AnticamperRange))
+				bool isinzone = false;
+				for(int i = 0; i < 10; i++)
+				{
+					if(!m_aDontCampPos[i].m_PosSet)
+						continue;
+					// Check if the player is moving
+					if((m_aDontCampPos[i].m_Pos.x - pChr->m_Pos.x >= (float)AnticamperRange || m_aDontCampPos[i].m_Pos.x - pChr->m_Pos.x <= -(float)AnticamperRange) || (m_aDontCampPos[i].m_Pos.y - pChr->m_Pos.y >= (float)AnticamperRange || m_aDontCampPos[i].m_Pos.y - pChr->m_Pos.y <= -(float)AnticamperRange))
+					{
+						continue;
+					}
+					isinzone = true;
+					break;
+				}
+
+				if(!isinzone)
 				{
 					pPlayer->m_CampZoneTick = -1;
+					continue;
 				}
 
 				// Kill him
@@ -815,7 +824,6 @@ void IGameController::Tick()
 					continue;
 				}
 			}
-		}
 	}
 
 	DoActivityCheck();
