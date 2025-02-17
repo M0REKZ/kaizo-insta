@@ -3683,7 +3683,7 @@ void CCharacter::HandleKZTiles()
 	}
 	else if(TileIndex == KZ_TILE_MODERATOR)
 	{
-		if(Server()->GetAuthedState(m_pPlayer->GetCid()) != AUTHED_MOD)
+		if(Server()->GetAuthedState(m_pPlayer->GetCid()) < AUTHED_MOD)
 		{
 			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
 			GameServer()->SendChatTarget(m_pPlayer->GetCid(), "Only Moderators allowed");
@@ -3691,7 +3691,7 @@ void CCharacter::HandleKZTiles()
 	}
 	else if(TileIndex == KZ_TILE_HELPER)
 	{
-		if(Server()->GetAuthedState(m_pPlayer->GetCid()) != AUTHED_HELPER)
+		if(Server()->GetAuthedState(m_pPlayer->GetCid()) < AUTHED_HELPER)
 		{
 			Die(m_pPlayer->GetCid(), WEAPON_WORLD);
 			GameServer()->SendChatTarget(m_pPlayer->GetCid(), "Only Helpers allowed");
