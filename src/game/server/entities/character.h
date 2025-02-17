@@ -285,6 +285,9 @@ private:
 	bool m_Sit = false;
 	bool m_Water;
 	bool m_SentWaterTune = false;
+	int m_oldExtraHookLength;
+	int m_oldExtraWalkSpeed;
+	int m_oldExtraFireSpeed;
 	bool m_NoAir;
 	bool m_QuadWater;
 	int m_InvisibleShieldId = -1;
@@ -331,9 +334,18 @@ public:
 	int m_ReloadMultiplier; //from XXLDDRace
 	bool m_FastReload; //from XXLDDRace
 	bool m_ForceInvisible = false;
+	int m_LessFreezeTime = 0;
+	int m_ExtraFireSpeed = 0;
+
 	bool m_InsideXXLTile = false;
 	bool m_InsideForceInvisible = false;
 	bool m_InsideRemoveExtrasTile = false;
+
+	bool m_InsideLessFreezeTime = false;
+	bool m_InsideExtraHookLength = false;
+	bool m_InsideExtraWalkSpeed = false;
+	bool m_InsideExtraFireSpeed = false;
+
 	int m_Mines;
 	bool m_TakingNoOwnerDamage = false;
 	//void Die(int Killer, int Weapon, int tick, bool SendKillMsg = true); //JSAURUS rollback

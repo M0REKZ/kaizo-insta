@@ -1072,6 +1072,14 @@ void CGameContext::SendTuningParams(int ClientId, int Zone)
 			{
 				Msg.AddInt(7);
 			}
+			else if((i == 0)) //+KZ GroundControlSpeed
+			{
+				Msg.AddInt(pParams[i] + m_apPlayers[ClientId]->GetCharacter()->GetCore().m_ExtraWalkSpeed);
+			}
+			else if((i == 8)) //+KZ HookLength
+			{
+				Msg.AddInt(pParams[i] + m_apPlayers[ClientId]->GetCharacter()->GetCore().m_ExtraHookLength);
+			}
 			else if((i == 31) // collision
 				&& (m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_SOLO || m_apPlayers[ClientId]->GetCharacter()->NeededFaketuning() & FAKETUNE_NOCOLL))
 			{

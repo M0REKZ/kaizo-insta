@@ -245,7 +245,7 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 
 	m_Vel.y += m_Tuning.m_Gravity;
 
-	float MaxSpeed = Grounded ? m_Tuning.m_GroundControlSpeed : m_Tuning.m_AirControlSpeed;
+	float MaxSpeed = Grounded ? m_Tuning.m_GroundControlSpeed + m_ExtraWalkSpeed : m_Tuning.m_AirControlSpeed;
 	float Accel = Grounded ? m_Tuning.m_GroundControlAccel : m_Tuning.m_AirControlAccel;
 	float Friction = Grounded ? m_Tuning.m_GroundFriction : m_Tuning.m_AirFriction;
 
@@ -367,10 +367,10 @@ void CCharacterCore::Tick(bool UseInput, bool DoDeferredTick)
 			HookBase = m_HookTeleBase;
 		}
 		vec2 NewPos = m_HookPos + m_HookDir * m_Tuning.m_HookFireSpeed;
-		if(distance(HookBase, NewPos) > m_Tuning.m_HookLength)
+		if(distance(HookBase, NewPos) > m_Tuning.m_HookLength + m_ExtraHookLength)
 		{
 			m_HookState = HOOK_RETRACT_START;
-			NewPos = HookBase + normalize(NewPos - HookBase) * m_Tuning.m_HookLength;
+			NewPos = HookBase + normalize(NewPos - HookBase) * (m_Tuning.m_HookLength + m_ExtraHookLength);
 			m_Reset = true;
 		}
 
@@ -581,7 +581,7 @@ void CCharacterCore::TickDeferred()
 				{
 					if(Distance > PhysicalSize() * 1.50f)
 					{
-						float HookAccel = m_Tuning.m_HookDragAccel * (Distance / m_Tuning.m_HookLength);
+						float HookAccel = m_Tuning.m_HookDragAccel * (Distance / (m_Tuning.m_HookLength + m_ExtraHookLength));
 						float DragSpeed = m_Tuning.m_HookDragSpeed;
 
 						vec2 Temp;

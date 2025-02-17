@@ -283,6 +283,8 @@ public:
 	int m_TeamKZ = TEAM_RED;
 	bool m_SendCoreThisTick = false;
 	bool m_Mounted = false;
+	int m_ExtraHookLength = 0;
+	int m_ExtraWalkSpeed = 0;
 	void SetMoveRestrictions(int m) { m_MoveRestrictions = m; }
 //private:
 	CTeamsCore *m_pTeams;

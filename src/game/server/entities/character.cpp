@@ -941,7 +941,7 @@ void CCharacter::FireWeapon()
 	{
 		float FireDelay;
 		GetTuning(m_TuneZone)->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
-		m_ReloadTimer = FireDelay * Server()->TickSpeed() / m_ReloadMultiplier; // sometimes 1000 sometimes 10000
+		m_ReloadTimer = FireDelay * Server()->TickSpeed() / (m_ReloadMultiplier + m_ExtraFireSpeed); // sometimes 1000 sometimes 10000
 	}
 	else if(m_Core.m_ActiveWeapon < KZ_NUM_CUSTOM_WEAPONS)
 	{
@@ -1653,10 +1653,13 @@ void CCharacter::SnapCharacter(int SnappingClient, int Id)
 				Faketuning |= FAKETUNE_NOHAMMER;
 			}
 		}
-		if(Faketuning != m_NeededFaketuning || m_Water != m_SentWaterTune)
+		if(Faketuning != m_NeededFaketuning || m_Water != m_SentWaterTune || m_oldExtraFireSpeed != m_ExtraFireSpeed || m_oldExtraHookLength != m_Core.m_ExtraHookLength || m_oldExtraWalkSpeed != m_Core.m_ExtraWalkSpeed)
 		{
 			m_NeededFaketuning = Faketuning;
 			m_SentWaterTune = m_Water;
+			m_oldExtraFireSpeed = m_ExtraFireSpeed;
+			m_oldExtraHookLength = m_Core.m_ExtraHookLength;
+			m_oldExtraWalkSpeed = m_Core.m_ExtraWalkSpeed;
 			GameServer()->SendTuningParams(m_pPlayer->GetCid(), m_TuneZone); // update tunings
 		}
 	}
@@ -3369,7 +3372,9 @@ bool CCharacter::Freeze(int Seconds)
 	{
 		// m_Armor = 0; // ddnet-insta do not set m_Armor use SetArmorProgress instead
 		GameServer()->m_pController->SetArmorProgressEmpty(this); // ddnet-insta
-		m_FreezeTime = Seconds * Server()->TickSpeed();
+		m_FreezeTime = (Seconds - m_LessFreezeTime) * Server()->TickSpeed();
+		if(m_FreezeTime < 0) //+KZ for LessFreezeTime
+			m_FreezeTime = 0;
 		m_Core.m_FreezeStart = Server()->Tick();
 		if(m_pPlayer && !m_FrozenKZ)
 		{
@@ -3735,6 +3740,14 @@ void CCharacter::HandleKZTiles()
 
 		m_HammerPower = false;
 
+		m_ExtraFireSpeed = 0;
+
+		m_LessFreezeTime = 0;
+
+		m_Core.m_ExtraHookLength = 0;
+
+		m_Core.m_ExtraWalkSpeed = 0;
+
 		//Add others here
 
 		GameServer()->SendChatTarget(m_pPlayer->GetCid(), "All Extras disabled");
@@ -3980,7 +3993,87 @@ void CCharacter::HandleKZTiles()
 		GameServer()->SendChatTarget(GetPlayer()->GetCid(), aBuf);
 		m_Core.m_Jumps = NewJumps;
 	}
+
+	int LessFreezeTime = m_LessFreezeTime;
+
+	if(TileIndex == KZ_TILE_LESS_FREEZE_TIME && !m_InsideLessFreezeTime)
+	{
+		LessFreezeTime++;
+		m_InsideLessFreezeTime = true;
+	}
+	else if(m_InsideLessFreezeTime && TileIndex != KZ_TILE_LESS_FREEZE_TIME)
+	{
+		m_InsideLessFreezeTime = false;
+	}
+
+	if(LessFreezeTime != m_LessFreezeTime)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "Freeze time reduced to %d", g_Config.m_SvFreezeDelay - LessFreezeTime);
+		GameServer()->SendChatTarget(GetPlayer()->GetCid(), aBuf);
+		m_LessFreezeTime = LessFreezeTime;
+	}
+
+	int ExtraHookLength = m_Core.m_ExtraHookLength;
+
+	if(TileIndex == KZ_TILE_EXTRA_HOOK_LENGTH && !m_InsideExtraHookLength)
+	{
+		ExtraHookLength += 10;
+		m_InsideExtraHookLength = true;
+	}
+	else if(m_InsideExtraHookLength && TileIndex != KZ_TILE_EXTRA_HOOK_LENGTH)
+	{
+		m_InsideExtraHookLength = false;
+	}
+
+	if(ExtraHookLength != m_Core.m_ExtraHookLength)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "Hook length increased to %d", (int)(Tuning()->m_HookLength + ExtraHookLength));
+		GameServer()->SendChatTarget(GetPlayer()->GetCid(), aBuf);
+		m_Core.m_ExtraHookLength = ExtraHookLength;
+	}
 	
+	int ExtraWalkSpeed = m_Core.m_ExtraWalkSpeed;
+
+	if(TileIndex == KZ_TILE_EXTRA_WALK_SPEED && !m_InsideExtraWalkSpeed)
+	{
+		ExtraWalkSpeed++;
+		m_InsideExtraWalkSpeed = true;
+	}
+	else if(m_InsideExtraWalkSpeed && TileIndex != KZ_TILE_EXTRA_WALK_SPEED)
+	{
+		m_InsideExtraWalkSpeed = false;
+	}
+
+	if(ExtraWalkSpeed != m_Core.m_ExtraWalkSpeed)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "Walk speed increased to %d", (int)(Tuning()->m_GroundControlSpeed + ExtraWalkSpeed));
+		GameServer()->SendChatTarget(GetPlayer()->GetCid(), aBuf);
+		m_Core.m_ExtraWalkSpeed = ExtraWalkSpeed;
+	}
+
+	int ExtraFireSpeed = m_ExtraFireSpeed;
+
+	if(TileIndex == KZ_TILE_EXTRA_FIRE_SPEED && !m_InsideExtraFireSpeed)
+	{
+		ExtraFireSpeed += 10;
+		m_InsideExtraFireSpeed = true;
+	}
+	else if(m_InsideExtraFireSpeed && TileIndex != KZ_TILE_EXTRA_FIRE_SPEED)
+	{
+		m_InsideExtraFireSpeed = false;
+	}
+
+	if(ExtraFireSpeed != m_ExtraFireSpeed)
+	{
+		char aBuf[256];
+		str_format(aBuf, sizeof(aBuf), "Fire speed increased by %d", ExtraFireSpeed);
+		GameServer()->SendChatTarget(GetPlayer()->GetCid(), aBuf);
+		m_ExtraFireSpeed = ExtraFireSpeed;
+	}
+
 	
 	if(Collision()->GetKZTileIndex(m_Pos.x - 15 , m_Pos.y) == KZ_TILE_5_DAMAGE)
 	{
