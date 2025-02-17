@@ -250,6 +250,7 @@ public:
 	int m_MsgBotCount = 0;
 	int m_RageQuitTick = 0;
 	int m_RedirectTo = 0;
+	int m_CampZoneTick = -1;
 };
 
 #endif

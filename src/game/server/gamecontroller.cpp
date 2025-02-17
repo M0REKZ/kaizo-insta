@@ -754,6 +754,70 @@ void IGameController::Tick()
 		m_pLoadBestTimeResult = nullptr;
 	}
 
+	{
+		for(int i = 0; i < 10; i++)
+		{
+			if(!m_aDontCampPos[i].m_PosSet)
+				continue;
+
+			for(CPlayer *pPlayer : GameServer()->m_apPlayers)
+			{
+
+				if(!pPlayer)
+					continue;
+
+				CCharacter *pChr = pPlayer->GetCharacter();
+
+				//Dont do anticamper if there is no character
+				if(!pChr)
+				{
+					pPlayer->m_CampZoneTick = -1;
+					continue;
+				}
+
+				//Dont do anticamper if player is already frozen
+				if(pChr->m_FreezeTime > 0 || pChr->GetCore().m_DeepFrozen)
+				{
+					pPlayer->m_CampZoneTick = -1;
+					continue;
+				}
+
+				int AnticamperTime = g_Config.m_SvAnticamperZoneTime;
+				int AnticamperRange = g_Config.m_SvAnticamperZoneRange;
+
+				if(pPlayer->m_CampZoneTick == -1)
+				{
+					//pPlayer->m_CampPos = pChr->m_Pos;
+					pPlayer->m_CampZoneTick = Server()->Tick() + Server()->TickSpeed() * AnticamperTime;
+				}
+
+				// Check if the player is moving
+				if((m_aDontCampPos[i].m_Pos.x - pChr->m_Pos.x >= (float)AnticamperRange || m_aDontCampPos[i].m_Pos.x - pChr->m_Pos.x <= -(float)AnticamperRange) || (m_aDontCampPos[i].m_Pos.y - pChr->m_Pos.y >= (float)AnticamperRange || m_aDontCampPos[i].m_Pos.y - pChr->m_Pos.y <= -(float)AnticamperRange))
+				{
+					pPlayer->m_CampZoneTick = -1;
+				}
+
+				// Kill him
+				if((pPlayer->m_CampZoneTick <= Server()->Tick()) && (pPlayer->m_CampZoneTick > 0))
+				{
+					//Kill Player
+					pChr->Die(pPlayer->GetCid(), WEAPON_WORLD);
+
+					char aBuf[128];
+
+					str_format(aBuf, sizeof(aBuf), "%s has been killed due to camping...", Server()->ClientName(pPlayer->GetCid()));
+
+					GameServer()->SendChatTarget(-1, aBuf);
+
+					//Reset counter on death
+					pPlayer->m_CampZoneTick = -1;
+
+					continue;
+				}
+			}
+		}
+	}
+
 	DoActivityCheck();
 }
 
@@ -1041,6 +1105,20 @@ int IGameController::MakeLosersCry()
 bool IGameController::OnKZEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Val1, int Val2, int Val3)
 {
 	
+	if(Index == KZ_TILE_ANTICAMPER_ZONE)
+	{
+		for(int i = 0; i < 10; i++)
+		{
+			if(!m_aDontCampPos[i].m_PosSet)
+			{
+				m_aDontCampPos[i].m_Pos = vec2(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
+				m_aDontCampPos[i].m_PosSet = true;
+				break;
+			}
+		}
+	}
+
+
 	int Type = -1;
 	int SubType = 0;
 

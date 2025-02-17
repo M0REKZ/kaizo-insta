@@ -182,6 +182,13 @@ public:
 	//+KZ
 	bool m_AllowSkinChange = true; //restored from ddnet-insta
 	bool m_AllowBangCommands = true; //+KZ
+
+	struct DontCampPos
+	{
+		vec2 m_Pos = vec2(0,0);
+		bool m_PosSet = false;
+	} m_aDontCampPos[10];
+
 	bool IsSkinChangeAllowed() const { return m_AllowSkinChange; } //restored from ddnet-insta
 	virtual bool OnKZEntity(int Index, int x, int y, int Layer, int Flags, bool Initial, int Val1, int Val2, int Val3);
 	virtual bool OnCharacterSnap(int SnappingClient, int Id) {return false;}
