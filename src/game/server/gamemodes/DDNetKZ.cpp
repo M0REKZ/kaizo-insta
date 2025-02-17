@@ -341,10 +341,10 @@ void CGameControllerDDNetKZ::OnPlayerDisconnect(CPlayer *pPlayer, const char *pR
 int CGameControllerDDNetKZ::SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags)
 {
 	int Flags =
-		GAMEINFOFLAG_PREDICT_VANILLA | // ddnet-insta
-		GAMEINFOFLAG_ENTITIES_VANILLA | // ddnet-insta
+		//GAMEINFOFLAG_PREDICT_VANILLA | // ddnet-insta
+		//GAMEINFOFLAG_ENTITIES_VANILLA | // ddnet-insta
 		GAMEINFOFLAG_BUG_VANILLA_BOUNCE | // ddnet-insta
-		GAMEINFOFLAG_GAMETYPE_VANILLA | // ddnet-insta
+		//GAMEINFOFLAG_GAMETYPE_VANILLA | // ddnet-insta
 		GAMEINFOFLAG_TIMESCORE |
 		//GAMEINFOFLAG_GAMETYPE_RACE |
 		//GAMEINFOFLAG_GAMETYPE_DDRACE |
