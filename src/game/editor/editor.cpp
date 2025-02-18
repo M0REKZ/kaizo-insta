@@ -4259,7 +4259,7 @@ void CEditor::RenderLayers(CUIRect LayersBox)
 							}
 						}
 
-						Ui()->DoPopupMenu(&s_LayerPopupContext, Ui()->MouseX(), Ui()->MouseY(), 120, 270, &s_LayerPopupContext, PopupLayer);
+						Ui()->DoPopupMenu(&s_LayerPopupContext, Ui()->MouseX(), Ui()->MouseY(), 120, 280, &s_LayerPopupContext, PopupLayer);
 					}
 
 					SetOperation(OP_NONE);
@@ -4516,8 +4516,7 @@ bool CEditor::ReplaceImage(const char *pFileName, int StorageType, bool CheckDup
 	}
 
 	std::shared_ptr<CEditorImage> pImg = m_Map.m_vpImages[m_SelectedImage];
-	Graphics()->UnloadTexture(&(pImg->m_Texture));
-	pImg->Free();
+	pImg->CEditorImage::Free();
 	pImg->m_Width = ImgInfo.m_Width;
 	pImg->m_Height = ImgInfo.m_Height;
 	pImg->m_Format = ImgInfo.m_Format;
