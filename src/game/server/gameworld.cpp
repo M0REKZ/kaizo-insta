@@ -443,3 +443,29 @@ CCharacter *CGameWorld::IntersectCharacterTick(vec2 Pos0, vec2 Pos1, float Radiu
 
 	return pClosest;
 }
+
+int CGameWorld::FindCharactersTick(vec2 Pos, float Radius, CCharacter **ppEnts, int Max, int tick)
+{
+	vec2 pos;
+	int Num = 0;
+	for(CCharacter *pEnt = (CCharacter*)m_apFirstEntityTypes[ENTTYPE_CHARACTER]; pEnt; pEnt = (CCharacter*)pEnt->m_pNextTypeEntity)
+	{
+		pos = pEnt->m_Pos;
+		if(tick > 0)
+		{
+			tick = tick % POSITION_HISTORY;
+			pos = pEnt->GetCore().m_Positions[tick];
+		}
+
+		if(distance(pos, Pos) < Radius + pEnt->m_ProximityRadius)
+		{
+			if(ppEnts)
+				ppEnts[Num] = pEnt;
+			Num++;
+			if(Num == Max)
+				break;
+		}
+	}
+
+	return Num;
+}

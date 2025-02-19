@@ -204,6 +204,7 @@ public:
 	CTuningParams *GetTuning(int i) { return &TuningList()[i]; }
 
 	class CCharacter *IntersectCharacterTick(vec2 Pos0, vec2 Pos1, float Radius, vec2 &NewPos, int tick, class CCharacter *pNotThis = 0, int CollideWith = -1, class CCharacter *pThisOnly = 0);  //JSAURUS rollback
+	int FindCharactersTick(vec2 Pos, float Radius, CCharacter **ppEnts, int Max, int tick);
 };
 
 #endif

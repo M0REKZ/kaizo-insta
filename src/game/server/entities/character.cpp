@@ -689,14 +689,17 @@ void CCharacter::FireWeapon()
 		if(m_Core.m_HammerHitDisabled)
 			break;
 
-		CEntity *apEnts[MAX_CLIENTS];
+		CCharacter *apEnts[MAX_CLIENTS]; // CCharacter +KZ rollback
 		int Hits = 0;
-		int Num = GameServer()->m_World.FindEntities(ProjStartPos, GetProximityRadius() * 0.5f, apEnts,
-			MAX_CLIENTS, CGameWorld::ENTTYPE_CHARACTER);
+		int tick = -1; //+KZ rollback
+		if(m_pPlayer && m_pPlayer->m_Rollback) //+KZ rollback
+			tick = m_Core.m_LastAckedSnapshot; //+KZ rollback
+		int Num = GameServer()->m_World.FindCharactersTick(ProjStartPos, GetProximityRadius() * 0.5f, apEnts,
+			MAX_CLIENTS, tick); //FindCharactersTick +KZ rollback
 
 		for(int i = 0; i < Num; ++i)
 		{
-			auto *pTarget = static_cast<CCharacter *>(apEnts[i]);
+			auto *pTarget = apEnts[i]; // CCharacter +KZ rollback
 
 			//if ((pTarget == this) || Collision()->IntersectLine(ProjStartPos, pTarget->m_Pos, NULL, NULL))
 			if((pTarget == this || (pTarget->IsAlive() && !CanCollide(pTarget->GetPlayer()->GetCid()))))
