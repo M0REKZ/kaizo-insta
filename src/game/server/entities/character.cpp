@@ -4507,7 +4507,7 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 			TargetPosSet = true;
 			DoSmartTargetChase = true;
 		}
-		else
+		else if(!pEnemyFlag->m_pCarrier)
 		{
 			//Input.m_Direction = pEnemyFlag->m_Pos.x > m_Pos.x ? 1 : -1;
 			TargetPos = pEnemyFlag->m_Pos;
@@ -4516,7 +4516,7 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 		}
 	}
 	
-	if(pClosestPickup && !pEnemyFlag && !pTeamFlag)
+	if(pClosestPickup && !(pTeamFlag && pEnemyFlag && (pEnemyFlag->m_pCarrier == this || !pEnemyFlag->m_pCarrier)))
 	{
 		//Input.m_Direction = pClosestPickup->m_Pos.x > m_Pos.x ? 1 : -1;
 		TargetPos = pClosestPickup->m_Pos;
@@ -4533,25 +4533,19 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 		Input.m_TargetX = pClosestChar->m_Pos.x - m_Pos.x; // aim
 		Input.m_TargetY = pClosestChar->m_Pos.y - m_Pos.y;
 		
-		if(!pClosestPickup && !pEnemyFlag  && !pTeamFlag)
+		if(!pClosestPickup && !(pTeamFlag && pEnemyFlag && (pEnemyFlag->m_pCarrier == this || !pEnemyFlag->m_pCarrier)))
 		{
-			//Input.m_Direction = pClosestChar->m_Pos.x > m_Pos.x ? 1 : -1;
 			TargetPos = pClosestChar->m_Pos;
 			TargetPosSet = true;
 			DoSmartTargetChase = true;
 		}
 		
-		//printf("%.5f %.5f \n",distance(m_Pos, pClosestChar->m_Pos),30.0f);
-		
 		if(m_Core.m_aWeapons[WEAPON_NINJA].m_Got)
 		{
-			//SetWeapon(WEAPON_LASER);
 		}
 		else if(m_Core.m_aWeapons[WEAPON_LASER].m_Got && m_Core.m_aWeapons[WEAPON_LASER].m_Ammo && distance(m_Pos, pClosestChar->m_Pos) < GameServer()->Tuning()->m_LaserReach)
 		{
 			SetWeapon(WEAPON_LASER);
-			
-			//aim laserbounce
 		}
 		else if(m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Got && m_Core.m_aWeapons[WEAPON_SHOTGUN].m_Ammo && distance(m_Pos, pClosestChar->m_Pos) < GameServer()->Tuning()->m_ShotgunLifetime * 3000.0f)
 		{
@@ -4565,11 +4559,6 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 		{
 			SetWeapon(WEAPON_GUN);
 		}
-		
-		/*if(pClosestChar->m_Pos.y < m_Pos.y && !(Collision()->GetCollisionAt(m_Pos.x , m_Pos.y - GetProximityRadius() / 3.f) == TILE_DEATH))
-		{
-			targetisup = true;
-		}*/
 		
 		if((m_Core.m_ActiveWeapon == WEAPON_LASER ? (!Collision()->FastIntersectLine(m_Pos,pClosestChar->m_Pos,nullptr,nullptr) && distance(m_Pos, pClosestChar->m_Pos) < GameServer()->Tuning()->m_LaserReach) : !Collision()->FastIntersectLine(m_Pos,pClosestChar->m_Pos,nullptr,nullptr)) || m_Core.m_aWeapons[WEAPON_NINJA].m_Got)
 		{
@@ -5043,9 +5032,12 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 				m_DontDoSmartTargetChase--;
 		}
 
-		if(m_DoGrenadeJump && (GetWeaponGot(WEAPON_GRENADE) && GetWeaponAmmo(WEAPON_GRENADE)))
+		if(m_DoGrenadeJump && ((GetWeaponGot(WEAPON_GRENADE) && GetWeaponAmmo(WEAPON_GRENADE)) || (g_Config.m_SvLaserJump && GetWeaponGot(WEAPON_LASER) && GetWeaponAmmo(WEAPON_LASER))))
 		{
-			SetActiveWeapon(WEAPON_GRENADE);
+			if(GetWeaponGot(WEAPON_GRENADE) && GetWeaponAmmo(WEAPON_GRENADE))
+				SetActiveWeapon(WEAPON_GRENADE);
+			else if(g_Config.m_SvLaserJump && GetWeaponGot(WEAPON_LASER) && GetWeaponAmmo(WEAPON_LASER))
+				SetActiveWeapon(WEAPON_LASER);
 			Input.m_TargetX = 0;
 			Input.m_TargetY = 1;
 			Input.m_Fire = 1;
@@ -5053,27 +5045,36 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 
 		m_DoGrenadeJump = false;
 
-		if((GetWeaponGot(WEAPON_GRENADE) && GetWeaponAmmo(WEAPON_GRENADE)) && (GameServer()->m_pController->m_IsInstagibKZ || m_Health >= 10 || (m_Health >= 5 && m_Armor >= 5)))
+		if(((GetWeaponGot(WEAPON_GRENADE) && GetWeaponAmmo(WEAPON_GRENADE)) || (g_Config.m_SvLaserJump && GetWeaponGot(WEAPON_LASER) && GetWeaponAmmo(WEAPON_LASER))) && (GameServer()->m_pController->m_IsInstagibKZ || m_Health >= 10 || (m_Health >= 5 && m_Armor >= 5)))
 		{
-			if(m_Core.m_Jumps > 0 && TargetPos.x > m_Pos.x - 300.f && TargetPos.x < m_Pos.x + 300.f && TargetPos.y < m_Pos.y - 400.f && IsGrounded() && !Collision()->FastIntersectLine(m_Pos,m_Pos + vec2(0.f,-300.f),nullptr,nullptr))
+			if(m_Core.m_Jumps > 0 && TargetPos.x > m_Pos.x - 300.f && TargetPos.x < m_Pos.x + 300.f && TargetPos.y < m_Pos.y - 150.f && IsGrounded() && !Collision()->FastIntersectLine(m_Pos,m_Pos + vec2(0.f,-300.f),nullptr,nullptr))
 			{
 				m_DoGrenadeJump = true;
 				Input.m_Jump = true;
-				SetActiveWeapon(WEAPON_GRENADE);
+				if(GetWeaponGot(WEAPON_GRENADE) && GetWeaponAmmo(WEAPON_GRENADE))
+					SetActiveWeapon(WEAPON_GRENADE);
+				else if(g_Config.m_SvLaserJump && GetWeaponGot(WEAPON_LASER) && GetWeaponAmmo(WEAPON_LASER))
+					SetActiveWeapon(WEAPON_LASER);
 			}
 			else if(TargetPos.x < m_Pos.x - 700.f && IsGrounded() && !Collision()->FastIntersectLine(m_Pos,m_Pos + vec2(-300.f,0.f),nullptr,nullptr))
 			{
 				Input.m_TargetX = 1;
 				Input.m_TargetY = 1;
 				Input.m_Fire = 1;
-				SetActiveWeapon(WEAPON_GRENADE);
+				if(GetWeaponGot(WEAPON_GRENADE) && GetWeaponAmmo(WEAPON_GRENADE))
+					SetActiveWeapon(WEAPON_GRENADE);
+				else if(g_Config.m_SvLaserJump && GetWeaponGot(WEAPON_LASER) && GetWeaponAmmo(WEAPON_LASER))
+					SetActiveWeapon(WEAPON_LASER);
 			}
 			else if(TargetPos.x > m_Pos.x + 700.f && IsGrounded() && !Collision()->FastIntersectLine(m_Pos,m_Pos + vec2(300.f,0.f),nullptr,nullptr))
 			{
 				Input.m_TargetX = -1;
 				Input.m_TargetY = 1;
 				Input.m_Fire = 1;
-				SetActiveWeapon(WEAPON_GRENADE);
+				if(GetWeaponGot(WEAPON_GRENADE) && GetWeaponAmmo(WEAPON_GRENADE))
+					SetActiveWeapon(WEAPON_GRENADE);
+				else if(g_Config.m_SvLaserJump && GetWeaponGot(WEAPON_LASER) && GetWeaponAmmo(WEAPON_LASER))
+					SetActiveWeapon(WEAPON_LASER);
 			}
 		}
 	}
@@ -5107,8 +5108,8 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 	{
 		vec2 right,left;
 
-		Collision()->FastIntersectLine(m_Pos,m_Pos + vec2(1000.f,0.f),&right,nullptr);
-		Collision()->FastIntersectLine(m_Pos,m_Pos + vec2(-1000.f,0.f),&left,nullptr);
+		Collision()->FastIntersectLine(m_Pos,m_Pos + vec2(1000.f,1000.f),&right,nullptr);
+		Collision()->FastIntersectLine(m_Pos,m_Pos + vec2(-1000.f,1000.f),&left,nullptr);
 
 		float rightlength = right.x - m_Pos.x;
 		float leftlength = m_Pos.x - left.x;
