@@ -5039,6 +5039,40 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 			if(m_DontDoSmartTargetChase > 0)
 				m_DontDoSmartTargetChase--;
 		}
+
+		if(m_DoGrenadeJump && (GetWeaponGot(WEAPON_GRENADE) && GetWeaponAmmo(WEAPON_GRENADE)))
+		{
+			SetActiveWeapon(WEAPON_GRENADE);
+			Input.m_TargetX = 0;
+			Input.m_TargetY = 1;
+			Input.m_Fire = 1;
+		}
+
+		m_DoGrenadeJump = false;
+
+		if((GetWeaponGot(WEAPON_GRENADE) && GetWeaponAmmo(WEAPON_GRENADE)) && (GameServer()->m_pController->m_IsInstagibKZ || m_Health >= 10 || (m_Health >= 5 && m_Armor >= 5)))
+		{
+			if(m_Core.m_Jumps > 0 && TargetPos.x > m_Pos.x - 300.f && TargetPos.x < m_Pos.x + 300.f && TargetPos.y < m_Pos.y - 400.f && IsGrounded() && !Collision()->FastIntersectLine(m_Pos,m_Pos + vec2(0.f,-300.f),nullptr,nullptr))
+			{
+				m_DoGrenadeJump = true;
+				Input.m_Jump = true;
+				SetActiveWeapon(WEAPON_GRENADE);
+			}
+			else if(TargetPos.x < m_Pos.x - 700.f && IsGrounded() && !Collision()->FastIntersectLine(m_Pos,m_Pos + vec2(-300.f,0.f),nullptr,nullptr))
+			{
+				Input.m_TargetX = 1;
+				Input.m_TargetY = 1;
+				Input.m_Fire = 1;
+				SetActiveWeapon(WEAPON_GRENADE);
+			}
+			else if(TargetPos.x > m_Pos.x + 700.f && IsGrounded() && !Collision()->FastIntersectLine(m_Pos,m_Pos + vec2(300.f,0.f),nullptr,nullptr))
+			{
+				Input.m_TargetX = -1;
+				Input.m_TargetY = 1;
+				Input.m_Fire = 1;
+				SetActiveWeapon(WEAPON_GRENADE);
+			}
+		}
 	}
 	
 	if(m_TryingDirectionSmart && !Collision()->FastIntersectLine(m_Pos,TargetPos,nullptr,nullptr))
@@ -5065,12 +5099,35 @@ void CCharacter::DoKZBotAI(CNetObj_PlayerInput &Input)
 			m_TryingOppositeSmart = false;
 		}
 	}
+
+	if(!m_Core.m_Jumps && !Collision()->FastIntersectLine(m_Pos,m_Pos + vec2(0.f,1000.f),nullptr,nullptr))
+	{
+		vec2 right,left;
+
+		Collision()->FastIntersectLine(m_Pos,m_Pos + vec2(1000.f,0.f),&right,nullptr);
+		Collision()->FastIntersectLine(m_Pos,m_Pos + vec2(-1000.f,0.f),&left,nullptr);
+
+		float rightlength = right.x - m_Pos.x;
+		float leftlength = m_Pos.x - left.x;
+
+		if(rightlength == leftlength)
+		{
+			Input.m_Direction = 0;
+		}
+		else if(rightlength > leftlength)
+		{
+			Input.m_Direction = -1;
+		}
+		else
+		{
+			Input.m_Direction = 1;
+		}
+	}
 	
 	
 	//HELP
-	if((jumpifgoingtofall ? !(Collision()->FastIntersectLine(m_Pos,m_Pos + vec2(0.f,1000.f),nullptr,nullptr)) : false) || (butjumpifwall ? m_Core.m_Colliding : false) || (!dontjump && ((Collision()->GetCollisionAt(m_Pos.x , m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH) || !Collision()->FastIntersectLine(m_Pos,m_Pos + vec2(0.f,1000.f),nullptr,nullptr) || m_Core.m_Colliding || (((Collision()->CheckPoint(m_Pos.x + GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)) && !(Collision()->CheckPoint(m_Pos.x - GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)))) || ((!(Collision()->CheckPoint(m_Pos.x + GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)) && (Collision()->CheckPoint(m_Pos.x - GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)))) || targetisup)))
+	if(!m_DoGrenadeJump && ((jumpifgoingtofall ? !(Collision()->FastIntersectLine(m_Pos,m_Pos + vec2(0.f,1000.f),nullptr,nullptr)) : false) || (butjumpifwall ? m_Core.m_Colliding : false) || (!dontjump && ((Collision()->GetCollisionAt(m_Pos.x , m_Pos.y + GetProximityRadius() / 3.f) == TILE_DEATH) || !Collision()->FastIntersectLine(m_Pos,m_Pos + vec2(0.f,1000.f),nullptr,nullptr) || m_Core.m_Colliding || (((Collision()->CheckPoint(m_Pos.x + GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)) && !(Collision()->CheckPoint(m_Pos.x - GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)))) || ((!(Collision()->CheckPoint(m_Pos.x + GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)) && (Collision()->CheckPoint(m_Pos.x - GetProximityRadius() / 2, m_Pos.y + GetProximityRadius() / 2 + 5)))) || targetisup))))
 	{
-		
 		if(IsGrounded() || (m_Core.m_Jumps > 0 && m_Core.m_Vel.y > 0))
 			Input.m_Jump = true;
 		else

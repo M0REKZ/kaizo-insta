@@ -367,6 +367,7 @@ public:
 	bool m_TryingOppositeSmart = false;
 	bool m_StopUntilTouchGround = false;
 	int m_DontDoSmartTargetChase = 0;
+	bool m_DoGrenadeJump = false;
 	
 	//for Pointer's bots AI:
 	int m_botAggroPointer = -1;

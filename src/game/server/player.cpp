@@ -39,8 +39,35 @@ CPlayer::CPlayer(CGameContext *pGameServer, uint32_t UniqueClientId, int ClientI
 		str_copy(m_TeeInfos.m_aSkinName, "0_Cyborg Greyfox_KZ", sizeof(m_TeeInfos.m_aSkinName));
 		for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 		{
-			if(p==1 || p==2) //those must be ""
+			m_TeeInfos.m_aUseCustomColors[p] = true;
+
+			if(p==0)
+			{
+				str_copy(m_TeeInfos.m_apSkinPartNames[p], "fox", sizeof(m_TeeInfos.m_apSkinPartNames[p]));
+				m_TeeInfos.m_aSkinPartColors[p] = 1769560;
 				continue;
+			}
+
+			if(p==1)
+			{
+				str_copy(m_TeeInfos.m_apSkinPartNames[p], "warpaint", sizeof(m_TeeInfos.m_apSkinPartNames[p]));
+				m_TeeInfos.m_aSkinPartColors[p] = 4278190080;
+				continue;
+			}
+			
+			if(p==2)
+			{
+				str_copy(m_TeeInfos.m_apSkinPartNames[p], "hair", sizeof(m_TeeInfos.m_apSkinPartNames[p]));
+				continue;
+			}
+
+			if(p==5)
+			{
+				str_copy(m_TeeInfos.m_apSkinPartNames[p], "negative", sizeof(m_TeeInfos.m_apSkinPartNames[p]));
+				m_TeeInfos.m_aSkinPartColors[p] = 65408;
+				continue;
+			}
+			
 
 			str_copy(m_TeeInfos.m_apSkinPartNames[p], "standard", sizeof(m_TeeInfos.m_apSkinPartNames[p]));
         }
@@ -417,6 +444,8 @@ void CPlayer::Snap(int SnappingClient)
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_ADMIN;
 		if(!GameServer()->m_pController->IsPlayerReadyMode() || m_IsReadyToPlay)
 			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_READY;
+		if(((CServer*)Server())->m_aClients[m_ClientId].m_KZBot) //+KZ
+			pPlayerInfo->m_PlayerFlags |= protocol7::PLAYERFLAG_BOT;
 
 		// Times are in milliseconds for 0.7
 		pPlayerInfo->m_Score = Score; // ddnet-insta moved milliseconds code to SnapPlayerScore()
