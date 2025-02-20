@@ -2777,6 +2777,12 @@ if(SERVER)
     entities/kz/helicopter.h
     entities/kz/jet.cpp
     entities/kz/jet.h
+    entities/kz/kz_bot_ai/base_ai.cpp
+    entities/kz/kz_bot_ai/base_ai.h
+    entities/kz/kz_bot_ai/kz_ai.cpp
+    entities/kz/kz_bot_ai/kz_ai.h
+    entities/kz/kz_bot_ai/pointer_ai.cpp
+    entities/kz/kz_bot_ai/pointer_ai.h
     entity.cpp
     entity.h
     eventhandler.cpp

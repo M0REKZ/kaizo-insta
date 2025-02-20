@@ -6,11 +6,13 @@
 #include <game/server/entity.h>
 #include <game/server/save.h>
 #include <game/kztiles.h>
+#include <game/server/entities/kz/kz_bot_ai/base_ai.h>
 
 class CGameTeams;
 class CGameWorld;
 class IAntibot;
 struct CAntibotCharacterData;
+class CBaseKZBotAI;
 
 enum
 {
@@ -309,10 +311,6 @@ private:
 	bool m_PortalReset = false;
 	
 public:
-	void HandleKZBot(CNetObj_PlayerInput &Input);
-	void DoKZBotAI(CNetObj_PlayerInput &Input);
-	void DoPointerBotAI(CNetObj_PlayerInput &Input);
-	
 	void DoKZDamage(vec2 Force, int Dmg, int From, int Weapon);
 	bool InWater() { return m_Water; }
 	bool Invisible() { return m_Invisible; }
@@ -361,18 +359,15 @@ public:
 	int m_aCustomWeaponSnaps[KZ_NUM_CUSTOM_WEAPONS - KZ_CUSTOM_WEAPON_START];
 	int m_aCustomWeaponAmmo[KZ_NUM_CUSTOM_WEAPONS - KZ_CUSTOM_WEAPON_START];
 	int m_aCustomWeaponMaxAmmo[KZ_NUM_CUSTOM_WEAPONS - KZ_CUSTOM_WEAPON_START];
-	
-	//for +KZ AI:
-	int m_TryingDirectionSmart = 0;
-	bool m_TryingOppositeSmart = false;
-	bool m_StopUntilTouchGround = false;
-	int m_DontDoSmartTargetChase = 0;
-	bool m_DoGrenadeJump = false;
-	
-	//for Pointer's bots AI:
-	int m_botAggroPointer = -1;
-	int m_ticksSinceFirePointer = 0;
-	int m_botDirectionPointer = 1;
+
+	//+KZ for bot AI:
+	void HandleKZBot(CNetObj_PlayerInput &Input);
+	CBaseKZBotAI* m_pKZBotAI = nullptr;
+
+	int GetHealth() { return m_Health; }
+	int GetArmor() { return m_Armor; }
+	CNetObj_PlayerInput GetLatestInput() { return m_LatestInput; }
+
 };
 
 enum
