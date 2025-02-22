@@ -128,6 +128,12 @@ CCharacter::~CCharacter()
 	{
 		Server()->SnapFreeId(m_CursorId[1]);
 	}
+
+	if(m_pKZBotAI)
+	{
+		delete m_pKZBotAI;
+		m_pKZBotAI = nullptr;
+	}
 }
 
 void CCharacter::Reset()
