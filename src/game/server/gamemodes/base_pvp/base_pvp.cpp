@@ -1,3 +1,4 @@
+#include <base/log.h>
 #include <base/system.h>
 #include <engine/server/server.h>
 #include <engine/shared/config.h>
@@ -33,7 +34,7 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	GameServer()->Tuning()->Set("shotgun_speed", 2750);
 	GameServer()->Tuning()->Set("shotgun_speeddiff", 0.8f);
 
-	dbg_msg("ddnet-insta", "connecting to database ...");
+	log_info("ddnet-insta", "connecting to database ...");
 	// set the stats table to the gametype name in all lowercase
 	// if you want to track stats in a sql database for that gametype
 	m_pStatsTable = "";
@@ -59,7 +60,7 @@ void CGameControllerPvp::OnInit()
 
 void CGameControllerPvp::OnRoundStart()
 {
-	dbg_msg(
+	log_debug(
 		"ddnet-insta",
 		"new round start! Current game state: %s",
 		GameStateToStr(GameState()));
@@ -91,7 +92,7 @@ void CGameControllerPvp::OnRoundStart()
 	// round end is too early because then players do not see the final scoreboard
 	if(g_Config.m_SvRedirectAndShutdownOnRoundEnd)
 	{
-		for(int i = 0; i < MAX_CLIENTS; i++)
+		for(int i = 0; i < Server()->MaxClients(); i++)
 			if(Server()->ClientIngame(i))
 				Server()->RedirectClient(i, g_Config.m_SvRedirectAndShutdownOnRoundEnd);
 
@@ -302,6 +303,8 @@ int CGameControllerPvp::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer, in
 		return pPlayer->m_SavedStats.m_BestSpree;
 	case EDisplayScore::CURRENT_SPREE:
 		return pPlayer->Spree();
+	case EDisplayScore::WIN_POINTS:
+		return pPlayer->m_SavedStats.m_WinPoints;
 	case EDisplayScore::WINS:
 		return pPlayer->m_SavedStats.m_Wins;
 	case EDisplayScore::KILLS:
@@ -595,7 +598,8 @@ void CGameControllerPvp::SaveStatsOnRoundEnd(CPlayer *pPlayer)
 		if(Won)
 		{
 			pPlayer->m_Stats.m_Wins++;
-			pPlayer->m_Stats.m_Points += PointsForWin(pPlayer);
+			pPlayer->m_Stats.m_Points++;
+			pPlayer->m_Stats.m_WinPoints += WinPointsForWin(pPlayer);
 		}
 		if(Lost)
 			pPlayer->m_Stats.m_Losses++;
@@ -913,12 +917,32 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 {
 	CGameControllerDDRace::OnCharacterDeath(pVictim, pKiller, Weapon);
 
+	if(pVictim->HasRainbow())
+		pVictim->Rainbow(false);
+
+	// this is the vanilla base default respawn delay
+	// it can not be configured
+	// but it will overwritten by configurable delays in almost all cases
+	// so this only a fallback
+	int DelayInMs = 500;
+
+	if(Weapon == WEAPON_SELF)
+		DelayInMs = g_Config.m_SvSelfKillRespawnDelayMs;
+	else if(Weapon == WEAPON_WORLD)
+		DelayInMs = g_Config.m_SvWorldKillRespawnDelayMs;
+	else if(Weapon == WEAPON_GAME)
+		DelayInMs = g_Config.m_SvGameKillRespawnDelayMs;
+	else if(pKiller && pVictim->GetPlayer() != pKiller)
+		DelayInMs = g_Config.m_SvEnemyKillRespawnDelayMs;
+	else if(pKiller && pVictim->GetPlayer() == pKiller)
+		DelayInMs = g_Config.m_SvSelfDamageRespawnDelayMs;
+
+	int DelayInTicks = (int)(Server()->TickSpeed() * ((float)DelayInMs / 1000.0f));
+	pVictim->GetPlayer()->m_RespawnTick = Server()->Tick() + DelayInTicks;
+
 	// do scoreing
 	if(!pKiller || Weapon == WEAPON_GAME)
 		return 0;
-
-	if(Weapon == WEAPON_SELF)
-		pVictim->GetPlayer()->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() * 3.0f;
 
 	// never count score or win rounds in ddrace teams
 	if(GameServer()->GetDDRaceTeam(pKiller->GetCid()))
@@ -929,22 +953,16 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 	const bool SelfKill = pKiller == pVictim->GetPlayer();
 	const bool SuicideOrWorld = Weapon == WEAPON_SELF || Weapon == WEAPON_WORLD || SelfKill;
 
-	// zCatch score can never be decremented
-	// and only be incremented by wins
-	// https://github.com/ddnet-insta/ddnet-insta/issues/191
-	if(!IsZcatchGameType())
+	if(SuicideOrWorld)
 	{
-		if(SuicideOrWorld)
-		{
-			pVictim->GetPlayer()->DecrementScore();
-		}
+		pVictim->GetPlayer()->DecrementScore();
+	}
+	else
+	{
+		if(IsTeamPlay() && pVictim->GetPlayer()->GetTeam() == pKiller->GetTeam())
+			pKiller->DecrementScore(); // teamkill
 		else
-		{
-			if(IsTeamPlay() && pVictim->GetPlayer()->GetTeam() == pKiller->GetTeam())
-				pKiller->DecrementScore(); // teamkill
-			else
-				pKiller->IncrementScore(); // normal kill
-		}
+			pKiller->IncrementScore(); // normal kill
 	}
 
 	// update spectator modes for dead players in survival
@@ -1173,6 +1191,9 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 		if(!m_IsVanillaGameType || Weapon != WEAPON_SHOTGUN)
 			Character.GetPlayer()->UpdateLastToucher(From);
 	}
+
+	if(Character.m_FreezeTime && Weapon == WEAPON_LASER)
+		Character.UnFreeze();
 
 	CPlayer *pPlayer = Character.GetPlayer();
 	if(Character.m_IsGodmode)

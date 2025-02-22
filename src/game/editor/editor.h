@@ -470,7 +470,7 @@ public:
 		m_SpeedupAngle = 0;
 		m_LargeLayerWasWarned = false;
 		m_PreventUnusedTilesWasWarned = false;
-		m_AllowPlaceUnusedTiles = 0;
+		m_AllowPlaceUnusedTiles = EUnusedEntities::NOT_ALLOWED;
 		m_BrushDrawDestructive = true;
 
 		//+KZ
@@ -635,7 +635,16 @@ public:
 	int m_PopupEventWasActivated;
 	bool m_LargeLayerWasWarned;
 	bool m_PreventUnusedTilesWasWarned;
-	int m_AllowPlaceUnusedTiles;
+
+	enum class EUnusedEntities
+	{
+		ALLOWED_IMPLICIT = -1,
+		NOT_ALLOWED = 0,
+		ALLOWED_EXPLICIT = 1,
+	};
+	EUnusedEntities m_AllowPlaceUnusedTiles;
+	bool IsAllowPlaceUnusedTiles() const;
+
 	bool m_BrushDrawDestructive;
 
 	int m_Mentions = 0;

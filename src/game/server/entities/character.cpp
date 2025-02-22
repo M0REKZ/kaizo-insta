@@ -1486,9 +1486,7 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg, bool rollBack)
 	}
 
 	StopRecording();
-	if(GameServer()->m_pController->m_IsInstagibKZ || GameServer()->m_pController->IsVanillaGameType())
-		m_pPlayer->m_RespawnTick = Server()->Tick() + Server()->TickSpeed() / 2;
-	else
+	if(!(GameServer()->m_pController->m_IsInstagibKZ || GameServer()->m_pController->IsVanillaGameType()))
 		m_pPlayer->m_RespawnTick = Server()->Tick();
 	int ModeSpecial = GameServer()->m_pController->OnCharacterDeath(this, (Killer < 0) ? nullptr : GameServer()->m_apPlayers[Killer], Weapon);
 

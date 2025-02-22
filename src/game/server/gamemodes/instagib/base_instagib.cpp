@@ -29,6 +29,9 @@ int CGameControllerInstagib::SnapGameInfoExFlags(int SnappingClient, int DDRaceF
 
 bool CGameControllerInstagib::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
+	if(Character.m_FreezeTime && Weapon == WEAPON_LASER)
+		Character.UnFreeze();
+
 	if(From == Character.GetPlayer()->GetCid())
 	{
 		// Give back ammo on grenade self push

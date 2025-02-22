@@ -294,7 +294,7 @@ bool CGameControllerPvp::OnBangCommand(int ClientId, const char *pCmd, int NumAr
 	if(SetSlots != -1)
 	{
 		char aCmd[512];
-		str_format(aCmd, sizeof(aCmd), "sv_spectator_slots %d", MAX_CLIENTS - (SetSlots * 2));
+		str_format(aCmd, sizeof(aCmd), "sv_spectator_slots %d", Server()->MaxClients() - (SetSlots * 2));
 		char aDesc[512];
 		str_format(aDesc, sizeof(aDesc), "%dvs%d", SetSlots, SetSlots);
 		GameServer()->BangCommandVote(ClientId, aCmd, aDesc);
@@ -391,6 +391,9 @@ bool CGameControllerPvp::OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, i
 
 	if(IsChatBlocked(pMsg, Length, Team, pPlayer))
 		return true;
+
+	if(!pMsg->m_Team && !AllowPublicChat(pPlayer) && Server()->GetAuthedState(pPlayer->GetCid()))
+		GameServer()->SendChatTarget(pPlayer->GetCid(), "To use public chat use the rcon command 'chat'");
 
 	if(pMsg->m_Team || !AllowPublicChat(pPlayer))
 		Team = ((pPlayer->GetTeam() == TEAM_SPECTATORS) ? TEAM_SPECTATORS : pPlayer->GetTeam()); // ddnet-insta
