@@ -1512,6 +1512,8 @@ void CGameControllerPvp::OnPlayerDisconnect(class CPlayer *pPlayer, const char *
 			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::FLAG_SIX);
 		else if(g_Config.m_SvTournamentJoinMsgs == 2)
 			SendChatSpectators(aBuf, CGameContext::FLAG_SIX);
+		
+		GameServer()->SendDiscordChatMessage(-1,aBuf);
 
 		str_format(aBuf, sizeof(aBuf), "leave player='%d:%s'", ClientId, Server()->ClientName(ClientId));
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
