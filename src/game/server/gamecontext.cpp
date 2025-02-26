@@ -2354,6 +2354,9 @@ void CGameContext::OnSayNetMessage(const CNetMsg_Cl_Say *pMsg, int ClientId, con
 		m_apPlayers[ClientId]->m_MsgBotCount++;
 	}
 
+	if(str_find_nocase(pMsg->m_pMessage, "rq") || str_find_nocase(pMsg->m_pMessage,"rage"))
+		pPlayer->m_RageQuitTick = Server()->Tick();
+
 	// drop empty and autocreated spam messages (more than 32 characters per second)
 	if(Length == 0 || (pMsg->m_pMessage[0] != '/' && (g_Config.m_SvSpamprotection && pPlayer->m_LastChat && pPlayer->m_LastChat + Server()->TickSpeed() * ((31 + Length) / 32) > Server()->Tick())))
 		return;
@@ -5800,8 +5803,8 @@ bool CGameContext::CheckBotPointer(int ClientID, const char* msg)
 	if (fancy_count > 3)
 		count += 2;
 	// general needles to disallow
-	const char* disallowedStrings[] = {"krx", "discord.gg", "http", "free", "bot client", "cheat client"};
-	for (int i = 0; i < 6; i++) {
+	const char* disallowedStrings[] = {"krx", "discord.gg", "http", "free", "bot client", "cheat", ".xyz"};
+	for (int i = 0; i < 7; i++) {
 		if (str_find_nocase(msg, disallowedStrings[i]))
 			count++;
 	}
