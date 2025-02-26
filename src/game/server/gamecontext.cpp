@@ -6602,15 +6602,18 @@ void CGameContext::SendDiscordChatMessage(int ClientID, const char* msg)
 {
 	char aPayload[4048];
 	char aStatsStr[4000];
-	char pStr[275];
-	pStr[0] = '\0';
-	str_format(pStr, sizeof(pStr),"%s: %s",Server()->ClientName(ClientID),msg);
+	char aStr[275];
+	aStr[0] = '\0';
+	if(CheckClientId2(ClientID))
+		str_format(aStr, sizeof(aStr),"%s: %s",Server()->ClientName(ClientID),msg);
+	else
+		str_format(aStr, sizeof(aStr),"%s: %s","Server",msg);
 
 	str_format(
 		aPayload,
 		sizeof(aPayload),
 		"{\"allowed_mentions\": {\"parse\": []}, \"content\": \"%s\"}",
-		EscapeJson(aStatsStr, sizeof(aStatsStr), pStr));
+		EscapeJson(aStatsStr, sizeof(aStatsStr), aStr));
 	const int PayloadSize = str_length(aPayload);
 	// TODO: use HttpPostJson()
 	std::shared_ptr<CHttpRequest> pDiscord = HttpPost(g_Config.m_SvChatDiscordWebhook, (const unsigned char *)aPayload, PayloadSize);

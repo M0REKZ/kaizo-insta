@@ -1435,6 +1435,7 @@ void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 		char aBuf[512];
         str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s using a %s client", Server()->ClientName(ClientId),
                     GetTeamName(pPlayer->GetTeam()), !Server()->IsSixup(ClientId) ? "0.6" : "0.7");
+		GameServer()->SendDiscordChatMessage(-1,aBuf);
 		//str_format(aBuf, sizeof(aBuf), "'%s' entered and joined the %s", Server()->ClientName(ClientId), GetTeamName(pPlayer->GetTeam()));
 		if(!g_Config.m_SvTournamentJoinMsgs || pPlayer->GetTeam() != TEAM_SPECTATORS)
 			GameServer()->SendChat(-1, TEAM_ALL, aBuf, -1, CGameContext::FLAG_SIX);
