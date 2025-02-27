@@ -30,13 +30,10 @@ All DDNet-Insta gamemodes and also EXTRA GAMEMODES like:
 
 # Project goals
 
-- Stay close and up to date with upstream ddnet. Keep the git diff in files edited by ddnet as minimal as possible to keep merging cheap.
+- Stay close and up to date with upstream ddnet
 - Be generic, consistent and configurable. If possible the same config variables and concepts should be applied to all gametypes.
   For example configs such as anticamper should not be ``sv_zcatch_anticamper`` but ``sv_anticamper`` and work in all gametypes.
 - Support latest ddnet and teeworlds clients fully and correctly.
-- Be friendly to downstream projects. Commits and releases should warn about breaking changes.
-  Downstream projects should have an easy time to add new gametypes that can be updated to new ddnet-insta versions
-  without a lot of effort.
 
 # Features
 
