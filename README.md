@@ -39,6 +39,7 @@ All DDNet-Insta gamemodes and also EXTRA GAMEMODES like:
 
 * All DDNet-Insta features and:
 * Moving Tiles
+* Vehicles
 * Killing plasma turrets
   <br><img src="https://m0rekz.github.io/Kaizo-insta/turretplasma.webp" height="200px"></img>
 * Killing rotating laser
