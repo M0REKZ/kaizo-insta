@@ -291,6 +291,7 @@ void CGameControllerDDNetKZ::OnPlayerDisconnect(CPlayer *pPlayer, const char *pR
 	m_InvalidateConnectedIpsCache = true;
 	
 	int ClientId = pPlayer->GetCid();
+	pPlayer->OnDisconnect();
 	if(Server()->ClientIngame(ClientId))
 	{
 		char aBuf[512];
