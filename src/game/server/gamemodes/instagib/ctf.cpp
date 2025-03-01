@@ -166,9 +166,9 @@ bool CGameControllerInstaBaseCTF::OnEntity(int Index, int x, int y, int Layer, i
 
 	const vec2 Pos(x * 32.0f + 16.0f, y * 32.0f + 16.0f);
 	int Team = -1;
-	if(Index == ENTITY_FLAGSTAND_RED)
+	if(g_Config.m_SvSwapFlags ? Index == ENTITY_FLAGSTAND_BLUE : Index == ENTITY_FLAGSTAND_RED)
 		Team = TEAM_RED;
-	if(Index == ENTITY_FLAGSTAND_BLUE)
+	if(g_Config.m_SvSwapFlags ? Index == ENTITY_FLAGSTAND_RED : Index == ENTITY_FLAGSTAND_BLUE)
 		Team = TEAM_BLUE;
 	
 	//twplus begin +KZ
