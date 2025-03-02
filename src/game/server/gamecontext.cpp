@@ -5803,8 +5803,8 @@ bool CGameContext::CheckBotPointer(int ClientID, const char* msg)
 	if (fancy_count > 3)
 		count += 2;
 	// general needles to disallow
-	const char* disallowedStrings[] = {"krx", "discord.gg", "http", "free", "bot client", "cheat", ".xyz"};
-	for (int i = 0; i < 7; i++) {
+	const char* disallowedStrings[] = {"krx", "discord.gg", "http", "free", "bot client", "cheat", ".xyz", "t.me", "hack", "porn", "ЧИТЫ", "читы"};
+	for (int i = 0; i < 12; i++) {
 		if (str_find_nocase(msg, disallowedStrings[i]))
 			count++;
 	}
