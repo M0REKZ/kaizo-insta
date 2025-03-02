@@ -48,6 +48,20 @@ public:
 	 * zCatch                                                          *
 	 *******************************************************************/
 
+	// used only for zcatch! do not use anywhere else.
+	// the name is misleading
+	// it will not be set on every spawn
+	// only on spawns during active zcatch rounds
+	// if it is a release game the value will be zero
+	int m_AliveSinceTick = 0;
+
+	// used only for zcatch! do not use anywhere else.
+	// the name is misleading
+	// it will not be set on every death
+	// only on deaths during active zcatch rounds
+	// if it is a release game the value will be zero
+	int m_DeadSinceTick = 0;
+
 	// Will be -1 when the player is alive
 	int m_KillerId = -1;
 
@@ -125,8 +139,6 @@ public:
 	 *******************************************************************/
 	// see also m_LastToucherId
 	int m_OriginalFreezerId = -1;
-	// amount of seconds to freeze on next spawn
-	int m_FreezeOnSpawn = 0;
 
 	int m_Multi = 1;
 
@@ -136,13 +148,18 @@ public:
 	/*******************************************************************
 	 * shared                                                          *
 	 *******************************************************************/
-	//Anticamper
+	// anticamper
 	bool m_SentCampMsg;
 	int m_CampTick;
 	vec2 m_CampPos;
 	
 	bool m_ForceAFK; //+KZ
 	bool m_MenuAFK;
+
+	// amount of seconds to freeze on next spawn
+	// used for sv_punish_freeze_disconnect
+	// useful for fng and modes with anticamper
+	int m_FreezeOnSpawn = 0;
 
 	// fng and block
 	int m_LastToucherId = -1;

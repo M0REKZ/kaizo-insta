@@ -203,6 +203,16 @@ public:
 	virtual bool OnChangeInfoNetMessage(const CNetMsg_Cl_ChangeInfo *pMsg, int ClientId) { return false; }
 
 	/*
+		Function: OnSkinChange7
+			gets run if a 0.7 client requested a skin change
+			after spam protection check
+
+		Returns:
+			return true to skip the default behavior and consume the event
+	*/
+	virtual bool OnSkinChange7(protocol7::CNetMsg_Cl_SkinChange *pMsg, int ClientId) { return false; }
+
+	/*
 		Function: OnSetTeamNetMessage
 			hooks into CGameContext::OnSetTeamNetMessage()
 			before any spam protection check
@@ -524,6 +534,21 @@ public:
 	virtual int SnapTimeLimit(int SnappingClient);
 
 	/*
+		Function: GetCarriedFlag
+			Returns the type of flag the given player is currently carrying.
+			Flag refers here to a CTF gametype flag which is either red, blue or none.
+
+		Arguments:
+			pPlayer - player to check
+
+		Returns:
+			FLAG_NONE -1
+			FLAG_RED  0
+			FLAG_BLUE 2
+	*/
+	virtual int GetCarriedFlag(class CPlayer *pPlayer);
+
+	/*
 		Function: InitPlayer
 			Called once for every new CPlayer object that is being constructed
 			is only called when a new player connects
@@ -774,6 +799,9 @@ public:
 
 	// get client id by in game name
 	int GetCidByName(const char *pName);
+
+	// only used in ctf gametypes
+	class CFlag *m_apFlags[NUM_FLAGS];
 
 	CSqlStats *m_pSqlStats = nullptr;
 	const char *m_pStatsTable = "";

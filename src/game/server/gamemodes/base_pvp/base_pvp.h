@@ -25,6 +25,8 @@ public:
 	void OnPlayerTick(class CPlayer *pPlayer);
 	void OnCharacterTick(class CCharacter *pChr);
 
+	bool CanSpawn(int Team, vec2 *pOutPos, int DDTeam) override;
+	bool BlockFirstShotOnSpawn(class CCharacter *pChr, int Weapon) const;
 	void SendChatSpectators(const char *pMessage, int Flags);
 	void OnInit() override;
 	void OnPlayerConnect(CPlayer *pPlayer) override;
@@ -52,6 +54,7 @@ public:
 	void OnLoadedNameStats(const CSqlStatsPlayer *pStats, class CPlayer *pPlayer) override;
 	void OnClientDataPersist(CPlayer *pPlayer, CGameContext::CPersistentClientData *pData) override;
 	void OnClientDataRestore(CPlayer *pPlayer, const CGameContext::CPersistentClientData *pData) override;
+	bool OnSkinChange7(protocol7::CNetMsg_Cl_SkinChange *pMsg, int ClientId) override;
 
 	void ModifyWeapons(IConsole::IResult *pResult, void *pUserData, int Weapon, bool Remove);
 
@@ -172,5 +175,13 @@ public:
 		Checkout gctf/gctf.h gctf/gctf.cpp and gctf/sql_columns.h for an example
 	*/
 	CExtraColumns *m_pExtraColumns = nullptr;
+
+	// Used for sv_punish_freeze_disconnect
+	// restore freeze state on reconnect
+	// this is used for players trying to bypass
+	// getting frozen in fng or by anticamper
+	std::vector<NETADDR> m_vFrozenQuitters;
+	int64_t m_ReleaseAllFrozenQuittersTick = 0;
+	void RestoreFreezeStateOnRejoin(CPlayer *pPlayer);
 };
 #endif // GAME_SERVER_GAMEMODES_BASE_PVP_BASE_PVP_H

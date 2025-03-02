@@ -48,6 +48,8 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	// this contructor is not called on "restart" commands
 	if(g_Config.m_SvTournamentChatSmart)
 		g_Config.m_SvTournamentChat = 0;
+
+	m_vFrozenQuitters.clear();
 }
 
 void CGameControllerPvp::OnInit()
@@ -353,20 +355,25 @@ bool CGameControllerPvp::ForceNetworkClipping(const CEntity *pEntity, int Snappi
 	if(SnappingClient < 0 || SnappingClient >= MAX_CLIENTS)
 		return false;
 
-	const bool ForceDefaultView = !g_Config.m_SvAllowZoom && GameServer()->m_apPlayers[SnappingClient]->GetTeam() != TEAM_SPECTATORS;
+	CPlayer *pPlayer = GameServer()->m_apPlayers[SnappingClient];
+	const bool IsSpectator = pPlayer->GetTeam() == TEAM_SPECTATORS;
+	const bool ForceDefaultView = !g_Config.m_SvAllowZoom && !IsSpectator;
+
+	if(!ForceDefaultView && pPlayer->m_ShowAll)
+		return false;
 
 	// ddnet-insta: snap default if player is ingame
-	vec2 &ShowDistance = GameServer()->m_apPlayers[SnappingClient]->m_ShowDistance;
+	vec2 &ShowDistance = pPlayer->m_ShowDistance;
 
 	// https://github.com/teeworlds/teeworlds/blob/93f5bf632a3859e97d527fc93a26b6dced767fbc/src/game/server/entity.cpp#L44
 	if(ForceDefaultView)
 		ShowDistance = vec2(1000, 800);
 
-	float dx = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos.x - CheckPos.x;
+	float dx = pPlayer->m_ViewPos.x - CheckPos.x;
 	if(absolute(dx) > ShowDistance.x)
 		return true;
 
-	float dy = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos.y - CheckPos.y;
+	float dy = pPlayer->m_ViewPos.y - CheckPos.y;
 	return absolute(dy) > ShowDistance.y;
 }
 
@@ -377,10 +384,15 @@ bool CGameControllerPvp::ForceNetworkClippingLine(const CEntity *pEntity, int Sn
 	if(SnappingClient < 0 || SnappingClient >= MAX_CLIENTS)
 		return false;
 
-	const bool ForceDefaultView = !g_Config.m_SvAllowZoom && GameServer()->m_apPlayers[SnappingClient]->GetTeam() != TEAM_SPECTATORS;
+	CPlayer *pPlayer = GameServer()->m_apPlayers[SnappingClient];
+	const bool IsSpectator = pPlayer->GetTeam() == TEAM_SPECTATORS;
+	const bool ForceDefaultView = !g_Config.m_SvAllowZoom && !IsSpectator;
 
-	vec2 &ViewPos = GameServer()->m_apPlayers[SnappingClient]->m_ViewPos;
-	vec2 &ShowDistance = GameServer()->m_apPlayers[SnappingClient]->m_ShowDistance;
+	if(!ForceDefaultView && pPlayer->m_ShowAll)
+		return false;
+
+	vec2 &ViewPos = pPlayer->m_ViewPos;
+	vec2 &ShowDistance = pPlayer->m_ShowDistance;
 
 	// https://github.com/teeworlds/teeworlds/blob/93f5bf632a3859e97d527fc93a26b6dced767fbc/src/game/server/entity.cpp#L44
 	if(ForceDefaultView)
@@ -984,9 +996,9 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 		if(pKiller->GetCharacter() && pKiller != pVictim->GetPlayer())
 		{
 			AddSpree(pKiller);
-			if(g_Config.m_SvOnFireMode && Weapon == WEAPON_LASER)
+			if(g_Config.m_SvReloadTimeOnHit > 0 && Weapon == WEAPON_LASER && !IsFngGameType())
 			{
-				pKiller->GetCharacter()->m_ReloadTimer = 10;
+				pKiller->GetCharacter()->m_ReloadTimer = g_Config.m_SvReloadTimeOnHit;
 			}
 		}
 
@@ -1083,6 +1095,12 @@ void CGameControllerPvp::Tick()
 		Anticamper();
 	if(g_Config.m_SvTournamentChatSmart)
 		SmartChatTick();
+
+	if(m_ReleaseAllFrozenQuittersTick < Server()->Tick() && !m_vFrozenQuitters.empty())
+	{
+		log_info("ddnet-insta", "all freeze quitter punishments expired. cleaning up ...");
+		m_vFrozenQuitters.clear();
+	}
 
 	// win check
 	if((m_GameState == IGS_GAME_RUNNING || m_GameState == IGS_GAME_PAUSED) && !GameServer()->m_World.m_ResetRequested)
@@ -1311,6 +1329,37 @@ int CGameControllerPvp::GetDefaultWeaponBasedOnSpawnWeapons() const
 	return WEAPON_GUN;
 }
 
+bool CGameControllerPvp::CanSpawn(int Team, vec2 *pOutPos, int DDTeam)
+{
+	// spectators can't spawn
+	if(Team == TEAM_SPECTATORS)
+		return false;
+
+	CSpawnEval Eval;
+	if(IsTeamPlay()) // ddnet-insta
+	{
+		Eval.m_FriendlyTeam = Team;
+
+		// first try own team spawn, then normal spawn and then enemy
+		EvaluateSpawnType(&Eval, 1 + (Team & 1), DDTeam);
+		if(!Eval.m_Got)
+		{
+			EvaluateSpawnType(&Eval, 0, DDTeam);
+			if(!Eval.m_Got)
+				EvaluateSpawnType(&Eval, 1 + ((Team + 1) & 1), DDTeam);
+		}
+	}
+	else
+	{
+		EvaluateSpawnType(&Eval, 0, DDTeam);
+		EvaluateSpawnType(&Eval, 1, DDTeam);
+		EvaluateSpawnType(&Eval, 2, DDTeam);
+	}
+
+	*pOutPos = Eval.m_Pos;
+	return Eval.m_Got;
+}
+
 void CGameControllerPvp::OnCharacterSpawn(class CCharacter *pChr)
 {
 	OnCharacterConstruct(pChr);
@@ -1322,6 +1371,20 @@ void CGameControllerPvp::OnCharacterSpawn(class CCharacter *pChr)
 	pChr->IncreaseHealth(10);
 
 	pChr->GetPlayer()->UpdateLastToucher(-1);
+
+	if(pChr->GetPlayer()->m_FreezeOnSpawn)
+	{
+		pChr->Freeze(pChr->GetPlayer()->m_FreezeOnSpawn);
+		pChr->GetPlayer()->m_FreezeOnSpawn = 0;
+
+		char aBuf[512];
+		str_format(
+			aBuf,
+			sizeof(aBuf),
+			"'%s' spawned frozen because he quit while being frozen",
+			Server()->ClientName(pChr->GetPlayer()->GetCid()));
+		SendChat(-1, TEAM_ALL, aBuf);
+	}
 }
 
 void CGameControllerPvp::AddSpree(class CPlayer *pPlayer)
@@ -1415,6 +1478,39 @@ void CGameControllerPvp::OnClientDataRestore(CPlayer *pPlayer, const CGameContex
 {
 }
 
+bool CGameControllerPvp::OnSkinChange7(protocol7::CNetMsg_Cl_SkinChange *pMsg, int ClientId)
+{
+	CPlayer *pPlayer = GameServer()->m_apPlayers[ClientId];
+
+	CTeeInfo Info(pMsg->m_apSkinPartNames, pMsg->m_aUseCustomColors, pMsg->m_aSkinPartColors);
+	Info.FromSixup();
+
+	CTeeInfo OldInfo = pPlayer->m_TeeInfos;
+	pPlayer->m_TeeInfos = Info;
+
+	// restore old color
+	if(!IsSkinColorChangeAllowed())
+	{
+		for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+		{
+			pPlayer->m_TeeInfos.m_aSkinPartColors[p] = OldInfo.m_aSkinPartColors[p];
+			pPlayer->m_TeeInfos.m_aUseCustomColors[p] = OldInfo.m_aUseCustomColors[p];
+		}
+	}
+
+	protocol7::CNetMsg_Sv_SkinChange Msg;
+	Msg.m_ClientId = ClientId;
+	for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
+	{
+		Msg.m_apSkinPartNames[p] = pPlayer->m_TeeInfos.m_apSkinPartNames[p];
+		Msg.m_aSkinPartColors[p] = pPlayer->m_TeeInfos.m_aSkinPartColors[p];
+		Msg.m_aUseCustomColors[p] = pPlayer->m_TeeInfos.m_aUseCustomColors[p];
+	}
+
+	Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
+	return true;
+}
+
 void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 {
 	m_InvalidateConnectedIpsCache = true;
@@ -1460,10 +1556,34 @@ void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 		pPlayer->m_VerifiedForChat = true;
 	}
 
-	CheckReadyStates(); // ddnet-insta
+	CheckReadyStates();
+	SendGameInfo(ClientId); // update game info
+	RestoreFreezeStateOnRejoin(pPlayer);
+}
 
-	// update game info
-	SendGameInfo(ClientId);
+void CGameControllerPvp::RestoreFreezeStateOnRejoin(CPlayer *pPlayer)
+{
+	const NETADDR *pAddr = Server()->ClientAddr(pPlayer->GetCid());
+
+	bool Match = false;
+	int Index = -1;
+	for(const auto &Quitter : m_vFrozenQuitters)
+	{
+		Index++;
+		if(!net_addr_comp_noport(&Quitter, pAddr))
+		{
+			Match = true;
+			break;
+		}
+	}
+
+	if(Match)
+	{
+		log_info("ddnet-insta", "a frozen player rejoined removing slot %d (%zu left)", Index, m_vFrozenQuitters.size() - 1);
+		m_vFrozenQuitters.erase(m_vFrozenQuitters.begin() + Index);
+
+		pPlayer->m_FreezeOnSpawn = 20;
+	}
 }
 
 void CGameControllerPvp::SendChatSpectators(const char *pMessage, int Flags)
@@ -1487,6 +1607,26 @@ void CGameControllerPvp::OnPlayerDisconnect(class CPlayer *pPlayer, const char *
 {
 	if(GameState() != IGS_END_ROUND)
 		SaveStatsOnDisconnect(pPlayer);
+
+	while(true)
+	{
+		if(!g_Config.m_SvPunishFreezeDisconnect)
+			break;
+
+		CCharacter *pChr = pPlayer->GetCharacter();
+		if(!pChr)
+			break;
+		if(!pChr->m_FreezeTime)
+			break;
+
+		const NETADDR *pAddr = Server()->ClientAddr(pPlayer->GetCid());
+		m_vFrozenQuitters.emplace_back(*pAddr);
+
+		// frozen quit punishment expires after 5 minutes
+		// to avoid memory leaks
+		m_ReleaseAllFrozenQuittersTick = Server()->Tick() + Server()->TickSpeed() * 300;
+		break;
+	}
 
 	m_InvalidateConnectedIpsCache = true;
 	pPlayer->OnDisconnect();
@@ -1653,10 +1793,54 @@ void CGameControllerPvp::Anticamper()
 	}
 }
 
+bool CGameControllerPvp::BlockFirstShotOnSpawn(class CCharacter *pChr, int Weapon) const
+{
+	// WEAPON_GUN is not full auto
+	// this makes sure that vanilla gamemodes are not affected
+	// by any side effects that this fix might have
+	if(Weapon == WEAPON_GUN)
+		return false;
+
+	// if a player holds down the fire key forever
+	// we eventually activate the full auto weapon
+	int TicksAlive = Server()->Tick() - pChr->m_SpawnTick;
+	constexpr int HalfSecond = SERVER_TICK_SPEED / 2;
+	if(TicksAlive > HalfSecond)
+		return false;
+
+	// all the ddrace edge cases still apply
+	// except the ones that activate full auto for certain weapons
+	bool FullAuto = false;
+	if(pChr->m_Core.m_Jetpack && pChr->m_Core.m_ActiveWeapon == WEAPON_GUN)
+		FullAuto = true;
+	// allow firing directly after coming out of freeze or being unfrozen
+	// by something
+	if(pChr->m_FrozenLastTick)
+		FullAuto = true;
+
+	// check if we gonna fire
+	if(CountInput(pChr->m_LatestPrevInput.m_Fire, pChr->m_LatestInput.m_Fire).m_Presses)
+		return false;
+	if(FullAuto && (pChr->m_LatestInput.m_Fire & 1) && pChr->m_Core.m_aWeapons[pChr->m_Core.m_ActiveWeapon].m_Ammo)
+		return false;
+	return true;
+}
+
 bool CGameControllerPvp::OnFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos)
 {
 	if(Character.m_HasNoWeapon)
 		return false;
+	// https://github.com/ddnet-insta/ddnet-insta/issues/289
+	// left clicking during death screen can decrease the spawn delay
+	// but in modes where players spawn with full auto weapons such as
+	// grenade and laser this can fire a shot on spawn
+	//
+	// so this shot is intentionally blocked here
+	// to avoid messing with hit accuracy stats
+	// and also fix players doing potentially unwanted kills
+	// by just trying to respawn
+	if(BlockFirstShotOnSpawn(&Character, Weapon))
+		return true;
 
 	if(IsStatTrack() && Weapon != WEAPON_HAMMER)
 		Character.GetPlayer()->m_Stats.m_ShotsFired++;

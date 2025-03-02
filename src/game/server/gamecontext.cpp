@@ -1730,7 +1730,7 @@ void CGameContext::OnClientEnter(int ClientId)
 	protocol7::CNetMsg_Sv_ClientInfo NewClientInfoMsg;
 	NewClientInfoMsg.m_ClientId = ClientId;
 	NewClientInfoMsg.m_Local = 0;
-	NewClientInfoMsg.m_Team = pNewPlayer->GetTeam();
+	NewClientInfoMsg.m_Team = m_pController->GetPlayerTeam(pNewPlayer, true); // ddnet-insta
 	NewClientInfoMsg.m_pName = Server()->ClientName(ClientId);
 	NewClientInfoMsg.m_pClan = Server()->ClientClan(ClientId);
 	NewClientInfoMsg.m_Country = Server()->ClientCountry(ClientId);
@@ -2111,6 +2111,9 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 
 			pPlayer->m_LastChangeInfo = Server()->Tick();
 
+			if(m_pController->OnSkinChange7(pMsg, ClientId)) // ddnet-insta
+				return nullptr;
+
 			CTeeInfo Info(pMsg->m_apSkinPartNames, pMsg->m_aUseCustomColors, pMsg->m_aSkinPartColors);
 			Info.FromSixup();
 			pPlayer->m_TeeInfos = Info;
@@ -2120,12 +2123,8 @@ void *CGameContext::PreProcessMsg(int *pMsgId, CUnpacker *pUnpacker, int ClientI
 			for(int p = 0; p < protocol7::NUM_SKINPARTS; p++)
 			{
 				Msg.m_apSkinPartNames[p] = pMsg->m_apSkinPartNames[p];
-				// ddnet-insta
-				if(m_pController->IsSkinColorChangeAllowed())
-				{
-					Msg.m_aSkinPartColors[p] = pMsg->m_aSkinPartColors[p];
-					Msg.m_aUseCustomColors[p] = pMsg->m_aUseCustomColors[p];
-				}
+				Msg.m_aSkinPartColors[p] = pMsg->m_aSkinPartColors[p];
+				Msg.m_aUseCustomColors[p] = pMsg->m_aUseCustomColors[p];
 			}
 
 			Server()->SendPackMsg(&Msg, MSGFLAG_VITAL | MSGFLAG_NORECORD, -1);
