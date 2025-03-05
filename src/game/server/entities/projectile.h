@@ -50,6 +50,8 @@ private:
 	bool m_Freeze;
 	int m_TuneZone;
 	bool m_BelongsToPracticeTeam;
+	int m_DDRaceTeam;
+	bool m_IsSolo;
 	vec2 m_InitDir;
 
 	// ddnet-insta
@@ -63,6 +65,7 @@ public:
 	virtual int GetOwnerId() const override { return m_Owner; }
 	
 	int GetStartTick() { return m_StartTick; }
+	bool CanCollide(int ClientId) override;
 	bool m_FirstTick;
 	int m_OrigStartTick;
 	bool m_FirstSnap;

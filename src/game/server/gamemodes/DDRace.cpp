@@ -182,9 +182,9 @@ void CGameControllerDDRace::HandleCharacterQuad(CCharacter *pChr, CQuad *pQuad)
 	}
 }
 
-void CGameControllerDDRace::SetArmorProgress(CCharacter *pCharacer, int Progress)
+void CGameControllerDDRace::SetArmorProgress(CCharacter *pCharacter, int Progress)
 {
-	pCharacer->SetArmor(clamp(10 - (Progress / 15), 0, 10));
+	pCharacter->SetArmor(clamp(10 - (Progress / 15), 0, 10));
 }
 
 void CGameControllerDDRace::OnPlayerConnect(CPlayer *pPlayer)

@@ -50,6 +50,22 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 		g_Config.m_SvTournamentChat = 0;
 
 	m_vFrozenQuitters.clear();
+
+	m_UnbalancedTick = TBALANCE_OK;
+}
+
+void CGameControllerPvp::OnReset()
+{
+	CGameControllerDDRace::OnReset();
+
+	for(auto &pPlayer : GameServer()->m_apPlayers)
+	{
+		if(!pPlayer)
+			continue;
+
+		pPlayer->m_IsReadyToPlay = true;
+		pPlayer->m_ScoreStartTick = Server()->Tick();
+	}
 }
 
 void CGameControllerPvp::OnInit()
@@ -69,11 +85,12 @@ void CGameControllerPvp::OnRoundStart()
 
 	int StartGameState = GameState();
 
-	// ddnet-insta
 	m_GameStartTick = Server()->Tick();
 	SetGameState(IGS_GAME_RUNNING);
 	m_GameStartTick = Server()->Tick();
 	m_SuddenDeath = 0;
+	m_aTeamscore[TEAM_RED] = 0;
+	m_aTeamscore[TEAM_BLUE] = 0;
 
 	// only auto start round if we are in casual mode and there is no tournament running
 	// otherwise set infinite warmup and wait for !restart
@@ -1102,6 +1119,22 @@ void CGameControllerPvp::Tick()
 		m_vFrozenQuitters.clear();
 	}
 
+	// do team-balancing (skip this in survival, done there when a round starts)
+	if(IsTeamPlay()) //  && !(m_GameFlags&protocol7::GAMEFLAG_SURVIVAL))
+	{
+		switch(m_UnbalancedTick)
+		{
+		case TBALANCE_CHECK:
+			CheckTeamBalance();
+			break;
+		case TBALANCE_OK:
+			break;
+		default:
+			if(g_Config.m_SvTeambalanceTime && Server()->Tick() > m_UnbalancedTick + g_Config.m_SvTeambalanceTime * Server()->TickSpeed() * 60)
+				DoTeamBalance();
+		}
+	}
+
 	// win check
 	if((m_GameState == IGS_GAME_RUNNING || m_GameState == IGS_GAME_PAUSED) && !GameServer()->m_World.m_ResetRequested)
 	{
@@ -1113,12 +1146,23 @@ void CGameControllerPvp::OnPlayerTick(class CPlayer *pPlayer)
 {
 	pPlayer->InstagibTick();
 
-	// this is needed for the smart tournament chat
-	// otherwise players get marked as afk during pause
-	// and then the game is considered not competitive anymore
-	// which is wrong
 	if(GameServer()->m_World.m_Paused)
+	{
+		// this is needed for the smart tournament chat
+		// otherwise players get marked as afk during pause
+		// and then the game is considered not competitive anymore
+		// which is wrong
 		pPlayer->UpdatePlaytime();
+
+		// all these are set in player.cpp
+		// ++m_RespawnTick;
+		// ++m_DieTick;
+		// ++m_PreviousDieTick;
+		// ++m_JoinTick;
+		// ++m_LastActionTick;
+		// ++m_TeamChangeTick;
+		++pPlayer->m_ScoreStartTick;
+	}
 
 	if(pPlayer->m_GameStateBroadcast)
 	{
@@ -1167,7 +1211,7 @@ bool CGameControllerPvp::OnLaserHit(int Bounces, int From, int Weapon, CCharacte
 	return true;
 }
 
-bool CGameControllerPvp::IsSpawnProtected(CPlayer *pVictim, CPlayer *pKiller) const
+bool CGameControllerPvp::IsSpawnProtected(const CPlayer *pVictim, const CPlayer *pKiller) const
 {
 	// there has to be a valid killer to get spawn protected
 	// one should never be spawn protected from the world
@@ -1199,48 +1243,123 @@ bool CGameControllerPvp::IsSpawnProtected(CPlayer *pVictim, CPlayer *pKiller) co
 	return false;
 }
 
-bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
+void CGameControllerPvp::ApplyVanillaDamage(int &Dmg, int From, int Weapon, CCharacter *pCharacter)
 {
+	CPlayer *pPlayer = pCharacter->GetPlayer();
+	if(From == pPlayer->GetCid())
+	{
+		// m_pPlayer only inflicts half damage on self
+		Dmg = maximum(1, Dmg / 2);
+
+		// do not cause self damage with jetpack
+		if(Weapon == WEAPON_GUN && pCharacter->Core()->m_Jetpack)
+		{
+			Dmg = 0;
+			return;
+		}
+	}
+
+	pCharacter->m_DamageTaken++;
+
+	// create healthmod indicator
+	if(Server()->Tick() < pCharacter->m_DamageTakenTick + 25)
+	{
+		// make sure that the damage indicators doesn't group together
+		GameServer()->CreateDamageInd(pCharacter->m_Pos, pCharacter->m_DamageTaken * 0.25f, Dmg);
+	}
+	else
+	{
+		pCharacter->m_DamageTaken = 0;
+		GameServer()->CreateDamageInd(pCharacter->m_Pos, 0, Dmg);
+	}
+
+	if(Dmg)
+	{
+		if(pCharacter->m_Armor)
+		{
+			if(Dmg > 1)
+			{
+				pCharacter->m_Health--;
+				Dmg--;
+			}
+
+			if(Dmg > pCharacter->m_Armor)
+			{
+				Dmg -= pCharacter->m_Armor;
+				pCharacter->m_Armor = 0;
+			}
+			else
+			{
+				pCharacter->m_Armor -= Dmg;
+				Dmg = 0;
+			}
+		}
+	}
+
+	pCharacter->m_DamageTakenTick = Server()->Tick();
+
+	if(From >= 0 && From < MAX_CLIENTS && From != pCharacter->GetPlayer()->GetCid() && GameServer()->m_apPlayers[From])
+	{
+		DoDamageHitSound(From);
+	}
+
+	if(Dmg > 2)
+		GameServer()->CreateSound(pCharacter->m_Pos, SOUND_PLAYER_PAIN_LONG);
+	else
+		GameServer()->CreateSound(pCharacter->m_Pos, SOUND_PLAYER_PAIN_SHORT);
+}
+
+bool CGameControllerPvp::SkipDamage(int Dmg, int From, int Weapon, const CCharacter *pCharacter, bool &ApplyForce)
+{
+	ApplyForce = true;
+
+	const CPlayer *pPlayer = pCharacter->GetPlayer();
+	const CPlayer *pKiller = GetPlayerOrNullptr(From);
+
+	if(pCharacter->m_IsGodmode)
+		return true;
+	if(From >= 0 && From <= MAX_CLIENTS && GameServer()->m_pController->IsFriendlyFire(pPlayer->GetCid(), From))
+		return true;
+	if(g_Config.m_SvOnlyHookKills && pKiller)
+	{
+		const CCharacter *pKillerChr = pKiller->GetCharacter();
+		if(pKillerChr)
+			if(pKillerChr->HookedPlayer() != pPlayer->GetCid())
+				return true;
+	}
+	if(IsSpawnProtected(pPlayer, pKiller))
+		return true;
+	return false;
+}
+
+void CGameControllerPvp::OnAnyDamage(int Dmg, int From, int Weapon, CCharacter *pCharacter)
+{
+	CPlayer *pPlayer = pCharacter->GetPlayer();
+
 	// only weapons that push the tee around are considerd a touch
 	// gun and laser do not push (as long as there is no explosive guns/lasers)
 	// and shotgun only pushes in ddrace gametypes
 	if(Weapon != WEAPON_GUN && Weapon != WEAPON_LASER)
 	{
 		if(!m_IsVanillaGameType || Weapon != WEAPON_SHOTGUN)
-			Character.GetPlayer()->UpdateLastToucher(From);
+			pPlayer->UpdateLastToucher(From);
 	}
 
-	if(Character.m_FreezeTime && Weapon == WEAPON_LASER)
-		Character.UnFreeze();
+	if(pCharacter->m_FreezeTime && Weapon == WEAPON_LASER)
+		pCharacter->UnFreeze();
 
-	CPlayer *pPlayer = Character.GetPlayer();
-	if(Character.m_IsGodmode)
-		return true;
-	if(From >= 0 && From <= MAX_CLIENTS && GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
+	if(From >= 0 && From <= MAX_CLIENTS && GameServer()->m_pController->IsFriendlyFire(pPlayer->GetCid(), From))
 	{
 		// boosting mates counts neither as hit nor as miss
 		if(IsStatTrack() && Weapon != WEAPON_HAMMER)
 			pPlayer->m_Stats.m_ShotsFired--;
-		Dmg = 0;
-		return false;
 	}
-	if(g_Config.m_SvOnlyHookKills && From >= 0 && From <= MAX_CLIENTS)
-	{
-		return false;
-	}
-	CPlayer *pKiller = nullptr;
-	if(From >= 0 && From <= MAX_CLIENTS)
-		pKiller = GameServer()->m_apPlayers[From];
-	if(g_Config.m_SvOnlyHookKills && pKiller)
-	{
-		CCharacter *pChr = pKiller->GetCharacter();
-		if(!pChr || pChr->GetCore().HookedPlayer() != Character.GetPlayer()->GetCid())
-			return false;
-	}
-	// the "true" means tees hit during spawn protection
-	// will still be pushed around
-	if(IsSpawnProtected(pPlayer, pKiller))
-		return false;
+}
+
+void CGameControllerPvp::OnAppliedDamage(int Dmg, int From, int Weapon, CCharacter *pCharacter)
+{
+	CPlayer *pPlayer = pCharacter->GetPlayer();
+	CPlayer *pKiller = GetPlayerOrNullptr(From);
 
 	if(IsStatTrack() && Weapon != WEAPON_HAMMER)
 	{
@@ -1258,6 +1377,18 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 			pKiller->m_Stats.m_ShotsHit++;
 		}
 	}
+}
+
+bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
+{
+	OnAnyDamage(Dmg, From, Weapon, &Character);
+	bool ApplyForce = false;
+	if(SkipDamage(Dmg, From, Weapon, &Character, ApplyForce))
+	{
+		Dmg = 0;
+		return !ApplyForce;
+	}
+	OnAppliedDamage(Dmg, From, Weapon, &Character);
 
 	// instagib damage always kills no matter the armor
 	// max vanilla weapon damage is katana with 9 dmg
@@ -1274,6 +1405,7 @@ bool CGameControllerPvp::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 	{
 		Character.Die(From, Weapon);
 
+		CPlayer *pKiller = GetPlayerOrNullptr(From);
 		if(From != Character.GetPlayer()->GetCid() && pKiller)
 		{
 			CCharacter *pChr = pKiller->GetCharacter();
@@ -1663,6 +1795,7 @@ void CGameControllerPvp::OnPlayerDisconnect(class CPlayer *pPlayer, const char *
 	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
 	{
 		--m_aTeamSize[pPlayer->GetTeam()];
+		m_UnbalancedTick = TBALANCE_CHECK;
 	}
 }
 
@@ -1700,12 +1833,12 @@ void CGameControllerPvp::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg
 	if(OldTeam != TEAM_SPECTATORS)
 	{
 		--m_aTeamSize[OldTeam];
-		// m_UnbalancedTick = TBALANCE_CHECK;
+		m_UnbalancedTick = TBALANCE_CHECK;
 	}
 	if(Team != TEAM_SPECTATORS)
 	{
 		++m_aTeamSize[Team];
-		// m_UnbalancedTick = TBALANCE_CHECK;
+		m_UnbalancedTick = TBALANCE_CHECK;
 		// if(m_GameState == IGS_WARMUP_GAME && HasEnoughPlayers())
 		// 	SetGameState(IGS_WARMUP_GAME, 0);
 		// pPlayer->m_IsReadyToPlay = !IsPlayerReadyMode();

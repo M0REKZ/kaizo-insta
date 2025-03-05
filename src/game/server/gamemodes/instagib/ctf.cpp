@@ -204,13 +204,18 @@ bool CGameControllerInstaBaseCTF::OnEntity(int Index, int x, int y, int Layer, i
 	if(Team == -1 || m_apFlags[Team])
 		return false;
 
-	CFlag *F = new CFlag(&GameServer()->m_World, Team);
-	F->m_StandPos = Pos;
-	F->m_Pos = Pos;
-	m_apFlags[Team] = F;
-	GameServer()->m_World.InsertEntity(F);
+	CFlag *pFlag = new CFlag(&GameServer()->m_World, Team);
+	pFlag->m_StandPos = Pos;
+	pFlag->m_Pos = Pos;
+	m_apFlags[Team] = pFlag;
+	GameServer()->m_World.InsertEntity(pFlag);
 	 */
 	return true;
+}
+
+bool CGameControllerInstaBaseCTF::CanBeMovedOnBalance(int ClientId)
+{
+	return GetCarriedFlag(GameServer()->m_apPlayers[ClientId]) == FLAG_NONE;
 }
 
 void CGameControllerInstaBaseCTF::OnFlagReturn(CFlag *pFlag)
@@ -228,10 +233,10 @@ void CGameControllerInstaBaseCTF::OnFlagGrab(class CFlag *pFlag)
 		return;
 	if(!pFlag->IsAtStand())
 		return;
-	if(!pFlag->m_pCarrier)
+	if(!pFlag->GetCarrier())
 		return;
 
-	CPlayer *pPlayer = pFlag->m_pCarrier->GetPlayer();
+	CPlayer *pPlayer = pFlag->GetCarrier()->GetPlayer();
 	if(IsStatTrack())
 		pPlayer->m_Stats.m_FlagGrabs++;
 }

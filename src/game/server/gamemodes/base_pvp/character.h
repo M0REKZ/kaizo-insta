@@ -42,6 +42,7 @@ public:
 
 	bool OnFngFireWeapon(CCharacter &Character, int &Weapon, vec2 &Direction, vec2 &MouseTarget, vec2 &ProjStartPos);
 	void TakeHammerHit(CCharacter *pFrom);
+	void AmmoRegen();
 	/*
 		Function: IsTouchingTile
 
@@ -61,6 +62,9 @@ public:
 
 	void Rainbow(bool Activate);
 	bool HasRainbow() const { return m_Rainbow; }
+
+	const class CPlayer *GetPlayer() const { return m_pPlayer; }
+	int HookedPlayer() const { return m_Core.HookedPlayer(); }
 
 private:
 	// players skin changes colors

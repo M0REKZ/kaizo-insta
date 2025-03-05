@@ -48,9 +48,6 @@ int CGameControllerCTF::SnapGameInfoExFlags(int SnappingClient, int DDRaceFlags)
 
 bool CGameControllerCTF::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
-	if(From >= 0 && From <= MAX_CLIENTS && GameServer()->m_pController->IsFriendlyFire(Character.GetPlayer()->GetCid(), From))
-		return CGameControllerPvp::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
-
 	if(Weapon == WEAPON_GUN || Weapon == WEAPON_SHOTGUN)
 		Dmg = 1;
 	if(Weapon == WEAPON_LASER)
@@ -60,67 +57,11 @@ bool CGameControllerCTF::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From,
 	// if(Weapon == WEAPON_GRENADE)
 	// 	Dmg = 6;
 
-	if(From == Character.GetPlayer()->GetCid())
-	{
-		// m_pPlayer only inflicts half damage on self
-		Dmg = maximum(1, Dmg / 2);
+	bool ApplyForce = true;
+	if(SkipDamage(Dmg, From, Weapon, &Character, ApplyForce))
+		return CGameControllerPvp::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
 
-		// do not cause self damage with jetpack
-		if(Weapon == WEAPON_GUN && Character.Core()->m_Jetpack)
-		{
-			Dmg = 0;
-			return false;
-		}
-	}
-
-	Character.m_DamageTaken++;
-
-	// create healthmod indicator
-	if(Server()->Tick() < Character.m_DamageTakenTick + 25)
-	{
-		// make sure that the damage indicators doesn't group together
-		GameServer()->CreateDamageInd(Character.m_Pos, Character.m_DamageTaken * 0.25f, Dmg);
-	}
-	else
-	{
-		Character.m_DamageTaken = 0;
-		GameServer()->CreateDamageInd(Character.m_Pos, 0, Dmg);
-	}
-
-	if(Dmg)
-	{
-		if(Character.m_Armor)
-		{
-			if(Dmg > 1)
-			{
-				Character.m_Health--;
-				Dmg--;
-			}
-
-			if(Dmg > Character.m_Armor)
-			{
-				Dmg -= Character.m_Armor;
-				Character.m_Armor = 0;
-			}
-			else
-			{
-				Character.m_Armor -= Dmg;
-				Dmg = 0;
-			}
-		}
-	}
-
-	Character.m_DamageTakenTick = Server()->Tick();
-
-	if(From >= 0 && From < MAX_CLIENTS && From != Character.GetPlayer()->GetCid() && GameServer()->m_apPlayers[From])
-	{
-		DoDamageHitSound(From);
-	}
-
-	if(Dmg > 2)
-		GameServer()->CreateSound(Character.m_Pos, SOUND_PLAYER_PAIN_LONG);
-	else
-		GameServer()->CreateSound(Character.m_Pos, SOUND_PLAYER_PAIN_SHORT);
+	ApplyVanillaDamage(Dmg, From, Weapon, &Character);
 
 	return CGameControllerPvp::OnCharacterTakeDamage(Force, Dmg, From, Weapon, Character);
 }
