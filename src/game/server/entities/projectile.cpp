@@ -232,6 +232,14 @@ void CProjectile::Tick()
 			if(!Collide)
 				Collide = HitFlag(PrevPos, CurPos);
 
+			if(!Collide)
+			{
+				if(IntersectProjectile(CollideTick))
+				{
+					Collide = TILE_SOLID;
+				}
+			}
+
 			if(Collide)
 				break;
 
@@ -263,6 +271,15 @@ void CProjectile::Tick()
 	//+KZ
 	if(!Collide)
 		Collide = HitFlag(PrevPos, CurPos);
+
+	if(!Collide)
+	{
+		if(IntersectProjectile(Server()->Tick()))
+		{
+			Collide = TILE_SOLID;
+		}
+	}
+
 	}
 
 	if(m_LifeSpan > -1)
@@ -591,6 +608,43 @@ bool CProjectile::CanCollide(int ClientId)
 	if(m_IsSolo)
 		return m_Owner == ClientId;
 	return true;
+}
+
+CProjectile *CProjectile::IntersectProjectile(int CheckTick)
+{
+	if(!g_Config.m_SvCollideProjectiles)
+		return nullptr;
+
+	float Pt = (CheckTick - m_StartTick - 1) / (float)Server()->TickSpeed();
+	float Ct = (CheckTick - m_StartTick) / (float)Server()->TickSpeed();
+	vec2 CurPos = GetPos(Ct);
+	vec2 PrevPos = GetPos(Pt);
+
+	float ProjCt;
+	vec2 ProjPos;
+	vec2 outpos;
+
+
+	for(CProjectile* pProj = (CProjectile*)GameWorld()->FindFirst(CGameWorld::ENTTYPE_PROJECTILE);pProj;pProj = (CProjectile*)pProj->TypeNext())
+	{
+		if(!pProj)
+			continue;
+
+		if(pProj == this)
+			continue;
+		
+		ProjCt = (CheckTick - pProj->m_StartTick) / (float)Server()->TickSpeed();
+		
+		ProjPos = pProj->GetPos(ProjCt);
+
+		closest_point_on_line(PrevPos, CurPos, ProjPos, outpos);
+
+		if(distance(ProjPos, outpos) < 13.0f)
+			return pProj;
+
+	}
+
+	return nullptr;
 }
 
 void CProjectile::SetBouncing(int Value)

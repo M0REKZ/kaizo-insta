@@ -70,6 +70,7 @@ public:
 	int m_OrigStartTick;
 	bool m_FirstSnap;
 	int ParticleID[3];
+	CProjectile* IntersectProjectile(int CheckTick);
 };
 
 #endif

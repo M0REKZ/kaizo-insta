@@ -105,6 +105,14 @@ void CVanillaProjectile::Tick()
 			if(!Collide)
 				Collide = HitFlag(PrevPos, CurPos);
 
+			if(!Collide)
+			{
+				if(IntersectProjectile(CollideTick))
+				{
+					Collide = TILE_SOLID;
+				}
+			}
+				
 			if(Collide)
 				break;
 
@@ -136,6 +144,14 @@ void CVanillaProjectile::Tick()
 	//+KZ
 	if(!Collide)
 		Collide = HitFlag(PrevPos, CurPos);
+
+	if(!Collide)
+	{
+		if(IntersectProjectile(Server()->Tick()))
+		{
+			Collide = TILE_SOLID;
+		}
+	}	
 	}
 
 
