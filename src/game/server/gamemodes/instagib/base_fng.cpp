@@ -384,27 +384,21 @@ bool CGameControllerBaseFng::OnLaserHit(int Bounces, int From, int Weapon, CChar
 	return CGameControllerInstagib::OnLaserHit(Bounces, From, Weapon, pVictim);
 }
 
+bool CGameControllerBaseFng::SkipDamage(int Dmg, int From, int Weapon, const CCharacter *pCharacter, bool &ApplyForce)
+{
+	ApplyForce = true;
+
+	if(pCharacter->m_FreezeTime)
+		return true;
+
+	return CGameControllerInstagib::SkipDamage(Dmg, From, Weapon, pCharacter, ApplyForce);
+}
+
 // warning this does not call the base pvp take damage method
 // so it has to reimplement all the relevant functionality
 bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &From, int &Weapon, CCharacter &Character)
 {
-	if(!Character.m_FreezeTime)
-		Character.GetPlayer()->m_OriginalFreezerId = From;
-
 	OnAnyDamage(Dmg, From, Weapon, &Character);
-
-	// no self damage
-	if(From == Character.GetPlayer()->GetCid())
-	{
-		// self damage counts as boosting
-		// so the hit/misses rate should not be affected
-		//
-		// yes this means that grenade boost kills
-		// can get you a accuracy over 100%
-		if(IsStatTrack() && Weapon != WEAPON_HAMMER)
-			Character.GetPlayer()->m_Stats.m_ShotsFired--;
-		return false;
-	}
 
 	bool ApplyForce = false;
 	if(SkipDamage(Dmg, From, Weapon, &Character, ApplyForce))
@@ -413,21 +407,12 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 		return !ApplyForce;
 	}
 
-	CPlayer *pKiller = GetPlayerOrNullptr(From);
+	OnAppliedDamage(Dmg, From, Weapon, &Character);
 
-	if(Character.m_FreezeTime)
-	{
-		Dmg = 0;
-		return false;
-	}
+	CPlayer *pKiller = GetPlayerOrNullptr(From);
 
 	if(pKiller)
 	{
-		if(IsStatTrack())
-		{
-			pKiller->m_Stats.m_ShotsHit++;
-		}
-
 		pKiller->IncrementScore();
 		AddTeamscore(pKiller->GetTeam(), 1);
 		DoDamageHitSound(From);
@@ -451,6 +436,7 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 
 	GameServer()->CreateDeath(Character.m_Pos, Character.GetPlayer()->GetCid(), Character.TeamMask());
 
+	Character.GetPlayer()->m_OriginalFreezerId = From;
 	Character.Freeze(10);
 	return false;
 }

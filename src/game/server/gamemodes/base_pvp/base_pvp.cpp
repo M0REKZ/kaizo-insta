@@ -1316,6 +1316,12 @@ bool CGameControllerPvp::SkipDamage(int Dmg, int From, int Weapon, const CCharac
 	const CPlayer *pPlayer = pCharacter->GetPlayer();
 	const CPlayer *pKiller = GetPlayerOrNullptr(From);
 
+	if(From == pPlayer->GetCid())
+	{
+		if(!m_SelfDamage)
+			return true;
+	}
+
 	if(pCharacter->m_IsGodmode)
 		return true;
 	if(From >= 0 && From <= MAX_CLIENTS && GameServer()->m_pController->IsFriendlyFire(pPlayer->GetCid(), From))
@@ -1348,11 +1354,14 @@ void CGameControllerPvp::OnAnyDamage(int Dmg, int From, int Weapon, CCharacter *
 	if(Weapon == WEAPON_LASER && !IsFngGameType())
 		pCharacter->UnFreeze();
 
-	if(From >= 0 && From <= MAX_CLIENTS && GameServer()->m_pController->IsFriendlyFire(pPlayer->GetCid(), From))
+	if(From == pPlayer->GetCid() && Weapon != WEAPON_LASER)
 	{
-		// boosting mates counts neither as hit nor as miss
-		if(IsStatTrack() && Weapon != WEAPON_HAMMER)
-			pPlayer->m_Stats.m_ShotsFired--;
+		// self damage counts as boosting
+		// so the hit/misses rate should not be affected
+		//
+		// yes this means that grenade boost kills
+		// can get you a accuracy over 100%
+		pPlayer->m_Stats.m_ShotsFired--;
 	}
 }
 
@@ -1363,16 +1372,7 @@ void CGameControllerPvp::OnAppliedDamage(int Dmg, int From, int Weapon, CCharact
 
 	if(IsStatTrack() && Weapon != WEAPON_HAMMER)
 	{
-		if(From == pPlayer->GetCid())
-		{
-			// self damage counts as boosting
-			// so the hit/misses rate should not be affected
-			//
-			// yes this means that grenade boost kills
-			// can get you a accuracy over 100%
-			pPlayer->m_Stats.m_ShotsFired--;
-		}
-		else if(pKiller)
+		if(pKiller && From != pPlayer->GetCid())
 		{
 			pKiller->m_Stats.m_ShotsHit++;
 		}
