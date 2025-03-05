@@ -1341,11 +1341,11 @@ void CGameControllerPvp::OnAnyDamage(int Dmg, int From, int Weapon, CCharacter *
 	// and shotgun only pushes in ddrace gametypes
 	if(Weapon != WEAPON_GUN && Weapon != WEAPON_LASER)
 	{
-		if(!m_IsVanillaGameType || Weapon != WEAPON_SHOTGUN)
+		if(!HasVanillaShotgun(pPlayer) || Weapon != WEAPON_SHOTGUN)
 			pPlayer->UpdateLastToucher(From);
 	}
 
-	if(pCharacter->m_FreezeTime && Weapon == WEAPON_LASER)
+	if(Weapon == WEAPON_LASER && !IsFngGameType())
 		pCharacter->UnFreeze();
 
 	if(From >= 0 && From <= MAX_CLIENTS && GameServer()->m_pController->IsFriendlyFire(pPlayer->GetCid(), From))

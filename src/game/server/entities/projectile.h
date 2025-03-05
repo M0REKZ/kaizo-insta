@@ -34,7 +34,7 @@ public:
 	int HitFlag(vec2 From, vec2 To); //+KZ
 	virtual ~CProjectile();
 
-private:
+protected: // ddnet-insta protected instead of private for vanilla proj inheritance
 	vec2 m_Direction;
 	int m_LifeSpan;
 	int m_Owner;
