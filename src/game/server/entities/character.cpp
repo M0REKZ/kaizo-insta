@@ -1151,7 +1151,7 @@ void CCharacter::Tick()
 			m_DieNow = true;
 		}
 		
-		if((m_RollbackAttacker >= 0 && m_RollbackAttacker < MAX_CLIENTS) && GameServer()->m_apPlayers[m_RollbackAttacker] && !(GameServer()->m_apPlayers[m_RollbackAttacker]->GetCharacter()))
+		if(m_Dying != -1 && (m_RollbackAttacker >= 0 && m_RollbackAttacker < MAX_CLIENTS) && GameServer()->m_apPlayers[m_RollbackAttacker] && !(GameServer()->m_apPlayers[m_RollbackAttacker]->GetCharacter()))
 		{
 			m_DieNow = false;
 			m_Dying = -1;
@@ -1448,7 +1448,7 @@ void CCharacter::Die(int Killer, int Weapon, bool SendKillMsg, bool rollBack)
 {
 	if(rollBack && m_pPlayer->m_Rollback && Killer != m_pPlayer->GetCid() && Weapon == WEAPON_LASER && !m_DieNow)
 	{
-		m_Dying = Server()->Tick() + (m_pPlayer->m_Latency.m_Avg * Server()->TickSpeed())/1000;;
+		m_Dying = Server()->Tick() + (m_pPlayer->m_Latency.m_Avg * Server()->TickSpeed())/1000;
 		return;
 		
 	}
