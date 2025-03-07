@@ -32,7 +32,6 @@ MACRO_CONFIG_STR(SvRunWhenEmpty, sv_run_when_empty, 64, "", CFGFLAG_SERVER, "Fil
 MACRO_CONFIG_INT(SvHammerPower, sv_hammer_power, 5, 1, 500, CFGFLAG_SERVER, "Hammer's power (For Hammer Power Powerup)")
 MACRO_CONFIG_INT(SvAnticamperZoneTime, sv_anticamper_zone_time, 5, 5, 120, CFGFLAG_SERVER | CFGFLAG_GAME, "How long to wait till the player dies")
 MACRO_CONFIG_INT(SvAnticamperZoneRange, sv_anticamper_zone_range, 600, 0, 1000, CFGFLAG_SERVER | CFGFLAG_GAME, "Distance how far away the player must move to escape anticamper")
-MACRO_CONFIG_INT(SvSwapFlags, sv_swap_flags, 0, 0, 1, CFGFLAG_SERVER, "Swap flag positions")
 MACRO_CONFIG_INT(SvCollideProjectiles, sv_collide_projectiles, 0, 0, 1, CFGFLAG_SERVER, "Make projectiles collide with each other")
 
 //For Vanilla
