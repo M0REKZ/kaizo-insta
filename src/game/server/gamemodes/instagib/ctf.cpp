@@ -171,6 +171,9 @@ bool CGameControllerInstaBaseCTF::OnEntity(int Index, int x, int y, int Layer, i
 	if(Index == ENTITY_FLAGSTAND_BLUE)
 		Team = TEAM_BLUE;
 	
+	if(Team != -1 && g_Config.m_SvSwapFlags)
+		Team = Team == TEAM_RED ? TEAM_BLUE : TEAM_RED;
+
 	//twplus begin +KZ
 	if(!(Team == -1 || m_apFlags[Team]))
 	{
