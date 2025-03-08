@@ -91,6 +91,10 @@ public:
 	// ddnet-insta only
 	// return false to not cause any damage
 	bool OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim) override;
+	void OnExplosionHits(int OwnerId, CExplosionTarget *pTargets, int NumTargets) override;
+	void OnHammerHit(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force) override;
+	void ApplyFngHammerForce(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force) override;
+	void FngUnmeltHammerHit(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force) override;
 	void ApplyVanillaDamage(int &Dmg, int From, int Weapon, CCharacter *pCharacter) override;
 	bool DecreaseHealthAndKill(int Dmg, int From, int Weapon, CCharacter *pCharacter) override;
 	bool SkipDamage(int Dmg, int From, int Weapon, const CCharacter *pCharacter, bool &ApplyForce) override;
@@ -112,6 +116,13 @@ public:
 	void OnFlagCapture(class CFlag *pFlag, float Time, int TimeTicks) override;
 	bool ForceNetworkClipping(const CEntity *pEntity, int SnappingClient, vec2 CheckPos) override;
 	bool ForceNetworkClippingLine(const CEntity *pEntity, int SnappingClient, vec2 StartPos, vec2 EndPos) override;
+
+	// pPlayer is the player that just hit
+	// an enemy with the grenade
+	//
+	// can be called multiple times for one bullet
+	// of the explosion has multiple hits
+	void RefillGrenadesOnHit(CPlayer *pPlayer);
 
 	bool IsWinner(const CPlayer *pPlayer, char *pMessage, int SizeOfMessage) override;
 	bool IsLoser(const CPlayer *pPlayer) override;

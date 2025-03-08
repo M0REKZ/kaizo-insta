@@ -12,6 +12,7 @@
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/laser_text.h>
 #include <game/server/instagib/sql_stats.h>
+#include <game/server/instagib/structs.h>
 #include <game/server/instagib/version.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
@@ -338,7 +339,7 @@ int CGameControllerPvp::SnapPlayerScore(int SnappingClient, CPlayer *pPlayer, in
 bool CGameControllerPvp::IsGrenadeGameType() const
 {
 	// TODO: this should be done with some cleaner spawnweapons/available weapons enum flag thing
-	if(!str_comp(m_pGameType, "zCatch"))
+	if(IsZcatchGameType())
 	{
 		return m_SpawnWeapons == SPAWN_WEAPON_GRENADE;
 	}
@@ -583,6 +584,13 @@ bool CGameControllerPvp::IsStatTrack(char *pReason, int SizeOfReason)
 	if(pReason)
 		pReason[0] = '\0';
 
+	if(g_Config.m_SvAlwaysTrackStats)
+	{
+		if(g_Config.m_SvDebugStats)
+			log_debug("stats", "tracking stats no matter what because sv_always_track_stats is set");
+		return true;
+	}
+
 	if(IsWarmup())
 	{
 		if(pReason)
@@ -594,7 +602,7 @@ bool CGameControllerPvp::IsStatTrack(char *pReason, int SizeOfReason)
 	int Count = NumConnectedIps();
 	bool Track = Count >= MinPlayers;
 	if(g_Config.m_SvDebugStats)
-		dbg_msg("stats", "connected unique ips=%d (%d+ needed to track) tracking=%d", Count, MinPlayers, Track);
+		log_debug("stats", "connected unique ips=%d (%d+ needed to track) tracking=%d", Count, MinPlayers, Track);
 
 	if(!Track)
 	{
@@ -969,7 +977,7 @@ int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlaye
 	int DelayInTicks = (int)(Server()->TickSpeed() * ((float)DelayInMs / 1000.0f));
 	pVictim->GetPlayer()->m_RespawnTick = Server()->Tick() + DelayInTicks;
 
-	// do scoreing
+	// do scoring
 	if(!pKiller || Weapon == WEAPON_GAME)
 		return 0;
 
@@ -1214,6 +1222,132 @@ bool CGameControllerPvp::OnLaserHit(int Bounces, int From, int Weapon, CCharacte
 	return true;
 }
 
+void CGameControllerPvp::OnExplosionHits(int OwnerId, CExplosionTarget *pTargets, int NumTargets)
+{
+	CPlayer *pKiller = GetPlayerOrNullptr(OwnerId);
+	if(!pKiller)
+		return;
+
+	int HitTeamMates = 0;
+	int HitEnemies = 0;
+	bool SelfDamage = false;
+
+	for(int i = 0; i < NumTargets; i++)
+	{
+		CExplosionTarget *pTarget = &pTargets[i];
+		int HitId = pTarget->m_pCharacter->GetPlayer()->GetCid();
+
+		// do not count self damage
+		// as team or enemy hit
+		if(HitId == OwnerId)
+		{
+			SelfDamage = true;
+			continue;
+		}
+
+		if(GameServer()->m_pController->IsFriendlyFire(HitId, pKiller->GetCid()))
+			HitTeamMates++;
+		else
+			HitEnemies++;
+	}
+
+	// this if statement is a bit bloated
+	// but it allows for detailed debug logs
+	if(SelfDamage && !HitEnemies)
+	{
+		// self damage counts as boosting
+		// so the hit/misses rate should not be affected
+		if(IsStatTrack())
+		{
+			if(g_Config.m_SvDebugStats)
+				log_info("ddnet-insta", "shot did not count because it boosted the shooter");
+			pKiller->m_Stats.m_ShotsFired--;
+		}
+	}
+	else if(HitTeamMates && !HitEnemies)
+	{
+		// boosting mates counts neither as hit nor as miss
+		if(IsStatTrack())
+		{
+			if(g_Config.m_SvDebugStats)
+				log_info("ddnet-insta", "shot did not count because it boosted %d team mates", HitTeamMates);
+			pKiller->m_Stats.m_ShotsFired--;
+		}
+	}
+}
+
+void CGameControllerPvp::OnHammerHit(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force)
+{
+	// not sure if these asserts should be kept
+	// all of them should be save its just wasting clock cycles
+	dbg_assert(pPlayer, "invalid player caused a hammer hit");
+	dbg_assert(pTarget, "invalid player received a hammer hit");
+	dbg_assert(pTarget->GetCharacter(), "dead player received a hammer hit");
+
+	ApplyFngHammerForce(pPlayer, pTarget, Force);
+	FngUnmeltHammerHit(pPlayer, pTarget, Force);
+}
+
+void CGameControllerPvp::ApplyFngHammerForce(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force)
+{
+	if(!g_Config.m_SvFngHammer)
+		return;
+
+	CCharacter *pTargetChr = pTarget->GetCharacter();
+	CCharacter *pFromChr = pPlayer->GetCharacterDeadOrAlive();
+
+	vec2 Dir;
+	if(length(pTargetChr->m_Pos - pFromChr->m_Pos) > 0.0f)
+		Dir = normalize(pTargetChr->m_Pos - pFromChr->m_Pos);
+	else
+		Dir = vec2(0.f, -1.f);
+
+	vec2 Push = vec2(0.f, -1.f) + normalize(Dir + vec2(0.f, -1.1f)) * 10.0f;
+
+	// matches ddnet clients prediction code by default
+	// https://github.com/ddnet/ddnet/blob/f9df4a85be4ca94ca91057cd447707bcce16fd94/src/game/client/prediction/entities/character.cpp#L334-L346
+	if(GameServer()->m_pController->IsTeamPlay() && pTarget->GetTeam() == pPlayer->GetTeam() && pTargetChr->m_FreezeTime)
+	{
+		Push.x *= g_Config.m_SvMeltHammerScaleX * 0.01f;
+		Push.y *= g_Config.m_SvMeltHammerScaleY * 0.01f;
+	}
+	else
+	{
+		Push.x *= g_Config.m_SvHammerScaleX * 0.01f;
+		Push.y *= g_Config.m_SvHammerScaleY * 0.01f;
+	}
+
+	Force = Push;
+}
+
+void CGameControllerPvp::FngUnmeltHammerHit(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force)
+{
+	CCharacter *pTargetChr = pTarget->GetCharacter();
+
+	// only frozen team mates in fng can be unmelt hammered
+	if(!GameServer()->m_pController->IsFngGameType())
+		return;
+	if(!pTargetChr->m_FreezeTime)
+		return;
+	if(!GameServer()->m_pController->IsTeamPlay())
+		return;
+	if(pPlayer->GetTeam() != pTarget->GetTeam())
+		return;
+
+	pTargetChr->m_FreezeTime -= Server()->TickSpeed() * 3;
+
+	// make sure we don't got negative and let the ddrace tick trigger the unfreeeze
+	if(pTargetChr->m_FreezeTime < 2)
+	{
+		pTargetChr->m_FreezeTime = 2;
+
+		// reward the unfreezer with one point
+		pPlayer->AddScore(1);
+		if(GameServer()->m_pController->IsStatTrack())
+			pPlayer->m_Stats.m_Unfreezes++;
+	}
+}
+
 bool CGameControllerPvp::IsSpawnProtected(const CPlayer *pVictim, const CPlayer *pKiller) const
 {
 	// there has to be a valid killer to get spawn protected
@@ -1397,27 +1531,11 @@ void CGameControllerPvp::OnAnyDamage(vec2 &Force, int &Dmg, int &From, int &Weap
 		{
 			pCharacter->SetWeaponAmmo(WEAPON_GRENADE, minimum(pCharacter->GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + 1, g_Config.m_SvGrenadeAmmoRegenNum));
 		}
-
-		// self damage counts as boosting
-		// so the hit/misses rate should not be affected
-		//
-		// yes this means that grenade boost kills
-		// can get you a accuracy over 100%
-		pPlayer->m_Stats.m_ShotsFired--;
 	}
 
-	if(Weapon == WEAPON_LASER)
+	if(Weapon == WEAPON_HAMMER)
 	{
-		if(!IsFngGameType())
-			pCharacter->UnFreeze();
-	}
-	else if(Weapon == WEAPON_HAMMER)
-	{
-		dbg_assert(pKiller, "invalid player hammered someone");
-		// dbg_assert(pKiller->GetCharacter(), "dead player hammered someone");
-
-		if(pKiller->GetCharacter())
-			pCharacter->TakeHammerHit(pKiller->GetCharacter(), Force);
+		OnHammerHit(pKiller, pPlayer, Force);
 	}
 }
 
@@ -1426,12 +1544,18 @@ void CGameControllerPvp::OnAppliedDamage(int &Dmg, int &From, int &Weapon, CChar
 	CPlayer *pPlayer = pCharacter->GetPlayer();
 	CPlayer *pKiller = GetPlayerOrNullptr(From);
 
-	if(IsStatTrack() && Weapon != WEAPON_HAMMER)
+	if(!pKiller)
+		return;
+
+	bool SelfDamage = From == pPlayer->GetCid();
+	if(SelfDamage)
+		return;
+
+	DoDamageHitSound(From);
+
+	if(Weapon != WEAPON_HAMMER && IsStatTrack())
 	{
-		if(pKiller && From != pPlayer->GetCid())
-		{
-			pKiller->m_Stats.m_ShotsHit++;
-		}
+		pKiller->m_Stats.m_ShotsHit++;
 	}
 
 	if(From != pPlayer->GetCid())
@@ -1441,24 +1565,25 @@ void CGameControllerPvp::OnAppliedDamage(int &Dmg, int &From, int &Weapon, CChar
 		else
 			DoDamageHitSound(From);
 	}
+	if(Weapon == WEAPON_GRENADE)
+		RefillGrenadesOnHit(pKiller);
+}
 
-	// TODO: refactor this to a method called RefillNadesOnHit
-	if(!pCharacter->IsAlive() && From != pCharacter->GetPlayer()->GetCid() && pKiller)
+void CGameControllerPvp::RefillGrenadesOnHit(CPlayer *pPlayer)
+{
+	CCharacter *pChr = pPlayer->GetCharacter();
+	if(!pChr)
+		return;
+
+	// refill nades
+	int RefillNades = 0;
+	if(g_Config.m_SvGrenadeAmmoRegenOnKill == 1)
+		RefillNades = 1;
+	else if(g_Config.m_SvGrenadeAmmoRegenOnKill == 2)
+		RefillNades = g_Config.m_SvGrenadeAmmoRegenNum;
+	if(RefillNades && g_Config.m_SvGrenadeAmmoRegen)
 	{
-		CCharacter *pKillerChr = pKiller->GetCharacter();
-		if(!pKillerChr)
-			return;
-
-		// refill nades
-		int RefillNades = 0;
-		if(g_Config.m_SvGrenadeAmmoRegenOnKill == 1)
-			RefillNades = 1;
-		else if(g_Config.m_SvGrenadeAmmoRegenOnKill == 2)
-			RefillNades = g_Config.m_SvGrenadeAmmoRegenNum;
-		if(RefillNades && g_Config.m_SvGrenadeAmmoRegen && Weapon == WEAPON_GRENADE)
-		{
-			pKillerChr->SetWeaponAmmo(WEAPON_GRENADE, minimum(pKillerChr->GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + RefillNades, g_Config.m_SvGrenadeAmmoRegenNum));
-		}
+		pChr->SetWeaponAmmo(WEAPON_GRENADE, minimum(pChr->GetCore().m_aWeapons[WEAPON_GRENADE].m_Ammo + RefillNades, g_Config.m_SvGrenadeAmmoRegenNum));
 	}
 }
 
@@ -1842,6 +1967,8 @@ void CGameControllerPvp::OnPlayerDisconnect(class CPlayer *pPlayer, const char *
 		--m_aTeamSize[pPlayer->GetTeam()];
 		m_UnbalancedTick = TBALANCE_CHECK;
 	}
+
+	CheckReadyStates(ClientId);
 }
 
 void CGameControllerPvp::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)

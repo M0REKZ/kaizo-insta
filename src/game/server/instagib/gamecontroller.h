@@ -17,6 +17,7 @@
 #include <game/server/instagib/enums.h>
 #include <game/server/instagib/sql_stats.h>
 #include <game/server/instagib/sql_stats_player.h>
+#include <game/server/instagib/structs.h>
 
 struct CScoreLoadBestTimeResult;
 
@@ -282,6 +283,96 @@ public:
 			false - to skip TakeDamage
 	*/
 	virtual bool OnLaserHit(int Bounces, int From, int Weapon, CCharacter *pVictim) { return true; };
+
+	/*
+		Function: OnHammerHit
+			Similar to CAntibot::OnHammerHit() called from the same spot.
+			With same argument order with the aditional argument Force which
+			can inform you about the Force that would be applied on hit.
+			You can also overwrite that value to change the hammer knockback.
+
+			Unlike OnLaserHit() it is called from within CGameController::OnCharacterTakeDamage()
+
+			Be careful the pPlayer that hit the hammer might not have a character anymore!
+			`pPlayer->GetCharacter()` can be `nullptr` because tees can land a hammer in the tick
+			they die.
+
+		Arguments:
+			pPlayer - The player that landed the hammer hit. Can be dead already. `pPlayer->GetCharacter()` can be `nullptr`.
+			          If you still need information about the character that landed the hit.
+				  Use `pPlayer->GetCharacterDeadOrAlive()` but be careful!
+			pTarget - The player that got hit with the hammer
+			Force - The force that will be applied to the hit character.
+			        It is already set to the default once this method is called.
+				And you can overwrite the value if you want to apply
+				a different velocity to the hit character.
+	*/
+	virtual void OnHammerHit(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force){};
+
+	/*
+		Function: OnExplosionHits
+			Will be called after every explosion.
+			When all hit targets are known.
+			At this point damage has already been delt
+			And players might have already been killed.
+			All of that happens in CGameController::OnCharacterTakeDamage().
+
+			Use this method if you need to know all targets of the explosion.
+
+			Try to avoid dealing damage in this method otherwise it is duplicated
+			with CGameController::OnCharacterTakeDamage().
+			If you need to know all targets to deal damage you have to skip the damage dealing
+			in CGameController::OnCharacterTakeDamage()
+			Ideally by overwriting OnAppliedDamage()
+			Do not use this method to deal damage that should happen in CGameController::OnCharacterTakeDamage().
+
+		Arguments:
+			OwnerId - Client Id of the player that triggered the explosion. Might be -1 if its not coming from a player but from the world.
+			ExplosionHits - Characters that got hit by the explosion. They are not filtered yet by SkipDamage() you have to do that!
+	*/
+	virtual void OnExplosionHits(int OwnerId, CExplosionTarget *pTargets, int NumTargets){};
+
+	/*
+		Function: ApplyFngHammerForce
+			Hammers in fng have differnt tuning.
+			If sv_fng_hammer is set the hammer is a bit stronger.
+			This method applies this custom knock back.
+
+		Arguments:
+			pPlayer - The player that landed the hammer hit. Can be dead already. `pPlayer->GetCharacter()` can be `nullptr`.
+			          If you still need information about the character that landed the hit.
+				  Use `pPlayer->GetCharacterDeadOrAlive()` but be careful!
+			pTarget - The player that got hit with the hammer
+			Force - The force that will be applied to the hit character.
+			        It is already set to the default once this method is called.
+				And you can overwrite the value if you want to apply
+				a different velocity to the hit character.
+	*/
+	virtual void ApplyFngHammerForce(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force){};
+
+	/*
+		Function: ApplyFngHammerForce
+			Hammers in fng can unfreeze team mates.
+			But not like in ddrace with one hit.
+			It actually takes a few hits.
+			And every hit decreases the freeze time a bit.
+			This method is implementing this freeze time decrease.
+
+		Arguments:
+			pPlayer - The player that landed the hammer hit. Can be dead already. `pPlayer->GetCharacter()` can be `nullptr`.
+			          If you still need information about the character that landed the hit.
+				  Use `pPlayer->GetCharacterDeadOrAlive()` but be careful!
+			pTarget - The player that got hit with the hammer
+			Force - The force that will be applied to the hit character.
+			        It is already set to the default once this method is called.
+				And you can overwrite the value if you want to apply
+				a different velocity to the hit character.
+
+				Actually not used in ddnet-insta
+				can be used to implement your own freeze hammer that depends on how
+				how far the hammer would throw for example
+	*/
+	virtual void FngUnmeltHammerHit(CPlayer *pPlayer, CPlayer *pTarget, vec2 &Force){};
 
 	/*
 		Function: OnFireWeapon
