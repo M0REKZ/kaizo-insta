@@ -953,7 +953,7 @@ void CCharacter::FireWeapon()
 	if(!m_ReloadTimer && m_Core.m_ActiveWeapon < NUM_WEAPONS)
 	{
 		float FireDelay;
-		GetTuning(m_TuneZone)->Get(38 + m_Core.m_ActiveWeapon, &FireDelay);
+		GetTuning(m_TuneZone)->Get(offsetof(CTuningParams, m_HammerFireDelay) / sizeof(CTuneParam) + m_Core.m_ActiveWeapon, &FireDelay);
 		m_ReloadTimer = FireDelay * Server()->TickSpeed() / (m_ReloadMultiplier + m_ExtraFireSpeed); // sometimes 1000 sometimes 10000
 	}
 	else if(m_Core.m_ActiveWeapon < KZ_NUM_CUSTOM_WEAPONS)
