@@ -281,7 +281,7 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 		}
 
 		// do sacrifice flag sound
-		if(g_Config.m_SvFngSpikeSound)
+		if(g_Config.m_SvFngSpikeSound == 1)
 		{
 			CClientMask Mask = CClientMask().set(pKiller->GetCid());
 			for(int i = 0; i < MAX_CLIENTS; i++)
@@ -293,6 +293,13 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 					Mask.set(i);
 			}
 			GameServer()->CreateSound(pKiller->m_ViewPos, SOUND_CTF_CAPTURE, Mask);
+		}
+		else if(g_Config.m_SvFngSpikeSound == 2)
+		{
+			CClientMask Mask = pChr->TeamMask();
+			Mask.reset(pKiller->GetCid());
+			GameServer()->CreateSound(pChr->GetPos(), SOUND_CTF_GRAB_PL, Mask);
+			GameServer()->CreateSoundGlobal(SOUND_CTF_CAPTURE, pKiller->GetCid());
 		}
 	}
 
@@ -310,9 +317,8 @@ inline void CGameControllerBaseFng::UpdateScoresAndDisplayPoints(CPlayer *pKille
 	// in CGameControllerPvp::OnCharacterDeath()
 	pKiller->AddScore(PlayerScore - 1);
 	AddTeamscore(pKiller->GetTeam(), TeamScore);
-	int Score = IsTeamPlay() ? TeamScore : PlayerScore;
 	if(pKiller->IsPlaying()) // NOLINT(clang-analyzer-unix.Malloc)
-		MakeLaserTextPoints(pKiller->GetCharacter()->GetPos(), Score, 3); // NOLINT(clang-analyzer-unix.Malloc)
+		MakeLaserTextPoints(pKiller->GetCharacter()->GetPos(), PlayerScore, 3); // NOLINT(clang-analyzer-unix.Malloc)
 }
 
 void CGameControllerBaseFng::SnapDDNetCharacter(int SnappingClient, CCharacter *pChr, CNetObj_DDNetCharacter *pDDNetCharacter)
