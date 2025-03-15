@@ -2733,7 +2733,7 @@ void CGameContext::OnCallVoteNetMessage(const CNetMsg_Cl_CallVote *pMsg, int Cli
 void CGameContext::OnVoteNetMessage(const CNetMsg_Cl_Vote *pMsg, int ClientId)
 {
 	//+KZ
-	if(g_Config.m_SvDropWeapons)
+	if(g_Config.m_SvDropWeapons && !m_VoteCloseTime)
 	{
 		CPlayer *pPlayer = m_apPlayers[ClientId];
 		CCharacter* pChr = pPlayer->GetCharacter();
