@@ -57,6 +57,15 @@ void CGameControllerBlock::Tick()
 	CGameControllerPvp::Tick();
 }
 
+bool CGameControllerBlock::SkipDamage(int Dmg, int From, int Weapon, const CCharacter *pCharacter, bool &ApplyForce)
+{
+	ApplyForce = true;
+
+	// there is never damage in block
+	// it is ddrace like
+	return true;
+}
+
 int CGameControllerBlock::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
 {
 	// this is a edge case
@@ -74,6 +83,8 @@ int CGameControllerBlock::OnCharacterDeath(class CCharacter *pVictim, class CPla
 
 	if(pKiller && pKiller != pVictim->GetPlayer() && pVictim->m_FreezeTime)
 	{
+		OnKill(pVictim->GetPlayer(), pKiller, Weapon);
+
 		// TODO: the kill message will also be sent in CCharacter::Die which is a bit annoying
 
 		// kill message
