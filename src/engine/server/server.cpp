@@ -1085,7 +1085,7 @@ int CServer::ClientRejoinCallback(int ClientId, void *pUser)
 
 	pThis->GameServer()->TeehistorianRecordPlayerRejoin(ClientId);
 	pThis->Antibot()->OnEngineClientDrop(ClientId, "rejoin");
-	pThis->Antibot()->OnEngineClientJoin(ClientId, false);
+	pThis->Antibot()->OnEngineClientJoin(ClientId);
 
 	pThis->SendMap(ClientId);
 
@@ -1117,7 +1117,7 @@ int CServer::NewClientNoAuthCallback(int ClientId, void *pUser)
 	pThis->m_aClients[ClientId].Reset();
 
 	pThis->GameServer()->TeehistorianRecordPlayerJoin(ClientId, false);
-	pThis->Antibot()->OnEngineClientJoin(ClientId, false);
+	pThis->Antibot()->OnEngineClientJoin(ClientId);
 
 	pThis->SendCapabilities(ClientId);
 	pThis->SendMap(ClientId);
@@ -1153,7 +1153,7 @@ int CServer::NewClientCallback(int ClientId, void *pUser, bool Sixup)
 	pThis->m_aClients[ClientId].Reset();
 
 	pThis->GameServer()->TeehistorianRecordPlayerJoin(ClientId, Sixup);
-	pThis->Antibot()->OnEngineClientJoin(ClientId, Sixup);
+	pThis->Antibot()->OnEngineClientJoin(ClientId);
 
 	pThis->m_aClients[ClientId].m_Sixup = Sixup;
 
@@ -2469,6 +2469,11 @@ void CServer::FillAntibot(CAntibotRoundData *pData)
 			static_assert(std::size((CAntibotPlayerData{}).m_aAddress) >= NETADDR_MAXSTRSIZE);
 			static_assert(std::is_same_v<decltype(CServer{}.ClientAddrStringImpl(ClientId, true)), const std::array<char, NETADDR_MAXSTRSIZE> &>);
 			mem_copy(pPlayer->m_aAddress, ClientAddrStringImpl(ClientId, true).data(), NETADDR_MAXSTRSIZE);
+			pPlayer->m_Sixup = m_aClients[ClientId].m_Sixup;
+			pPlayer->m_DnsblNone = m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_NONE;
+			pPlayer->m_DnsblPending = m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_PENDING;
+			pPlayer->m_DnsblBlacklisted = m_aClients[ClientId].m_DnsblState == CClient::DNSBL_STATE_BLACKLISTED;
+			pPlayer->m_Authed = m_aClients[ClientId].m_Authed > AUTHED_NO;
 		}
 	}
 }

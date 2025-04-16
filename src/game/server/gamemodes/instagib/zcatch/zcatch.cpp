@@ -266,6 +266,8 @@ void CGameControllerZcatch::OnRoundEnd()
 
 		UpdateCatchTicks(pPlayer, ECatchUpdate::ROUND_END);
 	}
+
+	CGameControllerInstagib::OnRoundEnd();
 }
 
 CGameControllerZcatch::~CGameControllerZcatch() = default;

@@ -1,14 +1,20 @@
 #ifndef GAME_CLIENT_COMPONENTS_NAMEPLATES_H
 #define GAME_CLIENT_COMPONENTS_NAMEPLATES_H
+#include <base/color.h>
 #include <base/vmath.h>
 
 #include <engine/shared/protocol.h>
-#include <engine/textrender.h>
 
 #include <game/client/component.h>
-#include <game/generated/protocol.h>
 
-class CNamePlateRenderData
+enum class EHookStrongWeakState
+{
+	WEAK,
+	NEUTRAL,
+	STRONG
+};
+
+class CNamePlateData
 {
 public:
 	bool m_InGame;
@@ -31,23 +37,17 @@ public:
 	bool m_DirRight;
 	float m_FontSizeDirection;
 	bool m_ShowHookStrongWeak;
-	enum
-	{
-		HOOKSTRONGWEAK_WEAK,
-		HOOKSTRONGWEAK_UNKNOWN,
-		HOOKSTRONGWEAK_STRONG
-	} m_HookStrongWeak;
+	EHookStrongWeakState m_HookStrongWeakState;
 	bool m_ShowHookStrongWeakId;
 	int m_HookStrongWeakId;
 	float m_FontSizeHookStrongWeak;
 };
 
-class CNamePlate;
-
 class CNamePlates : public CComponent
 {
 private:
-	CNamePlate *m_pNamePlates;
+	class CNamePlatesData;
+	CNamePlatesData *m_pData;
 
 public:
 	void RenderNamePlateGame(vec2 Position, const CNetObj_PlayerInfo *pPlayerInfo, float Alpha);

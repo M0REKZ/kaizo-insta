@@ -23,6 +23,7 @@ public:
 	virtual void OnInit() override;
 
 	void ReconstructSmokeTrail(const CProjectileData *pCurrent, int DestroyTick);
+	void RenderLaser(vec2 From, vec2 Pos, ColorRGBA OuterColor, ColorRGBA InnerColor, float TicksBody, float TicksHead, int Type) const;
 
 private:
 	int m_BlueFlagOffset;
@@ -34,6 +35,7 @@ private:
 	int m_aPickupWeaponArmorOffset[4];
 	int m_aProjectileOffset[NUM_WEAPONS];
 	int m_aParticleSplatOffset[3];
+	int m_DoorHeadOffset;
 };
 
 #endif

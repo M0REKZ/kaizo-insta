@@ -83,13 +83,14 @@ void CLayerGroup::Render()
 			{
 				std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
 
-				if(g_Config.m_EdShowIngameEntities && pLayer->IsEntitiesLayer() &&
-					(pLayer == m_pMap->m_pGameLayer || pLayer == m_pMap->m_pFrontLayer))
+				if(g_Config.m_EdShowIngameEntities && pLayer->IsEntitiesLayer() && (pLayer == m_pMap->m_pGameLayer || pLayer == m_pMap->m_pFrontLayer || pLayer == m_pMap->m_pSwitchLayer))
 				{
-					m_pMap->m_pEditor->RenderGameEntities(pTiles);
+					if(pLayer != m_pMap->m_pSwitchLayer)
+						m_pMap->m_pEditor->RenderGameEntities(pTiles);
+					m_pMap->m_pEditor->RenderSwitchEntities(pTiles);
 				}
 
-				if(pTiles->m_Game || pTiles->m_Front || pTiles->m_Tele || pTiles->m_Speedup || pTiles->m_Tune || pTiles->m_Switch)
+				if(pTiles->m_HasGame || pTiles->m_HasFront || pTiles->m_HasTele || pTiles->m_HasSpeedup || pTiles->m_HasTune || pTiles->m_HasSwitch)
 					continue;
 			}
 			if(m_pMap->m_pEditor->m_ShowDetail || !(pLayer->m_Flags & LAYERFLAG_DETAIL))
@@ -102,7 +103,7 @@ void CLayerGroup::Render()
 		if(pLayer->m_Visible && pLayer->m_Type == LAYERTYPE_TILES && !pLayer->IsEntitiesLayer())
 		{
 			std::shared_ptr<CLayerTiles> pTiles = std::static_pointer_cast<CLayerTiles>(pLayer);
-			if(pTiles->m_Game || pTiles->m_Front || pTiles->m_Tele || pTiles->m_Speedup || pTiles->m_Tune || pTiles->m_Switch)
+			if(pTiles->m_HasGame || pTiles->m_HasFront || pTiles->m_HasTele || pTiles->m_HasSpeedup || pTiles->m_HasTune || pTiles->m_HasSwitch)
 			{
 				pLayer->Render();
 			}
