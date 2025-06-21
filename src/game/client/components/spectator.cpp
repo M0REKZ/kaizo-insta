@@ -335,8 +335,8 @@ void CSpectator::OnRender()
 	SpectatorRect.Draw(ColorRGBA(0.0f, 0.0f, 0.0f, 0.3f), IGraphics::CORNER_ALL, 20.0f);
 
 	// clamp mouse position to selector area
-	m_SelectorMouse.x = clamp(m_SelectorMouse.x, -(ObjWidth - 20.0f), ObjWidth - 20.0f);
-	m_SelectorMouse.y = clamp(m_SelectorMouse.y, -280.0f, 280.0f);
+	m_SelectorMouse.x = std::clamp(m_SelectorMouse.x, -(ObjWidth - 20.0f), ObjWidth - 20.0f);
+	m_SelectorMouse.y = std::clamp(m_SelectorMouse.y, -280.0f, 280.0f);
 
 	const bool MousePressed = Input()->KeyPress(KEY_MOUSE_1) || m_TouchState.m_PrimaryPressed;
 
@@ -596,7 +596,7 @@ void CSpectator::Spectate(int SpectatorId)
 {
 	if(Client()->State() == IClient::STATE_DEMOPLAYBACK)
 	{
-		m_pClient->m_DemoSpecId = clamp(SpectatorId, (int)SPEC_FOLLOW, MAX_CLIENTS - 1);
+		m_pClient->m_DemoSpecId = std::clamp(SpectatorId, (int)SPEC_FOLLOW, MAX_CLIENTS - 1);
 		// The tick must be rendered for the spectator mode to be updated, so we do it manually when demo playback is paused
 		if(DemoPlayer()->BaseInfo()->m_Paused)
 			GameClient()->m_Menus.DemoSeekTick(IDemoPlayer::TICK_CURRENT);
@@ -637,28 +637,27 @@ void CSpectator::SpectateClosest()
 
 	int NewSpectatorId = -1;
 
-	vec2 CurPosition(m_pClient->m_Camera.m_Center);
+	vec2 CurPosition = m_pClient->m_Camera.m_Center;
 	if(SpectatorId != SPEC_FREEVIEW)
 	{
 		const CNetObj_Character &CurCharacter = Snap.m_aCharacters[SpectatorId].m_Cur;
-		CurPosition.x = CurCharacter.m_X;
-		CurPosition.y = CurCharacter.m_Y;
+		CurPosition = vec2(CurCharacter.m_X, CurCharacter.m_Y);
 	}
 
 	int ClosestDistance = std::numeric_limits<int>::max();
-	for(int i = 0; i < MAX_CLIENTS; i++)
+	for(int ClientId = 0; ClientId < MAX_CLIENTS; ClientId++)
 	{
-		if(i == SpectatorId || !Snap.m_aCharacters[i].m_Active || !Snap.m_apPlayerInfos[i] || Snap.m_apPlayerInfos[i]->m_Team == TEAM_SPECTATORS)
+		if(ClientId == SpectatorId || !Snap.m_aCharacters[ClientId].m_Active || !Snap.m_apPlayerInfos[ClientId] || Snap.m_apPlayerInfos[ClientId]->m_Team == TEAM_SPECTATORS)
 			continue;
 
-		if(Client()->State() != IClient::STATE_DEMOPLAYBACK && i == Snap.m_LocalClientId)
+		if(Client()->State() != IClient::STATE_DEMOPLAYBACK && ClientId == Snap.m_LocalClientId)
 			continue;
 
-		const CNetObj_Character &MaybeClosestCharacter = Snap.m_aCharacters[i].m_Cur;
+		const CNetObj_Character &MaybeClosestCharacter = Snap.m_aCharacters[ClientId].m_Cur;
 		int Distance = distance(CurPosition, vec2(MaybeClosestCharacter.m_X, MaybeClosestCharacter.m_Y));
 		if(NewSpectatorId == -1 || Distance < ClosestDistance)
 		{
-			NewSpectatorId = i;
+			NewSpectatorId = ClientId;
 			ClosestDistance = Distance;
 		}
 	}

@@ -19,6 +19,8 @@
 #include <game/generated/protocol7.h>
 #include <game/generated/protocolglue.h>
 
+class CAuthManager; // ddnet-insta
+
 struct CAntibotRoundData;
 
 // When recording a demo on the server, the ClientId -1 is used
@@ -36,6 +38,13 @@ public:
 	virtual const char *GetRandomMapFromPool() = 0;
 	// ddnet-insta method that force stops the server
 	virtual void ShutdownServer() = 0;
+	// called when a 0.7 player sends rcon credentials
+	// returns true if these were in the format username:password
+	// and matched some ddnet rcon user
+	// in that case the player will also be logged in
+	// returns false otherwise
+	virtual bool SixupUsernameAuth(int ClientId, const char *pCredentials) = 0;
+	virtual CAuthManager *AuthManager() = 0;
 
 	MACRO_INTERFACE("server")
 protected:
@@ -221,7 +230,7 @@ public:
 			return true;
 		if(GetClientVersion(Client) >= VERSION_DDNET_OLD)
 			return true;
-		Target = clamp(Target, 0, VANILLA_MAX_CLIENTS - 1);
+		Target = std::clamp(Target, 0, VANILLA_MAX_CLIENTS - 1);
 		int *pMap = GetIdMap(Client);
 		if(pMap[Target] == -1)
 			return false;
@@ -307,6 +316,7 @@ class IGameServer : public IInterface
 	// ddnet-insta
 public:
 	virtual const char *ServerInfoPlayerScoreKind() = 0;
+	virtual bool OnClientPacket(int ClientId, bool Sys, int MsgId, struct CNetChunk *pPacket, class CUnpacker *pUnpacker) = 0;
 
 protected:
 public:
@@ -314,7 +324,8 @@ public:
 	// is instantiated.
 	virtual void OnInit(const void *pPersistentData) = 0;
 	virtual void OnConsoleInit() = 0;
-	virtual void OnMapChange(char *pNewMapName, int MapNameSize) = 0;
+	// Returns `true` if map change accepted.
+	[[nodiscard]] virtual bool OnMapChange(char *pNewMapName, int MapNameSize) = 0;
 	// `pPersistentData` may be null if this is the last time `IGameServer`
 	// is destroyed.
 	virtual void OnShutdown(void *pPersistentData) = 0;

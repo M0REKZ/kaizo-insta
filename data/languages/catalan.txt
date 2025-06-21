@@ -1147,7 +1147,7 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == 
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
 == 
 
 [Graphics error]
@@ -1247,9 +1247,6 @@ Restarting. Please wait…
 Loading skin files
 == 
 
-Loading background map
-== 
-
 Auto-sync player camera
 == 
 
@@ -1319,6 +1316,10 @@ Multi-View
 == 
 
 [Spectating]
+Following %d: %s
+== 
+
+[Spectating]
 Following %s
 == 
 
@@ -1330,6 +1331,9 @@ Team %d
 == 
 
 Some map images could not be loaded. Check the local console for details.
+== 
+
+Loading map
 == 
 
 Uploading map data to GPU
@@ -1368,6 +1372,9 @@ There's an unsaved map in the editor, you might want to save it.
 Continue anyway?
 == 
 
+This name cannot be used for files and folders
+== 
+
 A demo with this name already exists
 == 
 
@@ -1389,10 +1396,19 @@ Videos directory
 Video was saved to '%s'
 == 
 
-Unable to save the skin
+Cancel
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
 == 
 
 Unable to save the skin with a reserved name
+== 
+
+Unable to save the skin
 == 
 
 Trying to determine UDP connectivity…
@@ -1490,11 +1506,11 @@ Go back the specified duration
 == 
 
 [Demo player duration]
-%d min.
+%s min.
 == 
 
 [Demo player duration]
-%d sec.
+%s sec.
 == 
 
 Change the skip duration
@@ -1759,10 +1775,22 @@ Player info change cooldown
 Download community skins
 == 
 
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
 Create a random skin
 == 
 
 Choose default eyes when joining a server
+== 
+
+No skins match your filter criteria
 == 
 
 Open the directory to add custom skins
@@ -1819,9 +1847,6 @@ Reset controls
 == 
 
 Are you sure that you want to reset the controls to their defaults?
-== 
-
-Cancel
 == 
 
 Allows maps to render with more detail
@@ -1979,6 +2004,9 @@ All
 Size of key press icons
 == 
 
+Preview player's name plate
+== 
+
 Preview dummy's name plate
 == 
 
@@ -2055,6 +2083,12 @@ Freeze Laser Outline Color
 == 
 
 Freeze Laser Inner Color
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
 == 
 
 Set all to Rifle

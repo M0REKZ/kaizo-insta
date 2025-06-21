@@ -7,14 +7,14 @@ endif()
 
 file(STRINGS src/game/version.h VERSION_LINE
   LIMIT_COUNT 1
-  REGEX "^#define GAME_RELEASE_VERSION "
+  REGEX "^#define GAME_RELEASE_VERSION_INTERNAL "
 )
 
-if(VERSION_LINE MATCHES "\"([0-9]+)\\.([0-9]+)\\.([0-9]+)\"")
+if(VERSION_LINE MATCHES "([0-9]+)\\.([0-9]+)\\.([0-9]+)")
   set(VERSION_MAJOR ${CMAKE_MATCH_1})
   set(VERSION_MINOR ${CMAKE_MATCH_2})
   set(VERSION_PATCH ${CMAKE_MATCH_3})
-elseif(VERSION_LINE MATCHES "\"([0-9]+)\\.([0-9]+)\"")
+elseif(VERSION_LINE MATCHES "([0-9]+)\\.([0-9]+)")
   set(VERSION_MAJOR ${CMAKE_MATCH_1})
   set(VERSION_MINOR ${CMAKE_MATCH_2})
   set(VERSION_PATCH "0")
@@ -546,10 +546,6 @@ if(EXCEPTION_HANDLING)
   find_package(Crashdump)
 endif()
 
-if(SECURITY_COMPILER_FLAGS)
-  find_package(SSP)
-endif()
-
 if(TARGET_OS AND TARGET_OS STREQUAL "mac")
   find_program(CMAKE_OTOOL otool)
   find_program(DMGBUILD dmgbuild)
@@ -710,6 +706,7 @@ if(TARGET_OS STREQUAL "windows")
   set(PLATFORM_LIBS)
   list(APPEND PLATFORM_LIBS shlwapi) # PathIsRelativeW
   list(APPEND PLATFORM_LIBS version ws2_32) # Windows sockets
+  list(APPEND PLATFORM_LIBS advapi32) # Reg* and Crypt* functions
   list(APPEND PLATFORM_LIBS bcrypt userenv) # for Rust (https://github.com/rust-lang/rust/issues/91974)
   list(APPEND PLATFORM_LIBS ole32) # CoInitialize(Ex)
   list(APPEND PLATFORM_LIBS shell32)
@@ -2009,7 +2006,7 @@ set_src(BASE GLOB_RECURSE src/base
   unicode/confusables.h
   unicode/confusables_data.h
   unicode/tolower.cpp
-  unicode/tolower.h
+  unicode/tolower_data.cpp
   unicode/tolower_data.h
   vmath.h
 )
@@ -2166,6 +2163,7 @@ set_src(GAME_SHARED GLOB src/game
   mapitems_insta.h
   prng.cpp
   prng.h
+  race_state.h
   teamscore.cpp
   teamscore.h
   tuning.h
@@ -2388,6 +2386,8 @@ if(CLIENT)
     components/players.h
     components/race_demo.cpp
     components/race_demo.h
+    components/render_layer.cpp
+    components/render_layer.h
     components/scoreboard.cpp
     components/scoreboard.h
     components/skins.cpp
@@ -2416,12 +2416,16 @@ if(CLIENT)
     pickup_data.h
     prediction/entities/character.cpp
     prediction/entities/character.h
+    prediction/entities/door.cpp
+    prediction/entities/door.h
     prediction/entities/dragger.cpp
     prediction/entities/dragger.h
     prediction/entities/laser.cpp
     prediction/entities/laser.h
     prediction/entities/pickup.cpp
     prediction/entities/pickup.h
+    prediction/entities/plasma.cpp
+    prediction/entities/plasma.h
     prediction/entities/projectile.cpp
     prediction/entities/projectile.h
     prediction/entity.cpp
@@ -2514,6 +2518,8 @@ if(CLIENT)
     prompt.h
     proof_mode.cpp
     proof_mode.h
+    quadart.cpp
+    quadart.h
     quick_action.h
     quick_actions.cpp
     quick_actions.h
@@ -2564,8 +2570,12 @@ if(CLIENT)
   endif()
 
   if(TARGET_OS STREQUAL "windows")
+    set(VERSION_EXECUTABLE "${CLIENT_EXECUTABLE}")
+    set(VERSION_COMPANY "${CLIENT_EXECUTABLE} Team")
+    configure_file("other/versioninfo/versioninfo.rc.in" "client.versioninfo.rc")
     configure_file("other/manifest/client.manifest.in" "client.manifest")
     set(CLIENT_ICON "other/icons/DDNet.rc")
+    set(CLIENT_VERSIONINFO "${CMAKE_CURRENT_BINARY_DIR}/client.versioninfo.rc")
     if(NOT MINGW)
       set(CLIENT_MANIFEST "${CMAKE_CURRENT_BINARY_DIR}/client.manifest")
     else()
@@ -2574,6 +2584,7 @@ if(CLIENT)
     endif()
   else()
     set(CLIENT_ICON)
+    set(CLIENT_VERSIONINFO)
     set(CLIENT_MANIFEST)
   endif()
 
@@ -2582,6 +2593,7 @@ if(CLIENT)
     add_library(game-client SHARED
       ${CLIENT_SRC}
       ${CLIENT_ICON}
+      ${CLIENT_VERSIONINFO}
       ${CLIENT_MANIFEST}
       ${DEPS_CLIENT}
       $<TARGET_OBJECTS:engine-gfx>
@@ -2593,6 +2605,7 @@ if(CLIENT)
     add_executable(game-client WIN32
       ${CLIENT_SRC}
       ${CLIENT_ICON}
+      ${CLIENT_VERSIONINFO}
       ${CLIENT_MANIFEST}
       ${DEPS_CLIENT}
       $<TARGET_OBJECTS:engine-gfx>
@@ -2908,16 +2921,18 @@ if(SERVER)
 
     gameworld.cpp
     gameworld.h
+    instagib/antibob.cpp
+    instagib/antibob.h
     instagib/chat_commands.cpp
     instagib/chat_commands.h
     instagib/enums.cpp
     instagib/enums.h
     instagib/extra_columns.h
+    instagib/gamecontext.cpp
     instagib/gamecontext.h
     instagib/gamecontext/bangcommands.cpp
     instagib/gamecontroller.cpp
     instagib/gamecontroller.h
-    instagib/gamelogic.cpp
     instagib/laser_text.cpp
     instagib/laser_text.h
     instagib/persistent_client_data.h
@@ -2937,6 +2952,7 @@ if(SERVER)
     instagib/strhelpers.h
     instagib/structs.h
     instagib/version.h
+    mutes.cpp
     player.cpp
     player.h
     save.cpp
@@ -2959,9 +2975,14 @@ if(SERVER)
   )
   set(SERVER_SRC ${ENGINE_SERVER_WITHOUT_MAIN} ${GAME_SERVER} ${GAME_GENERATED_SERVER})
   if(TARGET_OS STREQUAL "windows")
+    set(VERSION_EXECUTABLE "${SERVER_EXECUTABLE}")
+    set(VERSION_COMPANY "${CLIENT_EXECUTABLE} Team")
+    configure_file("other/versioninfo/versioninfo.rc.in" "server.versioninfo.rc")
     set(SERVER_ICON "other/icons/DDNet-Server.rc")
+    set(SERVER_VERSIONINFO "${CMAKE_CURRENT_BINARY_DIR}/server.versioninfo.rc")
   else()
     set(SERVER_ICON)
+    set(SERVER_VERSIONINFO)
   endif()
 
   # Antibot
@@ -3002,6 +3023,7 @@ if(SERVER)
       $<TARGET_OBJECTS:game-server-without-main>
       "${PROJECT_SOURCE_DIR}/src/engine/server/main.cpp"
       ${SERVER_ICON}
+      ${SERVER_VERSIONINFO}
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
       $<TARGET_OBJECTS:rust-bridge-shared>
@@ -3011,6 +3033,7 @@ if(SERVER)
       ${DEPS}
       "${PROJECT_SOURCE_DIR}/src/engine/server/main.cpp"
       ${SERVER_ICON}
+      ${SERVER_VERSIONINFO}
       $<TARGET_OBJECTS:game-server-without-main>
       $<TARGET_OBJECTS:engine-shared>
       $<TARGET_OBJECTS:game-shared>
@@ -3064,7 +3087,6 @@ if(TOOLS)
     dilate.cpp
     dummy_map.cpp
     map_convert_07.cpp
-    map_create_pixelart.cpp
     map_diff.cpp
     map_extract.cpp
     map_find_env.cpp
@@ -3072,6 +3094,7 @@ if(TOOLS)
     map_replace_area.cpp
     map_replace_image.cpp
     map_resave.cpp
+    map_test.cpp
     packetgen.cpp
     stun.cpp
     twping.cpp
@@ -3085,7 +3108,7 @@ if(TOOLS)
       set(TOOL_DEPS ${DEPS})
       set(TOOL_LIBS ${LIBS})
       unset(EXTRA_TOOL_SRC)
-      if(TOOL MATCHES "^(dilate|map_convert_07|map_create_pixelart|map_optimize|map_extract|map_replace_image)$")
+      if(TOOL MATCHES "^(dilate|map_convert_07|map_optimize|map_extract|map_replace_image)$")
         list(APPEND TOOL_INCLUDE_DIRS ${PNG_INCLUDE_DIRS})
         list(APPEND TOOL_DEPS $<TARGET_OBJECTS:engine-gfx>)
         list(APPEND TOOL_LIBS ${PNG_LIBRARIES})
@@ -3195,6 +3218,7 @@ if((GTEST_FOUND OR DOWNLOAD_GTEST) AND SERVER)
     test.cpp
     test.h
     thread.cpp
+    time.cpp
     timestamp.cpp
     unix.cpp
     uuid.cpp
@@ -3431,7 +3455,6 @@ if(TOOLS)
     demo_extract_chat
     dilate
     map_convert_07
-    map_create_pixelart
     map_diff
     map_extract
   )
@@ -3715,6 +3738,10 @@ foreach(target ${TARGETS})
   if(ENABLE_IPO)
     set_property(TARGET ${target} PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
   endif()
+  if(TARGET_OS STREQUAL "emscripten")
+    # Preload data directory into the filesystem
+    target_link_options(${target} PRIVATE --preload-file data)
+  endif()
 endforeach()
 
 foreach(target ${TARGETS_LINK})
@@ -3802,7 +3829,7 @@ foreach(target ${TARGETS_OWN})
     target_compile_definitions(${target} PRIVATE CONF_INFORM_UPDATE)
   endif()
   if(STEAM)
-    target_compile_definitions(${target} PRIVATE PLATFORM_SUFFIX="-steam")
+    target_compile_definitions(${target} PRIVATE PLATFORM_SUFFIX=-steam)
   endif()
   if(DISCORD)
     target_compile_definitions(${target} PRIVATE CONF_DISCORD)
@@ -3811,7 +3838,7 @@ foreach(target ${TARGETS_OWN})
     endif()
   endif()
   if(VERSION)
-    target_compile_definitions(${target} PRIVATE GAME_RELEASE_VERSION="${VERSION}")
+    target_compile_definitions(${target} PRIVATE GAME_RELEASE_VERSION_INTERNAL=${VERSION})
   endif()
   if(TARGET_OS STREQUAL "android")
     if(ANDROID_PACKAGE_NAME)

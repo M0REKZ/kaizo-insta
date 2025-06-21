@@ -1044,10 +1044,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == Inicializace se nezdařila. Zkuste změnit gfx_backend na OpenGL nebo Vulkan v settings_ddnet.cfg v adresáři s konfigurací a zkuste to znovu.
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Nedostatek VRAM. Zkuste odebrat vlastní aktiva (skins, entity, atd.), zejména ty s vysokým rozlišením.
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == Při nahrávání příkazu došlo k chybě. Zkuste aktualizovat ovladače GPU.
 
@@ -1338,12 +1334,12 @@ Go back the specified duration
 == Vrátit se o zadanou dobu
 
 [Demo player duration]
-%d min.
-== %d min.
+%s min.
+== %s min.
 
 [Demo player duration]
-%d sec.
-== %d sec.
+%s sec.
+== %s sec.
 
 Change the skip duration
 == Změnit dobu přeskočení
@@ -1911,6 +1907,10 @@ Eyes
 English translation by the DDNet Team
 == Czech translation by khubajsn, Petr, Medik, TeeWorlds-org and dobrykafe
 
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
 No demo with this filename exists
 == 
 
@@ -1918,9 +1918,6 @@ No demo with this filename exists
 == 
 
 Some fonts could not be loaded. Check the local console for details.
-== 
-
-Loading background map
 == 
 
 Auto-sync player camera
@@ -1949,8 +1946,24 @@ Active
 Loading maps…
 == 
 
+[Spectating]
+Following %d: %s
+== 
+
 [Spectating Camera Mode Icon]
 AUTO
+== 
+
+Loading map
+== 
+
+This name cannot be used for files and folders
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
 == 
 
 Online friends (%d)
@@ -2081,6 +2094,18 @@ Saves file
 Open the saves file
 == 
 
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
+== 
+
 Show FPS
 == 
 
@@ -2155,6 +2180,9 @@ All
 Size of key press icons
 == 
 
+Preview player's name plate
+== 
+
 Preview dummy's name plate
 == 
 
@@ -2165,6 +2193,12 @@ Width of others' hook collision line
 == 
 
 Preview 'Hook collisions' being pressed
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
 == 
 
 AntiPing: prediction margin

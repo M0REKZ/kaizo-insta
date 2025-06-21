@@ -147,6 +147,38 @@ void CGameControllerBaseFng::OnShowMultis(const CSqlStatsPlayer *pStats, class C
 	}
 }
 
+void CGameControllerBaseFng::OnShowSteals(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName)
+{
+	char aBuf[512];
+	str_format(
+		aBuf,
+		sizeof(aBuf),
+		"~~~ all time stats for '%s'",
+		pRequestedName);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "~ Kills stolen from others: %d", pStats->m_StealsFromOthers);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "~ Kills stolen by others: %d", pStats->m_StealsByOthers);
+	GameServer()->SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	int TargetId = GetCidByName(pRequestedName);
+	if(TargetId < 0 || TargetId >= MAX_CLIENTS)
+		return;
+
+	const CPlayer *pPlayer = GameServer()->m_apPlayers[TargetId];
+
+	str_format(aBuf, sizeof(aBuf), "~~~ round stats for '%s'", pRequestedName);
+	SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "~ Kills stolen from others: %d", pPlayer->m_Stats.m_StealsFromOthers);
+	SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+
+	str_format(aBuf, sizeof(aBuf), "~ Kills stolen by others: %d", pPlayer->m_Stats.m_StealsByOthers);
+	SendChatTarget(pRequestingPlayer->GetCid(), aBuf);
+}
+
 void CGameControllerBaseFng::OnPlayerDisconnect(class CPlayer *pPlayer, const char *pReason)
 {
 	for(CPlayer *pOther : GameServer()->m_apPlayers)
@@ -259,19 +291,22 @@ void CGameControllerBaseFng::OnSpike(class CCharacter *pChr, int SpikeTile)
 		pKiller->m_LastKillTime = pKiller->HandleMulti();
 
 		// check for steal
-		if(pChr->GetPlayer()->m_OriginalFreezerId != -1 && (GameFlags() & GAMEFLAG_TEAMS))
+		if(pChr->GetPlayer()->m_OriginalFreezerId != -1)
 		{
 			CPlayer *pOriginalFreezer = GameServer()->m_apPlayers[pChr->GetPlayer()->m_OriginalFreezerId];
 			if(pOriginalFreezer && pOriginalFreezer != pKiller)
 			{
-				char aBuf[512];
-				str_format(
-					aBuf,
-					sizeof(aBuf),
-					"'%s' stole '%s's kill.",
-					Server()->ClientName(pKiller->GetCid()),
-					Server()->ClientName(pOriginalFreezer->GetCid()));
-				GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+				if(g_Config.m_SvAnnounceSteals)
+				{
+					char aBuf[512];
+					str_format(
+						aBuf,
+						sizeof(aBuf),
+						"'%s' kill was stolen by '%s'.",
+						Server()->ClientName(pOriginalFreezer->GetCid()),
+						Server()->ClientName(pKiller->GetCid()));
+					GameServer()->SendChat(-1, TEAM_ALL, aBuf);
+				}
 
 				if(IsStatTrack())
 				{
@@ -328,7 +363,13 @@ void CGameControllerBaseFng::SnapDDNetCharacter(int SnappingClient, CCharacter *
 {
 	CGameControllerInstagib::SnapDDNetCharacter(SnappingClient, pChr, pDDNetCharacter);
 
+	if(SnappingClient < 0 || SnappingClient >= MAX_CLIENTS)
+		return;
+
 	CPlayer *pSnapReceiver = GameServer()->m_apPlayers[SnappingClient];
+	if(!pSnapReceiver)
+		return;
+
 	bool IsTeamMate = pChr->GetPlayer()->GetCid() == SnappingClient;
 	if(IsTeamPlay() && pChr->GetPlayer()->GetTeam() == pSnapReceiver->GetTeam())
 		IsTeamMate = true;
@@ -454,6 +495,7 @@ bool CGameControllerBaseFng::OnCharacterTakeDamage(vec2 &Force, int &Dmg, int &F
 
 	GameServer()->CreateDeath(Character.m_Pos, Character.GetPlayer()->GetCid(), Character.TeamMask());
 
+	Character.GetPlayer()->UpdateLastToucher(From);
 	Character.GetPlayer()->m_OriginalFreezerId = From;
 	Character.Freeze(g_Config.m_SvHitFreezeDelay);
 	return false;

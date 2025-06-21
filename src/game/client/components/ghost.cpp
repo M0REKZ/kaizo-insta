@@ -351,19 +351,15 @@ void CGhost::OnRender()
 		if(Player.m_Weapon == WEAPON_NINJA && g_Config.m_ClShowNinja)
 		{
 			// change the skin for the ghost to the ninja
-			const auto *pSkin = m_pClient->m_Skins.FindOrNullptr("x_ninja");
-			if(pSkin != nullptr)
+			GhostNinjaRenderInfo = Ghost.m_pManagedTeeRenderInfo->TeeRenderInfo();
+			GhostNinjaRenderInfo.ApplySkin(GameClient()->m_Players.NinjaTeeRenderInfo()->TeeRenderInfo());
+			GhostNinjaRenderInfo.m_CustomColoredSkin = m_pClient->IsTeamPlay();
+			if(!GhostNinjaRenderInfo.m_CustomColoredSkin)
 			{
-				GhostNinjaRenderInfo = Ghost.m_pManagedTeeRenderInfo->TeeRenderInfo();
-				GhostNinjaRenderInfo.Apply(pSkin);
-				GhostNinjaRenderInfo.m_CustomColoredSkin = m_pClient->IsTeamPlay();
-				if(!GhostNinjaRenderInfo.m_CustomColoredSkin)
-				{
-					GhostNinjaRenderInfo.m_ColorBody = ColorRGBA(1, 1, 1);
-					GhostNinjaRenderInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
-				}
-				pRenderInfo = &GhostNinjaRenderInfo;
+				GhostNinjaRenderInfo.m_ColorBody = ColorRGBA(1, 1, 1);
+				GhostNinjaRenderInfo.m_ColorFeet = ColorRGBA(1, 1, 1);
 			}
+			pRenderInfo = &GhostNinjaRenderInfo;
 		}
 
 		m_pClient->m_Players.RenderHook(&Prev, &Player, pRenderInfo, -2, IntraTick);
@@ -377,6 +373,10 @@ void CGhost::UpdateTeeRenderInfo(CGhostItem &Ghost)
 	CSkinDescriptor SkinDescriptor;
 	SkinDescriptor.m_Flags = CSkinDescriptor::FLAG_SIX;
 	IntsToStr(Ghost.m_Skin.m_aSkin, std::size(Ghost.m_Skin.m_aSkin), SkinDescriptor.m_aSkinName, std::size(SkinDescriptor.m_aSkinName));
+	if(!CSkin::IsValidName(SkinDescriptor.m_aSkinName))
+	{
+		str_copy(SkinDescriptor.m_aSkinName, "default");
+	}
 
 	CTeeRenderInfo TeeRenderInfo;
 	TeeRenderInfo.ApplyColors(Ghost.m_Skin.m_UseCustomColor, Ghost.m_Skin.m_ColorBody, Ghost.m_Skin.m_ColorFeet);

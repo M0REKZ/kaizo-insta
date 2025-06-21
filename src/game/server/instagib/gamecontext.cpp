@@ -1,24 +1,20 @@
-#include <base/system.h>
-#include <engine/shared/config.h>
-#include <game/generated/protocol.h>
-#include <game/generated/protocol7.h>
-#include <game/server/instagib/protocol.h>
-
-#include "../entities/character.h"
-#include "../gamecontext.h"
-#include "../player.h"
-
+#include <base/log.h>
+#include <engine/shared/network.h>
+#include <engine/shared/packer.h>
+#include <game/server/gamecontext.h>
 #include <game/server/gamecontroller.h>
+#include <game/server/instagib/protocol.h>
+#include <game/server/player.h>
 
-// TODO: this is not game logic
-//       do some cleanup of the file structuring
-//       rcon_commands.cpp rcon_configs.cpp and gamelogic.cpp
-//       all implement CGameContext mehtods
 void CGameContext::OnInitInstagib()
 {
 	UpdateVoteCheckboxes(); // ddnet-insta
 	AlertOnSpecialInstagibConfigs(); // ddnet-insta
 	ShowCurrentInstagibConfigsMotd(); // ddnet-insta
+
+	// https://github.com/ddnet-insta/ddnet-insta/issues/341
+	if(!str_to_display_score(g_Config.m_SvDisplayScore, &m_DisplayScore))
+		log_warn("ddnet-insta", "'%s' is not a valid display score pick one of those: " DISPLAY_SCORE_VALUES, g_Config.m_SvDisplayScore);
 
 	m_pHttp = Kernel()->RequestInterface<IHttp>();
 
@@ -334,7 +330,7 @@ void CGameContext::SendGameMsg(int GameMsgId, int ParaI1, int ClientId) const
 		if(GameMsgId == protocol7::GAMEMSG_GAME_PAUSED)
 		{
 			char aBuf[512];
-			int PauseId = clamp(ParaI1, 0, Server()->MaxClients() - 1);
+			int PauseId = std::clamp(ParaI1, 0, Server()->MaxClients() - 1);
 			str_format(aBuf, sizeof(aBuf), "'%s' initiated a pause. If you are ready do /ready", Server()->ClientName(PauseId));
 			SendChatTarget(i, aBuf);
 		}
@@ -416,4 +412,30 @@ void CGameContext::InstagibUnstackChatMessage(char *pUnstacked, const char *pMes
 		str_copy(m_aaLastChatMessages[i], m_aaLastChatMessages[i - 1]);
 	}
 	str_copy(m_aaLastChatMessages[0], pMessage);
+}
+
+void CGameContext::SwapTeams()
+{
+	if(!m_pController)
+		return;
+	if(!m_pController->IsTeamPlay())
+		return;
+
+	SendGameMsg(protocol7::GAMEMSG_TEAM_SWAP, -1);
+
+	for(CPlayer *pPlayer : m_apPlayers)
+	{
+		if(pPlayer && pPlayer->GetTeam() != TEAM_SPECTATORS)
+			m_pController->DoTeamChange(pPlayer, pPlayer->GetTeam() ^ 1, false);
+	}
+
+	m_pController->SwapTeamscore();
+}
+
+bool CGameContext::OnClientPacket(int ClientId, bool Sys, int MsgId, CNetChunk *pPacket, CUnpacker *pUnpacker)
+{
+	if(!m_pController)
+		return false;
+
+	return m_pController->OnClientPacket(ClientId, Sys, MsgId, pPacket, pUnpacker);
 }

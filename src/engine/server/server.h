@@ -69,7 +69,9 @@ public:
 	void ClearRandomMapPool() override;
 	const char *GetRandomMapFromPool() override;
 	void ShutdownServer() override { m_RunServer = STOPPING; };
+	CAuthManager *AuthManager() override { return &m_AuthManager; }
 	static void ConRedirect(IConsole::IResult *pResult, void *pUser);
+	bool SixupUsernameAuth(int ClientId, const char *pCredentials) override;
 
 private:
 	friend class CServerLogger;
@@ -420,7 +422,7 @@ public:
 
 	void ExpireServerInfo() override;
 	void CacheServerInfo(CCache *pCache, int Type, bool SendClients);
-	void CacheServerInfoSixup(CCache *pCache, bool SendClients);
+	void CacheServerInfoSixup(CCache *pCache, bool SendClients, int MaxConsideredClients);
 	void SendServerInfo(const NETADDR *pAddr, int Token, int Type, bool SendClients);
 	void GetServerInfoSixup(CPacker *pPacker, int Token, bool SendClients);
 	bool RateLimitServerInfoConnless();

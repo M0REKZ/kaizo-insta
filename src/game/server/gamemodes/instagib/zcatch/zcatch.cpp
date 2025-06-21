@@ -231,7 +231,10 @@ void CGameControllerZcatch::StartZcatchRound()
 		pPlayer->m_KillerId = -1;
 
 		// resets the winners color
-		pPlayer->m_Spree = 0;
+		pPlayer->m_Spree = 0; // TODO: this is nasty it breaks sprees across rounds
+		//                             also resetting m_Spree should check first
+		//                             if it was a new spree high score and set
+		//                             m_BestSpree
 		pPlayer->m_UntrackedSpree = 0;
 	}
 }
@@ -378,7 +381,10 @@ bool CGameControllerZcatch::OnSelfkill(int ClientId)
 			str_format(aBuf, sizeof(aBuf), "You were released by '%s'", Server()->ClientName(pPlayer->GetCid()));
 			ReleasePlayer(pVictim, aBuf);
 		}
-		str_format(aBuf, sizeof(aBuf), "You released %zu remaining spectators because your kill count reached 0.", pPlayer->m_vVictimIds.size());
+		if(pPlayer->m_vVictimIds.empty())
+			str_copy(aBuf, "You released all players. The next selfkill will kill you!");
+		else
+			str_format(aBuf, sizeof(aBuf), "You released %zu remaining spectators because your kill count reached 0.", pPlayer->m_vVictimIds.size());
 		SendChatTarget(ClientId, aBuf);
 		pPlayer->m_vVictimIds.clear();
 	}
@@ -773,6 +779,7 @@ void CGameControllerZcatch::ReleaseAllPlayers()
 			pPlayer->SetTeamNoKill(TEAM_RED);
 		}
 		pPlayer->m_KillerId = -1;
+		pPlayer->m_vVictimIds.clear();
 	}
 }
 

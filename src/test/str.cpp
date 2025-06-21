@@ -4,6 +4,8 @@
 
 #include <game/gamecore.h>
 
+#include <limits>
+
 typedef void (*TStringArgumentFunction)(char *pStr);
 template<TStringArgumentFunction Func>
 static void TestInplace(const char *pInput, const char *pOutput)
@@ -195,13 +197,61 @@ TEST(Str, Utf8ToSkeleton)
 	EXPECT_EQ(aBuf[5], 'u');
 }
 
+TEST(Str, Utf8ToLowerCodepoint)
+{
+	EXPECT_TRUE(str_utf8_tolower_codepoint('A') == 'a');
+	EXPECT_TRUE(str_utf8_tolower_codepoint('z') == 'z');
+	EXPECT_TRUE(str_utf8_tolower_codepoint(192) == 224); // À -> à
+	EXPECT_TRUE(str_utf8_tolower_codepoint(7882) == 7883); // Ị -> ị
+}
+
+template<size_t BufferSize = 128>
+static void TestStrUtf8ToLower(const char *pInput, const char *pOutput)
+{
+	char aBuf[BufferSize];
+	str_utf8_tolower(pInput, aBuf, sizeof(aBuf));
+	EXPECT_STREQ(aBuf, pOutput);
+}
+
 TEST(Str, Utf8ToLower)
 {
-	EXPECT_TRUE(str_utf8_tolower('A') == 'a');
-	EXPECT_TRUE(str_utf8_tolower('z') == 'z');
-	EXPECT_TRUE(str_utf8_tolower(192) == 224); // À -> à
-	EXPECT_TRUE(str_utf8_tolower(7882) == 7883); // Ị -> ị
+	// See https://stackoverflow.com/a/18689585
+	TestStrUtf8ToLower<>("", "");
+	TestStrUtf8ToLower<>("a", "a");
+	TestStrUtf8ToLower<>("A", "a");
+	TestStrUtf8ToLower<>("z", "z");
+	TestStrUtf8ToLower<>("Z", "z");
+	TestStrUtf8ToLower<>("ABC", "abc");
+	TestStrUtf8ToLower<>("ÖÜÄẞ", "öüäß");
+	TestStrUtf8ToLower<>("Iİ", "ii");
+	TestStrUtf8ToLower<>("Ϊ", "ϊ");
+	TestStrUtf8ToLower<>("Į", "į");
+	TestStrUtf8ToLower<>("Җ", "җ");
+	TestStrUtf8ToLower<>("Ѹ", "ѹ");
+	TestStrUtf8ToLower<>("Ǆ", "ǆ");
+	TestStrUtf8ToLower<>("ⒹⒹＮＥＴ", "ⓓⓓｎｅｔ");
+	TestStrUtf8ToLower<>("Ⱥ", "ⱥ"); // lower case uses more bytes than upper case
 
+	TestStrUtf8ToLower<1>("ABC", "");
+	TestStrUtf8ToLower<2>("ABC", "a");
+	TestStrUtf8ToLower<3>("ABC", "ab");
+	TestStrUtf8ToLower<4>("ABC", "abc");
+
+	TestStrUtf8ToLower<1>("ȺȺȺ", "");
+	TestStrUtf8ToLower<2>("ȺȺȺ", "");
+	TestStrUtf8ToLower<3>("ȺȺȺ", "");
+	TestStrUtf8ToLower<4>("ȺȺȺ", "ⱥ");
+	TestStrUtf8ToLower<5>("ȺȺȺ", "ⱥ");
+	TestStrUtf8ToLower<6>("ȺȺȺ", "ⱥ");
+	TestStrUtf8ToLower<7>("ȺȺȺ", "ⱥⱥ");
+	TestStrUtf8ToLower<8>("ȺȺȺ", "ⱥⱥ");
+	TestStrUtf8ToLower<9>("ȺȺȺ", "ⱥⱥ");
+	TestStrUtf8ToLower<10>("ȺȺȺ", "ⱥⱥⱥ");
+	TestStrUtf8ToLower<11>("ȺȺȺ", "ⱥⱥⱥ");
+}
+
+TEST(Str, Utf8CompNocase)
+{
 	EXPECT_TRUE(str_utf8_comp_nocase("ÖlÜ", "ölü") == 0);
 	EXPECT_TRUE(str_utf8_comp_nocase("ÜlÖ", "ölü") > 0); // ü > ö
 	EXPECT_TRUE(str_utf8_comp_nocase("ÖlÜ", "ölüa") < 0); // NULL < a
@@ -523,6 +573,13 @@ TEST(Str, Base64)
 	EXPECT_STREQ(aBuf, "YXN1cmUu");
 	StrBase64Str(aBuf, sizeof(aBuf), "sure.");
 	EXPECT_STREQ(aBuf, "c3VyZS4=");
+
+	StrBase64Str(aBuf, 4, "pleasure.");
+	EXPECT_STREQ(aBuf, "cGx");
+	StrBase64Str(aBuf, 5, "pleasure.");
+	EXPECT_STREQ(aBuf, "cGxl");
+	StrBase64Str(aBuf, 6, "pleasure.");
+	EXPECT_STREQ(aBuf, "cGxlY");
 }
 
 TEST(Str, Base64Decode)
@@ -551,6 +608,9 @@ TEST(Str, Base64Decode)
 	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
 	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), "////"), 3);
 	EXPECT_STREQ(aOut, "\xff\xff\xffXXXXXXXXXXXXX");
+	str_copy(aOut, "XXXXXXXXXXXXXXXX", sizeof(aOut));
+	EXPECT_EQ(str_base64_decode(aOut, sizeof(aOut), "CQk+"), 3);
+	EXPECT_STREQ(aOut, "		>XXXXXXXXXXXXX");
 }
 
 TEST(Str, Base64DecodeError)
@@ -566,10 +626,17 @@ TEST(Str, Base64DecodeError)
 	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AAA=AAAA"), 0);
 	// Invalid characters.
 	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "----"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "A---"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AA--"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AAA-"), 0);
 	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AAAA "), 0);
 	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "AAA "), 0);
 	// Invalid padding values.
 	EXPECT_LT(str_base64_decode(aBuf, sizeof(aBuf), "//=="), 0);
+	// Wrong output buffer size.
+	EXPECT_LT(str_base64_decode(aBuf, 2, "cGxlYXN1cmUu"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, 3, "cGxlYXN1cmUu"), 0);
+	EXPECT_LT(str_base64_decode(aBuf, 4, "cGxlYXN1cmUu"), 0);
 }
 
 TEST(Str, Tokenize)
@@ -621,6 +688,17 @@ TEST(Str, Format)
 	EXPECT_STREQ(aBuf, "99:");
 }
 
+TEST(Str, FormatNumber)
+{
+	char aBuf[16];
+	EXPECT_EQ(str_format(aBuf, sizeof(aBuf), "%d", 0), 1);
+	EXPECT_STREQ(aBuf, "0");
+	EXPECT_EQ(str_format(aBuf, sizeof(aBuf), "%d", std::numeric_limits<int>::min()), 11);
+	EXPECT_STREQ(aBuf, "-2147483648");
+	EXPECT_EQ(str_format(aBuf, sizeof(aBuf), "%d", std::numeric_limits<int>::max()), 10);
+	EXPECT_STREQ(aBuf, "2147483647");
+}
+
 TEST(Str, FormatTruncate)
 {
 	const char *pStr = "DDNet最好了";
@@ -669,6 +747,14 @@ TEST(Str, TrimWords)
 	EXPECT_STREQ(str_trim_words(pStr3, 3), "dddd");
 	EXPECT_STREQ(str_trim_words(pStr3, 4), "");
 	EXPECT_STREQ(str_trim_words(pStr3, 100), "");
+	const char *pStr4 = "";
+	EXPECT_STREQ(str_trim_words(pStr4, 0), "");
+	EXPECT_STREQ(str_trim_words(pStr4, 1), "");
+	EXPECT_STREQ(str_trim_words(pStr4, 2), "");
+	const char *pStr5 = "     ";
+	EXPECT_STREQ(str_trim_words(pStr5, 0), "");
+	EXPECT_STREQ(str_trim_words(pStr5, 1), "");
+	EXPECT_STREQ(str_trim_words(pStr5, 2), "");
 }
 
 TEST(Str, CopyNum)

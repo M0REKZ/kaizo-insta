@@ -3,8 +3,11 @@
 #include <cstdint>
 #include <engine/server/server.h>
 #include <engine/shared/config.h>
+#include <engine/shared/network.h>
+#include <engine/shared/packer.h>
 #include <engine/shared/protocol.h>
 #include <game/generated/protocol.h>
+#include <game/race_state.h>
 #include <game/server/entities/character.h>
 #include <game/server/entities/laser.h>
 #include <game/server/entities/ddnet_pvp/vanilla_projectile.h>
@@ -17,7 +20,10 @@
 #include <game/server/instagib/version.h>
 #include <game/server/player.h>
 #include <game/server/score.h>
+#include <game/server/teams.h>
 #include <game/version.h>
+
+#include <game/server/instagib/antibob.h>
 
 #include "base_pvp.h"
 
@@ -54,6 +60,8 @@ CGameControllerPvp::CGameControllerPvp(class CGameContext *pGameServer) :
 	m_vFrozenQuitters.clear();
 
 	m_UnbalancedTick = TBALANCE_OK;
+
+	g_AntibobContext.m_pConsole = Console();
 }
 
 void CGameControllerPvp::OnReset()
@@ -437,6 +445,30 @@ bool CGameControllerPvp::ForceNetworkClippingLine(const CEntity *pEntity, int Sn
 	return (absolute(DistanceToLine.x) > ClippDistance || absolute(DistanceToLine.y) > ClippDistance);
 }
 
+bool CGameControllerPvp::OnClientPacket(int ClientId, bool Sys, int MsgId, CNetChunk *pPacket, CUnpacker *pUnpacker)
+{
+	// make a copy so we can consume fields
+	// without breaking the state for the server
+	// in case we pass the packet on
+	CUnpacker Unpacker = *pUnpacker;
+	bool Vital = pPacket->m_Flags & NET_CHUNKFLAG_VITAL;
+
+	if(Sys && MsgId == NETMSG_RCON_AUTH && Vital && Server()->IsSixup(ClientId))
+	{
+		const char *pCredentials = Unpacker.GetString(CUnpacker::SANITIZE_CC);
+		if(Unpacker.Error())
+			return false;
+
+		// check if 0.7 player sends valid credentials for
+		// a ddnet rcon account in the format username:pass
+		// in that case login and drop the message
+		if(Server()->SixupUsernameAuth(ClientId, pCredentials))
+			return true;
+	}
+
+	return false;
+}
+
 void CGameControllerPvp::OnShowStatsAll(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName)
 {
 	char aBuf[1024];
@@ -629,14 +661,18 @@ void CGameControllerPvp::SaveStatsOnRoundEnd(CPlayer *pPlayer)
 	if(aMsg[0])
 		GameServer()->SendChatTarget(pPlayer->GetCid(), aMsg);
 
-	dbg_msg("sql", "saving round stats of player '%s' win=%d loss=%d msg='%s'", Server()->ClientName(pPlayer->GetCid()), Won, Lost, aMsg);
+	dbg_msg("stats", "saving round stats of player '%s' win=%d loss=%d msg='%s'", Server()->ClientName(pPlayer->GetCid()), Won, Lost, aMsg);
 
 	// the spree can not be incremented if stat track is off
 	// but the best spree will be counted even if it is off
 	// this ensures that the spree of a player counts that
 	// dominated the entire server into rq and never died
 	if(pPlayer->Spree() > pPlayer->m_Stats.m_BestSpree)
+	{
+		log_info("stats", "player '%s' has a spree of %d kills that was not tracked (force tracking it now)", Server()->ClientName(pPlayer->GetCid()), pPlayer->Spree());
+		log_info("stats", "player '%s' currently has %d tracked kills", Server()->ClientName(pPlayer->GetCid()), pPlayer->m_Stats.m_Kills);
 		pPlayer->m_Stats.m_BestSpree = pPlayer->Spree();
+	}
 	if(IsStatTrack())
 	{
 		if(Won)
@@ -869,7 +905,8 @@ int CGameControllerPvp::GetAutoTeam(int NotThisId)
 	// check if there're enough player slots left
 	if(FreeInGameSlots())
 	{
-		++m_aTeamSize[Team];
+		if(GameServer()->GetDDRaceTeam(NotThisId) == 0)
+			++m_aTeamSize[Team];
 		return Team;
 	}
 	return TEAM_SPECTATORS;
@@ -936,7 +973,7 @@ void CGameControllerPvp::ModifyWeapons(IConsole::IResult *pResult, void *pUserDa
 	if(!pChr)
 		return;
 
-	if(clamp(Weapon, -1, NUM_WEAPONS - 1) != Weapon)
+	if(std::clamp(Weapon, -1, NUM_WEAPONS - 1) != Weapon)
 	{
 		pSelf->GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "info",
 			"invalid weapon id");
@@ -954,11 +991,22 @@ void CGameControllerPvp::ModifyWeapons(IConsole::IResult *pResult, void *pUserDa
 		pChr->GiveWeapon(Weapon, Remove);
 	}
 
-	pChr->m_DDRaceState = DDRACE_CHEAT;
+	pChr->m_DDRaceState = ERaceState::CHEATED;
 }
 
 int CGameControllerPvp::OnCharacterDeath(class CCharacter *pVictim, class CPlayer *pKiller, int Weapon)
 {
+	// int DDRaceTeam = GameServer()->GetDDRaceTeam(pVictim->GetPlayer()->GetCid());
+	// TODO: handle team state as a switch so we can be sure all future team states
+	//       added in a merge will throw a compiler warning
+	// int TeamState = Teams().GetTeamState(DDRaceTeam);
+	// if(TeamState == CGameTeams::TEAMSTATE_OPEN)
+	// TODO: not sure which team state does what and what we want in ddnet-insta
+	//       but if death would respawn you to t0 you should be moved to spec instead
+	//       but that seems annoying as a default
+	//       not allowing in others into the team as a default also seems annoying
+	//       maybe the new t0 mode would be a nice default state for ddnet-insta
+
 	CGameControllerDDRace::OnCharacterDeath(pVictim, pKiller, Weapon);
 
 	if(pVictim->HasRainbow())
@@ -1821,6 +1869,30 @@ bool CGameControllerPvp::OnSkinChange7(protocol7::CNetMsg_Cl_SkinChange *pMsg, i
 	return true;
 }
 
+bool CGameControllerPvp::OnTeamChatCmd(IConsole::IResult *pResult)
+{
+	if(!g_Config.m_SvTeam)
+	{
+		return false;
+	}
+
+	CPlayer *pPlayer = GameServer()->m_apPlayers[pResult->m_ClientId];
+	if(!pPlayer)
+		return false;
+
+	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
+	{
+		Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", "Only spectators can join ddrace teams");
+		return true;
+	}
+
+	pPlayer->SetTeam(TEAM_RED, false);
+	pPlayer->m_RespawnTick = 0;
+	pPlayer->TryRespawn();
+
+	return false;
+}
+
 void CGameControllerPvp::OnPlayerConnect(CPlayer *pPlayer)
 {
 	m_InvalidateConnectedIpsCache = true;
@@ -1918,6 +1990,13 @@ void CGameControllerPvp::OnPlayerDisconnect(class CPlayer *pPlayer, const char *
 	if(GameState() != IGS_END_ROUND)
 		SaveStatsOnDisconnect(pPlayer);
 
+	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
+	{
+		if(GameServer()->GetDDRaceTeam(pPlayer->GetCid()) == 0)
+			--m_aTeamSize[pPlayer->GetTeam()];
+		m_UnbalancedTick = TBALANCE_CHECK;
+	}
+
 	while(true)
 	{
 		if(!g_Config.m_SvPunishFreezeDisconnect)
@@ -1969,18 +2048,16 @@ void CGameControllerPvp::OnPlayerDisconnect(class CPlayer *pPlayer, const char *
 		GameServer()->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "game", aBuf);
 	}
 
-	// ddnet-insta
-	if(pPlayer->GetTeam() != TEAM_SPECTATORS)
-	{
-		--m_aTeamSize[pPlayer->GetTeam()];
-		m_UnbalancedTick = TBALANCE_CHECK;
-	}
-
 	CheckReadyStates(ClientId);
 }
 
 void CGameControllerPvp::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg)
 {
+	// has to be saved for later
+	// because the set team operation kills the character
+	// and then we lose the team information
+	int DDRaceTeam = GameServer()->GetDDRaceTeam(pPlayer->GetCid());
+
 	Team = ClampTeam(Team);
 	if(Team == pPlayer->GetTeam())
 		return;
@@ -2012,12 +2089,14 @@ void CGameControllerPvp::DoTeamChange(CPlayer *pPlayer, int Team, bool DoChatMsg
 	// update effected game settings
 	if(OldTeam != TEAM_SPECTATORS)
 	{
-		--m_aTeamSize[OldTeam];
+		if(DDRaceTeam == 0)
+			--m_aTeamSize[OldTeam];
 		m_UnbalancedTick = TBALANCE_CHECK;
 	}
 	if(Team != TEAM_SPECTATORS)
 	{
-		++m_aTeamSize[Team];
+		if(DDRaceTeam == 0)
+			++m_aTeamSize[Team];
 		m_UnbalancedTick = TBALANCE_CHECK;
 		// if(m_GameState == IGS_WARMUP_GAME && HasEnoughPlayers())
 		// 	SetGameState(IGS_WARMUP_GAME, 0);

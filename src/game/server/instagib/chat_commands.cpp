@@ -10,9 +10,19 @@
 
 #include <game/server/gamecontext.h>
 
-// implemented in ddracechat.cpp
-// yes that is cursed
-bool CheckClientId(int ClientId);
+void CGameContext::ConCreditsGctf(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	static constexpr const char *CREDITS[] = {
+		"DDNet-insta written by ChillerDragon",
+		"https://github.com/ddnet-insta/ddnet-insta/",
+		"Thanks to AssassinTee, Cuube, Anime-pdf, M0REKZ",
+		"JSaurusRex, jxsl13, lukure, ByFox and zhn",
+		"based on ddnet see /credits_ddnet",
+	};
+	for(const char *pLine : CREDITS)
+		pSelf->Console()->Print(IConsole::OUTPUT_LEVEL_STANDARD, "chatresp", pLine);
+}
 
 void CGameContext::ConReadyChange(IConsole::IResult *pResult, void *pUserData)
 {
@@ -263,6 +273,25 @@ void CGameContext::ConMultis(IConsole::IResult *pResult, void *pUserData)
 
 	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
 	pSelf->m_pController->m_pSqlStats->ShowStats(pResult->m_ClientId, pName, pSelf->m_pController->StatsTable(), EInstaSqlRequestType::CHAT_CMD_MULTIS);
+}
+
+void CGameContext::ConSteals(IConsole::IResult *pResult, void *pUserData)
+{
+	CGameContext *pSelf = (CGameContext *)pUserData;
+	if(!CheckClientId(pResult->m_ClientId))
+		return;
+
+	if(!pSelf->m_pController)
+		return;
+
+	if(!pSelf->m_pController->IsFngGameType())
+	{
+		pSelf->SendChatTarget(pResult->m_ClientId, "This command only available in fng gametypes.");
+		return;
+	}
+
+	const char *pName = pResult->NumArguments() ? pResult->GetString(0) : pSelf->Server()->ClientName(pResult->m_ClientId);
+	pSelf->m_pController->m_pSqlStats->ShowStats(pResult->m_ClientId, pName, pSelf->m_pController->StatsTable(), EInstaSqlRequestType::CHAT_CMD_STEALS);
 }
 
 void CGameContext::ConScore(IConsole::IResult *pResult, void *pUserData)

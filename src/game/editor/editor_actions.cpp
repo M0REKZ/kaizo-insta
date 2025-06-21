@@ -861,6 +861,7 @@ CEditorActionEditLayerTilesProp::CEditorActionEditLayerTilesProp(CEditor *pEdito
 		"color env offset",
 		"automapper",
 		"automapper reference",
+		"live gametiles",
 		"seed"};
 	static_assert(std::size(s_apNames) == (size_t)ETilesProp::NUM_PROPS);
 
@@ -946,6 +947,10 @@ void CEditorActionEditLayerTilesProp::Undo()
 	{
 		pLayerTiles->m_AutoMapperConfig = m_Previous;
 	}
+	else if(m_Prop == ETilesProp::PROP_LIVE_GAMETILES)
+	{
+		pLayerTiles->m_LiveGameTiles = m_Previous;
+	}
 	else if(m_Prop == ETilesProp::PROP_SEED)
 	{
 		pLayerTiles->m_Seed = m_Previous;
@@ -1025,6 +1030,10 @@ void CEditorActionEditLayerTilesProp::Redo()
 	else if(m_Prop == ETilesProp::PROP_AUTOMAPPER)
 	{
 		pLayerTiles->m_AutoMapperConfig = m_Current;
+	}
+	else if(m_Prop == ETilesProp::PROP_LIVE_GAMETILES)
+	{
+		pLayerTiles->m_LiveGameTiles = m_Current;
 	}
 	else if(m_Prop == ETilesProp::PROP_SEED)
 	{
@@ -1290,6 +1299,35 @@ void CEditorActionTileArt::Redo()
 
 	IStorage::StripPathAndExtension(m_aTileArtFile, m_pEditor->m_aTileartFilename, sizeof(m_pEditor->m_aTileartFilename));
 	m_pEditor->AddTileart(true);
+}
+
+// ---------------------------
+
+CEditorActionQuadArt::CEditorActionQuadArt(CEditor *pEditor, CQuadArtParameters Parameters) :
+	IEditorAction(pEditor), m_Parameters(Parameters)
+{
+	str_copy(m_aDisplayText, "Create Quadart");
+}
+
+void CEditorActionQuadArt::Undo()
+{
+	auto &Map = m_pEditor->m_Map;
+
+	// Delete added group
+	Map.m_vpGroups.pop_back();
+}
+
+void CEditorActionQuadArt::Redo()
+{
+	m_pEditor->m_QuadArtParameters = m_Parameters;
+	str_copy(m_pEditor->m_QuadArtParameters.m_aFilename, m_Parameters.m_aFilename, sizeof(m_pEditor->m_QuadArtParameters.m_aFilename));
+
+	if(!m_pEditor->Graphics()->LoadPng(m_pEditor->m_QuadArtImageInfo, m_pEditor->m_QuadArtParameters.m_aFilename, IStorage::TYPE_ALL))
+	{
+		m_pEditor->ShowFileDialogError("Failed to load image from file '%s'.", m_pEditor->m_QuadArtParameters.m_aFilename);
+		return;
+	}
+	m_pEditor->AddQuadArt(true);
 }
 
 // ---------------------------------
@@ -1576,7 +1614,7 @@ void CEditorActionEditEnvelopePointValue::Apply(bool Undo)
 	else
 	{
 		if(pEnvelope->GetChannels() == 1 || pEnvelope->GetChannels() == 4)
-			CurrentValue = clamp(CurrentValue, 0.0f, 1.0f);
+			CurrentValue = std::clamp(CurrentValue, 0.0f, 1.0f);
 		pEnvelope->m_vPoints[m_PtIndex].m_aValues[m_Channel] = f2fx(CurrentValue);
 
 		if(m_PtIndex != 0)

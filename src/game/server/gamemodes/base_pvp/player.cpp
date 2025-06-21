@@ -191,6 +191,9 @@ void CPlayer::ProcessStatsResult(CInstaSqlResult &Result)
 		case EInstaSqlRequestType::CHAT_CMD_MULTIS:
 			GameServer()->m_pController->OnShowMultis(&Result.m_Stats, this, Result.m_Info.m_aRequestedPlayer);
 			break;
+		case EInstaSqlRequestType::CHAT_CMD_STEALS:
+			GameServer()->m_pController->OnShowSteals(&Result.m_Stats, this, Result.m_Info.m_aRequestedPlayer);
+			break;
 		case EInstaSqlRequestType::PLAYER_DATA:
 			GameServer()->m_pController->OnLoadedNameStats(&Result.m_Stats, this);
 			break;
@@ -288,11 +291,13 @@ void CPlayer::SetTeamNoKill(int Team, bool DoChatMsg)
 
 	if(OldTeam != TEAM_SPECTATORS)
 	{
-		--GameServer()->m_pController->m_aTeamSize[OldTeam];
+		if(GameServer()->GetDDRaceTeam(GetCid()) == 0)
+			--GameServer()->m_pController->m_aTeamSize[OldTeam];
 	}
 	if(Team != TEAM_SPECTATORS)
 	{
-		++GameServer()->m_pController->m_aTeamSize[Team];
+		if(GameServer()->GetDDRaceTeam(GetCid()) == 0)
+			++GameServer()->m_pController->m_aTeamSize[Team];
 	}
 
 	Server()->ExpireServerInfo();
@@ -303,11 +308,13 @@ void CPlayer::SetTeamRaw(int Team)
 	int OldTeam = m_Team;
 	if(OldTeam != TEAM_SPECTATORS)
 	{
-		--GameServer()->m_pController->m_aTeamSize[OldTeam];
+		if(GameServer()->GetDDRaceTeam(GetCid()) == 0)
+			--GameServer()->m_pController->m_aTeamSize[OldTeam];
 	}
 	if(Team != TEAM_SPECTATORS)
 	{
-		++GameServer()->m_pController->m_aTeamSize[Team];
+		if(GameServer()->GetDDRaceTeam(GetCid()) == 0)
+			++GameServer()->m_pController->m_aTeamSize[Team];
 	}
 
 	m_Team = Team;

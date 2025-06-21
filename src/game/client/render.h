@@ -101,6 +101,14 @@ public:
 		m_SkinMetrics = pSkin->m_Metrics;
 	}
 
+	void ApplySkin(const CTeeRenderInfo &TeeRenderInfo)
+	{
+		m_OriginalRenderSkin = TeeRenderInfo.m_OriginalRenderSkin;
+		m_ColorableRenderSkin = TeeRenderInfo.m_ColorableRenderSkin;
+		m_BloodColor = TeeRenderInfo.m_BloodColor;
+		m_SkinMetrics = TeeRenderInfo.m_SkinMetrics;
+	}
+
 	void ApplyColors(bool CustomColoredSkin, int ColorBody, int ColorFeet)
 	{
 		m_CustomColoredSkin = CustomColoredSkin;
@@ -217,6 +225,7 @@ enum
 	TILERENDERFLAG_EXTEND = 4,
 
 	OVERLAYRENDERFLAG_TEXT = 1,
+	OVERLAYRENDERFLAG_EDITOR = 2,
 };
 
 typedef void (*ENVELOPE_EVAL)(int TimeOffsetMillis, int Env, ColorRGBA &Result, size_t Channels, void *pUser);

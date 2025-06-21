@@ -217,7 +217,8 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 		{
 			m_aClients[pMsg7->m_ClientId].m_Team = pMsg7->m_Team;
 			m_pClient->m_TranslationContext.m_aClients[pMsg7->m_ClientId].m_Team = pMsg7->m_Team;
-			m_aClients[pMsg7->m_ClientId].UpdateRenderInfo();
+			if(m_aClients[pMsg7->m_ClientId].m_Active)
+				m_aClients[pMsg7->m_ClientId].UpdateRenderInfo();
 
 			// if(pMsg7->m_ClientId == m_LocalClientId)
 			// {
@@ -678,7 +679,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 				break;
 			case protocol7::GAMEMSG_GAME_PAUSED:
 			{
-				int ClientId = clamp(aParaI[0], 0, MAX_CLIENTS - 1);
+				int ClientId = std::clamp(aParaI[0], 0, MAX_CLIENTS - 1);
 				str_format(aBuf, sizeof(aBuf), "'%s' initiated a pause", m_aClients[ClientId].m_aName);
 				SendChat(aBuf);
 			}
@@ -686,7 +687,7 @@ void *CGameClient::TranslateGameMsg(int *pMsgId, CUnpacker *pUnpacker, int Conn)
 			case protocol7::GAMEMSG_CTF_CAPTURE:
 				if(Conn == g_Config.m_ClDummy)
 					m_Sounds.Enqueue(CSounds::CHN_GLOBAL, SOUND_CTF_CAPTURE);
-				int ClientId = clamp(aParaI[1], 0, MAX_CLIENTS - 1);
+				int ClientId = std::clamp(aParaI[1], 0, MAX_CLIENTS - 1);
 				m_aStats[ClientId].m_FlagCaptures++;
 
 				float Time = aParaI[2] / (float)Client()->GameTickSpeed();

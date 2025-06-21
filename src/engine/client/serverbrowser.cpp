@@ -6,7 +6,8 @@
 #include "serverbrowser_ping_cache.h"
 
 #include <algorithm>
-#include <unordered_set>
+#include <map>
+#include <set>
 #include <vector>
 
 #include <base/hash_ctxt.h>
@@ -919,9 +920,8 @@ void CServerBrowser::OnServerInfoUpdate(const NETADDR &Addr, int Token, const CS
 			}
 		}
 
-		NETADDR Broadcast;
-		mem_zero(&Broadcast, sizeof(Broadcast));
-		Broadcast.type = m_pNetClient->NetType() | NETTYPE_LINK_BROADCAST;
+		NETADDR Broadcast = NETADDR_ZEROED;
+		Broadcast.type = (m_pNetClient->NetType() & ~(NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) | NETTYPE_LINK_BROADCAST;
 		int TokenBC = GenerateToken(Broadcast);
 		bool Drop = false;
 		Drop = Drop || BasicToken != GetBasicToken(TokenBC);
@@ -997,7 +997,7 @@ void CServerBrowser::Refresh(int Type, bool Force)
 
 		/* do the broadcast version */
 		mem_zero(&Packet, sizeof(Packet));
-		Packet.m_Address.type = m_pNetClient->NetType() | NETTYPE_LINK_BROADCAST;
+		Packet.m_Address.type = (m_pNetClient->NetType() & ~(NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) | NETTYPE_LINK_BROADCAST;
 		Packet.m_Flags = NETSENDFLAG_CONNLESS | NETSENDFLAG_EXTENDED;
 		Packet.m_DataSize = sizeof(aBuffer);
 		Packet.m_pData = aBuffer;
@@ -1018,7 +1018,7 @@ void CServerBrowser::Refresh(int Type, bool Force)
 
 		CNetChunk Packet7;
 		mem_zero(&Packet7, sizeof(Packet7));
-		Packet7.m_Address.type = m_pNetClient->NetType() | NETTYPE_TW7 | NETTYPE_LINK_BROADCAST;
+		Packet7.m_Address.type = (m_pNetClient->NetType() & ~(NETTYPE_WEBSOCKET_IPV4 | NETTYPE_WEBSOCKET_IPV6)) | NETTYPE_TW7 | NETTYPE_LINK_BROADCAST;
 		Packet7.m_Flags = NETSENDFLAG_CONNLESS;
 		Packet7.m_DataSize = Packer.Size();
 		Packet7.m_pData = Packer.Data();
@@ -1946,7 +1946,7 @@ const std::vector<CCommunityId> &CFavoriteCommunityFilterList::Entries() const
 }
 
 template<typename TNamedElement, typename TElementName>
-static bool IsSubsetEquals(const std::vector<const TNamedElement *> &vpLeft, const std::unordered_set<TElementName> &Right)
+static bool IsSubsetEquals(const std::vector<const TNamedElement *> &vpLeft, const std::set<TElementName> &Right)
 {
 	return vpLeft.size() <= Right.size() && std::all_of(vpLeft.begin(), vpLeft.end(), [&](const TNamedElement *pElem) {
 		return Right.count(TElementName(pElem->Name())) > 0;
@@ -2140,7 +2140,7 @@ void CExcludedCommunityCountryFilterList::Clean(const std::vector<CCommunity> &v
 			}
 		}
 		// Prevent filter that would exclude all allowed countries
-		std::unordered_set<CCommunityCountryName> UniqueCountries;
+		std::set<CCommunityCountryName> UniqueCountries;
 		for(const CCommunity &AllowedCommunity : vAllowedCommunities)
 		{
 			for(const CCommunityCountry &Country : AllowedCommunity.Countries())

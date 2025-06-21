@@ -431,6 +431,18 @@ public:
 	virtual void AmmoRegen(CCharacter *pChr);
 
 	/*
+		Function: OnClientPacket
+			hooks early into CServer::ProcessClientPacket
+			similar to CGameContext::OnMessage but convers both system and game messages
+			and it can also drop the message before the server processes it
+
+		Returns:
+			return true to consume the message and drop it before it gets passed to the server code
+			return false to let regular server code process the message
+	*/
+	virtual bool OnClientPacket(int ClientId, bool Sys, int MsgId, struct CNetChunk *pPacket, class CUnpacker *pUnpacker) { return false; }
+
+	/*
 		Function: OnChatMessage
 			hooks into CGameContext::OnSayNetMessage()
 			after unicode check and teehistorian already happend
@@ -440,6 +452,16 @@ public:
 			which would print it to the chat or run it as a ddrace chat command
 	*/
 	virtual bool OnChatMessage(const CNetMsg_Cl_Say *pMsg, int Length, int &Team, CPlayer *pPlayer) { return false; };
+
+	/*
+		Function: OnTeamChatCmd
+			Called when a player runs the /team ddnet chat command
+			Called before the ddnet code runs
+
+		Returns:
+			return true to not run the ddnet code
+	*/
+	virtual bool OnTeamChatCmd(IConsole::IResult *pResult) { return false; }
 
 	/*
 		Function: OnChangeInfoNetMessage
@@ -600,7 +622,13 @@ public:
 		Function: WinPointsForWin
 			Computes the amount of win points for winning a round.
 			"win points" are points you can only get by winning.
-			By default the reward will be higher if you had more enemies.
+			The purpose of differentiating between amount of wins and
+			win points is to have some kind of value of the win.
+			Some wins are harder to obtain than others depending on
+			the amount of enemies and scorelimit for example.
+
+			By default the reward will be amount of enemies plus score on round end.
+			In zCatch it only depends on the amount of kills in the winning streak.
 			These are WinPoints are not to be confused with regular round Points.
 
 		Arguments:
@@ -659,6 +687,18 @@ public:
 			pRequestedName - player name the stats belong to
 	*/
 	virtual void OnShowMultis(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName){};
+
+	/*
+		Function: OnShowSteals
+			called from the main thread when a SQL worker finished querying stats from the database
+			called when someone uses the /steals chat command
+
+		Arguments:
+			pStats - stats struct to display
+			pRequestingPlayer - player who initiated the stats request (might differ from the requested player)
+			pRequestedName - player name the stats belong to
+	*/
+	virtual void OnShowSteals(const CSqlStatsPlayer *pStats, class CPlayer *pRequestingPlayer, const char *pRequestedName){};
 
 	/*
 		Function: OnLoadedNameStats

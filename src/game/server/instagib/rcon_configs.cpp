@@ -23,6 +23,7 @@ void CGameContext::RegisterInstagibCommands()
 	Console()->Chain("sv_spectator_votes_sixup", ConchainSpectatorVotes, this);
 	Console()->Chain("sv_display_score", ConchainDisplayScore, this);
 	Console()->Chain("sv_only_wallshot_kills", ConchainOnlyWallshotKills, this);
+	Console()->Chain("sv_allow_zoom", ConchainAllowZoom, this);
 
 	// generated undocumented chat commands
 #define MACRO_ADD_COLUMN(name, sql_name, sql_type, bind_type, default, merge_method) ;
@@ -197,4 +198,20 @@ void CGameContext::ConchainOnlyWallshotKills(IConsole::IResult *pResult, void *p
 		pSelf->SendChat(-1, TEAM_ALL, "WARNING: only wallshots can kill");
 	else
 		pSelf->SendChat(-1, TEAM_ALL, "WARNING: wallshot is not needed anymore to kill");
+}
+
+void CGameContext::ConchainAllowZoom(IConsole::IResult *pResult, void *pUserData, IConsole::FCommandCallback pfnCallback, void *pCallbackUserData)
+{
+	pfnCallback(pResult, pCallbackUserData);
+
+#ifdef CONF_ANTIBOT
+	CGameContext *pSelf = (CGameContext *)pUserData;
+
+	if(pResult->NumArguments() == 0)
+		return;
+
+	char aBuf[512];
+	str_format(aBuf, sizeof(aBuf), "antibot sv_allow_zoom %d", g_Config.m_SvAllowZoom);
+	pSelf->Console()->ExecuteLine(aBuf);
+#endif
 }

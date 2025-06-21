@@ -49,9 +49,9 @@ class CHud : public CComponent
 	STextContainerIndex m_FPSTextContainerIndex;
 	STextContainerIndex m_DDRaceEffectsTextContainerIndex;
 	STextContainerIndex m_PlayerAngleTextContainerIndex;
-	char m_aPlayerAngleText[128];
+	float m_PlayerPrevAngle;
 	STextContainerIndex m_aPlayerSpeedTextContainers[2];
-	char m_aaPlayerSpeedText[2][128];
+	float m_aPlayerPrevSpeed[2];
 	int m_aPlayerSpeed[2];
 	enum class ESpeedChange
 	{
@@ -61,28 +61,36 @@ class CHud : public CComponent
 	};
 	ESpeedChange m_aLastPlayerSpeedChange[2];
 	STextContainerIndex m_aPlayerPositionContainers[2];
-	char m_aaPlayerPositionText[2][128];
+	float m_aPlayerPrevPosition[2];
 
 	void RenderCursor();
 
 	void RenderTextInfo();
 	void RenderConnectionWarning();
 	void RenderTeambalanceWarning();
-	void RenderVoting();
 
 	void PrepareAmmoHealthAndArmorQuads();
 	void RenderAmmoHealthAndArmor(const CNetObj_Character *pCharacter);
 
 	void PreparePlayerStateQuads();
-	void RenderPlayerState(const int ClientId);
+	void RenderPlayerState(int ClientId);
 
 	int m_LastSpectatorCountTick;
 	void RenderSpectatorCount();
 	void RenderDummyActions();
 	void RenderMovementInformation();
 
-	void UpdateMovementInformationTextContainer(STextContainerIndex &TextContainer, float FontSize, float Value, char *pPrevValue, size_t Size);
+	void UpdateMovementInformationTextContainer(STextContainerIndex &TextContainer, float FontSize, float Value, float &PrevValue);
 	void RenderMovementInformationTextContainer(STextContainerIndex &TextContainer, const ColorRGBA &Color, float X, float Y);
+
+	class CMovementInformation
+	{
+	public:
+		vec2 m_Pos;
+		vec2 m_Speed;
+		float m_Angle = 0.0f;
+	};
+	class CMovementInformation GetMovementInformation(int ClientId, int Conn) const;
 
 	void RenderGameTimer();
 	void RenderPauseNotification();
@@ -111,7 +119,7 @@ public:
 	// DDRace
 
 	virtual void OnMessage(int MsgType, void *pRawMsg) override;
-	void RenderNinjaBarPos(float x, const float y, const float Width, const float Height, float Progress, float Alpha = 1.0f);
+	void RenderNinjaBarPos(float x, float y, float Width, float Height, float Progress, float Alpha = 1.0f);
 
 private:
 	void RenderRecord();

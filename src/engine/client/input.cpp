@@ -350,6 +350,17 @@ void CInput::StopTextInput()
 	m_vCandidates.clear();
 }
 
+void CInput::EnsureScreenKeyboardShown()
+{
+	if(!SDL_HasScreenKeyboardSupport() ||
+		Graphics()->IsScreenKeyboardShown())
+	{
+		return;
+	}
+	SDL_StopTextInput();
+	SDL_StartTextInput();
+}
+
 void CInput::ConsumeEvents(std::function<void(const CEvent &Event)> Consumer) const
 {
 	for(const CEvent &Event : m_vInputEvents)
@@ -688,7 +699,7 @@ int CInput::Update()
 	bool IgnoreKeys = false;
 
 	const auto &&AddKeyEventChecked = [&](int Key, int Flags) {
-		if(Key != KEY_UNKNOWN && !IgnoreKeys && !HasComposition())
+		if(Key != KEY_UNKNOWN && !IgnoreKeys && (!(Flags & IInput::FLAG_PRESS) || !HasComposition()))
 		{
 			AddKeyEvent(Key, Flags);
 		}
@@ -867,7 +878,7 @@ void CInput::ProcessSystemMessage(SDL_SysWMmsg *pMsg)
 				for(DWORD i = pCandidateList->dwPageStart; i < pCandidateList->dwCount && (int)m_vCandidates.size() < (int)pCandidateList->dwPageSize; i++)
 				{
 					LPCWSTR pCandidate = (LPCWSTR)((DWORD_PTR)pCandidateList + pCandidateList->dwOffset[i]);
-					m_vCandidates.push_back(std::move(windows_wide_to_utf8(pCandidate).value_or("<invalid candidate>")));
+					m_vCandidates.push_back(windows_wide_to_utf8(pCandidate).value_or("<invalid candidate>"));
 				}
 				m_CandidateSelectedIndex = pCandidateList->dwSelection - pCandidateList->dwPageStart;
 			}

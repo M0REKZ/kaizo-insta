@@ -29,6 +29,7 @@ void CInstaSqlResult::SetVariant(EInstaSqlRequestType RequestType)
 	case EInstaSqlRequestType::CHAT_CMD_RANK:
 	case EInstaSqlRequestType::CHAT_CMD_STATSALL:
 	case EInstaSqlRequestType::CHAT_CMD_MULTIS:
+	case EInstaSqlRequestType::CHAT_CMD_STEALS:
 	case EInstaSqlRequestType::PLAYER_DATA:
 	case EInstaSqlRequestType::DIRECT:
 	case EInstaSqlRequestType::ALL:
@@ -929,7 +930,7 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 
 		if(!pSqlServer->PrepareStatement(aBuf, pError, ErrorSize))
 		{
-			dbg_msg("sql-thread", "prepare update failed query=%s", aBuf);
+			log_error("sql-thread", "prepare update failed query=%s", aBuf);
 			return false;
 		}
 
@@ -959,13 +960,31 @@ bool CSqlStats::SaveRoundStatsThread(IDbConnection *pSqlServer, const ISqlData *
 
 		if(NumUpdated == 0 && pData->m_Stats.HasValues())
 		{
-			dbg_msg("sql-thread", "update failed no rows changed but got the following stats:");
-			pData->m_Stats.Dump(pData->m_pExtraColumns, "sql-thread");
-			return false;
+			CSqlStatsPlayer StatsWithoutSpree = pData->m_Stats;
+			StatsWithoutSpree.m_BestSpree = 0;
+			if(StatsWithoutSpree.HasValues())
+			{
+				log_error("sql-thread", "failed to save stats for player '%s'", pData->m_aName);
+				log_error("sql-thread", "update failed no rows changed but got the following stats:");
+				pData->m_Stats.Dump(pData->m_pExtraColumns, "sql-thread");
+				return false;
+			}
+
+			// https://github.com/ddnet-insta/ddnet-insta/issues/336
+			// ideally this branch is never hit
+			// because the best spree should not be set to a lower value than the best spree in the db
+			// but it is an inevitable edge case
+			// the spree can be the only value set in the stats because sprees should not be reset on round ends
+			// but kills and points will be
+			// and someone else can always break the spree record on another server
+			//
+			// if this branch is confirmed to be harmless we can even remove the warning log
+			log_warn("sql-thread", "no rows changed for player '%s' whos only stat was a spree of %d kills", pData->m_aName, pData->m_Stats.m_BestSpree);
+			log_warn("sql-thread", "the current spree high score in the db for player '%s' is %d", pData->m_aName, MergeStats.m_BestSpree);
 		}
 		else if(NumUpdated > 1)
 		{
-			dbg_msg("sql-thread", "affected %d rows when trying to update stats of one player!", NumUpdated);
+			log_error("sql-thread", "affected %d rows when trying to update stats of one player!", NumUpdated);
 			dbg_assert(false, "FATAL ERROR: your database is probably corrupted! Time to restore the backup.");
 			return false;
 		}
@@ -1055,7 +1074,11 @@ bool CSqlStats::CreateTableThread(IDbConnection *pSqlServer, const ISqlData *pGa
 		pfnAddInt = AddColumnIntDefault0Mysql;
 
 	if(pfnAddInt)
+	{
 		pfnAddInt(pSqlServer, pData->m_aName, "win_points", pError, ErrorSize);
+		pfnAddInt(pSqlServer, pData->m_aName, "steals_from_others", pError, ErrorSize);
+		pfnAddInt(pSqlServer, pData->m_aName, "steals_by_others", pError, ErrorSize);
+	}
 
 	return true;
 }

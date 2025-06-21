@@ -837,10 +837,6 @@ Failed during initialization. Try to change gfx_backend to OpenGL or Vulkan in s
 == Falhou durante a inicialização. Tenta mudar gfx_backend para OpenGL ou Vulkan em settings_ddnet.cfg no diretório de configuração e tenta novamente.
 
 [Graphics error]
-Out of VRAM. Try removing custom assets (skins, entities, etc.), especially those with high resolution.
-== Sem VRAM. Tenta remover os ativos personalizados (skins, entidades, etc.), especialmente aqueles com alta resolução.
-
-[Graphics error]
 An error during command recording occurred. Try to update your GPU drivers.
 == Ocorreu um erro durante a gravação de comandos. Tenta atualizar os drivers da tua GPU.
 
@@ -945,9 +941,6 @@ Restarting. Please wait…
 
 Loading skin files
 == A carregar os ficheiros de skin
-
-Loading background map
-== A carregar o mapa de fundo
 
 Searching
 == A pesquisar
@@ -1229,12 +1222,12 @@ Go back the specified duration
 == Retroceder a duração especificada
 
 [Demo player duration]
-%d min.
-== %d min.
+%s min.
+== %s min.
 
 [Demo player duration]
-%d sec.
-== %d seg.
+%s sec.
+== %s seg.
 
 Change the skip duration
 == Mudar a duração de salto
@@ -2041,6 +2034,10 @@ Moved ingame
 English translation by the DDNet Team
 == Portuguese translation by HeroiAmarelo, rockuS and DrafaKiller
 
+[Graphics error]
+Out of VRAM. Try setting 'cl_skins_loaded_max' to a lower value or remove custom assets (skins, entities, etc.), especially those with high resolution.
+== 
+
 No demo with this filename exists
 == 
 
@@ -2068,6 +2065,22 @@ Active
 == 
 
 Loading maps…
+== 
+
+[Spectating]
+Following %d: %s
+== 
+
+Loading map
+== 
+
+This name cannot be used for files and folders
+== 
+
+Error checking player name
+== 
+
+Could not check for existing player with your name. Check your internet connection.
 == 
 
 Map size
@@ -2110,6 +2123,18 @@ Saves file
 == 
 
 Open the saves file
+== 
+
+This skin name cannot be used.
+== 
+
+Skin could not be loaded due to an error. Check the local console for details.
+== 
+
+Skin could not be found.
+== 
+
+No skins match your filter criteria
 == 
 
 Show FPS
@@ -2171,7 +2196,16 @@ Others
 All
 == 
 
+Preview player's name plate
+== 
+
 Preview dummy's name plate
+== 
+
+Dragger Outline Color
+== 
+
+Dragger Inner Color
 == 
 
 AntiPing: prediction margin
