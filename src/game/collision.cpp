@@ -1558,11 +1558,11 @@ void CCollision::GetAnimationTransform(float GlobalTime, int Env, CLayers *pLaye
 					vec2 p2 = p3 + InTang;
 
 					// validate bezier curve
-					p1.x = clamp(p1.x, p0.x, p3.x);
-					p2.x = clamp(p2.x, p0.x, p3.x);
+					p1.x = std::clamp(p1.x, p0.x, p3.x);
+					p2.x = std::clamp(p2.x, p0.x, p3.x);
 
 					// solve x(a) = time for a
-					a = clamp(SolveBezier(Time, p0.x, p1.x, p2.x, p3.x), 0.0f, 1.0f);
+					a = std::clamp(SolveBezier(Time, p0.x, p1.x, p2.x, p3.x), 0.0f, 1.0f);
 
 					// value = y(t)
 					if(c == 0)
@@ -1847,8 +1847,8 @@ bool CCollision::PushBoxOutsideQuads(vec2 *pInoutPos, vec2 Size, int *CollidedSi
 
 int CCollision::GetKZIndex(float x, float y) const
 {
-	int Nx = clamp(round_to_int(x) / 32, 0, m_KZWidth - 1);
-	int Ny = clamp(round_to_int(y) / 32, 0, m_KZHeight - 1);
+	int Nx = std::clamp(round_to_int(x) / 32, 0, m_KZWidth - 1);
+	int Ny = std::clamp(round_to_int(y) / 32, 0, m_KZHeight - 1);
 	return Ny * m_KZWidth + Nx;
 }
 

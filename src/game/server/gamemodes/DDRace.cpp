@@ -119,11 +119,11 @@ void CGameControllerDDRace::HandleCharacterQuad(CCharacter *pChr, CQuad *pQuad)
 	int Index = pQuad->m_ColorEnvOffset;
 	CPlayer *pPlayer = pChr->GetPlayer();
 	const int ClientId = pPlayer->GetCid();
-	const int PlayerDDRaceState = pChr->m_DDRaceState;
+	const ERaceState PlayerDDRaceState = pChr->m_DDRaceState;
 
 	bool IsOnStartTile = (Index == TILE_START);
 	// start
-	if(IsOnStartTile && PlayerDDRaceState != DDRACE_CHEAT)
+	if(IsOnStartTile && PlayerDDRaceState != ERaceState::CHEATED)
 	{
 		const int Team = GameServer()->GetDDRaceTeam(ClientId);
 		if(Teams().GetSaving(Team))
@@ -159,7 +159,7 @@ void CGameControllerDDRace::HandleCharacterQuad(CCharacter *pChr, CQuad *pQuad)
 	}
 
 	// finish
-	if((Index == TILE_FINISH) && PlayerDDRaceState == DDRACE_STARTED)
+	if((Index == TILE_FINISH) && PlayerDDRaceState == ERaceState::STARTED)
 		Teams().OnCharacterFinish(ClientId);
 
 	// unlock team

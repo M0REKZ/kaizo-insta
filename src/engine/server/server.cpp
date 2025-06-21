@@ -4433,7 +4433,7 @@ void CServer::UpdateKZBots(bool ForceDisconnect)
 	}
 	else
 	{
-		g_Config.m_SvKZBots = clamp(g_Config.m_SvKZBots, 0, MaxClients());
+		g_Config.m_SvKZBots = std::clamp(g_Config.m_SvKZBots, 0, MaxClients());
 		for(int DummyIndex = 0; DummyIndex < maximum(m_PreviousKZBots, g_Config.m_SvKZBots); ++DummyIndex)
 		{
 			const bool AddDummy = !ForceDisconnect && DummyIndex < g_Config.m_SvKZBots;

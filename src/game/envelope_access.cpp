@@ -70,8 +70,8 @@ CMapBasedEnvelopePointAccess::CMapBasedEnvelopePointAccess(IMap *pMap) :
 
 void CMapBasedEnvelopePointAccess::SetPointsRange(int StartPoint, int NumPoints)
 {
-	m_StartPoint = clamp(StartPoint, 0, m_NumPointsMax);
-	m_NumPoints = clamp(NumPoints, 0, maximum(m_NumPointsMax - StartPoint, 0));
+	m_StartPoint = std::clamp(StartPoint, 0, m_NumPointsMax);
+	m_NumPoints = std::clamp(NumPoints, 0, maximum(m_NumPointsMax - StartPoint, 0));
 }
 
 int CMapBasedEnvelopePointAccess::StartPoint() const

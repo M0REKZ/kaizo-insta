@@ -183,8 +183,8 @@ void CRandomWeapon::Snap(int SnappingClient)
 		pos2.x = (int)m_Pos.x + 16*cos((float)Server()->Tick() / 25.0);
 		pos2.y = (int)m_Pos.y + -16*cos((float)Server()->Tick() / 25.0);
 		
-		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), pos1, m_Type, 0, m_Number);
-		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), m_Id2, pos2, m_Type, 0, m_Number);
+		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), pos1, m_Type, 0, m_Number,0);
+		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), m_Id2, pos2, m_Type, 0, m_Number,0);
 	}
 	else if(m_Subtype[Team] >=0 && m_Subtype[Team] < NUM_WEAPONS)
 	{
@@ -204,6 +204,6 @@ void CRandomWeapon::Snap(int SnappingClient)
 		pProj->m_VelY = 0;
 		pProj->m_StartTick = Server()->Tick();
 		pProj->m_Type = WEAPON_HAMMER;
-		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Subtype[Team] == WEAPON_NINJA ? POWERUP_NINJA : m_Type, m_Subtype[Team], m_Number);
+		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Subtype[Team] == WEAPON_NINJA ? POWERUP_NINJA : m_Type, m_Subtype[Team], m_Number,0);
 	}
 }

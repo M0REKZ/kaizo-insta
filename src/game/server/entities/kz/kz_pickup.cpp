@@ -318,8 +318,8 @@ void CKZPickup::Snap(int SnappingClient)
 		pos2.x = (int)m_Pos.x + 16*cos((float)Server()->Tick() / 25.0);
 		pos2.y = (int)m_Pos.y + -16*cos((float)Server()->Tick() / 25.0);
 		
-		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), pos1, m_Type, 0, m_Number);
-		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), m_Id2, pos2, m_Type, 0, m_Number);
+		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), pos1, m_Type, 0, m_Number,0);
+		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), m_Id2, pos2, m_Type, 0, m_Number,0);
 	}
 	else if(m_Subtype >=0 && m_Subtype < NUM_WEAPONS)
 	{
@@ -339,7 +339,7 @@ void CKZPickup::Snap(int SnappingClient)
 		pProj->m_VelY = 0;
 		pProj->m_StartTick = Server()->Tick();
 		pProj->m_Type = WEAPON_HAMMER;
-		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, m_Subtype, m_Number);
+		GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, m_Subtype, m_Number,0);
 	}
 	else
 	{
@@ -361,7 +361,7 @@ void CKZPickup::Snap(int SnappingClient)
 			pProj->m_VelY = 0;
 			pProj->m_StartTick = Server()->Tick();
 			pProj->m_Type = WEAPON_LASER;
-			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_LASER, m_Number);
+			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_LASER, m_Number,0);
 		}
 		else if(m_Subtype == KZ_WEAPON_PORTAL_GUN)
 		{
@@ -371,7 +371,7 @@ void CKZPickup::Snap(int SnappingClient)
 			postemp.y = m_Pos.y + 32*cos((float)Server()->Tick() / 25.0);
 
 			GameServer()->SnapLaserObject(CSnapContext(SnappingClientVersion, Sixup),m_Id2,postemp,postemp,Server()->Tick(),-1,Server()->Tick() % 3);
-			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_LASER, m_Number);
+			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_LASER, m_Number,0);
 		}
 		else if(m_Subtype == KZ_WEAPON_MINIGUN)
 		{
@@ -396,7 +396,7 @@ void CKZPickup::Snap(int SnappingClient)
 			pProj->m_VelY = veltemp.y;
 			pProj->m_StartTick = Server()->Tick();
 			pProj->m_Type = WEAPON_SHOTGUN;
-			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_GRENADE, m_Number);
+			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_GRENADE, m_Number,0);
 		}
 		if(m_Subtype == KZ_WEAPON_BLACKHOLE)
 		{
@@ -421,7 +421,7 @@ void CKZPickup::Snap(int SnappingClient)
 			pProj->m_VelY = veltemp.y;
 			pProj->m_StartTick = Server()->Tick();
 			pProj->m_Type = WEAPON_GRENADE;
-			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_GRENADE, m_Number);
+			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_GRENADE, m_Number,0);
 		}
 		if(m_Subtype == KZ_WEAPON_CHARGE_HAMMER)
 		{
@@ -430,8 +430,8 @@ void CKZPickup::Snap(int SnappingClient)
 			postemp.x = m_Pos.x + 32*sin((float)Server()->Tick() / 25.0);
 			postemp.y = m_Pos.y + 32*cos((float)Server()->Tick() / 25.0);
 
-			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), m_Id2, postemp, POWERUP_ARMOR, 0, m_Number);
-			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_HAMMER, m_Number);
+			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), m_Id2, postemp, POWERUP_ARMOR, 0, m_Number,0);
+			GameServer()->SnapPickup(CSnapContext(SnappingClientVersion, Sixup), GetId(), m_Pos, m_Type, WEAPON_HAMMER, m_Number,0);
 		}
 	}
 }

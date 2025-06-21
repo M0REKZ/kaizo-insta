@@ -5735,7 +5735,7 @@ void CGameContext::CreateExplosionTick(vec2 Pos, int Owner, int Weapon, bool NoD
 		float l = length(Diff);
 		if(l)
 			ForceDir = normalize(Diff);
-		l = 1 - clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
+		l = 1 - std::clamp((l - InnerRadius) / (Radius - InnerRadius), 0.0f, 1.0f);
 		float Strength;
 		if(Owner == -1 || !m_apPlayers[Owner] || !m_apPlayers[Owner]->m_TuneZone)
 			Strength = Tuning()->m_ExplosionStrength;
@@ -6665,7 +6665,7 @@ void CGameContext::SendDiscordChatMessage(int ClientID, const char* msg)
 	char aStatsStr[4000];
 	char aStr[275];
 	aStr[0] = '\0';
-	if(CheckClientId2(ClientID))
+	if(CheckClientId(ClientID))
 		str_format(aStr, sizeof(aStr),"%s: %s",Server()->ClientName(ClientID),msg);
 	else
 		str_format(aStr, sizeof(aStr),"%s: %s","Server",msg);

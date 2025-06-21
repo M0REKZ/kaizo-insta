@@ -1818,7 +1818,7 @@ void CCharacter::Snap(int SnappingClient)
 		postemp.y = m_Pos.y + 32*cos((float)Server()->Tick() / 25.0);
 		
 		//+KZ: indicator idea taken from catch16
-		GameServer()->SnapPickup(CSnapContext(GameServer()->GetClientVersion(SnappingClient), Server()->IsSixup(SnappingClient)), m_InvisibleShieldId, postemp, POWERUP_ARMOR, 0, 0);
+		GameServer()->SnapPickup(CSnapContext(GameServer()->GetClientVersion(SnappingClient), Server()->IsSixup(SnappingClient)), m_InvisibleShieldId, postemp, POWERUP_ARMOR, 0, 0, 0);
 		
 	}
 
@@ -3870,8 +3870,8 @@ void CCharacter::HandleKZTiles()
 			TempVel.x = cos(RadAngle);
 			TempVel.y = sin(RadAngle);
 
-			TempVel.x = clamp(TempVel.x * Force , (float)-MaxVel, (float)MaxVel);
-			TempVel.y = clamp(TempVel.y * Force , (float)-MaxVel, (float)MaxVel);
+			TempVel.x = std::clamp(TempVel.x * Force , (float)-MaxVel, (float)MaxVel);
+			TempVel.y = std::clamp(TempVel.y * Force , (float)-MaxVel, (float)MaxVel);
 
 			m_Core.m_Vel = ClampVel(m_MoveRestrictions, TempVel);
 		}
