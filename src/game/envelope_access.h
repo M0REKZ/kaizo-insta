@@ -8,7 +8,6 @@
 class CEnvPoint;
 class CEnvPointBezier;
 class CEnvPointBezier_upstream;
-
 class IEnvelopePointAccess
 {
 public:
@@ -16,6 +15,7 @@ public:
 	virtual int NumPoints() const = 0;
 	virtual const CEnvPoint *GetPoint(int Index) const = 0;
 	virtual const CEnvPointBezier *GetBezier(int Index) const = 0;
+	int FindPointIndex(double TimeMillis) const;
 };
 
 class CMapBasedEnvelopePointAccess : public IEnvelopePointAccess

@@ -202,3 +202,32 @@ float SolveBezier(float x, float p0, float p1, float p2, float p3)
 		}
 	}
 }
+
+int IEnvelopePointAccess::FindPointIndex(double TimeMillis) const
+{
+	// binary search for the interval around TimeMillis
+	int Low = 0;
+	int High = NumPoints() - 2;
+	int FoundIndex = -1;
+
+	while(Low <= High)
+	{
+		int Mid = Low + (High - Low) / 2;
+		const CEnvPoint *pMid = GetPoint(Mid);
+		const CEnvPoint *pNext = GetPoint(Mid + 1);
+		if(TimeMillis >= pMid->m_Time && TimeMillis < pNext->m_Time)
+		{
+			FoundIndex = Mid;
+			break;
+		}
+		else if(TimeMillis < pMid->m_Time)
+		{
+			High = Mid - 1;
+		}
+		else
+		{
+			Low = Mid + 1;
+		}
+	}
+	return FoundIndex;
+}
