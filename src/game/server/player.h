@@ -243,6 +243,7 @@ public:
 	int m_RescueMode;
 
 	CSaveTee m_LastTeleTee;
+	std::optional<CSaveTee> m_LastDeath;
 	
 	void HandleKZBot(CNetObj_PlayerInput &Input);
 	bool m_Rollback = false;
