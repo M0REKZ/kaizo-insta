@@ -3,6 +3,7 @@
 #include <game/server/entities/character.h>
 #include <game/server/entities/ddnet_pvp/vanilla_pickup.h>
 #include <game/server/player.h>
+#include <engine/shared/config.h>
 
 #include "ctf.h"
 

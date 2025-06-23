@@ -1,4 +1,5 @@
 #include <game/server/entities/character.h>
+#include <engine/shared/config.h>
 
 #include "gdm.h"
 

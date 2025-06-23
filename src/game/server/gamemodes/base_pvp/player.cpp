@@ -9,6 +9,7 @@
 #include <game/server/player.h>
 #include <game/server/score.h>
 #include <game/version.h>
+#include <engine/shared/config.h>
 
 void CPlayer::ResetStats()
 {

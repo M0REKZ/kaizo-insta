@@ -1,5 +1,6 @@
 #include <game/server/entities/character.h>
 #include <game/server/player.h>
+#include <engine/shared/config.h>
 
 #include "Catch.h"
 

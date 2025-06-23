@@ -4,6 +4,7 @@
 #include <game/server/gamecontext.h>
 #include <game/server/player.h>
 #include <game/server/gamecontroller.h>
+#include <engine/shared/config.h>
 
 CKZBotAI::CKZBotAI(CCharacter * pChr) : CBaseKZBotAI(pChr)
 {

@@ -5,6 +5,7 @@
 #include <game/server/gamecontroller.h>
 #include <game/server/instagib/protocol.h>
 #include <game/server/player.h>
+#include <engine/shared/config.h>
 
 void CGameContext::OnInitInstagib()
 {
