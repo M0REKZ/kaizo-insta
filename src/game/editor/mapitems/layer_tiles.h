@@ -188,6 +188,7 @@ public:
 	bool m_HasTune;
 	int m_KZCustom;
 	char m_aFileName[IO_MAX_PATH_LENGTH];
+	bool m_KnownTextModeLayer = false;
 
 	EditorTileStateChangeHistory<STileStateChange> m_TilesHistory;
 	inline virtual void ClearHistory() { m_TilesHistory.clear(); }
