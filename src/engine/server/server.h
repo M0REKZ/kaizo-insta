@@ -552,5 +552,7 @@ public:
 #endif
 };
 
+bool IsInterrupted();
+
 extern CServer *CreateServer();
 #endif

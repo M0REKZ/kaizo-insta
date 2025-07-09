@@ -89,18 +89,8 @@
  *
  * @ingroup Debug
  */
-#if defined(__cplusplus)
-[[noreturn]]
-#endif
-void
-dbg_assert_imp(const char *filename, int line, const char *fmt, ...)
+[[noreturn]] void dbg_assert_imp(const char *filename, int line, const char *fmt, ...)
 	GNUC_ATTRIBUTE((format(printf, 3, 4)));
-
-#ifdef __clang_analyzer__
-#include <cassert>
-#undef dbg_assert
-#define dbg_assert(test, fmt, ...) assert(test)
-#endif
 
 /**
  * Checks whether the program is currently shutting down due to a failed
@@ -122,10 +112,7 @@ bool dbg_assert_has_failed();
  *
  * @see dbg_assert
  */
-#if defined(__cplusplus)
-[[noreturn]]
-#endif
-void
+[[noreturn]] void
 dbg_break();
 
 typedef std::function<void(const char *message)> DBG_ASSERT_HANDLER;
@@ -2164,6 +2151,18 @@ const char *fs_filename(const char *path);
  * @remark The strings are treated as null-terminated strings.
  */
 void fs_split_file_extension(const char *filename, char *name, size_t name_size, char *extension = nullptr, size_t extension_size = 0);
+
+/**
+ * Normalizes the given path: replaces backslashes with regular slashes
+ * and removes trailing slashes.
+ *
+ * @ingroup Filesystem
+ *
+ * @param path Path to normalize.
+ *
+ * @remark The strings are treated as null-terminated strings.
+ */
+void fs_normalize_path(char *path);
 
 /**
  * Get the parent directory of a directory.
