@@ -5557,7 +5557,7 @@ void CGameContext::OnUpdatePlayerServerInfo(CJsonStringWriter *pJSonWriter, int 
 	pJSonWriter->EndObject();
 
 	pJSonWriter->WriteAttribute("afk");
-	pJSonWriter->WriteBoolValue(m_apPlayers[Id]->IsAfk());
+	pJSonWriter->WriteBoolValue(m_apPlayers[Id]->IsAfk() && !((CServer*)Server())->m_aClients[Id].m_KZBot);
 
 	const int Team = m_pController->IsTeamPlay() ? m_apPlayers[Id]->GetTeam() : m_apPlayers[Id]->GetTeam() == TEAM_SPECTATORS ? -1 : GetDDRaceTeam(Id);
 
