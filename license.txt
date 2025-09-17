@@ -20,7 +20,7 @@ freely, subject to the following restrictions:
 
 ------------------------------------------------------------------------
 
-Kaizo-Insta Copyright (C) 2025 Benjamín Gajardo (also known as "+KZ")
+Kaizo-Insta Copyright (C) 2024-2025 Benjamín Gajardo (also known as "+KZ")
 
 Kaizo-Insta expands DDNet code with new features, all terms from
 the DDNet version 19.5 license applies, however there are extra restrictions:
