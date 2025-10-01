@@ -37,6 +37,10 @@ the DDNet version 19.5 license applies, however there are extra restrictions:
     -   The license currently used in the original software source code
         made by the original official author.
     -   Other license approved by the original official author.
+6. If you use source code of the original software as reference for your
+  project source code, that project source code is considered as altered
+  source code of the original software and must follow the terms of this
+  license.
 
 This notice must NOT be removed or altered from any binary or source distribution.
 
