@@ -1,3 +1,6 @@
+# KAIZO-INSTA HAS BEEN DISCONTINUED, FEEL FREE TO FORK THIS, BUT KEEP YOUR FORK SOURCE CODE PUBLIC AS THE LICENSE SAYS
+# PULL REQUESTS ARE WELCOME
+
 [![DDraceNetwork](https://m0rekz.github.io/Kaizo-insta/logo.png)](https://m0rekz.github.io/Kaizo-insta/)
 
 Kaizo-Insta is a DDNet-Insta modification with extra features like weapons, mines, laser-jump, turrets, vehicles and water!
