@@ -7,6 +7,8 @@ Kaizo-Insta is a DDNet-Insta modification with extra features like weapons, mine
 
 For build instructions visit the [ddnet repo](https://github.com/ddnet/ddnet).
 
+Make sure to follow the terms of the new license (found at license-kaizo.txt) if you use Kaizo-Insta specific code.
+
 ---
 
 Servers:
